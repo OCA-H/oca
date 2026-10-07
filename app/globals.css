@@ -1,0 +1,8 @@
+@import "tailwindcss";
+@import "../template/theme/oca-v1.css";
+
+/* Font variables */
+:root {
+  --serif: var(--font-raleway), 'Raleway', -apple-system, sans-serif;
+  --sans: var(--font-inter), 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+}
