@@ -11,7 +11,9 @@ export const BenefitsSection: React.FC = () => {
         </div>
         <div className="offer-grid">
           <div className="offer-card">
-            <div className="offer-logo-plate"><img /></div>
+            <div className="offer-logo-plate">
+              <img className="offer-logo-img" src="https://www.oldcolumban.net/wp-content/uploads/2022/11/MMT-Logo-1.jpg" alt="MakeMyTrip" loading="lazy" />
+            </div>
             <div className="offer-body">
               <h4>MakeMyTrip</h4>
               <p>Preferred fares on flights and hotel bookings for OCA members.</p>
@@ -19,7 +21,9 @@ export const BenefitsSection: React.FC = () => {
             </div>
           </div>
           <div className="offer-card">
-            <div className="offer-logo-plate"><img /></div>
+            <div className="offer-logo-plate">
+              <img className="offer-logo-img" src="https://www.oldcolumban.net/wp-content/uploads/2022/11/SpiceJet_logo-n.jpg" alt="SpiceJet" loading="lazy" />
+            </div>
             <div className="offer-body">
               <h4>SpiceJet</h4>
               <p>Exclusive fare codes for Columbans travelling with SpiceJet.</p>
@@ -27,7 +31,9 @@ export const BenefitsSection: React.FC = () => {
             </div>
           </div>
           <div className="offer-card">
-            <div className="offer-logo-plate"><img /></div>
+            <div className="offer-logo-plate">
+              <img className="offer-logo-img" src="https://www.oldcolumban.net/wp-content/uploads/2022/12/Samsung-Logo-2.jpg" alt="Samsung" loading="lazy" />
+            </div>
             <div className="offer-body">
               <h4>Samsung</h4>
               <p>Preferred pricing on Samsung devices for OCA members.</p>
