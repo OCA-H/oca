@@ -7,7 +7,11 @@ export const Header: React.FC = () => {
     <header>
       <div className="wrap topbar">
         <a href="#top" className="brand">
-          <img />
+          <img 
+            className="header-logo-img" 
+            src="/images/oca-header-logo.jpg" 
+            alt="Old Columbans Association" 
+          />
         </a>
     
         <nav className="primary-nav" aria-label="Primary">
