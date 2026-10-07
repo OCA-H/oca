@@ -19,7 +19,11 @@ export const HeroSection: React.FC = () => {
               <circle cx="180" cy="180" r="176" stroke="rgba(201,162,39,.35)" strokeWidth="1"/>
               <circle cx="180" cy="180" r="140" stroke="rgba(255,255,255,.12)" strokeWidth="1"/>
             </svg>
-            <img />
+            <img 
+              className="hero-crest-img" 
+              src="/images/oca-crest.png" 
+              alt="Old Columbans Association crest" 
+            />
           </div>
         </div>
       </div>
