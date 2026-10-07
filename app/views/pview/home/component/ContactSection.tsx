@@ -20,16 +20,16 @@ export const ContactSection: React.FC = () => {
               <a className="btn btn-primary btn-sm" href="#/membership">Get Lifetime Membership</a>
             </div>
           </div>
-          <form className="contact-form-panel" >
+          <form className="contact-form-panel" onSubmit={(e) => e.preventDefault()}>
             <div className="field-row">
-              <div className="field"><label>Full Name *</label><input /></div>
-              <div className="field"><label>Batch / Year</label><input /></div>
+              <div className="field"><label>Full Name *</label><input type="text" required placeholder="Your name" /></div>
+              <div className="field"><label>Batch / Year</label><input type="text" placeholder="e.g. 1995" /></div>
             </div>
             <div className="field-row">
-              <div className="field"><label>Email *</label><input /></div>
-              <div className="field"><label>Phone</label><input /></div>
+              <div className="field"><label>Email *</label><input type="email" required placeholder="you@example.com" /></div>
+              <div className="field"><label>Phone</label><input type="tel" placeholder="+91" /></div>
             </div>
-            <div className="field"><label>Subject</label><input /></div>
+            <div className="field"><label>Subject</label><input type="text" placeholder="What is this about?" /></div>
             <div className="field"><label>Message *</label><textarea required placeholder="Write your message here…"></textarea></div>
             <button className="btn btn-primary" type="submit">Send Message</button>
           </form>
