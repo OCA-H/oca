@@ -6,7 +6,7 @@ export const NoticeBoardSection: React.FC = () => {
       <div className="wrap">
         <div className="spotlight">
           <div className="spotlight-poster">
-            <img />
+            <img src="/images/chandrachud-spotlight.png" alt="Justice D. Y. Chandrachud - News Maker" />
           </div>
           <div className="spotlight-body">
             <div className="spotlight-top-row">

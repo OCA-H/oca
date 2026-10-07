@@ -20,7 +20,8 @@ export const OfferingsSection: React.FC = () => {
     
           <div className="notice-cards" id="noticeCards">
             <article className="notice-card">
-              <div className="notice-card-media photo-tile duo-navy"><img />
+              <div className="notice-card-media photo-tile duo-navy">
+                <img className="tile-img" src="https://www.oldcolumban.net/wp-content/uploads/2016/03/OCA_Newsletter-Volume11.jpg" alt="OCA newsletter and notice" loading="lazy" decoding="async" />
                 <div className="tile-icon"><svg viewBox="0 0 24 24" fill="none"><path d="M9 12h6M9 16h6M9 8h6M5 21V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16l-3-2-2 2-2-2-2 2-2-2-3 2Z" stroke="#fff" strokeWidth="1.4"/></svg></div>
               </div>
               <div className="notice-card-body">
@@ -30,7 +31,8 @@ export const OfferingsSection: React.FC = () => {
               </div>
             </article>
             <article className="notice-card">
-              <div className="notice-card-media photo-tile duo-teal"><img />
+              <div className="notice-card-media photo-tile duo-teal">
+                <img className="tile-img" src="https://www.oldcolumban.net/wp-content/uploads/2016/03/OCA_Newsletter-Volume11.jpg" alt="OCA newsletter and notice" loading="lazy" decoding="async" />
                 <div className="tile-icon"><svg viewBox="0 0 24 24" fill="none"><path d="M9 12h6M9 16h6M9 8h6M5 21V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16l-3-2-2 2-2-2-2 2-2-2-3 2Z" stroke="#fff" strokeWidth="1.4"/></svg></div>
               </div>
               <div className="notice-card-body">
@@ -40,7 +42,8 @@ export const OfferingsSection: React.FC = () => {
               </div>
             </article>
             <article className="notice-card">
-              <div className="notice-card-media photo-tile duo-gold"><img />
+              <div className="notice-card-media photo-tile duo-gold">
+                <img className="tile-img" src="https://www.oldcolumban.net/wp-content/uploads/2016/03/OCA_Newsletter-Volume11.jpg" alt="OCA newsletter and notice" loading="lazy" decoding="async" />
                 <div className="tile-icon"><svg viewBox="0 0 24 24" fill="none"><path d="M9 12h6M9 16h6M9 8h6M5 21V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16l-3-2-2 2-2-2-2 2-2-2-3 2Z" stroke="#fff" strokeWidth="1.4"/></svg></div>
               </div>
               <div className="notice-card-body">
@@ -50,7 +53,8 @@ export const OfferingsSection: React.FC = () => {
               </div>
             </article>
             <article className="notice-card">
-              <div className="notice-card-media photo-tile duo-navy"><img />
+              <div className="notice-card-media photo-tile duo-navy">
+                <img className="tile-img" src="https://www.oldcolumban.net/wp-content/uploads/2016/03/OCA_Newsletter-Volume11.jpg" alt="OCA newsletter and notice" loading="lazy" decoding="async" />
                 <div className="tile-icon"><svg viewBox="0 0 24 24" fill="none"><path d="M9 12h6M9 16h6M9 8h6M5 21V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16l-3-2-2 2-2-2-2 2-2-2-3 2Z" stroke="#fff" strokeWidth="1.4"/></svg></div>
               </div>
               <div className="notice-card-body">
@@ -60,7 +64,8 @@ export const OfferingsSection: React.FC = () => {
               </div>
             </article>
             <article className="notice-card">
-              <div className="notice-card-media photo-tile duo-teal"><img />
+              <div className="notice-card-media photo-tile duo-teal">
+                <img className="tile-img" src="https://www.oldcolumban.net/wp-content/uploads/2016/03/OCA_Newsletter-Volume11.jpg" alt="OCA newsletter and notice" loading="lazy" decoding="async" />
                 <div className="tile-icon"><svg viewBox="0 0 24 24" fill="none"><path d="M9 12h6M9 16h6M9 8h6M5 21V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16l-3-2-2 2-2-2-2 2-2-2-3 2Z" stroke="#fff" strokeWidth="1.4"/></svg></div>
               </div>
               <div className="notice-card-body">
@@ -70,7 +75,8 @@ export const OfferingsSection: React.FC = () => {
               </div>
             </article>
             <article className="notice-card">
-              <div className="notice-card-media photo-tile duo-gold"><img />
+              <div className="notice-card-media photo-tile duo-gold">
+                <img className="tile-img" src="https://www.oldcolumban.net/wp-content/uploads/2016/03/OCA_Newsletter-Volume11.jpg" alt="OCA newsletter and notice" loading="lazy" decoding="async" />
                 <div className="tile-icon"><svg viewBox="0 0 24 24" fill="none"><path d="M9 12h6M9 16h6M9 8h6M5 21V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16l-3-2-2 2-2-2-2 2-2-2-3 2Z" stroke="#fff" strokeWidth="1.4"/></svg></div>
               </div>
               <div className="notice-card-body">
