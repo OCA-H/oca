@@ -1,6 +1,19 @@
+'use client';
+
 import React from 'react';
+import { useGalleryHandler } from '../handler';
 
 export const GallerySection: React.FC = () => {
+  const {
+    galleryAlbums,
+    selectedAlbumIdx,
+    selectedPhotoIdx,
+    currentAlbum,
+    currentPhoto,
+    setIsHovered,
+    selectAlbum,
+  } = useGalleryHandler();
+
   return (
     <section className="section tint-gold" id="gallery">
       <div className="wrap">
@@ -13,18 +26,72 @@ export const GallerySection: React.FC = () => {
           <a className="btn btn-ghost btn-sm" href="https://www.oldcolumban.net/events-photographs/">View all photographs →</a>
         </div>
     
-        <div className="media-viewer">
+        <div 
+          className="media-viewer"
+          onMouseEnter={() => setIsHovered(true)}
+          onMouseLeave={() => setIsHovered(false)}
+        >
           <div className="media-stage">
-            <div className="photo-tile duo-navy" id="stageTile">
-              <img />
-              <div className="tile-icon" id="stageIcon"><svg viewBox="0 0 24 24" fill="none"><path d="M4 21h16M6 21V9l6-4 6 4v12M10 21v-5h4v5" stroke="#fff" strokeWidth="1.4"/></svg></div>
-              <div className="stage-counter" id="stageCounter">1 / 5</div>
-              <div className="tile-caption"><div className="t" id="stageCaption">Head table toast</div><div className="s" id="stageSub">Annual Lunch 2025 · Nov 2025</div></div>
+            <div className={`photo-tile ${currentAlbum.tone}`} id="stageTile">
+              <img 
+                className="tile-img" 
+                id="stageImg" 
+                src={currentPhoto.src} 
+                alt={currentPhoto.cap} 
+                decoding="async" 
+              />
+              <div 
+                className="tile-icon" 
+                id="stageIcon" 
+                dangerouslySetInnerHTML={{ __html: currentAlbum.icon }} 
+              />
+              <div className="stage-counter" id="stageCounter">
+                {selectedPhotoIdx + 1} / {currentAlbum.photos.length}
+              </div>
+              <div className="tile-caption">
+                <div className="t" id="stageCaption">{currentPhoto.cap}</div>
+                <div className="s" id="stageSub">{currentAlbum.name} · {currentAlbum.time}</div>
+              </div>
             </div>
           </div>
     
           <div className="album-tabs" id="albumTabs">
-            
+            {galleryAlbums.map((album, idx) => {
+              const isActive = idx === selectedAlbumIdx;
+              const secs = (album.photos.length * 3.2).toFixed(1).replace('.0', '');
+              return (
+                <div
+                  key={album.name}
+                  className={`album-tab ${isActive ? 'active' : ''}`}
+                  role="button"
+                  tabIndex={0}
+                  onClick={() => selectAlbum(idx)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault();
+                      selectAlbum(idx);
+                    }
+                  }}
+                >
+                  <div className="album-tab-top">
+                    <span className="album-tab-name">{album.name}</span>
+                    <span className="album-tab-time">{album.time}</span>
+                  </div>
+                  <div className="album-tab-meta">
+                    {album.photos.length} photos · {secs}s
+                  </div>
+                  <div className="album-progress">
+                    <div 
+                      className="album-progress-fill" 
+                      style={{ 
+                        width: isActive ? `${((selectedPhotoIdx + 1) / album.photos.length) * 100}%` : '0%',
+                        transition: isActive ? 'width 3.2s linear' : 'none'
+                      }} 
+                    />
+                  </div>
+                </div>
+              );
+            })}
           </div>
         </div>
       </div>
@@ -33,3 +100,4 @@ export const GallerySection: React.FC = () => {
 };
 
 export default GallerySection;
+
