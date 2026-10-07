@@ -24,8 +24,13 @@ export const ExecutiveCommitteeView: React.FC = () => {
                 </div>
               </div>
               <div className="page-hero-media">
-                <div className="photo-tile duo-teal"><img /><div className="tile-caption"><div className="t">The Association at work</div></div></div>
-                <div className="page-hero-crest"><img /></div>
+                <div className="photo-tile duo-teal">
+                  <img className="tile-img" src="https://www.oldcolumban.net/wp-content/uploads/2017/10/b38eafcb-e18b-484c-b1c6-1d1782b1b92a.jpg" alt="The Association at work" loading="lazy" decoding="async" />
+                  <div className="tile-caption"><div className="t">The Association at work</div></div>
+                </div>
+                <div className="page-hero-crest">
+                  <img src="/images/oca-crest.png" alt="OCA Crest" />
+                </div>
               </div>
             </div>
           </section>
@@ -45,7 +50,7 @@ export const ExecutiveCommitteeView: React.FC = () => {
               <div className="profile-row">
                   <article className="profile-card">
                     <div className="profile-photo">
-                      <img />
+                      <img src="https://www.oldcolumban.net/wp-content/uploads/2022/02/SVK-Profile-Pic-n.png" alt="Santosh V. Kalyani, President" loading="lazy" decoding="async" />
                       <span className="profile-role">PRESIDENT</span>
                     </div>
                     <div className="profile-body">
@@ -56,7 +61,7 @@ export const ExecutiveCommitteeView: React.FC = () => {
                   </article>
                   <article className="profile-card">
                     <div className="profile-photo">
-                      <img />
+                      <img src="https://www.oldcolumban.net/wp-content/uploads/2022/05/Anurag-agarawal-n-1.png" alt="Anurag Aggarwal, Secretary" loading="lazy" decoding="async" />
                       <span className="profile-role">SECRETARY</span>
                     </div>
                     <div className="profile-body">
@@ -67,7 +72,7 @@ export const ExecutiveCommitteeView: React.FC = () => {
                   </article>
                   <article className="profile-card">
                     <div className="profile-photo">
-                      <img />
+                      <img src="https://www.oldcolumban.net/wp-content/uploads/2020/02/Pranav-Uppal.jpg" alt="Kunwar Pranav Pratap Uppal, Treasurer" loading="lazy" decoding="async" />
                       <span className="profile-role">TREASURER</span>
                     </div>
                     <div className="profile-body">
