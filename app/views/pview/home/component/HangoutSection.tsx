@@ -20,7 +20,8 @@ export const HangoutSection: React.FC = () => {
     
           <div className="post-carousel" id="postCarousel">
             <article className="post-card" data-type="video">
-              <div className="post-media duo-navy"><img />
+              <div className="post-media duo-navy">
+                <img className="tile-img" src="https://www.oldcolumban.net/wp-content/uploads/2025/12/annual-lunch.jpg" alt="Annual Lunch highlights" loading="lazy" decoding="async" />
                 <div className="play-btn"><span><svg viewBox="0 0 24 24" fill="none"><path d="M8 5v14l11-7L8 5Z" fill="currentColor"/></svg></span></div>
                 <button className="mute-btn" data-muted="true" aria-label="Unmute"><svg viewBox="0 0 24 24" fill="none"><path d="M11 5 6 9H3v6h3l5 4V5Z" stroke="#fff" strokeWidth="1.6" strokeLinejoin="round"/><path d="M16 9l6 6M22 9l-6 6" stroke="#fff" strokeWidth="1.6" strokeLinecap="round"/></svg></button>
                 <span className="post-duration">2:14</span>
@@ -35,7 +36,8 @@ export const HangoutSection: React.FC = () => {
             </article>
     
             <article className="post-card" data-type="photo">
-              <div className="post-media duo-teal"><img />
+              <div className="post-media duo-teal">
+                <img className="tile-img" src="https://www.oldcolumban.net/wp-content/uploads/2017/10/b38eafcb-e18b-484c-b1c6-1d1782b1b92a.jpg" alt="Columbans reunited" loading="lazy" decoding="async" />
                 <div className="tile-icon"><svg viewBox="0 0 24 24" fill="none"><path d="M13 21l-1-1-6.36-6.36a5 5 0 1 1 7.07-7.07L13 7l.29-.43a5 5 0 1 1 7.07 7.07L14 20l-1 1Z" stroke="#fff" strokeWidth="1.4"/></svg></div>
               </div>
               <div className="post-body">
@@ -48,7 +50,8 @@ export const HangoutSection: React.FC = () => {
             </article>
     
             <article className="post-card" data-type="photo">
-              <div className="post-media duo-gold"><img />
+              <div className="post-media duo-gold">
+                <img className="tile-img" src="https://www.oldcolumban.net/wp-content/uploads/2023/02/IMG_1792.jpg" alt="At the OCA Secretariat" loading="lazy" decoding="async" />
                 <div className="tile-icon"><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="4" stroke="#fff" strokeWidth="1.4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6" stroke="#fff" strokeWidth="1.4"/></svg></div>
               </div>
               <div className="post-body">
@@ -61,7 +64,8 @@ export const HangoutSection: React.FC = () => {
             </article>
     
             <article className="post-card" data-type="video">
-              <div className="post-media duo-teal"><img />
+              <div className="post-media duo-teal">
+                <img className="tile-img" src="https://www.oldcolumban.net/wp-content/uploads/2022/10/Bro-Foley-Cricket-2022.jpg" alt="Cricket at the Brother Foley Memorial" loading="lazy" decoding="async" />
                 <div className="play-btn"><span><svg viewBox="0 0 24 24" fill="none"><path d="M8 5v14l11-7L8 5Z" fill="currentColor"/></svg></span></div>
                 <button className="mute-btn" data-muted="true" aria-label="Unmute"><svg viewBox="0 0 24 24" fill="none"><path d="M11 5 6 9H3v6h3l5 4V5Z" stroke="#fff" strokeWidth="1.6" strokeLinejoin="round"/><path d="M16 9l6 6M22 9l-6 6" stroke="#fff" strokeWidth="1.6" strokeLinecap="round"/></svg></button>
                 <span className="post-duration">0:48</span>
@@ -76,7 +80,8 @@ export const HangoutSection: React.FC = () => {
             </article>
     
             <article className="post-card" data-type="photo">
-              <div className="post-media duo-navy"><img />
+              <div className="post-media duo-navy">
+                <img className="tile-img" src="https://www.oldcolumban.net/wp-content/uploads/2022/11/sponsor-new.jpg" alt="Tournament sponsorship" loading="lazy" decoding="async" />
                 <div className="tile-icon"><svg viewBox="0 0 24 24" fill="none"><path d="M4 21v-2a4 4 0 0 1 4-4h8a4 4 0 0 1 4 4v2M12 3l2 4-2 1-2-1 2-4Z" stroke="#fff" strokeWidth="1.4"/></svg></div>
               </div>
               <div className="post-body">
@@ -89,7 +94,8 @@ export const HangoutSection: React.FC = () => {
             </article>
     
             <article className="post-card" data-type="photo">
-              <div className="post-media duo-gold"><img />
+              <div className="post-media duo-gold">
+                <img className="tile-img" src="https://www.oldcolumban.net/wp-content/uploads/2020/03/hp2-donate-image.jpg" alt="Back on campus" loading="lazy" decoding="async" />
                 <div className="tile-icon"><svg viewBox="0 0 24 24" fill="none"><path d="M3 21h18M5 21V7l7-4 7 4v14M9 21v-6h6v6" stroke="#fff" strokeWidth="1.4"/></svg></div>
               </div>
               <div className="post-body">
