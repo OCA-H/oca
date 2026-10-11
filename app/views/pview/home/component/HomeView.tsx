@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { Header, Footer } from '@/app/views/common';
+import { Header, Footer, Lightbox } from '@/app/views/common';
 import { useHomeHandler } from '../handler/useHomeHandler';
 import {
   HeroSection,
@@ -91,6 +91,7 @@ export const HomeView: React.FC = () => {
       </main>
 
       <Footer />
+      <Lightbox />
     </>
   );
 };
