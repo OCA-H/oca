@@ -3,8 +3,18 @@
 import { useEffect, useState } from 'react';
 import { galleryAlbums, GalleryAlbum } from '../content/home.content';
 
+export type AppRoute =
+  | 'home'
+  | 'vision-mission'
+  | 'executive-committee'
+  | 'membership'
+  | 'donation'
+  | 'annual-dinner'
+  | 'sports'
+  | 'annual-lunch';
+
 export function useHomeHandler() {
-  const [activeRoute, setActiveRoute] = useState<'home' | 'vision-mission' | 'executive-committee' | 'membership' | 'donation'>('home');
+  const [activeRoute, setActiveRoute] = useState<AppRoute>('home');
   const [selectedAlbumIdx, setSelectedAlbumIdx] = useState(0);
   const [selectedPhotoIdx, setSelectedPhotoIdx] = useState(0);
   const [isHovered, setIsHovered] = useState(false);
@@ -15,21 +25,50 @@ export function useHomeHandler() {
       const hash = window.location.hash.replace(/^#\/?/, '');
       if (!hash || hash === 'top' || hash === 'home') {
         setActiveRoute('home');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
       } else {
         const bang = hash.indexOf('!');
         const pageKey = bang === -1 ? hash : hash.slice(0, bang);
-        const anchor = bang === -1 ? (['events', 'hangout', 'give', 'connect', 'about', 'gallery', 'committee', 'contact'].includes(pageKey) ? pageKey : null) : hash.slice(bang + 1);
-        if (['vision-mission', 'executive-committee', 'membership', 'donation'].includes(pageKey)) {
-          setActiveRoute(pageKey as any);
+        const anchor =
+          bang === -1
+            ? ['events', 'hangout', 'give', 'connect', 'about', 'gallery', 'committee', 'contact'].includes(pageKey)
+              ? pageKey
+              : null
+            : hash.slice(bang + 1);
+
+        const SUBPAGES: AppRoute[] = [
+          'vision-mission',
+          'executive-committee',
+          'membership',
+          'donation',
+          'annual-dinner',
+          'sports',
+          'annual-lunch',
+        ];
+
+        if (SUBPAGES.includes(pageKey as AppRoute)) {
+          setActiveRoute(pageKey as AppRoute);
+          if (anchor) {
+            setTimeout(() => {
+              const target = document.getElementById(anchor);
+              if (target) {
+                target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+              }
+            }, 100);
+          } else {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          }
         } else {
           setActiveRoute('home');
           if (anchor) {
-            requestAnimationFrame(() => {
+            setTimeout(() => {
               const target = document.getElementById(anchor);
               if (target) {
-                target.scrollIntoView({ behavior: 'smooth' });
+                target.scrollIntoView({ behavior: 'smooth', block: 'start' });
               }
-            });
+            }, 100);
+          } else {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
           }
         }
       }

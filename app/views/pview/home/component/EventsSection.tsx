@@ -69,6 +69,7 @@ export const EventsSection: React.FC = () => {
               <p>An interschool cricket tournament held in memory of Brother Foley.</p>
               <a className="btn btn-secondary btn-sm" href="#/sports">View Details →</a>
             </div>
+            <a className="event-overlay" href="#/sports" tabIndex={-1} aria-hidden="true"></a>
           </div>
 
           <div className="event-card">
@@ -97,6 +98,7 @@ export const EventsSection: React.FC = () => {
               <p>Principal's appeal for sponsorship of this memorial tournament.</p>
               <a className="btn btn-secondary btn-sm" href="#/sports!sponsor">View Details →</a>
             </div>
+            <a className="event-overlay" href="#/sports!sponsor" tabIndex={-1} aria-hidden="true"></a>
           </div>
         </div>
       </div>

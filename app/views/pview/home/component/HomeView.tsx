@@ -24,6 +24,9 @@ import { VisionMissionView } from '../../vision-mission';
 import { ExecutiveCommitteeView } from '../../executive-committee';
 import { MembershipView } from '../../membership';
 import { DonationView } from '../../donation';
+import { AnnualDinnerView } from '../../annual-dinner';
+import { SportsView } from '../../sports';
+import { AnnualLunchView } from '../../annual-lunch';
 
 export const HomeView: React.FC = () => {
   const { activeRoute } = useHomeHandler();
@@ -69,6 +72,21 @@ export const HomeView: React.FC = () => {
         {/* Donation Subpage */}
         <div className={`page ${activeRoute === 'donation' ? 'is-active' : ''}`} id="page-donation">
           <DonationView />
+        </div>
+
+        {/* Annual Dinner Subpage */}
+        <div className={`page ${activeRoute === 'annual-dinner' ? 'is-active' : ''}`} id="page-annual-dinner">
+          <AnnualDinnerView />
+        </div>
+
+        {/* OCA Sports Subpage */}
+        <div className={`page ${activeRoute === 'sports' ? 'is-active' : ''}`} id="page-sports">
+          <SportsView />
+        </div>
+
+        {/* Annual Lunch Subpage */}
+        <div className={`page ${activeRoute === 'annual-lunch' ? 'is-active' : ''}`} id="page-annual-lunch">
+          <AnnualLunchView />
         </div>
       </main>
 

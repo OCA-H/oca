@@ -28,8 +28,9 @@ export const Header: React.FC = () => {
           <div className="nav-item">
             <span className="nav-link" data-nav="events">Events <svg viewBox="0 0 12 8" fill="none"><path d="M1 1l5 5 5-5" stroke="currentColor" strokeWidth="1.6"/></svg></span>
             <div className="dropdown">
-              <a href="https://www.oldcolumban.net/oca-annual-lunch-get-together/">OCA – Annual Lunch Get Together</a>
-              <a href="https://www.oldcolumban.net/oca-sports-event/">OCA Sports</a>
+              <a href="#/annual-dinner">OCA – Annual Dinner Get Together</a>
+              <a href="#/annual-lunch">OCA – Annual Lunch Get Together</a>
+              <a href="#/sports">OCA Sports</a>
               <a href="https://www.oldcolumban.net/platinum-jubilee-lunch/">Gallery</a>
               <a href="https://www.oldcolumban.net/school-anthem/">School Anthem</a>
               <a href="https://www.stcolumbas.edu.in/about-school.aspx">History of the School</a>
