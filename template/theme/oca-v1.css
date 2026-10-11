@@ -1278,6 +1278,37 @@ nav.primary-nav {
   margin-bottom: 16px;
 }
 
+/* ---------- featured event card (home) ---------- */
+.event-card.event-featured {
+  position: relative;
+  cursor: pointer;
+  border-color: var(--gold);
+  box-shadow: 0 0 0 1px var(--gold), 0 12px 28px rgba(201, 162, 39, .22);
+}
+
+.event-card.event-featured:hover {
+  box-shadow: 0 0 0 1px var(--gold), 0 16px 34px rgba(201, 162, 39, .34);
+  transform: translateY(-2px);
+}
+
+.event-featured .event-date-chip {
+  background: var(--gold);
+  color: var(--navy-dark);
+}
+
+.event-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  border-radius: inherit;
+}
+
+/* whole card is the click target */
+.event-featured:focus-within {
+  outline: 3px solid var(--brand-mid);
+  outline-offset: 3px;
+}
+
 /* ---------- Causes / give ---------- */
 .cause-grid {
   display: grid;

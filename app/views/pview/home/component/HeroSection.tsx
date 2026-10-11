@@ -10,7 +10,7 @@ export const HeroSection: React.FC = () => {
           <p className="lead">OCA's mission is to praise, promote and protect St. Columba's School and its students, and to unite, inform and involve alumni and friends in fellowship and support of each other and the school.</p>
           <div className="hero-ctas">
             <a className="btn btn-primary" href="#/membership">Become a Member</a>
-            <a className="btn btn-secondary" href="#events">Explore Events &amp; Connect</a>
+            <a className="btn btn-secondary" href="#/home!events">Explore Events &amp; Connect</a>
           </div>
         </div>
         <div className="hero-visual">

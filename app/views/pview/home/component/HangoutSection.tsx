@@ -10,7 +10,7 @@ export const HangoutSection: React.FC = () => {
             <h2 style={{ whiteSpace: "nowrap" }}>Photos &amp; videos from the community</h2>
             <p style={{ color: "#AFC8B6" }}>Cricket, lunches and reunions — <span style={{ color: "var(--gold)", fontWeight: "600" }}>posted live</span> by batches around the world.</p>
           </div>
-          <a className="btn btn-gold btn-sm" href="https://www.oldcolumban.net/events-photographs/">View all →</a>
+          <a className="btn btn-gold btn-sm" href="#/event-photographs">View all →</a>
         </div>
     
         <div className="post-carousel-wrap">

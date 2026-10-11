@@ -20,10 +20,11 @@ export const SocialConscienceSection: React.FC = () => {
               <div className="tile-caption"><span className="pill gold" style={{ background: "rgba(255,255,255,.9)" }}>Featured Cause</span></div>
             </div>
             <div className="cause-body">
-              <h4>Teachers Benevolent Fund</h4>
+              <h4><a href="#/teachers-benevolent-fund">Teachers Benevolent Fund</a></h4>
               <div className="progress-track"><div className="progress-fill" style={{ width: "7%" }}></div></div>
               <div className="fund-meta"><span>7% Donated</span><span><strong>₹15,68,928</strong> / ₹2,00,00,000</span></div>
-              <a className="btn btn-primary btn-sm" style={{ marginTop: "16px", width: "100%" }} href="#/donation">Contribute</a>
+              <a className="btn btn-primary btn-sm" style={{ marginTop: "16px", width: "100%" }} href="#/donation!give-form" data-fund="tbf">Contribute</a>
+              <a href="#/teachers-benevolent-fund" style={{ display: "block", textAlign: "center", marginTop: "12px", fontSize: "13.5px", fontWeight: 600, color: "var(--brand-mid)" }}>About the fund &rarr;</a>
             </div>
           </div>
           <div className="cause-card muted">

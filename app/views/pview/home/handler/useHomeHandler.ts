@@ -18,13 +18,18 @@ export function useHomeHandler() {
       } else {
         const bang = hash.indexOf('!');
         const pageKey = bang === -1 ? hash : hash.slice(0, bang);
+        const anchor = bang === -1 ? (['events', 'hangout', 'give', 'connect', 'about', 'gallery', 'committee', 'contact'].includes(pageKey) ? pageKey : null) : hash.slice(bang + 1);
         if (['vision-mission', 'executive-committee', 'membership', 'donation'].includes(pageKey)) {
           setActiveRoute(pageKey as any);
         } else {
           setActiveRoute('home');
-          const target = document.getElementById(pageKey);
-          if (target) {
-            target.scrollIntoView({ behavior: 'smooth' });
+          if (anchor) {
+            requestAnimationFrame(() => {
+              const target = document.getElementById(anchor);
+              if (target) {
+                target.scrollIntoView({ behavior: 'smooth' });
+              }
+            });
           }
         }
       }
@@ -74,7 +79,7 @@ export function useHomeHandler() {
       track.addEventListener('mouseleave', startAuto);
     }
 
-    setupCarousel('noticeCarousel', '.notice-nav.prev', '.notice-nav.next', '.notice-card', 22, 4500);
+    setupCarousel('noticeCards', '.notice-nav.prev', '.notice-nav.next', '.notice-card', 22, 4500);
     setupCarousel('postCarousel', '.post-nav.prev', '.post-nav.next', '.post-card', 22, 3500);
 
     // Mute button handler

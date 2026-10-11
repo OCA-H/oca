@@ -36,12 +36,12 @@ export const HomeView: React.FC = () => {
         {/* Home Page View */}
         <div className={`page ${activeRoute === 'home' ? 'is-active' : ''}`} id="page-home">
           <HeroSection />
+          <EventsSection />
           <HighlightsSection />
           <OfferingsSection />
           <NoticeBoardSection />
           <HangoutSection />
           <BirthdaysSection />
-          <EventsSection />
           <SocialConscienceSection />
           <BenefitsSection />
           <ConnectSection />

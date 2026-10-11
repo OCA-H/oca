@@ -23,7 +23,7 @@ export const GallerySection: React.FC = () => {
             <h2>Moments from the OCA community</h2>
             <p>Browse by album — the story keeps playing, or jump straight to the one you want.</p>
           </div>
-          <a className="btn btn-ghost btn-sm" href="https://www.oldcolumban.net/events-photographs/">View all photographs →</a>
+          <a className="btn btn-ghost btn-sm" href="#/event-photographs">View all photographs →</a>
         </div>
     
         <div 

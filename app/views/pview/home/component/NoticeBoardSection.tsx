@@ -2,11 +2,19 @@ import React from 'react';
 
 export const NoticeBoardSection: React.FC = () => {
   return (
-    <section className="section" style={{ background: "#fff" }}>
+    <section className="section" style={{ background: '#fff' }}>
       <div className="wrap">
+        <div className="section-head stack">
+          <span className="eyebrow">In the spotlight</span>
+          <h2>Columban Newsmakers</h2>
+          <p>Columbans making the School proud across public life, business and the arts.</p>
+        </div>
         <div className="spotlight">
           <div className="spotlight-poster">
-            <img src="/images/chandrachud-spotlight.png" alt="Justice D. Y. Chandrachud - News Maker" />
+            <img
+              src="/images/chandrachud-spotlight.png"
+              alt="Congratulations to Justice Dr. D. Y. Chandrachud, Batch of 1975, on being appointed Chief Justice of India"
+            />
           </div>
           <div className="spotlight-body">
             <div className="spotlight-top-row">
@@ -20,8 +28,12 @@ export const NoticeBoardSection: React.FC = () => {
               </div>
             </div>
             <h3>Congratulating Columban Justice D. Y. Chandrachud</h3>
-            <p>OCA proudly celebrates fellow Columban Justice Dhananjaya Y. Chandrachud on his tenure as Chief Justice of India — one of many Columbans making the school proud across public life, business and the arts.</p>
-            <a className="qa-link" style={{ marginTop: "14px", display: "inline-block" }} href="https://www.oldcolumban.net/columbans-profiles-of-success-achievements/">See more News Makers →</a>
+            <p>
+              OCA proudly celebrates fellow Columban Justice Dhananjaya Y. Chandrachud on his tenure as Chief Justice of India — one of many Columbans making the school proud across public life, business and the arts.
+            </p>
+            <a className="qa-link" style={{ marginTop: '14px', display: 'inline-block' }} href="#/news-makers">
+              See more News Makers →
+            </a>
           </div>
         </div>
       </div>
