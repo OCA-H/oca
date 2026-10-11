@@ -1,38 +1,39 @@
 /**
  * Global Route Constants
  * Maintains all routes across the OCA Hub application to avoid hardcoded strings.
- * All internal routes start with a leading slash ('/').
+ * Public subpages use hash-based routing on the root SPA (`/#/<page>`),
+ * while standalone App Router pages use direct paths (`/member-signin`, `/partner-organization`).
  */
 
 export const ROUTES = {
-  // Main Pages
-  HOME: '/home',
-  VISION_MISSION: '/vision-mission',
-  EXECUTIVE_COMMITTEE: '/executive-committee',
-  MEMBERSHIP: '/membership',
-  DONATION: '/donation',
-  ANNUAL_DINNER: '/annual-dinner',
-  ANNUAL_LUNCH: '/annual-lunch',
-  SPORTS: '/sports',
-  MEMBER_SIGNIN: '/member-signin',
-  PARTNER_ORGANIZATION: '/partner-organization',
+  // Main Subpages (Handled by HomeView hash router)
+  HOME: '#/home',
+  VISION_MISSION: '#/vision-mission',
+  EXECUTIVE_COMMITTEE: '#/executive-committee',
+  MEMBERSHIP: '#/membership',
+  DONATION: '#/donation',
+  ANNUAL_DINNER: '#/annual-dinner',
+  ANNUAL_LUNCH: '#/annual-lunch',
+  SPORTS: '#/sports',
+  MEMBER_SIGNIN: '#/member-signin',
+  PARTNER_ORGANIZATION: '#/partner-organization',
 
   // Section Anchors & Deep Links
-  HOME_EVENTS: '/home#events',
-  HOME_CONNECT: '/home#connect',
-  HOME_GIVE: '/home#give',
-  DONATION_GIVE_FORM: '/donation#give-form',
-  ANNUAL_DINNER_PASSES: '/annual-dinner#passes',
-  ANNUAL_DINNER_DETAILS: '/annual-dinner#details',
-  SPORTS_SPONSOR: '/sports#sponsor',
+  HOME_EVENTS: '#/home!events',
+  HOME_CONNECT: '#/home!connect',
+  HOME_GIVE: '#/home!give',
+  DONATION_GIVE_FORM: '#/donation!give-form',
+  ANNUAL_DINNER_PASSES: '#/annual-dinner!passes',
+  ANNUAL_DINNER_DETAILS: '#/annual-dinner!details',
+  SPORTS_SPONSOR: '#/sports!sponsor',
 
   // Subpages & Utility Links
-  LOST_PASSWORD: '/lost-password',
-  CONTACT: '/contact',
-  BYLAWS: '/bylaws',
-  NEWS_MAKERS: '/news-makers',
-  TEACHERS_BENEVOLENT_FUND: '/teachers-benevolent-fund',
-  EVENT_PHOTOGRAPHS: '/event-photographs',
+  LOST_PASSWORD: '#/lost-password',
+  CONTACT: '#/contact',
+  BYLAWS: '#/bylaws',
+  NEWS_MAKERS: '#/news-makers',
+  TEACHERS_BENEVOLENT_FUND: '#/teachers-benevolent-fund',
+  EVENT_PHOTOGRAPHS: '#/event-photographs',
   TOP: '#top',
 
   // Direct Page Routes
