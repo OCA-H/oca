@@ -1,4 +1,5 @@
 import React from 'react';
+import { ROUTES } from '@/app/views/common/helper/route';
 
 export const EventsSection: React.FC = () => {
   return (
@@ -38,9 +39,9 @@ export const EventsSection: React.FC = () => {
               <div className="date">Friday, 18 December 2026</div>
               <h4>OCA – Annual Dinner Get Together</h4>
               <p>An evening with Columbans of every batch, at the Qutub Golf Course.</p>
-              <a className="btn btn-primary btn-sm event-cta" href="#/annual-dinner">View Details →</a>
+              <a className="btn btn-primary btn-sm event-cta" href={ROUTES.ANNUAL_DINNER}>View Details →</a>
             </div>
-            <a className="event-overlay" href="#/annual-dinner" tabIndex={-1} aria-hidden="true"></a>
+            <a className="event-overlay" href={ROUTES.ANNUAL_DINNER} tabIndex={-1} aria-hidden="true"></a>
           </div>
 
           <div className="event-card">
@@ -67,9 +68,9 @@ export const EventsSection: React.FC = () => {
               <div className="date">Dec 2022 – Jan 2023</div>
               <h4>Brother Foley Memorial Interschool Cricket Tournament</h4>
               <p>An interschool cricket tournament held in memory of Brother Foley.</p>
-              <a className="btn btn-secondary btn-sm" href="#/sports">View Details →</a>
+              <a className="btn btn-secondary btn-sm" href={ROUTES.SPORTS}>View Details →</a>
             </div>
-            <a className="event-overlay" href="#/sports" tabIndex={-1} aria-hidden="true"></a>
+            <a className="event-overlay" href={ROUTES.SPORTS} tabIndex={-1} aria-hidden="true"></a>
           </div>
 
           <div className="event-card">
@@ -96,9 +97,9 @@ export const EventsSection: React.FC = () => {
               <div className="date">Sponsorship: ₹1.50 Lacs</div>
               <h4>Brother Oman Memorial Interschool Cricket Tournament</h4>
               <p>Principal's appeal for sponsorship of this memorial tournament.</p>
-              <a className="btn btn-secondary btn-sm" href="#/sports!sponsor">View Details →</a>
+              <a className="btn btn-secondary btn-sm" href={ROUTES.SPORTS_SPONSOR}>View Details →</a>
             </div>
-            <a className="event-overlay" href="#/sports!sponsor" tabIndex={-1} aria-hidden="true"></a>
+            <a className="event-overlay" href={ROUTES.SPORTS_SPONSOR} tabIndex={-1} aria-hidden="true"></a>
           </div>
         </div>
       </div>

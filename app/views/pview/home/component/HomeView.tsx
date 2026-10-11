@@ -28,6 +28,7 @@ import { AnnualDinnerView } from '../../annual-dinner';
 import { SportsView } from '../../sports';
 import { AnnualLunchView } from '../../annual-lunch';
 import { MemberSignInView } from '../../member-signin';
+import { PartnerOrganizationView } from '../../partner-organization';
 
 export const HomeView: React.FC = () => {
   const { activeRoute } = useHomeHandler();
@@ -93,6 +94,11 @@ export const HomeView: React.FC = () => {
         {/* Member Sign In Subpage */}
         <div className={`page ${activeRoute === 'member-signin' ? 'is-active' : ''}`} id="page-member-signin">
           <MemberSignInView />
+        </div>
+
+        {/* Partner Organization Subpage */}
+        <div className={`page ${activeRoute === 'partner-organization' ? 'is-active' : ''}`} id="page-partner-organization">
+          <PartnerOrganizationView />
         </div>
       </main>
 

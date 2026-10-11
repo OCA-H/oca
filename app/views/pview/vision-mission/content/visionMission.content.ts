@@ -1,3 +1,5 @@
+import { ROUTES } from '@/app/views/common/helper/route';
+
 export interface ObjectiveItem {
   num: string;
   title: string;
@@ -9,8 +11,8 @@ export const visionMissionContent = {
     eyebrow: 'About OCA',
     title: 'Vision & Mission',
     lead: 'Connecting generations of Columbans through fellowship, service, and commitment to our alma mater.',
-    primaryBtn: { text: 'Become a Member', href: '#/membership' },
-    secondaryBtn: { text: 'Support our initiatives', href: '#/donation' },
+    primaryBtn: { text: 'Become a Member', href: ROUTES.MEMBERSHIP },
+    secondaryBtn: { text: 'Support our initiatives', href: ROUTES.DONATION },
     image: '/images/annual-lunch.jpg',
     imageAlt: 'Columbans of every batch at the OCA Annual Lunch Get Together',
   },
@@ -41,7 +43,7 @@ export const visionMissionContent = {
       'OCA connects its members to each other, and to the past, present and future of St. Columba’s School.',
     ],
     buttonText: 'Meet the Executive Committee',
-    buttonHref: '#/executive-committee',
+    buttonHref: ROUTES.EXECUTIVE_COMMITTEE,
     image: '/images/IMG_1792.jpg',
     imageAlt: 'The OCA Secretariat at St. Columba’s School',
     caption: 'The OCA Secretariat at St. Columba’s School, Ashoka Place, New Delhi.',
@@ -84,7 +86,7 @@ export const visionMissionContent = {
     ] as ObjectiveItem[],
     formNote: 'The objectives are set out in full in the ',
     formNoteLinkText: 'ByLaws of OCA',
-    formNoteHref: '#/bylaws',
+    formNoteHref: ROUTES.BYLAWS,
   },
   socialConscience: {
     eyebrow: 'OCA Social Conscience',
@@ -92,7 +94,7 @@ export const visionMissionContent = {
     paragraph:
       'The Association’s prime objective is assisting the School with funds, amenities and inputs from the alumni. The Teachers Benevolent Fund stands behind the staff who spent their careers at Ashoka Place; memorial cricket tournaments keep Columban sport alive; the Secretariat keeps the record.',
     buttonText: 'Support our initiatives',
-    buttonHref: '#/donation',
+    buttonHref: ROUTES.DONATION,
     image: '/images/hp2-donate-image.jpg',
     imageAlt: 'Support for St. Columba’s School and its teachers',
     caption: 'The Teachers Benevolent Fund — the Association’s standing commitment to the staff of the School.',
@@ -101,7 +103,7 @@ export const visionMissionContent = {
     eyebrow: 'Join us',
     title: 'Be part of the Columban legacy',
     lead: 'Lifetime membership keeps you on the roll, in the directory, and in touch with Columbans of every batch.',
-    btnGold: { text: 'Become a Member', href: '#/membership' },
-    btnSecondary: { text: 'Support OCA', href: '#/donation' },
+    btnGold: { text: 'Become a Member', href: ROUTES.MEMBERSHIP },
+    btnSecondary: { text: 'Support OCA', href: ROUTES.DONATION },
   },
 };

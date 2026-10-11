@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { useAnnualDinnerHandler } from '../handler/useAnnualDinnerHandler';
+import { ROUTES } from '@/app/views/common/helper/route';
 
 export const AnnualDinnerView: React.FC = () => {
   const {
@@ -33,7 +34,7 @@ export const AnnualDinnerView: React.FC = () => {
     <>
       <nav className="crumb" aria-label="Breadcrumb">
         <div className="wrap">
-          <a href="#/home">Home</a>
+          <a href={ROUTES.HOME}>Home</a>
           <span className="sep">/</span>
           <span>Events</span>
           <span className="sep">/</span>
@@ -51,10 +52,10 @@ export const AnnualDinnerView: React.FC = () => {
               gathering at the Qutub Golf Course.
             </p>
             <div className="page-hero-actions">
-              <a className="btn btn-primary" href="#/annual-dinner!passes" onClick={scrollToAnchor('passes')}>
+              <a className="btn btn-primary" href={ROUTES.ANNUAL_DINNER_PASSES} onClick={scrollToAnchor('passes')}>
                 Get your pass
               </a>
-              <a className="btn btn-secondary" href="#/annual-dinner!details" onClick={scrollToAnchor('details')}>
+              <a className="btn btn-secondary" href={ROUTES.ANNUAL_DINNER_DETAILS} onClick={scrollToAnchor('details')}>
                 See the details
               </a>
             </div>
@@ -184,7 +185,7 @@ export const AnnualDinnerView: React.FC = () => {
                 <em>&#8377;15,000</em>
               </li>
             </ul>
-            <a className="btn btn-primary" href="#/annual-dinner!passes" onClick={scrollToAnchor('passes')}>
+            <a className="btn btn-primary" href={ROUTES.ANNUAL_DINNER_PASSES} onClick={scrollToAnchor('passes')}>
               Choose your pass
             </a>
           </aside>
@@ -514,8 +515,8 @@ export const AnnualDinnerView: React.FC = () => {
                   </svg>
                 </span>
                 <p>
-                  <b>Passes are for signed-in members.</b> <a href="#/member-signin">Sign in</a> to buy your pass, or{' '}
-                  <a href="#/membership">apply for membership</a> if you have not joined yet. Your details come from
+                  <b>Passes are for signed-in members.</b> <a href={ROUTES.MEMBER_SIGNIN}>Sign in</a> to buy your pass, or{' '}
+                  <a href={ROUTES.MEMBERSHIP}>apply for membership</a> if you have not joined yet. Your details come from
                   your member profile.
                 </p>
               </div>
@@ -619,10 +620,10 @@ export const AnnualDinnerView: React.FC = () => {
             </p>
           </div>
           <div className="cta-band-actions">
-            <a className="btn btn-gold" href="#/annual-dinner!passes" onClick={scrollToAnchor('passes')}>
+            <a className="btn btn-gold" href={ROUTES.ANNUAL_DINNER_PASSES} onClick={scrollToAnchor('passes')}>
               Get your pass
             </a>
-            <a className="btn btn-secondary" href="#/annual-lunch">
+            <a className="btn btn-secondary" href={ROUTES.ANNUAL_LUNCH}>
               See the Annual Lunch
             </a>
           </div>

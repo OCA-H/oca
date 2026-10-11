@@ -1,4 +1,5 @@
 import React from 'react';
+import { ROUTES } from '@/app/views/common/helper/route';
 
 export const HeroSection: React.FC = () => {
   return (
@@ -9,8 +10,8 @@ export const HeroSection: React.FC = () => {
           <h1><span className="nowrap-line">One school. One brotherhood.</span><br /><span style={{ color: "var(--gold)" }}>A lifetime of belonging.</span></h1>
           <p className="lead">OCA's mission is to praise, promote and protect St. Columba's School and its students, and to unite, inform and involve alumni and friends in fellowship and support of each other and the school.</p>
           <div className="hero-ctas">
-            <a className="btn btn-primary" href="#/membership">Become a Member</a>
-            <a className="btn btn-secondary" href="#/home!events">Explore Events &amp; Connect</a>
+            <a className="btn btn-primary" href={ROUTES.MEMBERSHIP}>Become a Member</a>
+            <a className="btn btn-secondary" href={ROUTES.HOME_EVENTS}>Explore Events &amp; Connect</a>
           </div>
         </div>
         <div className="hero-visual">

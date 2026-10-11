@@ -1,11 +1,12 @@
 import React from 'react';
+import { ROUTES } from '@/app/views/common/helper/route';
 
 export const Footer: React.FC = () => {
   return (
     <footer>
       <div className="wrap footer-top">
         <div className="footer-brand">
-          <a href="#top" className="brand" style={{ alignItems: "center" }}>
+          <a href={ROUTES.TOP} className="brand" style={{ alignItems: "center" }}>
             <img
               className="footer-logo-img"
               src="/images/oca-crest.png"
@@ -32,10 +33,10 @@ export const Footer: React.FC = () => {
         </div>
         <div className="footer-col">
           <h5>Quick Links</h5>
-          <a href="#top">Home</a>
-          <a href="https://www.oldcolumban.net/members-2/">Login</a>
-          <a href="#/membership">New Membership</a>
-          <a href="#/donation">Contribute</a>
+          <a href={ROUTES.TOP}>Home</a>
+          <a href={ROUTES.PORTAL_LOGIN}>Login</a>
+          <a href={ROUTES.MEMBERSHIP}>New Membership</a>
+          <a href={ROUTES.DONATION}>Contribute</a>
         </div>
       </div>
       <div className="wrap footer-bottom"><span>Copyright 2025 Old Columbans Association, All Rights Reserved</span></div>

@@ -1,4 +1,12 @@
+import { ROUTES } from '@/app/views/common/helper/route';
+
 export const memberSignInContent = {
+  breadcrumb: {
+    homeText: 'Home',
+    homeHref: ROUTES.HOME,
+    sectionText: 'Sign In',
+    pageText: 'OCA Member',
+  },
   eyebrow: 'OCA Members',
   title: 'Welcome back to the Columban community',
   benefits: [
@@ -22,7 +30,7 @@ export const memberSignInContent = {
   sideFooter: {
     question: 'Not a member yet? ',
     linkText: 'Apply for membership →',
-    linkHref: '#/membership',
+    linkHref: ROUTES.MEMBERSHIP,
   },
   main: {
     title: 'OCA Member Login',
@@ -32,13 +40,13 @@ export const memberSignInContent = {
     passwordLabel: 'Password',
     passwordPlaceholder: 'Your password',
     forgotPasswordText: 'Forgot Password?',
-    forgotPasswordHref: '#/lost-password',
+    forgotPasswordHref: ROUTES.LOST_PASSWORD,
     loginButtonText: 'Log in',
     orText: 'or',
     registerButtonText: 'Register',
-    registerHref: '#/membership',
+    registerHref: ROUTES.MEMBERSHIP,
     troubleText: 'Having trouble signing in? ',
     contactText: 'Contact the Secretariat',
-    contactHref: '#/contact',
+    contactHref: ROUTES.CONTACT,
   },
 };

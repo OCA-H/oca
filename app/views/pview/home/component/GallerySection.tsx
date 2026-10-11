@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { useGalleryHandler } from '../handler';
+import { ROUTES } from '@/app/views/common/helper/route';
 
 export const GallerySection: React.FC = () => {
   const {
@@ -23,7 +24,7 @@ export const GallerySection: React.FC = () => {
             <h2>Moments from the OCA community</h2>
             <p>Browse by album — the story keeps playing, or jump straight to the one you want.</p>
           </div>
-          <a className="btn btn-ghost btn-sm" href="#/event-photographs">View all photographs →</a>
+          <a className="btn btn-ghost btn-sm" href={ROUTES.EVENT_PHOTOGRAPHS}>View all photographs →</a>
         </div>
     
         <div 

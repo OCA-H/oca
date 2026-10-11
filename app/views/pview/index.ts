@@ -16,3 +16,5 @@ export * as annualLunch from './annual-lunch';
 export { AnnualLunchView } from './annual-lunch';
 export * as memberSignIn from './member-signin';
 export { MemberSignInView } from './member-signin';
+export * as partnerOrganization from './partner-organization';
+export { PartnerOrganizationView } from './partner-organization';

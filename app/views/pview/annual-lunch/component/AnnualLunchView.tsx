@@ -1,15 +1,16 @@
 'use client';
 
 import React from 'react';
+import { ROUTES } from '@/app/views/common/helper/route';
 
 export const AnnualLunchView: React.FC = () => {
   return (
     <>
       <nav className="crumb" aria-label="Breadcrumb">
         <div className="wrap">
-          <a href="#/home">Home</a>
+          <a href={ROUTES.HOME}>Home</a>
           <span className="sep">/</span>
-          <a href="#/home!events">Events</a>
+          <a href={ROUTES.HOME_EVENTS}>Events</a>
           <span className="sep">/</span>
           <span>Annual Lunch Get Together</span>
         </div>
@@ -174,7 +175,7 @@ export const AnnualLunchView: React.FC = () => {
             >
               RSVP Now
             </a>
-            <a className="btn btn-secondary" href="#/membership">
+            <a className="btn btn-secondary" href={ROUTES.MEMBERSHIP}>
               Become a Member
             </a>
           </div>

@@ -1,11 +1,12 @@
 import React from 'react';
+import { ROUTES } from '@/app/views/common/helper/route';
 
 export const ExecutiveCommitteeView: React.FC = () => {
   return (
     <>
       <nav className="crumb" aria-label="Breadcrumb">
             <div className="wrap">
-              <a href="#/home">Home</a>
+              <a href={ROUTES.HOME}>Home</a>
               <span className="sep">/</span>
               <span>Executive Committee</span>
             </div>
@@ -19,8 +20,8 @@ export const ExecutiveCommitteeView: React.FC = () => {
                 <h1>Executive Committee</h1>
                 <p className="lead">The leaders who guide OCA&rsquo;s mission and strengthen the Columban community.</p>
                 <div className="page-hero-actions">
-                  <a className="btn btn-primary" href="#/membership">Join the OCA community</a>
-                  <a className="btn btn-secondary" href="#/vision-mission">Read our mission</a>
+                  <a className="btn btn-primary" href={ROUTES.MEMBERSHIP}>Join the OCA community</a>
+                  <a className="btn btn-secondary" href={ROUTES.VISION_MISSION}>Read our mission</a>
                 </div>
               </div>
               <div className="page-hero-media">
@@ -212,8 +213,8 @@ export const ExecutiveCommitteeView: React.FC = () => {
                 <p>Members elect the committee, stand for it, and shape what the Association does next.</p>
               </div>
               <div className="cta-band-actions">
-                <a className="btn btn-gold" href="#/membership">Become a Member</a>
-                <a className="btn btn-secondary" href="#/donation">Support OCA</a>
+                <a className="btn btn-gold" href={ROUTES.MEMBERSHIP}>Become a Member</a>
+                <a className="btn btn-secondary" href={ROUTES.DONATION}>Support OCA</a>
               </div>
             </div>
           </section>

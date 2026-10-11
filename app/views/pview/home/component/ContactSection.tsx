@@ -1,4 +1,5 @@
 import React from 'react';
+import { ROUTES } from '@/app/views/common/helper/route';
 
 export const ContactSection: React.FC = () => {
   return (
@@ -17,7 +18,7 @@ export const ContactSection: React.FC = () => {
             <div className="contact-cta">
               <h4>Ready to reconnect?</h4>
               <p>Become a lifetime member and stay part of the Columban family for good.</p>
-              <a className="btn btn-primary btn-sm" href="#/membership">Get Lifetime Membership</a>
+              <a className="btn btn-primary btn-sm" href={ROUTES.MEMBERSHIP}>Get Lifetime Membership</a>
             </div>
           </div>
           <form className="contact-form-panel" onSubmit={(e) => e.preventDefault()}>

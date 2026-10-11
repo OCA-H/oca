@@ -1,5 +1,6 @@
 import React from 'react';
 import { visionMissionContent } from '../content';
+import { ROUTES } from '@/app/views/common/helper/route';
 
 export const VisionMissionView: React.FC = () => {
   const { hero, whoWeAre, vision, mission, objectives, socialConscience, cta } =
@@ -9,7 +10,7 @@ export const VisionMissionView: React.FC = () => {
     <>
       <nav className="crumb" aria-label="Breadcrumb">
         <div className="wrap">
-          <a href="#/home">Home</a>
+          <a href={ROUTES.HOME}>Home</a>
           <span className="sep">/</span>
           <span>Vision &amp; Mission</span>
         </div>

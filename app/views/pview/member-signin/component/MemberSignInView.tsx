@@ -21,11 +21,11 @@ export const MemberSignInView: React.FC = () => {
     <>
       <nav className="crumb" aria-label="Breadcrumb">
         <div className="wrap">
-          <a href="#/home">Home</a>
+          <a href={memberSignInContent.breadcrumb.homeHref}>{memberSignInContent.breadcrumb.homeText}</a>
           <span className="sep">/</span>
-          <span>Sign In</span>
+          <span>{memberSignInContent.breadcrumb.sectionText}</span>
           <span className="sep">/</span>
-          <span>OCA Member</span>
+          <span>{memberSignInContent.breadcrumb.pageText}</span>
         </div>
       </nav>
 

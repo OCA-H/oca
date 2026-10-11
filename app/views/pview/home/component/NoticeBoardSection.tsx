@@ -1,4 +1,5 @@
 import React from 'react';
+import { ROUTES } from '@/app/views/common/helper/route';
 
 export const NoticeBoardSection: React.FC = () => {
   return (
@@ -31,7 +32,7 @@ export const NoticeBoardSection: React.FC = () => {
             <p>
               OCA proudly celebrates fellow Columban Justice Dhananjaya Y. Chandrachud on his tenure as Chief Justice of India — one of many Columbans making the school proud across public life, business and the arts.
             </p>
-            <a className="qa-link" style={{ marginTop: '14px', display: 'inline-block' }} href="#/news-makers">
+            <a className="qa-link" style={{ marginTop: '14px', display: 'inline-block' }} href={ROUTES.NEWS_MAKERS}>
               See more News Makers →
             </a>
           </div>

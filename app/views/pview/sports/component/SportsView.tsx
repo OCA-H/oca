@@ -1,15 +1,16 @@
 'use client';
 
 import React from 'react';
+import { ROUTES } from '@/app/views/common/helper/route';
 
 export const SportsView: React.FC = () => {
   return (
     <>
       <nav className="crumb" aria-label="Breadcrumb">
         <div className="wrap">
-          <a href="#/home">Home</a>
+          <a href={ROUTES.HOME}>Home</a>
           <span className="sep">/</span>
-          <a href="#/home!events">Events</a>
+          <a href={ROUTES.HOME_EVENTS}>Events</a>
           <span className="sep">/</span>
           <span>OCA Sports</span>
         </div>
@@ -208,7 +209,7 @@ export const SportsView: React.FC = () => {
               >
                 Enquire about sponsoring
               </a>
-              <a className="btn btn-secondary" href="#/donation">
+              <a className="btn btn-secondary" href={ROUTES.DONATION}>
                 Contribute to OCA
               </a>
             </div>
