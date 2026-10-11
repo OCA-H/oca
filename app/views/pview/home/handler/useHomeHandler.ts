@@ -11,7 +11,8 @@ export type AppRoute =
   | 'donation'
   | 'annual-dinner'
   | 'sports'
-  | 'annual-lunch';
+  | 'annual-lunch'
+  | 'member-signin';
 
 export function useHomeHandler() {
   const [activeRoute, setActiveRoute] = useState<AppRoute>('home');
@@ -44,6 +45,7 @@ export function useHomeHandler() {
           'annual-dinner',
           'sports',
           'annual-lunch',
+          'member-signin',
         ];
 
         if (SUBPAGES.includes(pageKey as AppRoute)) {

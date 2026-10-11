@@ -14,3 +14,5 @@ export * as sports from './sports';
 export { SportsView } from './sports';
 export * as annualLunch from './annual-lunch';
 export { AnnualLunchView } from './annual-lunch';
+export * as memberSignIn from './member-signin';
+export { MemberSignInView } from './member-signin';
