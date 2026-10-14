@@ -10,8 +10,6 @@ export const AnnualLunchView: React.FC = () => {
         <div className="wrap">
           <a href={ROUTES.HOME}>Home</a>
           <span className="sep">/</span>
-          <a href={ROUTES.HOME_EVENTS}>Events</a>
-          <span className="sep">/</span>
           <span>Annual Lunch Get Together</span>
         </div>
       </nav>
@@ -66,7 +64,7 @@ export const AnnualLunchView: React.FC = () => {
             <div className="fact-lbl">Onwards</div>
           </div>
           <div className="fact">
-            <div className="fact-num fact-num--text">St. Columba&rsquo;s</div>
+            <div className="fact-num">St. Columba&rsquo;s</div>
             <div className="fact-lbl">School Grounds, Ashoka Place, New Delhi &ndash; 110 001</div>
           </div>
         </div>

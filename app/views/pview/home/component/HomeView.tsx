@@ -35,7 +35,7 @@ export const HomeView: React.FC = () => {
 
   return (
     <>
-      <Header />
+      <Header activeRoute={activeRoute} />
 
       <main id="app">
         {/* Home Page View */}

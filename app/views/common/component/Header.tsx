@@ -3,8 +3,23 @@
 import React, { useState } from 'react';
 import { ROUTES } from '@/app/views/common/helper/route';
 
-export const Header: React.FC = () => {
+interface HeaderProps {
+  activeRoute?: string;
+}
+
+const NAV_MAP: Record<string, string> = {
+  'vision-mission': 'about',
+  'executive-committee': 'about',
+  'membership': 'membership',
+  'donation': 'membership',
+  'annual-lunch': 'events',
+  'annual-dinner': 'events',
+  'sports': 'events',
+};
+
+export const Header: React.FC<HeaderProps> = ({ activeRoute }) => {
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
+  const activeNav = activeRoute ? NAV_MAP[activeRoute] : undefined;
 
   return (
     <>
@@ -20,7 +35,7 @@ export const Header: React.FC = () => {
       
           <nav className="primary-nav" aria-label="Primary">
             <div className="nav-item">
-              <span className="nav-link" data-nav="about">About OCA <svg viewBox="0 0 12 8" fill="none"><path d="M1 1l5 5 5-5" stroke="currentColor" strokeWidth="1.6"/></svg></span>
+              <span className={`nav-link ${activeNav === 'about' ? 'active' : ''}`} data-nav="about">About OCA <svg viewBox="0 0 12 8" fill="none"><path d="M1 1l5 5 5-5" stroke="currentColor" strokeWidth="1.6"/></svg></span>
               <div className="dropdown">
                 <a href={ROUTES.VISION_MISSION}>Our Mission &amp; Objectives</a>
                 <a href={ROUTES.EXECUTIVE_COMMITTEE}>Executive Committee</a>
@@ -31,7 +46,7 @@ export const Header: React.FC = () => {
               </div>
             </div>
             <div className="nav-item">
-              <span className="nav-link" data-nav="events">Events <svg viewBox="0 0 12 8" fill="none"><path d="M1 1l5 5 5-5" stroke="currentColor" strokeWidth="1.6"/></svg></span>
+              <span className={`nav-link ${activeNav === 'events' ? 'active' : ''}`} data-nav="events">Events <svg viewBox="0 0 12 8" fill="none"><path d="M1 1l5 5 5-5" stroke="currentColor" strokeWidth="1.6"/></svg></span>
               <div className="dropdown">
                 <a href={ROUTES.ANNUAL_DINNER}>OCA – Annual Dinner Get Together</a>
                 <a href={ROUTES.ANNUAL_LUNCH}>OCA – Annual Lunch Get Together</a>
