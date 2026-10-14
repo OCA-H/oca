@@ -26,16 +26,16 @@ export const Header: React.FC<HeaderProps> = ({ activeRoute }) => {
       <header>
         <div className="wrap topbar">
           <a href={ROUTES.TOP} className="brand">
-            <img 
-              className="header-logo-img" 
-              src="/images/oca-header-logo.jpg" 
-              alt="Old Columbans Association" 
+            <img
+              className="header-logo-img"
+              src="/images/oca-header-logo.jpg"
+              alt="Old Columbans Association"
             />
           </a>
-      
+
           <nav className="primary-nav" aria-label="Primary">
             <div className="nav-item">
-              <span className={`nav-link ${activeNav === 'about' ? 'active' : ''}`} data-nav="about">About OCA <svg viewBox="0 0 12 8" fill="none"><path d="M1 1l5 5 5-5" stroke="currentColor" strokeWidth="1.6"/></svg></span>
+              <span className={`nav-link ${activeNav === 'about' ? 'active' : ''}`} data-nav="about">About OCA <svg viewBox="0 0 12 8" fill="none"><path d="M1 1l5 5 5-5" stroke="currentColor" strokeWidth="1.6" /></svg></span>
               <div className="dropdown">
                 <a href={ROUTES.VISION_MISSION}>Our Mission &amp; Objectives</a>
                 <a href={ROUTES.EXECUTIVE_COMMITTEE}>Executive Committee</a>
@@ -46,14 +46,14 @@ export const Header: React.FC<HeaderProps> = ({ activeRoute }) => {
               </div>
             </div>
             <div className="nav-item">
-              <span className={`nav-link ${activeNav === 'events' ? 'active' : ''}`} data-nav="events">Events <svg viewBox="0 0 12 8" fill="none"><path d="M1 1l5 5 5-5" stroke="currentColor" strokeWidth="1.6"/></svg></span>
+              <span className={`nav-link ${activeNav === 'events' ? 'active' : ''}`} data-nav="events">Events <svg viewBox="0 0 12 8" fill="none"><path d="M1 1l5 5 5-5" stroke="currentColor" strokeWidth="1.6" /></svg></span>
               <div className="dropdown">
                 <a href={ROUTES.ANNUAL_DINNER}>OCA – Annual Dinner Get Together</a>
                 <a href={ROUTES.ANNUAL_LUNCH}>OCA – Annual Lunch Get Together</a>
                 <a href={ROUTES.SPORTS}>OCA Sports</a>
                 <div className="has-flyout">
                   <span className="fly-label" tabIndex={0} role="button" aria-haspopup="true">
-                    Gallery 
+                    Gallery
                     <svg viewBox="0 0 8 12" fill="none" aria-hidden="true"><path d="M1.5 1l5 5-5 5" stroke="currentColor" strokeWidth="1.6" /></svg>
                   </span>
                   <div className="flyout">
@@ -67,14 +67,14 @@ export const Header: React.FC<HeaderProps> = ({ activeRoute }) => {
               </div>
             </div>
             <div className="nav-item">
-              <span className="nav-link" data-nav="directory">Directory <svg viewBox="0 0 12 8" fill="none"><path d="M1 1l5 5 5-5" stroke="currentColor" strokeWidth="1.6"/></svg></span>
+              <span className="nav-link" data-nav="directory">Directory <svg viewBox="0 0 12 8" fill="none"><path d="M1 1l5 5 5-5" stroke="currentColor" strokeWidth="1.6" /></svg></span>
               <div className="dropdown">
                 <div className="dropdown-soon"><span>Find Your Batchmates</span><span className="soon-tag">Coming soon</span></div>
                 <div className="dropdown-soon"><span>Worldwide Chapters</span><span className="soon-tag">Coming soon</span></div>
               </div>
             </div>
             <div className="nav-item">
-              <span className="nav-link" data-nav="connect">OCA Connect <svg viewBox="0 0 12 8" fill="none"><path d="M1 1l5 5 5-5" stroke="currentColor" strokeWidth="1.6"/></svg></span>
+              <span className="nav-link" data-nav="connect">OCA Connect <svg viewBox="0 0 12 8" fill="none"><path d="M1 1l5 5 5-5" stroke="currentColor" strokeWidth="1.6" /></svg></span>
               <div className="dropdown">
                 <div className="dropdown-soon"><span>News Makers</span><span className="soon-tag">Coming soon</span></div>
                 <div className="dropdown-soon"><span>Alumni Services</span><span className="soon-tag">Coming soon</span></div>
@@ -85,44 +85,44 @@ export const Header: React.FC<HeaderProps> = ({ activeRoute }) => {
                 <div className="dropdown-soon"><span>Remembrance</span><span className="soon-tag">Coming soon</span></div>
               </div>
             </div>
-            <div className="nav-item">
+            {/* <div className="nav-item">
               <span className="nav-link" data-nav="membership">Membership <svg viewBox="0 0 12 8" fill="none"><path d="M1 1l5 5 5-5" stroke="currentColor" strokeWidth="1.6"/></svg></span>
               <div className="dropdown">
                 <a href={ROUTES.MEMBERSHIP}>Become a Member</a>
                 <a href={ROUTES.MEMBER_SIGNIN}>As an OCA Member</a>
                 <a href={ROUTES.PARTNER_ORGANIZATION}>As a Partner Organization</a>
               </div>
-            </div>
+            </div> */}
           </nav>
-      
+
           <div className="header-actions">
             <a className="btn btn-gold btn-sm" href={ROUTES.DONATION}>Contribute</a>
             <a className="btn btn-primary btn-sm" href={ROUTES.MEMBERSHIP}>Become a Member</a>
             <div className="nav-item signin-item">
-              <button className="icon-btn" type="button">Sign In <svg viewBox="0 0 12 8" fill="none"><path d="M1 1l5 5 5-5" stroke="currentColor" strokeWidth="1.6"/></svg></button>
+              <button className="icon-btn" type="button">Sign In <svg viewBox="0 0 12 8" fill="none"><path d="M1 1l5 5 5-5" stroke="currentColor" strokeWidth="1.6" /></svg></button>
               <div className="dropdown dropdown-right">
                 <a href={ROUTES.MEMBER_SIGNIN}>As an OCA Member</a>
                 <a href={ROUTES.PARTNER_ORGANIZATION}>As a Partner Organization</a>
               </div>
             </div>
             <button className="burger" aria-label="Open menu" onClick={() => setMobileNavOpen(true)}>
-              <svg width="26" height="26" viewBox="0 0 24 24" fill="none"><path d="M3 6h18M3 12h18M3 18h18" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/></svg>
+              <svg width="26" height="26" viewBox="0 0 24 24" fill="none"><path d="M3 6h18M3 12h18M3 18h18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" /></svg>
             </button>
           </div>
         </div>
       </header>
 
       {/* Mobile drawer scrim and navigation */}
-      <div 
-        className={`mobile-scrim ${mobileNavOpen ? 'open' : ''}`} 
-        onClick={() => setMobileNavOpen(false)} 
+      <div
+        className={`mobile-scrim ${mobileNavOpen ? 'open' : ''}`}
+        onClick={() => setMobileNavOpen(false)}
       />
       <div className={`mobile-nav ${mobileNavOpen ? 'open' : ''}`} id="mobileNav">
         <div className="mobile-nav-head">
           <span className="brand-text" style={{ color: 'var(--navy)' }}>
             <strong style={{ fontFamily: 'var(--serif)', fontSize: '17px' }}>Old Columbans</strong>
           </span>
-          <button 
+          <button
             onClick={() => setMobileNavOpen(false)}
             style={{ background: 'none', border: 'none', fontSize: '22px', cursor: 'pointer', color: 'var(--navy)' }}
             aria-label="Close menu"
