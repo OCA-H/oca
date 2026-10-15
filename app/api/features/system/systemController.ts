@@ -1,6 +1,6 @@
 import "server-only";
-import { BaseController } from "@/server/core/baseController";
-import type { SystemService } from "../service/systemService";
+import { BaseController } from "../../core/baseController";
+import type { SystemService } from "./systemService";
 
 export class SystemController extends BaseController {
   private readonly service: SystemService;

@@ -2,5 +2,4 @@
 // Add a feature's schema export here when you create one. Changing a table does nothing to the
 // database until you run `npm run db:generate` and `npm run db:migrate`.
 
-export {};
-
+export * from "../features/event-pass/eventPassSchema";

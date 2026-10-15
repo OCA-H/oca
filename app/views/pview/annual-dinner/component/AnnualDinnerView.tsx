@@ -19,6 +19,7 @@ export const AnnualDinnerView: React.FC = () => {
     currentTier,
     summaryLines,
     total,
+    passesById,
     handleReset,
     handleSubmit,
   } = useAnnualDinnerHandler();
@@ -247,9 +248,9 @@ export const AnnualDinnerView: React.FC = () => {
                     <span className="dn-radio" aria-hidden="true"></span>
                     <span className="dn-pass-t">
                       <b>Single</b>
-                      <em className="dn-left">100 left</em>
+                      <em className="dn-left">{passesById['yb-single']?.statusNote || '100 left'}</em>
                     </span>
-                    <span className="dn-price">&#8377;2,500</span>
+                    <span className="dn-price">&#8377;{(passesById['yb-single']?.price ?? 2500).toLocaleString('en-IN')}</span>
                   </label>
                   <label className={`dn-pass ${selectedPass === 'yb-spouse' ? 'is-checked' : ''}`}>
                     <input
@@ -262,9 +263,9 @@ export const AnnualDinnerView: React.FC = () => {
                     <span className="dn-radio" aria-hidden="true"></span>
                     <span className="dn-pass-t">
                       <b>With spouse</b>
-                      <em className="dn-left">50 left</em>
+                      <em className="dn-left">{passesById['yb-spouse']?.statusNote || '50 left'}</em>
                     </span>
-                    <span className="dn-price">&#8377;4,000</span>
+                    <span className="dn-price">&#8377;{(passesById['yb-spouse']?.price ?? 4000).toLocaleString('en-IN')}</span>
                   </label>
                 </div>
 
@@ -298,9 +299,9 @@ export const AnnualDinnerView: React.FC = () => {
                     <span className="dn-radio" aria-hidden="true"></span>
                     <span className="dn-pass-t">
                       <b>Single</b>
-                      <em className="dn-left">99 left</em>
+                      <em className="dn-left">{passesById['eb-single']?.statusNote || '99 left'}</em>
                     </span>
-                    <span className="dn-price">&#8377;3,500</span>
+                    <span className="dn-price">&#8377;{(passesById['eb-single']?.price ?? 3500).toLocaleString('en-IN')}</span>
                   </label>
                   <label className={`dn-pass ${selectedPass === 'eb-spouse' ? 'is-checked' : ''}`}>
                     <input
@@ -313,9 +314,9 @@ export const AnnualDinnerView: React.FC = () => {
                     <span className="dn-radio" aria-hidden="true"></span>
                     <span className="dn-pass-t">
                       <b>With spouse</b>
-                      <em className="dn-left">50 left</em>
+                      <em className="dn-left">{passesById['eb-spouse']?.statusNote || '50 left'}</em>
                     </span>
-                    <span className="dn-price">&#8377;5,000</span>
+                    <span className="dn-price">&#8377;{(passesById['eb-spouse']?.price ?? 5000).toLocaleString('en-IN')}</span>
                   </label>
                 </div>
 
@@ -388,7 +389,7 @@ export const AnnualDinnerView: React.FC = () => {
                     <span className="dn-pass-t">
                       <b>With spouse</b>
                     </span>
-                    <span className="dn-price">&#8377;15,000</span>
+                    <span className="dn-price">&#8377;{(passesById['golden']?.price ?? 15000).toLocaleString('en-IN')}</span>
                   </label>
                   <ul className="dn-perks">
                     <li>

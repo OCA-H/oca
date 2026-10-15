@@ -9,8 +9,8 @@ loadEnvConfig(process.cwd());
 
 export default defineConfig({
   dialect: "postgresql",
-  schema: "./server/db/schema.ts",
-  out: "./server/db/migrations",
+  schema: "./app/api/db/schema.ts",
+  out: "./app/api/db/migrations",
   dbCredentials: { url: process.env.DATABASE_URL ?? "" },
   strict: true,
   verbose: true,

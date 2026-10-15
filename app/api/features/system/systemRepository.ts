@@ -1,6 +1,6 @@
 import "server-only";
 import { sql } from "drizzle-orm";
-import { BaseRepository } from "@/server/core/baseRepository";
+import { BaseRepository } from "../../core/baseRepository";
 
 export interface DatabaseStatus {
   connected: boolean;

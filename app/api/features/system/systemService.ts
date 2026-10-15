@@ -1,5 +1,5 @@
 import "server-only";
-import type { SystemRepository, DatabaseStatus } from "../repository/systemRepository";
+import type { SystemRepository, DatabaseStatus } from "./systemRepository";
 
 export interface ServerStatusResult {
   status: "healthy" | "degraded";

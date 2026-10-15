@@ -1,7 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { PASS_OPTIONS, TEACHER_PRICE, UNDER12_PRICE, ABOVE12_PRICE, PassTier } from '../content';
+import { annualDinnerService, type ApiEventPass } from '../services/annualDinner.service';
 
 export interface SummaryLine {
   label: string;
@@ -15,8 +16,50 @@ export function useAnnualDinnerHandler() {
   const [under12, setUnder12] = useState<number>(0);
   const [above12, setAbove12] = useState<number>(0);
   const [submitted, setSubmitted] = useState<boolean>(false);
+  const [apiPasses, setApiPasses] = useState<ApiEventPass[]>([]);
+  const [isLoadingPasses, setIsLoadingPasses] = useState<boolean>(true);
 
-  const currentTier: PassTier | null = selectedPass ? PASS_OPTIONS[selectedPass] : null;
+  useEffect(() => {
+    let isMounted = true;
+    annualDinnerService.getPasses('annual-dinner').then((passes) => {
+      if (isMounted) {
+        if (passes.length > 0) {
+          setApiPasses(passes);
+        }
+        setIsLoadingPasses(false);
+      }
+    });
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  // Map API passes to PassTier record, falling back to static PASS_OPTIONS
+  const passOptionsMap = useMemo<Record<string, PassTier>>(() => {
+    if (apiPasses.length === 0) return PASS_OPTIONS;
+
+    const map: Record<string, PassTier> = { ...PASS_OPTIONS };
+    for (const p of apiPasses) {
+      map[p.passId] = {
+        id: p.passId as PassTier['id'],
+        label: p.label,
+        price: p.price,
+        group: p.tierGroup as PassTier['group'],
+        spouse: p.includesSpouse,
+      };
+    }
+    return map;
+  }, [apiPasses]);
+
+  const passesById = useMemo(() => {
+    const map: Record<string, ApiEventPass> = {};
+    for (const p of apiPasses) {
+      map[p.passId] = p;
+    }
+    return map;
+  }, [apiPasses]);
+
+  const currentTier: PassTier | null = selectedPass ? passOptionsMap[selectedPass] || PASS_OPTIONS[selectedPass] : null;
 
   const summaryLines: SummaryLine[] = [];
   let total = 0;
@@ -84,6 +127,9 @@ export function useAnnualDinnerHandler() {
     summaryLines,
     total,
     submitted,
+    apiPasses,
+    passesById,
+    isLoadingPasses,
     handleReset,
     handleSubmit,
   };
