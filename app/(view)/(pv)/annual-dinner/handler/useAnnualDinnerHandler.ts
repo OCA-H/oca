@@ -3,36 +3,66 @@
 import { useState, useEffect, useMemo } from 'react';
 import { PASS_OPTIONS, TEACHER_PRICE, UNDER12_PRICE, ABOVE12_PRICE, PassTier } from '../content';
 import { annualDinnerService, type ApiEventPass } from '../services/annualDinner.service';
+import { useAuth, type AuthUser } from '@/app/(view)/common/helper/useAuth';
 
 export interface SummaryLine {
   label: string;
   amount: number;
 }
 
+export interface PassBookingResult {
+  bookingRef: string;
+  passId: string;
+  passTitle: string;
+  total: number;
+  userName: string;
+  userEmail: string;
+  memberId: string;
+  createdAt: string;
+  spouseName?: string;
+  teachers?: number;
+  under12?: number;
+  above12?: number;
+}
+
 export function useAnnualDinnerHandler() {
+  const { user, isAuthenticated, isLoading: isAuthLoading } = useAuth();
   const [selectedPass, setSelectedPass] = useState<string | null>(null);
   const [teachers, setTeachers] = useState<number>(0);
   const [spouseName, setSpouseName] = useState<string>('');
   const [under12, setUnder12] = useState<number>(0);
   const [above12, setAbove12] = useState<number>(0);
   const [submitted, setSubmitted] = useState<boolean>(false);
+  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+  const [bookingResult, setBookingResult] = useState<PassBookingResult | null>(null);
   const [apiPasses, setApiPasses] = useState<ApiEventPass[]>([]);
-  const [isLoadingPasses, setIsLoadingPasses] = useState<boolean>(true);
+  const [isLoadingPasses, setIsLoadingPasses] = useState<boolean>(false);
 
+  // Fetch passes directly from database API when the user is authenticated
   useEffect(() => {
     let isMounted = true;
-    annualDinnerService.getPasses('annual-dinner').then((passes) => {
-      if (isMounted) {
-        if (passes.length > 0) {
-          setApiPasses(passes);
-        }
-        setIsLoadingPasses(false);
-      }
-    });
+    if (isAuthenticated) {
+      setIsLoadingPasses(true);
+      annualDinnerService
+        .getPasses('annual-dinner')
+        .then((passes) => {
+          if (isMounted) {
+            if (passes && passes.length > 0) {
+              setApiPasses(passes);
+            }
+            setIsLoadingPasses(false);
+          }
+        })
+        .catch(() => {
+          if (isMounted) setIsLoadingPasses(false);
+        });
+    } else {
+      setIsLoadingPasses(false);
+    }
     return () => {
       isMounted = false;
     };
-  }, []);
+  }, [isAuthenticated]);
 
   // Map API passes to PassTier record, falling back to static PASS_OPTIONS
   const passOptionsMap = useMemo<Record<string, PassTier>>(() => {
@@ -104,12 +134,55 @@ export function useAnnualDinnerHandler() {
     setUnder12(0);
     setAbove12(0);
     setSubmitted(false);
+    setBookingResult(null);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!selectedPass) return;
-    setSubmitted(true);
+    if (!isAuthenticated || !selectedPass || !currentTier) return;
+
+    setIsSubmitting(true);
+    try {
+      const refCode = `OCA-AD26-${Math.floor(1000 + Math.random() * 9000)}`;
+      const payload = {
+        bookingRef: refCode,
+        eventName: 'annual-dinner',
+        passId: selectedPass,
+        passTitle: currentTier.label,
+        total,
+        teachers: teachers > 0 ? teachers : undefined,
+        spouseName: currentTier.spouse ? spouseName.trim() : undefined,
+        under12: currentTier.group === 'golden' && under12 > 0 ? under12 : undefined,
+        above12: currentTier.group === 'golden' && above12 > 0 ? above12 : undefined,
+        memberId: user?.memberId || '',
+        userName: user?.fullName || 'Columban Member',
+        userEmail: user?.email || '',
+      };
+
+      await annualDinnerService.submitPassBooking(payload);
+
+      setBookingResult({
+        bookingRef: refCode,
+        passId: selectedPass,
+        passTitle: currentTier.label,
+        total,
+        userName: user?.fullName || 'Columban Member',
+        userEmail: user?.email || '',
+        memberId: user?.memberId || '',
+        createdAt: new Date().toLocaleDateString('en-IN', {
+          day: 'numeric',
+          month: 'short',
+          year: 'numeric',
+        }),
+        spouseName: currentTier.spouse && spouseName ? spouseName.trim() : undefined,
+        teachers: teachers > 0 ? teachers : undefined,
+        under12: currentTier.group === 'golden' && under12 > 0 ? under12 : undefined,
+        above12: currentTier.group === 'golden' && above12 > 0 ? above12 : undefined,
+      });
+      setSubmitted(true);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return {
@@ -127,12 +200,18 @@ export function useAnnualDinnerHandler() {
     summaryLines,
     total,
     submitted,
+    isSubmitting,
+    bookingResult,
     apiPasses,
     passesById,
     isLoadingPasses,
+    user,
+    isAuthenticated,
+    isAuthLoading,
     handleReset,
     handleSubmit,
   };
 }
 
 export default useAnnualDinnerHandler;
+

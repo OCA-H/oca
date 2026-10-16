@@ -4814,6 +4814,367 @@ section[id] {
   color: var(--navy);
 }
 
+/* ---------- Annual Dinner Pass Lock & Blur Styles ---------- */
+.dn-passes-wrap {
+  position: relative;
+  width: 100%;
+  max-width: 1144px;
+  margin: 36px auto 0;
+  border-radius: var(--radius-l);
+}
+
+.dn-passes-wrap .cf-form {
+  margin-top: 0;
+}
+
+.dn-passes-content {
+  position: relative;
+  transition: filter 0.3s ease, opacity 0.3s ease;
+}
+
+.dn-passes-content.is-blurred {
+  filter: blur(10px) saturate(120%);
+  -webkit-filter: blur(10px) saturate(120%);
+  opacity: 0.45;
+  pointer-events: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.dn-passes-lock-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 32px 20px;
+  background: rgba(244, 247, 246, 0.45);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  border-radius: var(--radius-l);
+  animation: dnFadeIn 0.25s ease-out;
+}
+
+@keyframes dnFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.dn-passes-lock-card {
+  position: relative;
+  background: #ffffff;
+  border: 1.5px solid rgba(201, 162, 39, 0.45);
+  box-shadow: 0 24px 60px rgba(11, 60, 30, 0.16), 0 8px 24px rgba(0, 0, 0, 0.08);
+  border-radius: 24px;
+  padding: 40px 36px;
+  max-width: 520px;
+  width: 100%;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+
+.dn-passes-lock-icon {
+  width: 68px;
+  height: 68px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, rgba(242, 208, 96, 0.25), rgba(201, 162, 39, 0.12));
+  border: 2px solid var(--gold);
+  color: var(--brand-mid);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 24px rgba(201, 162, 39, 0.28);
+}
+
+.dn-passes-lock-icon svg {
+  width: 32px;
+  height: 32px;
+}
+
+.dn-passes-lock-badge {
+  display: inline-block;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  padding: 4px 14px;
+  border-radius: 100px;
+  background: #FFFDF4;
+  color: var(--gold-dark);
+  border: 1px solid var(--gold);
+}
+
+.dn-passes-lock-title {
+  font-family: var(--serif);
+  font-size: 26px;
+  font-weight: 700;
+  color: var(--navy);
+  margin: 0;
+  line-height: 1.25;
+}
+
+.dn-passes-lock-desc {
+  font-size: 15px;
+  color: var(--text-soft);
+  line-height: 1.6;
+  margin: 0;
+  max-width: 440px;
+}
+
+.dn-passes-lock-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  justify-content: center;
+  width: 100%;
+  margin-top: 6px;
+}
+
+.dn-passes-lock-actions .btn {
+  flex: 1;
+  min-width: 180px;
+  justify-content: center;
+  text-align: center;
+}
+
+.dn-passes-lock-perks {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 8px;
+  padding-top: 16px;
+  border-top: 1px dashed var(--border-strong);
+  width: 100%;
+  text-align: left;
+}
+
+.dn-passes-lock-perks span {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--tc-ink);
+}
+
+.dn-passes-lock-perks svg {
+  color: var(--brand-mid);
+  flex-shrink: 0;
+}
+
+/* Authenticated Member Info Card */
+.dn-member-card {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  padding: 16px 20px;
+  margin-bottom: 18px;
+  border-radius: var(--radius-m);
+  background: #F4FBF7;
+  border: 1.5px solid rgba(15, 118, 110, 0.25);
+}
+
+.dn-member-avatar {
+  flex-shrink: 0;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--brand-mid), var(--navy));
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 16px;
+  box-shadow: 0 4px 10px rgba(11, 60, 30, 0.15);
+}
+
+.dn-member-details {
+  flex: 1;
+  min-width: 0;
+}
+
+.dn-member-row1 {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.dn-member-name {
+  font-size: 16px;
+  color: var(--navy);
+}
+
+.dn-member-verified-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 2px 10px;
+  border-radius: 100px;
+  background: #DCFCE7;
+  color: #15803D;
+  border: 1px solid #86EFAC;
+}
+
+.dn-member-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  font-size: 13.5px;
+  color: var(--text-soft);
+  margin-top: 4px;
+}
+
+.dn-member-meta strong {
+  color: var(--text);
+  font-weight: 600;
+}
+
+.dn-member-dot {
+  color: var(--border-strong);
+}
+
+.dn-member-note {
+  margin: 6px 0 0;
+  font-size: 12.5px;
+  color: var(--text-soft);
+  line-height: 1.4;
+}
+
+/* Success Booking Card */
+.dn-booking-success {
+  max-width: 680px;
+  margin: 0 auto;
+  padding: 16px;
+}
+
+.dn-success-card {
+  background: #ffffff;
+  border: 1.5px solid var(--border);
+  border-radius: 24px;
+  padding: 40px 36px;
+  text-align: center;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.08);
+}
+
+.dn-success-badge-icon {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: #DCFCE7;
+  color: #15803D;
+  border: 2px solid #86EFAC;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 16px;
+}
+
+.dn-success-badge-icon svg {
+  width: 32px;
+  height: 32px;
+}
+
+.dn-success-eyebrow {
+  display: inline-block;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--brand-mid);
+  margin-bottom: 6px;
+}
+
+.dn-success-card h3 {
+  font-family: var(--serif);
+  font-size: 24px;
+  color: var(--navy);
+  margin: 0 0 10px;
+}
+
+.dn-success-lead {
+  font-size: 15px;
+  color: var(--text-soft);
+  line-height: 1.6;
+  margin: 0 0 24px;
+}
+
+.dn-success-details {
+  background: var(--tint-teal);
+  border-radius: var(--radius-m);
+  padding: 20px 24px;
+  margin-bottom: 24px;
+  text-align: left;
+}
+
+.dn-success-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+  font-size: 14.5px;
+  color: var(--text);
+  border-bottom: 1px dashed var(--border);
+}
+
+.dn-success-row:last-child {
+  border-bottom: none;
+}
+
+.dn-success-row.dn-success-total {
+  margin-top: 8px;
+  padding-top: 14px;
+  border-top: 1.5px solid var(--border-strong);
+  font-size: 16px;
+}
+
+.dn-success-row.dn-success-total strong {
+  font-size: 24px;
+  color: var(--navy);
+}
+
+.dn-success-actions {
+  display: flex;
+  gap: 14px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+@media (max-width: 600px) {
+  .dn-passes-lock-card {
+    padding: 28px 20px;
+  }
+  .dn-passes-lock-actions .btn {
+    width: 100%;
+    min-width: 100%;
+  }
+  .dn-member-card {
+    flex-direction: column;
+    text-align: center;
+  }
+  .dn-member-row1 {
+    justify-content: center;
+  }
+  .dn-member-meta {
+    justify-content: center;
+  }
+}
+
+
 @media (max-width:980px) {
   .dn-poster {
     margin: 0 auto;
