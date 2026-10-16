@@ -5418,6 +5418,114 @@ section[id^="ec-"] {
   }
 }
 
+/* Executive Committee Table View for Previous Terms */
+.xc-table-wrap {
+  width: 100%;
+  overflow-x: auto;
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-m);
+  box-shadow: var(--shadow-card);
+  margin-top: 14px;
+  margin-bottom: 28px;
+  -webkit-overflow-scrolling: touch;
+}
+
+.xc-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  font-size: 14px;
+  min-width: 600px;
+}
+
+.xc-table thead th {
+  background: var(--bg-surface);
+  padding: 12px 18px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--text-soft);
+  border-bottom: 1.5px solid var(--border);
+  white-space: nowrap;
+}
+
+.xc-table tbody tr {
+  border-bottom: 1px solid var(--border);
+  transition: background .16s ease;
+}
+
+.xc-table tbody tr:last-child {
+  border-bottom: none;
+}
+
+.xc-table tbody tr:hover {
+  background: rgba(201, 162, 39, .04);
+}
+
+.xc-table tbody td {
+  padding: 14px 18px;
+  vertical-align: middle;
+}
+
+.xc-table-person {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.xc-table-mono {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 12.5px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  color: var(--brand);
+  flex-shrink: 0;
+  transition: all .16s ease;
+}
+
+.xc-table tbody tr:hover .xc-table-mono {
+  background: var(--brand);
+  border-color: var(--brand);
+  color: #fff;
+}
+
+.xc-table-name {
+  font-weight: 600;
+  color: var(--navy-dark);
+  font-size: 14.5px;
+}
+
+.xc-table-role {
+  font-size: 11px;
+  letter-spacing: .05em;
+  color: var(--teal-dark);
+  font-weight: 700;
+  text-transform: uppercase;
+  display: block;
+}
+
+.xc-table-role em {
+  font-style: normal;
+  font-weight: 500;
+  color: var(--text-soft);
+  text-transform: none;
+}
+
+.xc-table-batch {
+  color: var(--text-soft);
+  font-weight: 500;
+  font-size: 13.5px;
+  white-space: nowrap;
+}
+
 /* ---------- Form base styles (.cf-form) ---------- */
 .cf-form {
   background: #fff;

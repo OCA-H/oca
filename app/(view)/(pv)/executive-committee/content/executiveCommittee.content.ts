@@ -1,11 +1,11 @@
-import { ROUTES } from '@/app/(view)/common/helper/route';
+import { ROUTES } from '@/app/(view)/common/helper/routes';
 
 export interface OfficeBearer {
   name: string;
   role: string;
   roleSub?: string;
   batch: string;
-  email: string;
+  email?: string;
   photo?: string;
   photoAlt?: string;
   initials?: string;
@@ -13,13 +13,13 @@ export interface OfficeBearer {
 }
 
 export interface CommitteeMember {
-  initials: string;
+  initials?: string;
   name: string;
   batch: string;
   role: string;
   roleSub?: string;
   profession?: string;
-  email: string;
+  email?: string;
 }
 
 export interface CommitteeTerm {
@@ -99,12 +99,41 @@ export const executiveCommitteeContent: ExecutiveCommitteeContent = {
   jumpAriaLabel: 'Committee term jump links',
   terms: [
     {
-      id: 'ec-2023-25',
-      jumpLabel: '2023 – 2025',
+      id: 'ec-2025-27',
+      jumpLabel: '2025 – 2027',
       isCurrent: true,
       eyebrow: 'Current committee',
-      title: 'Executive Committee of 2023 – 2025',
+      title: 'Executive Committee of 2025 – 2027',
       pill: 'Current term',
+      officeBearers: [
+        {
+          name: 'Samir Chopra',
+          role: 'PRESIDENT',
+          batch: 'Batch of 1983',
+          initials: 'SC',
+        },
+        {
+          name: 'Sudip Kohli',
+          role: 'SECRETARY',
+          batch: 'Batch of 1983',
+          initials: 'SK',
+        },
+        {
+          name: 'Sanjay Hans',
+          role: 'TREASURER',
+          batch: 'Batch of 1982',
+          initials: 'SH',
+          profession: 'Business',
+          email: 'hanssanjay@gmail.com',
+        },
+      ],
+      members: [],
+    },
+    {
+      id: 'ec-2023-25',
+      jumpLabel: '2023 – 2025',
+      eyebrow: 'Previous committee',
+      title: 'Executive Committee of 2023 – 2025',
       officeBearers: [
         {
           name: 'Santosh V. Kalyani',

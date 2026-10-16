@@ -1,4 +1,4 @@
 export * from './common.helper';
-export * from './route';
-export { default as ROUTES } from './route';
+export * from './routes';
+export { default as ROUTES } from './routes';
 export * from './useAuth';

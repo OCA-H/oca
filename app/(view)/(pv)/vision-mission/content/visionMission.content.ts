@@ -1,4 +1,4 @@
-import { ROUTES } from '@/app/(view)/common/helper/route';
+import { ROUTES } from '@/app/(view)/common/helper/routes';
 
 export interface ObjectiveItem {
   num: string;

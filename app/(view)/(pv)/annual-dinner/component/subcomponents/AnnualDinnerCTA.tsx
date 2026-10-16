@@ -2,7 +2,7 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { ROUTES } from '@/app/(view)/common/helper/route';
+import { ROUTES } from '@/app/(view)/common/helper/routes';
 
 interface AnnualDinnerCTAProps {
   onScrollToAnchor: (id: string) => (e: React.MouseEvent<HTMLAnchorElement>) => void;

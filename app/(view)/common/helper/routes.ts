@@ -29,6 +29,7 @@ export const ROUTES = {
   ANNUAL_DINNER_PASSES: '/annual-dinner#passes',
   ANNUAL_DINNER_DETAILS: '/annual-dinner#details',
   SPORTS_SPONSOR: '/sports#sponsor',
+  EXECUTIVE_COMMITTEE_2025_27: '/executive-committee#ec-2025-27',
   EXECUTIVE_COMMITTEE_2023_25: '/executive-committee#ec-2023-25',
   EXECUTIVE_COMMITTEE_2021_23: '/executive-committee#ec-2021-23',
   EXECUTIVE_COMMITTEE_2019_21: '/executive-committee#ec-2019-21',

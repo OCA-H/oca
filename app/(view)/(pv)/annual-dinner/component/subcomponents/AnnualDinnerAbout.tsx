@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { ROUTES } from '@/app/(view)/common/helper/route';
+import { ROUTES } from '@/app/(view)/common/helper/routes';
 
 interface AnnualDinnerAboutProps {
   onScrollToAnchor: (id: string) => (e: React.MouseEvent<HTMLAnchorElement>) => void;

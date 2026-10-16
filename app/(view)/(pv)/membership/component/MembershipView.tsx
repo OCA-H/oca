@@ -2,7 +2,7 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { ROUTES } from '@/app/(view)/common/helper/route';
+import { ROUTES } from '@/app/(view)/common/helper/routes';
 import { useAuth } from '@/app/(view)/common/helper/useAuth';
 import { CustomDropdown } from '@/app/(view)/common';
 import { MEMBERSHIP_CONTENT } from '../content/membership.content';

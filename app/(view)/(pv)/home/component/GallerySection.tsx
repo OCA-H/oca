@@ -3,7 +3,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { useGalleryHandler } from '../handler';
-import { ROUTES } from '@/app/(view)/common/helper/route';
+import { ROUTES } from '@/app/(view)/common/helper/routes';
 
 export const GallerySection: React.FC = () => {
   const {

@@ -1,7 +1,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { visionMissionContent } from '../content';
-import { ROUTES } from '@/app/(view)/common/helper/route';
+import { ROUTES } from '@/app/(view)/common/helper/routes';
 
 export const VisionMissionView: React.FC = () => {
   const { hero, whoWeAre, vision, mission, objectives, socialConscience, cta } =

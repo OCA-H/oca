@@ -2,7 +2,7 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { ROUTES } from '@/app/(view)/common/helper/route';
+import { ROUTES } from '@/app/(view)/common/helper/routes';
 import { memberPortalContent } from '../content';
 import { useMemberPortalHandler } from '../handler';
 import { memberPortalHelper } from '../helper';

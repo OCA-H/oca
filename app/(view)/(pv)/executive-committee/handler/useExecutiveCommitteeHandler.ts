@@ -5,7 +5,7 @@ import { executiveCommitteeContent, CommitteeTerm } from '../content/executiveCo
 import { DropdownOption } from '@/app/(view)/common';
 
 export function useExecutiveCommitteeHandler() {
-  const [activeTermId, setActiveTermId] = useState<string>('ec-2023-25');
+  const [activeTermId, setActiveTermId] = useState<string>('ec-2025-27');
 
   // Sync active term with hash
   useEffect(() => {
