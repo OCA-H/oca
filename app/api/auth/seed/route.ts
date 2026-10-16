@@ -1,0 +1,4 @@
+import { userController } from "@/app/api/features/user/userModule";
+
+export const POST = (request: Request) => userController.seed(request);
+export const GET = (request: Request) => userController.seed(request);
