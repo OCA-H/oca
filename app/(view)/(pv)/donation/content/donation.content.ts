@@ -243,7 +243,7 @@ export const donationContent: DonationContent = {
       'The Teachers Benevolent Fund stands behind the staff who spent their careers at the School.',
     primaryBtn: {
       text: 'Contribute to this fund',
-      href: ROUTES.DONATION_GIVE_FORM,
+      href: '#give-form',
     },
     secondaryBtn: {
       text: 'About the fund',
