@@ -117,92 +117,29 @@ export const Header: React.FC<HeaderProps> = ({ activeRoute }) => {
             )}
             {isAuthenticated ? (
               <div className="nav-item signin-item member-profile-item">
-                <button
-                  type="button"
-                  className="icon-btn member-profile-btn"
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '8px',
-                    borderColor: 'var(--gold, #d4a843)',
-                    color: 'var(--navy)',
-                    padding: '6px 12px',
-                    background: 'rgba(212, 168, 67, 0.08)',
-                    borderRadius: 'var(--radius-s, 6px)',
-                  }}
-                >
-                  <span
-                    style={{
-                      width: '22px',
-                      height: '22px',
-                      borderRadius: '50%',
-                      background: 'var(--gold, #d4a843)',
-                      color: '#fff',
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      fontSize: '11px',
-                      fontWeight: 700,
-                    }}
-                  >
+                <button type="button" className="icon-btn member-profile-btn" aria-haspopup="true">
+                  <span className="member-avatar">
                     {(user?.fullName || 'M').charAt(0).toUpperCase()}
                   </span>
-                  <span style={{ fontWeight: 600, fontSize: '13.5px' }}>
+                  <span className="member-name">
                     {user?.fullName?.split(' ')[0] || 'Member'}
                   </span>
-                  <svg viewBox="0 0 12 8" fill="none" style={{ width: '9px', height: '9px', opacity: 0.8 }}>
+                  <svg viewBox="0 0 12 8" fill="none">
                     <path d="M1 1l5 5 5-5" stroke="currentColor" strokeWidth="1.6" />
                   </svg>
                 </button>
-                <div className="dropdown dropdown-right" style={{ minWidth: '220px', padding: '8px 0' }}>
-                  <div
-                    style={{
-                      padding: '10px 16px',
-                      borderBottom: '1px solid var(--border, #eee)',
-                      marginBottom: '6px',
-                    }}
-                  >
-                    <div style={{ fontWeight: 600, color: 'var(--navy)', fontSize: '14px' }}>
-                      {user?.fullName || 'Columban Member'}
+                <div className="dropdown dropdown-right member-dropdown">
+                  <div className="member-card">
+                    <span className="member-avatar member-avatar-lg">
+                      {(user?.fullName || 'M').charAt(0).toUpperCase()}
+                    </span>
+                    <div className="member-card-body">
+                      <div className="member-card-name">{user?.fullName || 'Columban Member'}</div>
+                      {user?.memberId && <div className="member-card-id">ID: {user.memberId}</div>}
+                      {user?.membershipType && <span className="member-card-badge">{user.membershipType}</span>}
                     </div>
-                    {user?.memberId && (
-                      <div style={{ fontSize: '11.5px', color: '#666', marginTop: '2px' }}>
-                        ID: {user.memberId}
-                      </div>
-                    )}
-                    {user?.membershipType && (
-                      <span
-                        style={{
-                          display: 'inline-block',
-                          marginTop: '6px',
-                          background: 'rgba(212, 168, 67, 0.15)',
-                          color: '#8a6514',
-                          fontSize: '10.5px',
-                          fontWeight: 600,
-                          padding: '2px 6px',
-                          borderRadius: '4px',
-                        }}
-                      >
-                        {user.membershipType}
-                      </span>
-                    )}
                   </div>
-                  <button
-                    type="button"
-                    onClick={() => { signOut(); }}
-                    style={{
-                      display: 'block',
-                      width: '100%',
-                      textAlign: 'left',
-                      background: 'none',
-                      border: 'none',
-                      padding: '10px 16px',
-                      color: '#c0392b',
-                      fontSize: '13.5px',
-                      cursor: 'pointer',
-                      fontWeight: 500,
-                    }}
-                  >
+                  <button type="button" className="member-signout" onClick={() => { signOut(); }}>
                     Sign Out
                   </button>
                 </div>
