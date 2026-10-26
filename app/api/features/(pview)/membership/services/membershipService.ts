@@ -13,10 +13,10 @@ export const MEMBERSHIP_FEE = 2000;
 export const MEMBERSHIP_TYPE = "Life Member";
 
 /**
- * Status given to the account created after payment. "pending" keeps sign-in closed until the
- * Secretariat verifies the application against School records and sets it to "active".
+ * Status given to the account created after payment. "active" lets the member sign in straight
+ * away; set it to "pending" to hold sign-in until the Secretariat approves each application.
  */
-const NEW_MEMBER_STATUS = "pending";
+const NEW_MEMBER_STATUS = "active";
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const MIN_PASSWORD_LENGTH = 8;
