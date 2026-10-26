@@ -4,3 +4,4 @@
 
 export * from "../features/sv/event-pass/schema";
 export * from "../features/sv/user/schema";
+export * from "../features/(pview)/membership/schema";

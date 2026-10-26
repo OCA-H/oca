@@ -1,8 +1,20 @@
 import type { NextConfig } from "next";
 
+/** Hostname of APP_URL, e.g. www.oldcolumban.net when testing CCAvenue against the registered domain locally. */
+const appHost = (() => {
+  try {
+    return new URL(process.env.APP_URL ?? "").hostname;
+  } catch {
+    return null;
+  }
+})();
+
 const nextConfig: NextConfig = {
   /* config options here */
   devIndicators: false,
+  // `next dev` only serves its scripts to localhost; without this, a page opened on APP_URL's
+  // domain renders but never becomes interactive. Development only; no effect on production.
+  allowedDevOrigins: appHost && appHost !== "localhost" ? [appHost] : [],
   cacheComponents: true,
   partialPrefetching: true,
   turbopack: {

@@ -1,3 +1,5 @@
+import { ROUTES } from '@/app/(view)/common/helper/routes';
+
 export const MEMBERSHIP_CONTENT = {
   hero: {
     eyebrow: 'Membership',
@@ -21,17 +23,102 @@ export const MEMBERSHIP_CONTENT = {
   stepMessages: {
     1: 'A one-time fee of <b>&#8377;2,000</b> is asked at the end.',
     2: 'Payment of <b>&#8377;2,000</b> comes next.',
-    3: 'Pay <b>&#8377;2,000</b> to complete your membership.',
+    3: 'Check your details, then pay <b>&#8377;2,000</b> on CCAvenue.',
   },
   titles: ["Mr.", "Mrs.", "Ms.", "Miss", "Dr.", "Prof.", "Br.", "Fr."],
   batches: ["2026", "2025", "2024", "2023", "2022", "2021", "2020", "2019", "2018", "2017", "2016", "2015", "2014", "2013", "2012", "2011", "2010", "2009", "2008", "2007", "2006", "2005", "2004", "2003", "2002", "2001", "2000", "1999", "1998", "1997", "1996", "1995", "1994", "1993", "1992", "1991", "1990", "1989", "1988", "1987", "1986", "1985", "1984", "1983", "1982", "1981", "1980", "1979", "1978", "1977", "1976", "1975", "1974", "1973", "1972", "1971", "1970", "1969", "1968", "1967", "1966", "1965", "1964", "1963", "1962", "1961", "1960", "1959", "1958", "1957", "1956", "1955", "1954", "1953", "1952", "1951", "1950", "1949", "1948", "1947", "1946", "1945", "1944", "1943", "1942", "1941"],
   countries: ["Afghanistan", "Albania", "Algeria", "Andorra", "Angola", "Antigua and Barbuda", "Argentina", "Armenia", "Australia", "Austria", "Azerbaijan", "Bahamas", "Bahrain", "Bangladesh", "Barbados", "Belarus", "Belgium", "Belize", "Benin", "Bhutan", "Bolivia", "Bosnia and Herzegovina", "Botswana", "Brazil", "Brunei", "Bulgaria", "Burkina Faso", "Burundi", "Cabo Verde", "Cambodia", "Cameroon", "Canada", "Central African Republic (CAR)", "Chad", "Chile", "China", "Colombia", "Comoros", "Democratic Republic of the Congo", "Republic of the Congo", "Costa Rica", "Cote d'Ivoire", "Croatia", "Cuba", "Cyprus", "Czech Republic", "Denmark", "Djibouti", "Dominica", "Dominican Republic", "Ecuador", "Egypt", "El Salvador", "Equatorial Guinea", "Eritrea", "Estonia", "Ethiopia", "Fiji", "Finland", "France", "Gabon", "Gambia", "Georgia", "Germany", "Ghana", "Greece", "Grenada", "Guatemala", "Guinea", "Guinea-Bissau", "Guyana", "Haiti", "Honduras", "Hungary", "Iceland", "India", "Indonesia", "Iran", "Iraq", "Ireland", "Israel", "Italy", "Jamaica", "Japan", "Jordan", "Kazakhstan", "Kenya", "Kiribati", "Kosovo", "Kuwait", "Kyrgyzstan", "Laos", "Latvia", "Lebanon", "Lesotho", "Liberia", "Libya", "Liechtenstein", "Lithuania", "Luxembourg", "Macedonia", "Madagascar", "Malawi", "Malaysia", "Maldives", "Mali", "Malta", "Marshall Islands", "Mauritania", "Mauritius", "Mexico", "Micronesia", "Moldova", "Monaco", "Mongolia", "Montenegro", "Morocco", "Mozambique", "Myanmar (Burma)", "Namibia", "Nauru", "Nepal", "Netherlands", "New Zealand", "Nicaragua", "Niger", "Nigeria", "North Korea", "Norway", "Oman", "Pakistan", "Palau", "Palestine", "Panama", "Papua New Guinea", "Paraguay", "Peru", "Philippines", "Poland", "Portugal", "Puerto Rico", "Qatar", "Romania", "Russia", "Rwanda", "Saint Kitts and Nevis", "Saint Lucia", "Saint Vincent and the Grenadines", "Samoa", "San Marino", "Sao Tome and Principe", "Saudi Arabia", "Senegal", "Serbia", "Seychelles", "Sierra Leone", "Singapore", "Slovakia", "Slovenia", "Solomon Islands", "Somalia", "South Africa", "South Korea", "South Sudan", "Spain", "Sri Lanka", "Sudan", "Suriname", "Swaziland", "Sweden", "Switzerland", "Syria", "Taiwan", "Tajikistan", "Tanzania", "Thailand", "Timor-Leste", "Togo", "Tonga", "Trinidad and Tobago", "Tunisia", "Turkey", "Turkmenistan", "Tuvalu", "Uganda", "Ukraine", "United Arab Emirates (UAE)", "United Kingdom (UK)", "United States of America (USA)", "Uruguay", "Uzbekistan", "Vanuatu", "Vatican City (Holy See)", "Venezuela", "Vietnam", "Yemen", "Zambia", "Zimbabwe"],
-  paymentOptions: [
-    { id: 'upi', title: 'UPI', desc: 'Any Indian bank app' },
-    { id: 'card', title: 'Card', desc: 'Indian debit or credit' },
-    { id: 'netbanking', title: 'Net banking', desc: 'From your bank account' },
-    { id: 'transfer', title: 'Bank transfer', desc: 'Details sent by email' },
-  ],
+  checkout: {
+    button: 'Pay ₹2,000',
+    redirecting: 'Taking you to CCAvenue…',
+    note: 'You will pay on CCAvenue’s secure page by UPI, card, net banking or wallet, and come back here once it is done.',
+  },
+  paymentStatus: {
+    loading: 'Confirming your payment with CCAvenue…',
+    receiptTitle: 'Payment summary',
+    totalLabel: { paid: 'Amount paid', other: 'Amount due' },
+    printLabel: 'Print receipt',
+    help: {
+      title: 'Need help?',
+      desc: 'Quote your order reference when you write or call, and the Secretariat will look into it.',
+      email: 'info@oldcolumban.net',
+      phone: '011-23748666',
+    },
+    states: {
+      paid: {
+        tone: 'success',
+        badge: 'Payment confirmed',
+        title: 'Welcome to the Old Columbans Association, {name}',
+        lead: 'Your life membership fee has been received. A copy of this receipt is below for your records.',
+        receiptStatus: 'Paid',
+        nextTitle: 'What happens next',
+        nextSteps: [
+          { title: 'Verification', desc: 'The Secretariat checks your application against School records, usually within a few working days.' },
+          { title: 'Account activation', desc: 'We email you once your membership is approved, and your account is switched on.' },
+          { title: 'Sign in', desc: 'Use the email and password you chose to reach the Member Portal and the alumni directory.' },
+        ],
+        primary: { label: 'Back to home', href: ROUTES.HOME },
+        secondary: { label: 'Explore events', href: ROUTES.HOME_EVENTS },
+      },
+      failed: {
+        tone: 'danger',
+        badge: 'Payment unsuccessful',
+        title: 'Your payment could not be completed',
+        lead: 'Your bank or CCAvenue declined the transaction, so your membership is not active yet. You can try again now.',
+        receiptStatus: 'Failed',
+        nextTitle: 'What you can do',
+        nextSteps: [
+          { title: 'Try again', desc: 'Most failures are temporary. Apply again, or choose a different card, UPI app or bank.' },
+          { title: 'Check with your bank', desc: 'Card limits, OTP timeouts and online-payment settings are the usual causes.' },
+          { title: 'Money debited?', desc: 'A failed payment that left your account is normally reversed by your bank within 5–7 working days. Write to us with the order reference if it is not.' },
+        ],
+        primary: { label: 'Try again', href: ROUTES.MEMBERSHIP_JOIN },
+        secondary: { label: 'Back to home', href: ROUTES.HOME },
+      },
+      cancelled: {
+        tone: 'neutral',
+        badge: 'Payment cancelled',
+        title: 'You cancelled the payment',
+        lead: 'No money has been taken and your membership is not active. You can complete it whenever you are ready.',
+        receiptStatus: 'Cancelled',
+        nextTitle: 'Ready when you are',
+        nextSteps: [
+          { title: 'Apply again', desc: 'Fill in the short form again and pay ₹2,000 to join for life.' },
+          { title: 'Have a question first?', desc: 'Write to the Secretariat about eligibility, batches or payment options before you pay.' },
+        ],
+        primary: { label: 'Apply again', href: ROUTES.MEMBERSHIP_JOIN },
+        secondary: { label: 'Back to home', href: ROUTES.HOME },
+      },
+      pending: {
+        tone: 'warning',
+        badge: 'Payment pending',
+        title: 'We are waiting for your bank to confirm',
+        lead: 'Your payment has not been confirmed yet. Please do not pay again — if money has left your account, this order will be updated shortly.',
+        receiptStatus: 'Awaiting confirmation',
+        nextTitle: 'What happens next',
+        nextSteps: [
+          { title: 'Give it a few minutes', desc: 'Some banks take a while to confirm. Refresh this page to see the latest status.' },
+          { title: 'Still pending?', desc: 'Write to the Secretariat with your order reference and we will check it with CCAvenue.' },
+        ],
+        primary: { label: 'Refresh status', href: '' },
+        secondary: { label: 'Back to home', href: ROUTES.HOME },
+      },
+      unknown: {
+        tone: 'danger',
+        badge: 'Status unavailable',
+        title: 'We could not confirm your payment',
+        lead: 'Something went wrong while reading the result from CCAvenue. Please do not pay again until you have checked with us.',
+        receiptStatus: 'Unconfirmed',
+        nextTitle: 'What you can do',
+        nextSteps: [
+          { title: 'Check your bank', desc: 'See whether ₹2,000 has left your account for this order.' },
+          { title: 'Contact the Secretariat', desc: 'Send us the order reference below and we will confirm your payment and membership.' },
+        ],
+        primary: { label: 'Back to membership', href: ROUTES.MEMBERSHIP },
+        secondary: { label: 'Back to home', href: ROUTES.HOME },
+      },
+    },
+  },
   benefits: [
     {
       num: '01',

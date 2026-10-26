@@ -1,6 +1,7 @@
 'use client';
 
-import { useState, useCallback, useRef } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
+import { membershipService, MembershipCheckoutError } from '../services/membership.service';
 
 export interface MembershipFormData {
   // Step 1
@@ -24,8 +25,6 @@ export interface MembershipFormData {
   state: string;
   zip: string;
   country: string;
-  // Step 3
-  mpay: 'upi' | 'card' | 'netbanking' | 'transfer';
 }
 
 const INITIAL_FORM_DATA: MembershipFormData = {
@@ -48,8 +47,10 @@ const INITIAL_FORM_DATA: MembershipFormData = {
   state: '',
   zip: '',
   country: 'India',
-  mpay: 'upi',
 };
+
+/** Fields on the address step, so a server error on one of them can send the member back there. */
+const ADDRESS_FIELDS = ['addr1', 'addr2', 'addr3', 'city', 'state', 'zip', 'country'];
 
 export function useMembershipHandler() {
   const [step, setStep] = useState<number>(1);
@@ -57,7 +58,8 @@ export function useMembershipHandler() {
   const [showPassword, setShowPassword] = useState<boolean>(false);
   const [showResetModal, setShowResetModal] = useState<boolean>(false);
   const [resetTargetStep, setResetTargetStep] = useState<number | null>(null);
-  const [submitted, setSubmitted] = useState<boolean>(false);
+  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
   const formRef = useRef<HTMLFormElement | null>(null);
 
   const scrollFormIntoView = useCallback(() => {
@@ -198,17 +200,42 @@ export function useMembershipHandler() {
     [step, goToNextStep]
   );
 
+  // Returning from CCAvenue with the browser's back button restores this page from the
+  // back/forward cache, still showing "Redirecting…".
+  useEffect(() => {
+    const onPageShow = (e: PageTransitionEvent) => {
+      if (e.persisted) setIsSubmitting(false);
+    };
+    window.addEventListener('pageshow', onPageShow);
+    return () => window.removeEventListener('pageshow', onPageShow);
+  }, []);
+
   const handleSubmit = useCallback(
-    (e: React.FormEvent<HTMLFormElement>) => {
+    async (e: React.FormEvent<HTMLFormElement>) => {
       e.preventDefault();
       if (step < 3) {
         goToNextStep();
         return;
       }
-      setSubmitted(true);
-      alert('Thank you! Redirecting to payment gateway for ₹2,000...');
+      if (isSubmitting) return;
+
+      setIsSubmitting(true);
+      setSubmitError(null);
+      try {
+        const checkout = await membershipService.checkout(formData);
+        membershipService.redirectToGateway(checkout);
+      } catch (error) {
+        setIsSubmitting(false);
+        if (error instanceof MembershipCheckoutError && error.fields) {
+          const [firstField, firstMessage] = Object.entries(error.fields)[0] ?? [];
+          if (firstField) setStep(ADDRESS_FIELDS.includes(firstField) ? 2 : 1);
+          setSubmitError(firstMessage || error.message);
+          return;
+        }
+        setSubmitError(error instanceof Error ? error.message : 'We could not start the payment. Please try again.');
+      }
     },
-    [step, goToNextStep]
+    [step, goToNextStep, isSubmitting, formData]
   );
 
   const reviewItems = [
@@ -249,7 +276,8 @@ export function useMembershipHandler() {
     formData,
     showPassword,
     showResetModal,
-    submitted,
+    isSubmitting,
+    submitError,
     formRef,
     reviewItems,
     handleChange,

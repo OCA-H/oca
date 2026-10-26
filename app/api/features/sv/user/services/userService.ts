@@ -50,6 +50,9 @@ export class UserService {
       throw HttpError.unauthorized("Invalid User ID/Email/Mobile or Password.");
     }
 
+    if (user.status === "pending") {
+      throw HttpError.forbidden("Your membership is awaiting verification by the OCA Secretariat. We will email you once it is approved.");
+    }
     if (user.status !== "active") {
       throw HttpError.forbidden("Your account is currently inactive. Please contact the OCA Secretariat.");
     }

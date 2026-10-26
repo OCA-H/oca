@@ -2,6 +2,7 @@ import "server-only";
 import { drizzle, type NodePgDatabase } from "drizzle-orm/node-postgres";
 import { Pool } from "pg";
 import * as schema from "@/app/api/db/schema";
+import { buildDatabaseUrl, missingDatabaseSettings } from "./databaseConfig";
 
 export type Orm = NodePgDatabase<typeof schema>;
 
@@ -10,12 +11,12 @@ export type Orm = NodePgDatabase<typeof schema>;
 const cache = globalThis as typeof globalThis & { ocaOrm?: Orm };
 
 export class Database {
-  /** Connects on first use, so `next build` works without DATABASE_URL. */
+  /** Connects on first use, so `next build` works without the DB_* settings. */
   static get orm(): Orm {
     if (!cache.ocaOrm) {
-      const connectionString = process.env.DATABASE_URL;
-      if (!connectionString) throw new Error("DATABASE_URL is not set. Add it to .env.local (see .env.example).");
-      cache.ocaOrm = drizzle({ client: new Pool({ connectionString, max: 10 }), schema });
+      const missing = missingDatabaseSettings();
+      if (missing.length > 0) throw new Error(`${missing.join(", ")} not set. Add them to .env (see .env.example).`);
+      cache.ocaOrm = drizzle({ client: new Pool({ connectionString: buildDatabaseUrl(), max: 10 }), schema });
     }
     return cache.ocaOrm;
   }

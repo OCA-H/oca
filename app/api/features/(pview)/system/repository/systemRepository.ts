@@ -11,7 +11,7 @@ export interface DatabaseStatus {
 
 export class SystemRepository extends BaseRepository {
   async checkConnection(): Promise<DatabaseStatus> {
-    const fallbackDbName = this.extractDatabaseName(process.env.DATABASE_URL);
+    const fallbackDbName = process.env.DB_NAME || "not_set";
     const start = performance.now();
 
     try {
@@ -32,16 +32,6 @@ export class SystemRepository extends BaseRepository {
         databaseName: fallbackDbName,
         error: error instanceof Error ? error.message : "Unable to reach database",
       };
-    }
-  }
-
-  private extractDatabaseName(url?: string): string {
-    if (!url) return "not_set";
-    try {
-      const parsed = new URL(url);
-      return parsed.pathname.replace(/^\//, "") || "unknown";
-    } catch {
-      return "unknown";
     }
   }
 }

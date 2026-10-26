@@ -16,6 +16,8 @@ export const MembershipView: React.FC = () => {
     formData,
     showPassword,
     showResetModal,
+    isSubmitting,
+    submitError,
     formRef,
     reviewItems,
     handleChange,
@@ -111,7 +113,7 @@ export const MembershipView: React.FC = () => {
                 >
                   <span className="ms-dot">3</span>
                   <span className="ms-lab">
-                    <b>Payment</b>
+                    <b>Review &amp; pay</b>
                     <small>&#8377;2,000, one-time</small>
                   </span>
                 </li>
@@ -126,6 +128,12 @@ export const MembershipView: React.FC = () => {
                 />
               </p>
             </div>
+
+            {submitError && (
+              <p className="ms-error" role="alert">
+                {submitError}
+              </p>
+            )}
 
             {/* Step 1: Your Details */}
             <div className="ms-panel" id="ms-p1" data-step="1" hidden={step !== 1}>
@@ -244,8 +252,9 @@ export const MembershipView: React.FC = () => {
                       name="password"
                       type={showPassword ? 'text' : 'password'}
                       required
+                      minLength={8}
                       autoComplete="new-password"
-                      placeholder="Choose a password"
+                      placeholder="At least 8 characters"
                       value={formData.password}
                       onChange={handleChange}
                     />
@@ -481,7 +490,7 @@ export const MembershipView: React.FC = () => {
               </div>
             </div>
 
-            {/* Step 3: Payment */}
+            {/* Step 3: Review & pay */}
             <div className="ms-panel" id="ms-p3" data-step="3" hidden={step !== 3}>
               <dl className="ms-review" id="ms-review" aria-label="Your application">
                 {reviewItems.map((item) => (
@@ -503,28 +512,8 @@ export const MembershipView: React.FC = () => {
                   <strong>&#8377;2,000</strong>
                 </div>
               </div>
-              <fieldset className="cf-group">
-                <legend>Payment option *</legend>
-                <div className="cf-pay" role="radiogroup" aria-label="Payment option">
-                  {content.paymentOptions.map((opt) => (
-                    <label key={opt.id} className="cf-opt">
-                      <input
-                        type="radio"
-                        name="mpay"
-                        value={opt.id}
-                        checked={formData.mpay === opt.id}
-                        required
-                        onChange={handleChange}
-                      />
-                      <span>
-                        <b>{opt.title}</b>
-                        <small>{opt.desc}</small>
-                      </span>
-                    </label>
-                  ))}
-                </div>
-              </fieldset>
               <ul className="cf-terms">
+                <li>{content.checkout.note}</li>
                 <li>All payments will be accepted in Indian Rupees only.</li>
                 <li>
                   International Debit / Credit cards and International Bank transfers
@@ -537,11 +526,17 @@ export const MembershipView: React.FC = () => {
                   type="button"
                   data-ms="back"
                   onClick={goToPrevStep}
+                  disabled={isSubmitting}
                 >
                   Back
                 </button>
-                <button className="btn btn-primary" type="submit">
-                  Pay &#8377;2,000
+                <button
+                  className="btn btn-primary"
+                  type="submit"
+                  disabled={isSubmitting}
+                  aria-busy={isSubmitting}
+                >
+                  {isSubmitting ? content.checkout.redirecting : content.checkout.button}
                 </button>
               </div>
             </div>
