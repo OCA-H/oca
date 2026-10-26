@@ -15,6 +15,8 @@ export const ROUTES = {
   ANNUAL_LUNCH: '/annual-lunch',
   SPORTS: '/sports',
   MEMBER_SIGNIN: '/member-signin',
+  FORGOT_PASSWORD: '/member-signin/forgot-password',
+  RESET_PASSWORD: '/member-signin/reset-password',
   PARTNER_ORGANIZATION: '/partner-organization',
 
   // Section Anchors & Deep Links

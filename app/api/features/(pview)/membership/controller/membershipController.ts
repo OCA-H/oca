@@ -6,9 +6,6 @@ import { MembershipRepository } from "../repository/membershipRepository";
 
 const PAYMENT_STATUS_PATH = "/membership/payment-status";
 
-/** Public origin of the site, for URLs CCAvenue sends the browser back to. */
-const baseUrl = (request: Request) => (process.env.APP_URL || new URL(request.url).origin).replace(/\/$/, "");
-
 export class MembershipController extends BaseController {
   constructor(private readonly service: MembershipService) {
     super();
@@ -21,7 +18,7 @@ export class MembershipController extends BaseController {
   async checkout(request: Request): Promise<Response> {
     return this.handle(async () => {
       const body = await this.readJson(request);
-      const checkout = await this.service.checkout(body, baseUrl(request));
+      const checkout = await this.service.checkout(body, this.baseUrl(request));
       return this.ok({ data: checkout }, 201);
     });
   }
@@ -32,7 +29,7 @@ export class MembershipController extends BaseController {
    * always redirects to the payment status page instead of returning JSON.
    */
   async paymentResponse(request: Request): Promise<Response> {
-    const statusUrl = new URL(PAYMENT_STATUS_PATH, baseUrl(request));
+    const statusUrl = new URL(PAYMENT_STATUS_PATH, this.baseUrl(request));
     let form: FormData | null = null;
     try {
       form = await this.readForm(request);

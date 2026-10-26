@@ -1,8 +1,11 @@
 import "server-only";
+import { after } from "next/server";
 import { BaseController } from "@/app/api/core/baseController";
 import { HttpError } from "@/app/api/core/httpError";
+import { Mailer } from "@/app/api/core/mailer";
 import { UserService } from "../services/userService";
 import { UserRepository } from "../repository/userRepository";
+import { PasswordResetRepository } from "../repository/passwordResetRepository";
 import {
   buildSessionCookieHeader,
   buildClearSessionCookieHeader,
@@ -109,6 +112,51 @@ export class UserController extends BaseController {
   }
 
   /**
+   * POST /api/auth/forgot-password
+   * Emails a reset link if the email / member ID / mobile matches an active account. The answer
+   * is the same either way, and the work runs after the response so its timing gives nothing away.
+   */
+  async forgotPassword(request: Request): Promise<Response> {
+    return this.handle(async () => {
+      const body = await this.readJson(request);
+      const identifier = typeof body.identifier === "string" ? body.identifier.trim() : "";
+      if (!identifier) {
+        throw HttpError.badRequest("Please enter your Email ID, User ID, or Mobile number.", {
+          identifier: "Please enter your Email ID, User ID, or Mobile number.",
+        });
+      }
+
+      // Same for every identifier, so a broken mailbox fails visibly without revealing who is a member.
+      await Mailer.ensureReady();
+
+      const baseUrl = this.baseUrl(request);
+      after(() =>
+        this.service.requestPasswordReset(identifier, baseUrl).catch((error) => {
+          console.error("Password reset email failed:", error);
+        })
+      );
+
+      return this.ok({
+        message: "If an account matches those details, we have emailed a link to reset your password.",
+      });
+    });
+  }
+
+  /**
+   * POST /api/auth/reset-password
+   * Sets a new password from the token in a reset link.
+   */
+  async resetPassword(request: Request): Promise<Response> {
+    return this.handle(async () => {
+      const body = await this.readJson(request);
+      const token = typeof body.token === "string" ? body.token.trim() : "";
+      const password = typeof body.password === "string" ? body.password : "";
+      await this.service.resetPassword(token, password);
+      return this.ok({ message: "Your password has been changed. You can now sign in with it." });
+    });
+  }
+
+  /**
    * POST /api/auth/seed
    * Populates default demo members if empty.
    */
@@ -124,6 +172,6 @@ export class UserController extends BaseController {
 }
 
 export const userRepository = new UserRepository();
-export const userService = new UserService(userRepository);
+export const userService = new UserService(userRepository, new PasswordResetRepository());
 export const userController = new UserController(userService);
 

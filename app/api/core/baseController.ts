@@ -16,6 +16,11 @@ export abstract class BaseController {
     }
   }
 
+  /** Public origin of the site (APP_URL, else the request's), for links in emails and gateway redirects. */
+  protected baseUrl(request: Request): string {
+    return (process.env.APP_URL || new URL(request.url).origin).replace(/\/$/, "");
+  }
+
   protected ok(data: object, status = 200) {
     return Response.json({ ok: true, ...data }, { status });
   }

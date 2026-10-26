@@ -35,4 +35,30 @@ export const memberSignInService = {
 
     return json as SignInResponse;
   },
+
+  requestPasswordReset: async (identifier: string): Promise<string> => {
+    const res = await fetch('/api/auth/forgot-password', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ identifier }),
+    });
+    const json = await res.json().catch(() => null);
+    if (!res.ok || !json?.ok) {
+      throw new Error(json?.error || 'We could not send the reset email. Please try again.');
+    }
+    return json.message as string;
+  },
+
+  resetPassword: async (token: string, password: string): Promise<string> => {
+    const res = await fetch('/api/auth/reset-password', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ token, password }),
+    });
+    const json = await res.json().catch(() => null);
+    if (!res.ok || !json?.ok) {
+      throw new Error(json?.fields?.password || json?.error || 'We could not change your password. Please try again.');
+    }
+    return json.message as string;
+  },
 };

@@ -1,8 +1,19 @@
 import "server-only";
+import crypto from "node:crypto";
 import { HttpError } from "@/app/api/core/httpError";
+import { Mailer } from "@/app/api/core/mailer";
 import { UserRepository } from "../repository/userRepository";
+import { PasswordResetRepository } from "../repository/passwordResetRepository";
 import type { User, SafeUser } from "../schema/userSchema";
-import { verifyPassword, createSessionToken, type SessionUser } from "@/app/api/core/auth";
+import { passwordResetEmail } from "./passwordResetEmail";
+import { verifyPassword, hashPassword, createSessionToken, type SessionUser } from "@/app/api/core/auth";
+
+const RESET_LINK_TTL_MINUTES = 30;
+/** Stops the form being used to flood a member's inbox. */
+const RESET_EMAIL_COOLDOWN_SECONDS = 60;
+const MIN_PASSWORD_LENGTH = 8;
+
+const hashResetToken = (token: string) => crypto.createHash("sha256").update(token).digest("hex");
 
 export function toSafeUser(user: User): SafeUser {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -24,7 +35,10 @@ export function toSessionUser(user: User): SessionUser {
 }
 
 export class UserService {
-  constructor(private readonly repository: UserRepository) {}
+  constructor(
+    private readonly repository: UserRepository,
+    private readonly resets: PasswordResetRepository
+  ) {}
 
   /**
    * Authenticates user with memberId/email/mobile and password.
@@ -80,6 +94,55 @@ export class UserService {
       throw HttpError.notFound("User not found.");
     }
     return toSafeUser(user);
+  }
+
+  /**
+   * Emails a one-time reset link to the account matching the email, member ID or mobile.
+   * Does nothing, silently, for unknown or inactive accounts, so callers can always answer the
+   * same way and the form cannot be used to discover who is a member.
+   */
+  async requestPasswordReset(identifier: string, baseUrl: string): Promise<void> {
+    const user = await this.repository.findByIdentifier(identifier);
+    if (!user || user.status !== "active") return;
+
+    const latest = await this.resets.findLatestForUser(user.id);
+    if (latest && Date.now() - latest.createdAt.getTime() < RESET_EMAIL_COOLDOWN_SECONDS * 1000) return;
+
+    const token = crypto.randomBytes(32).toString("hex");
+    await this.resets.createForUser(
+      user.id,
+      hashResetToken(token),
+      new Date(Date.now() + RESET_LINK_TTL_MINUTES * 60 * 1000)
+    );
+
+    const resetUrl = `${baseUrl}/member-signin/reset-password?token=${token}`;
+    await Mailer.send(
+      passwordResetEmail({
+        to: user.email,
+        name: user.fullName,
+        resetUrl,
+        expiresInMinutes: RESET_LINK_TTL_MINUTES,
+        baseUrl,
+      })
+    );
+  }
+
+  /** Sets a new password from a reset link. The link stops working once used. */
+  async resetPassword(token: string, password: string): Promise<void> {
+    if (password.length < MIN_PASSWORD_LENGTH) {
+      throw HttpError.badRequest("Some details need fixing.", {
+        password: `Password must be at least ${MIN_PASSWORD_LENGTH} characters.`,
+      });
+    }
+
+    const invalidLink = HttpError.badRequest("This reset link is invalid or has expired. Please request a new one.");
+    if (!/^[0-9a-f]{64}$/.test(token)) throw invalidLink;
+
+    const reset = await this.resets.findUsable(hashResetToken(token));
+    if (!reset) throw invalidLink;
+
+    const { hash, salt } = hashPassword(password);
+    if (!(await this.resets.consume(reset, hash, salt))) throw invalidLink;
   }
 
   async seedDemoUsers(): Promise<SafeUser[]> {
