@@ -112,7 +112,9 @@ export const Header: React.FC<HeaderProps> = ({ activeRoute }) => {
 
           <div className="header-actions">
             <Link className="btn btn-gold btn-sm" href={ROUTES.DONATION} onClick={() => handleLinkClick(ROUTES.DONATION)}>Contribute</Link>
-            <Link className="btn btn-primary btn-sm" href={ROUTES.MEMBERSHIP} onClick={() => handleLinkClick(ROUTES.MEMBERSHIP)}>Become a Member</Link>
+            {!isAuthenticated && (
+              <Link className="btn btn-primary btn-sm" href={ROUTES.MEMBERSHIP} onClick={() => handleLinkClick(ROUTES.MEMBERSHIP)}>Become a Member</Link>
+            )}
             {isAuthenticated ? (
               <div className="nav-item signin-item member-profile-item">
                 <button
@@ -185,13 +187,6 @@ export const Header: React.FC<HeaderProps> = ({ activeRoute }) => {
                       </span>
                     )}
                   </div>
-                  <Link
-                    href={ROUTES.PAGE_MEMBER_PORTAL}
-                    style={{ fontWeight: 600, color: 'var(--gold, #d4a843)', display: 'flex', alignItems: 'center', gap: '6px' }}
-                    onClick={() => handleLinkClick(ROUTES.PAGE_MEMBER_PORTAL)}
-                  >
-                    ★ Member Portal
-                  </Link>
                   <button
                     type="button"
                     onClick={() => { signOut(); }}
@@ -286,12 +281,9 @@ export const Header: React.FC<HeaderProps> = ({ activeRoute }) => {
         <span className="sub sub-soon">Remembrance<span className="soon-tag">Soon</span></span>
 
         <Link className="top" href={ROUTES.MEMBERSHIP} onClick={() => handleLinkClick(ROUTES.MEMBERSHIP)}>Membership</Link>
-        {isAuthenticated ? (
-          <Link className="sub" href={ROUTES.PAGE_MEMBER_PORTAL} onClick={() => handleLinkClick(ROUTES.PAGE_MEMBER_PORTAL)} style={{ color: 'var(--gold, #d4a843)', fontWeight: 600 }}>★ Member Portal</Link>
-        ) : null}
-        <Link className="sub" href={ROUTES.MEMBERSHIP} onClick={() => handleLinkClick(ROUTES.MEMBERSHIP)}>Become a Member</Link>
         {!isAuthenticated && (
           <>
+            <Link className="sub" href={ROUTES.MEMBERSHIP} onClick={() => handleLinkClick(ROUTES.MEMBERSHIP)}>Become a Member</Link>
             <Link className="sub" href={ROUTES.MEMBER_SIGNIN} onClick={() => handleLinkClick(ROUTES.MEMBER_SIGNIN)}>As an OCA Member</Link>
             <Link className="sub" href={ROUTES.PARTNER_ORGANIZATION} onClick={() => handleLinkClick(ROUTES.PARTNER_ORGANIZATION)}>As a Partner Organization</Link>
           </>
@@ -299,7 +291,9 @@ export const Header: React.FC<HeaderProps> = ({ activeRoute }) => {
 
         <div className="cta-row">
           <Link className="btn btn-gold" href={ROUTES.DONATION} onClick={() => handleLinkClick(ROUTES.DONATION)}>Contribute</Link>
-          <Link className="btn btn-primary" href={ROUTES.MEMBERSHIP} onClick={() => handleLinkClick(ROUTES.MEMBERSHIP)}>Become a Member</Link>
+          {!isAuthenticated && (
+            <Link className="btn btn-primary" href={ROUTES.MEMBERSHIP} onClick={() => handleLinkClick(ROUTES.MEMBERSHIP)}>Become a Member</Link>
+          )}
           {isAuthenticated ? (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', width: '100%', marginTop: '4px' }}>
               <div
@@ -317,7 +311,6 @@ export const Header: React.FC<HeaderProps> = ({ activeRoute }) => {
                   <div style={{ fontSize: '11px', color: '#666' }}>ID: {user.memberId}</div>
                 )}
               </div>
-              <Link className="btn btn-gold" href={ROUTES.PAGE_MEMBER_PORTAL} onClick={() => handleLinkClick(ROUTES.PAGE_MEMBER_PORTAL)}>★ Member Portal</Link>
               <button
                 className="btn btn-ghost"
                 type="button"

@@ -595,11 +595,7 @@ export const MembershipView: React.FC = () => {
             <p>{content.cta.desc}</p>
           </div>
           <div className="cta-band-actions">
-            {isAuthenticated ? (
-              <Link className="btn btn-gold" href={ROUTES.PAGE_MEMBER_PORTAL}>
-                ★ Member Portal
-              </Link>
-            ) : (
+            {!isAuthenticated && (
               <Link className="btn btn-gold" href={ROUTES.MEMBER_SIGNIN}>
                 Sign In
               </Link>

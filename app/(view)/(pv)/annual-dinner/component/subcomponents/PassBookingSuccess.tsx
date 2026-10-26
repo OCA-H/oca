@@ -64,8 +64,8 @@ export const PassBookingSuccess: React.FC<PassBookingSuccessProps> = ({ bookingR
         </div>
 
         <div className="dn-success-actions">
-          <Link href={ROUTES.MEMBER_PORTAL} className="btn btn-primary">
-            Go to Member Portal
+          <Link href={ROUTES.HOME} className="btn btn-primary">
+            Back to Home
           </Link>
           <button type="button" className="btn btn-secondary" onClick={onReset}>
             Book another pass

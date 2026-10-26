@@ -39,11 +39,7 @@ export const Footer: React.FC = () => {
         <div className="footer-col">
           <h5>Quick Links</h5>
           <Link href={ROUTES.HOME}>Home</Link>
-          {isAuthenticated ? (
-            <Link href={ROUTES.PAGE_MEMBER_PORTAL} style={{ color: 'var(--gold, #d4a843)', fontWeight: 600 }}>★ Member Portal</Link>
-          ) : (
-            <Link href={ROUTES.MEMBER_SIGNIN}>Sign In</Link>
-          )}
+          {!isAuthenticated && <Link href={ROUTES.MEMBER_SIGNIN}>Sign In</Link>}
           <Link href={ROUTES.MEMBERSHIP}>New Membership</Link>
           <Link href={ROUTES.DONATION}>Contribute</Link>
         </div>

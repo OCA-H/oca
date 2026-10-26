@@ -50,11 +50,11 @@ export function useMemberSignInHandler() {
       const response = await memberSignInService.login({ user, pass: password });
       setFeedback({
         type: 'success',
-        text: `Welcome back, ${response.data?.fullName || 'Columban'}! Redirecting to Member Portal...`,
+        text: `Welcome back, ${response.data?.fullName || 'Columban'}! Redirecting...`,
       });
 
-      // Check for redirect query parameter in URL, otherwise go to /sv/member-portal
-      let targetUrl = '/sv/member-portal';
+      // Check for redirect query parameter in URL, otherwise go to the home page
+      let targetUrl = '/';
       if (typeof window !== 'undefined') {
         const params = new URLSearchParams(window.location.search);
         const redirectParam = params.get('redirect');
