@@ -1,5 +1,6 @@
 import React from 'react';
 import type { ProfilePanel } from '../../content';
+import { PanelLink } from './PanelLink';
 import { ProfileIcon } from './ProfileIcon';
 
 interface PanelHeadProps {
@@ -13,10 +14,10 @@ interface PanelHeadProps {
 export const PanelHead: React.FC<PanelHeadProps> = ({ panel, title, lead, onBack }) => (
   <>
     {onBack && (
-      <button className="mp-back" type="button" data-panel="dashboard" onClick={onBack}>
+      <PanelLink className="mp-back" panel="dashboard" onShow={onBack}>
         <ProfileIcon name="back" />
         Dashboard
-      </button>
+      </PanelLink>
     )}
     <div className="mp-head">
       <h2 id={`mp-t-${panel}`} tabIndex={-1}>

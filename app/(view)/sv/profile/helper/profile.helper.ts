@@ -1,6 +1,26 @@
+import { ROUTES } from "@/app/(view)/common/helper/routes";
+import { PROFILE_PANEL_SLUGS, type ProfilePanel } from "../content";
 import type { MemberProfile, ProfileUpdate } from "../services";
 
+const PANEL_BY_SLUG = Object.fromEntries(
+  Object.entries(PROFILE_PANEL_SLUGS).map(([panel, slug]) => [slug, panel as ProfilePanel])
+);
+
 export const profileHelper = {
+  /** "account" → "/sv/profile/account"; the dashboard is "/sv/profile". */
+  panelPath: (panel: ProfilePanel): string =>
+    panel === "dashboard" ? ROUTES.PROFILE : `${ROUTES.PROFILE}/${PROFILE_PANEL_SLUGS[panel]}`,
+
+  /** The panel a /sv/profile/... address points at, or null when it is not one of ours. */
+  panelFromSlug: (slug: string | undefined): ProfilePanel | null =>
+    slug === undefined ? "dashboard" : (PANEL_BY_SLUG[slug] ?? null),
+
+  /** The panel for the current pathname, falling back to the dashboard. */
+  panelFromPath: (pathname: string): ProfilePanel => {
+    const rest = pathname.replace(/\/+$/, "").slice(ROUTES.PROFILE.length).replace(/^\//, "");
+    return profileHelper.panelFromSlug(rest || undefined) ?? "dashboard";
+  },
+
   getInitials: (name: string): string =>
     name
       .split(" ")

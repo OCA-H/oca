@@ -2,6 +2,7 @@ export * from './ProfileIcon';
 export * from './ProfileHero';
 export * from './ProfileSidebar';
 export * from './PanelHead';
+export * from './PanelLink';
 export * from './DiscardDialog';
 export * from './DashboardPanel';
 export * from './AccountPanel';

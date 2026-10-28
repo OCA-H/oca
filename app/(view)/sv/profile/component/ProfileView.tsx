@@ -34,7 +34,7 @@ export const ProfileView: React.FC = () => {
     handleSignOut,
   } = useProfileHandler();
 
-  if (isLoading) return <ProfileSkeleton />;
+  if (isLoading) return <ProfileSkeleton panel={panel} />;
 
   if (!profile) {
     return (

@@ -3,6 +3,19 @@ import { MEMBERSHIP_CONTENT } from "@/app/(view)/(pv)/membership/content";
 
 export type ProfilePanel = "dashboard" | "account" | "card" | "donor" | "birthdays" | "suggest" | "password";
 
+/**
+ * Each panel's address under /sv/profile, so a refresh or a shared link opens the same panel.
+ * The dashboard is /sv/profile itself.
+ */
+export const PROFILE_PANEL_SLUGS: Record<Exclude<ProfilePanel, "dashboard">, string> = {
+  account: "account",
+  card: "membership-card",
+  donor: "donor-pass",
+  birthdays: "birthdays",
+  suggest: "suggestions",
+  password: "change-password",
+};
+
 export type ProfileIcon =
   | "dashboard"
   | "user"

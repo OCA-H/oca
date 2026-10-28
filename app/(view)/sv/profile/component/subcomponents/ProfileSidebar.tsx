@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { profileContent, type ProfilePanel } from '../../content';
 import { profileHelper } from '../../helper';
 import type { MemberProfile } from '../../services';
+import { PanelLink } from './PanelLink';
 import { ProfileIcon } from './ProfileIcon';
 
 interface ProfileSidebarProps {
@@ -75,17 +76,16 @@ export const ProfileSidebar: React.FC<ProfileSidebarProps> = ({
             <p className="mp-group">{group}</p>
             {items.map((item) =>
               item.panel ? (
-                <button
+                <PanelLink
                   key={item.label}
                   className={`mp-link${panel === item.panel ? ' is-active' : ''}`}
-                  type="button"
-                  data-panel={item.panel}
+                  panel={item.panel}
+                  onShow={onShowPanel}
                   aria-current={panel === item.panel ? 'page' : undefined}
-                  onClick={() => onShowPanel(item.panel!)}
                 >
                   <ProfileIcon name={item.icon} />
                   <span>{item.label}</span>
-                </button>
+                </PanelLink>
               ) : (
                 <Link key={item.label} className="mp-link" href={item.href!}>
                   <ProfileIcon name={item.icon} />

@@ -4,6 +4,7 @@ import { profileContent, type ProfilePanel, type ProfileTile } from '../../conte
 import { profileHelper } from '../../helper';
 import type { MemberProfile } from '../../services';
 import { PanelHead } from './PanelHead';
+import { PanelLink } from './PanelLink';
 import { ProfileIcon } from './ProfileIcon';
 
 interface DashboardPanelProps {
@@ -85,9 +86,9 @@ export const DashboardPanel: React.FC<DashboardPanelProps> = ({ profile, hidden,
           );
 
           return tile.panel ? (
-            <button key={tile.label} className={className} type="button" data-panel={tile.panel} onClick={() => onShowPanel(tile.panel!)}>
+            <PanelLink key={tile.label} className={className} panel={tile.panel} onShow={onShowPanel}>
               {body}
-            </button>
+            </PanelLink>
           ) : (
             <Link key={tile.label} className={className} href={tile.href!}>
               {body}

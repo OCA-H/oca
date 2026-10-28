@@ -1,19 +1,22 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { ROUTES } from '@/app/(view)/common/helper/routes';
 import { profileContent, type ProfilePanel } from '../content';
+import { profileHelper } from '../helper';
 import { profileService, type MemberProfile } from '../services';
 
 const { photo } = profileContent;
 
 export function useProfileHandler() {
   const router = useRouter();
+  // The address is the source of truth for the open panel, so refresh, links and Back all agree.
+  const panel = profileHelper.panelFromPath(usePathname());
   const [profile, setProfile] = useState<MemberProfile | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [panel, setPanel] = useState<ProfilePanel>('dashboard');
+  const scrollTo = useRef<ProfilePanel | null>(null);
   const [photoSrc, setPhotoSrc] = useState<string | null>(null);
   const [photoMsg, setPhotoMsg] = useState<{ text: string; bad: boolean } | null>(null);
   const [sentWishes, setSentWishes] = useState<string[]>([]);
@@ -40,9 +43,17 @@ export function useProfileHandler() {
     };
   }, []);
 
-  /** Swaps the panel in place, then brings its heading into view and focus. */
-  const showPanel = useCallback((name: ProfilePanel) => {
-    setPanel(name);
+  /** On phones the menu is a sideways row of pills: keeps the open panel's pill in view. */
+  const centerNavLink = useCallback((name: ProfilePanel, behavior: ScrollBehavior) => {
+    const link = document.querySelector<HTMLElement>(`.mp-link[data-panel="${name}"]`);
+    const row = link?.parentElement;
+    if (window.innerWidth <= 900 && link && row && row.scrollWidth > row.clientWidth) {
+      row.scrollTo({ left: link.offsetLeft - (row.clientWidth - link.offsetWidth) / 2, behavior });
+    }
+  }, []);
+
+  /** Brings a panel's heading into view and focus once it is showing. */
+  const revealPanel = useCallback((name: ProfilePanel) => {
     requestAnimationFrame(() => {
       const heading = document.querySelector<HTMLElement>(`#mp-${name} h2`);
       heading?.focus({ preventScroll: true });
@@ -53,14 +64,38 @@ export function useProfileHandler() {
       const rect = anchor.getBoundingClientRect();
       const top = (isNarrow ? rect.bottom - 70 : rect.top - 100) + window.pageYOffset;
       window.scrollTo({ top: Math.max(0, top), behavior: 'smooth' });
-
-      const link = document.querySelector<HTMLElement>(`.mp-link[data-panel="${name}"]`);
-      const row = link?.parentElement;
-      if (isNarrow && link && row && row.scrollWidth > row.clientWidth) {
-        row.scrollTo({ left: link.offsetLeft - (row.clientWidth - link.offsetWidth) / 2, behavior: 'smooth' });
-      }
+      centerNavLink(name, 'smooth');
     });
-  }, []);
+  }, [centerNavLink]);
+
+  /**
+   * Moves to the panel's own address without a reload or refetch: pushState keeps this page
+   * mounted and usePathname picks up the change. The reveal waits for that render.
+   */
+  const showPanel = useCallback(
+    (name: ProfilePanel) => {
+      if (name === panel) {
+        revealPanel(name);
+        return;
+      }
+      scrollTo.current = name;
+      window.history.pushState(null, '', profileHelper.panelPath(name));
+    },
+    [panel, revealPanel]
+  );
+
+  // After a refresh or a shared link, the open panel's pill may start off-screen.
+  const hasProfile = profile !== null;
+  const initialPanel = useRef(panel);
+  useEffect(() => {
+    if (hasProfile) requestAnimationFrame(() => centerNavLink(initialPanel.current, 'instant'));
+  }, [hasProfile, centerNavLink]);
+
+  useEffect(() => {
+    if (scrollTo.current !== panel) return;
+    scrollTo.current = null;
+    revealPanel(panel);
+  }, [panel, revealPanel]);
 
   const sayPhoto = (text: string, bad = false) => {
     clearTimeout(photoTimer.current);
