@@ -33,7 +33,6 @@ function documentRules(label: string): UploadRules {
   return { maxBytes: 4 * 1024 * 1024, kinds: [FILE_KINDS.jpeg, FILE_KINDS.png, FILE_KINDS.webp, FILE_KINDS.pdf], label };
 }
 
-const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const PAN_PATTERN = /^[A-Z]{5}[0-9]{4}[A-Z]$/;
 
 /** A fund as the contribution form lists it. */
@@ -154,7 +153,9 @@ export class ContributionService {
     }
 
     const name = required("name", "Name");
-    const email = required("email", "Email").toLowerCase();
+    // Always the signed-in member's account email, whatever the form sends: the receipt and
+    // thank-you go to the member who gave, and the form cannot redirect them elsewhere.
+    const email = user.email.toLowerCase();
     const mobile = required("mobile", "Mobile").replace(/[\s-]/g, "");
     const address = required("address", "Address");
     const city = required("city", "City");
@@ -162,7 +163,6 @@ export class ContributionService {
     const pincode = required("pincode", "Pin code");
     const country = required("country", "Country");
 
-    if (email && !EMAIL_PATTERN.test(email)) fields.email = "Enter a valid email address.";
     if (mobile && !/^\+?\d{6,15}$/.test(mobile)) fields.mobile = "Enter a valid mobile number.";
     if (pincode && country === "India" && !/^\d{6}$/.test(pincode)) fields.pincode = "Enter a 6-digit pin code.";
 

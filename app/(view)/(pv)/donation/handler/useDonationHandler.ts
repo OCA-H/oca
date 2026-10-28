@@ -5,7 +5,8 @@ import { donationContent } from '../content/donation.content';
 import { formatCurrency, calculateAmount } from '../helper/donation.helper';
 import { donationService, type ContributionFund } from '../services/donation.service';
 import { ApiError } from '@/app/(view)/common/services/api.service';
-import { useAuth, type AuthUser } from '@/app/(view)/common/helper/useAuth';
+import { useAuth } from '@/app/(view)/common/helper/useAuth';
+import { profileService, type MemberProfile } from '@/app/(view)/sv/profile/services/profile.service';
 
 export interface DonationFormData {
   /** Code of the chosen fund. */
@@ -33,31 +34,68 @@ export interface DonationFormData {
 const DEFAULT_FUND = 'tbf';
 const DEFAULT_AMOUNT = 5100;
 
-/** A fresh form, with the member's name, email and batch from their account. */
-const initialFormData = (user: AuthUser | null): DonationFormData => ({
-  fund: DEFAULT_FUND,
-  amount: DEFAULT_AMOUNT,
-  units: '1',
-  name: user?.fullName ?? '',
-  batch: user?.batchYear ?? '',
-  email: user?.email ?? '',
-  mobile: '',
-  address: '',
-  city: '',
-  state: '',
-  pincode: '',
-  country: 'India',
+/** The "About you" fields that can be filled in from the member's profile. */
+type ProfileFields = Pick<
+  DonationFormData,
+  'name' | 'batch' | 'email' | 'mobile' | 'address' | 'city' | 'state' | 'pincode' | 'country'
+>;
+
+/** The member's saved details, as the form's fields. Empty where the profile has nothing. */
+const profileFields = (profile: MemberProfile): ProfileFields => ({
+  name: profile.fullName,
+  batch: profile.batchYear ?? '',
+  email: profile.email,
+  mobile: profile.mobile,
+  address: [profile.address.line1, profile.address.line2, profile.address.line3].filter(Boolean).join(', '),
+  city: profile.address.city,
+  state: profile.address.state,
+  pincode: profile.address.zip,
+  country: profile.address.country || 'India',
+});
+
+/**
+ * Autofills from the profile. With `overwrite`, every field the profile has a value for is
+ * replaced ("Use my profile details"); otherwise only fields the member has left empty are.
+ * The email always comes from the account: it cannot be changed on this form.
+ */
+const fillFromProfile = (prev: DonationFormData, profile: MemberProfile, overwrite: boolean): DonationFormData => {
+  const next = { ...prev };
+  for (const [key, value] of Object.entries(profileFields(profile)) as [keyof ProfileFields, string][]) {
+    if (value && (overwrite || !prev[key])) next[key] = value;
+  }
+  next.email = profile.email;
+  return next;
+};
+
+/** A fresh form, with the member's details from their profile once it has loaded. */
+const initialFormData = (profile: MemberProfile | null): DonationFormData => {
+  const blank: DonationFormData = {
+    fund: DEFAULT_FUND,
+    amount: DEFAULT_AMOUNT,
+    units: '1',
+    name: '',
+    batch: '',
+    email: '',
+    mobile: '',
+    address: '',
+    city: '',
+    state: '',
+    pincode: '',
+    country: 'India',
   g80: 'yes',
   pan: '',
   panFile: null,
   addressDoc: '',
-  addressFile: null,
-  pay: 'upi',
-});
+    addressFile: null,
+    pay: 'upi',
+  };
+  return profile ? fillFromProfile(blank, profile, true) : blank;
+};
 
 export function useDonationHandler() {
   const { user, isAuthenticated } = useAuth();
   const [formData, setFormData] = useState<DonationFormData>(() => initialFormData(null));
+  const [profile, setProfile] = useState<MemberProfile | null>(null);
   const [funds, setFunds] = useState<ContributionFund[]>([]);
   const [fundsError, setFundsError] = useState<string | null>(null);
   const [showResetModal, setShowResetModal] = useState<boolean>(false);
@@ -89,18 +127,29 @@ export function useDonationHandler() {
     };
   }, [isAuthenticated]);
 
-  // Fill in who is giving once the member is known, without overwriting anything they typed.
-  // Done while rendering (React's pattern for state that follows a changing value), once per member.
-  const [prefilledFor, setPrefilledFor] = useState<number | null>(null);
-  if (user && prefilledFor !== user.id) {
-    setPrefilledFor(user.id);
-    setFormData((prev) => ({
-      ...prev,
-      name: prev.name || user.fullName,
-      email: prev.email || user.email,
-      batch: prev.batch || (user.batchYear ?? ''),
-    }));
-  }
+  // Autofill "About you" from the member's profile, without overwriting anything already typed.
+  useEffect(() => {
+    if (!isAuthenticated) return;
+    let active = true;
+    profileService
+      .getProfile()
+      .then((loaded) => {
+        if (!active) return;
+        setProfile(loaded);
+        setFormData((prev) => fillFromProfile(prev, loaded, false));
+      })
+      .catch(() => {
+        // The member can still fill the form in by hand; the email is set from the account on the server.
+      });
+    return () => {
+      active = false;
+    };
+  }, [isAuthenticated]);
+
+  /** "Use my profile details": refills every field the profile has a value for. */
+  const applyProfile = useCallback(() => {
+    if (profile) setFormData((prev) => fillFromProfile(prev, profile, true));
+  }, [profile]);
 
   // Pre-select fund if user clicks "Contribute to this fund" (data-fund="tbf")
   const preselectFund = useCallback((fundCode: string) => {
@@ -171,9 +220,9 @@ export function useDonationHandler() {
   const closeResetModal = useCallback(() => setShowResetModal(false), []);
 
   const confirmReset = useCallback(() => {
-    setFormData(initialFormData(user));
+    setFormData(initialFormData(profile));
     setShowResetModal(false);
-  }, [user]);
+  }, [profile]);
 
   // Returning from CCAvenue with the browser's back button restores this page from the
   // back/forward cache, still showing "Redirecting…".
@@ -229,6 +278,8 @@ export function useDonationHandler() {
     content: donationContent,
     user,
     isAuthenticated,
+    hasProfile: profile !== null,
+    applyProfile,
     funds,
     fundsError,
     currentFund,

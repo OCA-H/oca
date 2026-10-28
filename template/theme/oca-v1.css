@@ -4940,6 +4940,45 @@ section[id] {
   padding-top: 64px;
 }
 
+/* "Use my profile details" beside the About you step, and the account email it cannot change */
+.cf-autofill {
+  margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border: 1px solid var(--border-strong);
+  border-radius: 100px;
+  background: #fff;
+  color: var(--brand);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.cf-autofill:hover:not(:disabled) {
+  border-color: var(--brand);
+  background: var(--tint-teal);
+}
+
+.cf-autofill svg {
+  width: 15px;
+  height: 15px;
+}
+
+.cf-locked {
+  background: var(--tint-teal);
+  color: var(--text-soft);
+  cursor: not-allowed;
+}
+
+.cf-field-note {
+  display: block;
+  margin-top: 6px;
+  font-size: 12px;
+  color: var(--text-soft);
+}
+
 /* ---------- Annual Dinner Pass Lock & Blur Styles ---------- */
 .dn-passes-wrap {
   position: relative;

@@ -9,6 +9,8 @@ import { unitOptions } from '../../helper/donation.helper';
 export const ContributionForm: React.FC<{ handler: DonationHandler }> = ({ handler }) => {
   const {
     content,
+    hasProfile,
+    applyProfile,
     funds,
     fundsError,
     currentFund,
@@ -121,6 +123,21 @@ export const ContributionForm: React.FC<{ handler: DonationHandler }> = ({ handl
       <div className="cf-step">
         <span className="cf-num">2</span>
         <h3>About you</h3>
+        {hasProfile && (
+          <button
+            type="button"
+            className="cf-autofill"
+            onClick={applyProfile}
+            disabled={isSubmitting}
+            title="Fill in your name, mobile and address from your member profile"
+          >
+            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <circle cx="12" cy="8" r="4" stroke="currentColor" strokeWidth="1.8" />
+              <path d="M4 20c0-3.3 3.6-6 8-6s8 2.7 8 6" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+            </svg>
+            Use my profile details
+          </button>
+        )}
       </div>
 
       <div className="field-row">
@@ -153,17 +170,18 @@ export const ContributionForm: React.FC<{ handler: DonationHandler }> = ({ handl
 
       <div className="field-row">
         <div className="field">
-          <label htmlFor="d-email">Email *</label>
+          <label htmlFor="d-email">Email</label>
+          {/* The account's email, set on the server too: the receipt always goes to the signed-in member. */}
           <input
             id="d-email"
             name="email"
             type="email"
-            required
-            autoComplete="email"
-            placeholder="you@example.com"
+            readOnly
+            aria-readonly="true"
+            className="cf-locked"
             value={formData.email}
-            onChange={handleChange}
           />
+          <small className="cf-field-note">Your account email. The receipt is sent here.</small>
         </div>
         <div className="field">
           <label htmlFor="d-phone">Mobile *</label>
@@ -330,7 +348,7 @@ export const ContributionForm: React.FC<{ handler: DonationHandler }> = ({ handl
       </div>
 
       {/* Step 4: Payment option */}
-      <div className="cf-step">
+      {/* <div className="cf-step">
         <span className="cf-num">4</span>
         <h3>Payment option</h3>
       </div>
@@ -354,7 +372,7 @@ export const ContributionForm: React.FC<{ handler: DonationHandler }> = ({ handl
         {terms.map((term, idx) => (
           <li key={idx}>{term}</li>
         ))}
-      </ul>
+      </ul> */}
 
       <div className="cf-submit">
         {submitError && (
