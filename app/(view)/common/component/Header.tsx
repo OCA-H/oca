@@ -24,7 +24,7 @@ const NAV_MAP: Record<string, string> = {
 
 export const Header: React.FC<HeaderProps> = ({ activeRoute }) => {
   const router = useRouter();
-  const { isAuthenticated, user, signOut } = useAuth();
+  const { isAuthenticated, isLoading: isAuthLoading, user, signOut } = useAuth();
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const activeNav = activeRoute ? NAV_MAP[activeRoute] : undefined;
 
@@ -112,10 +112,13 @@ export const Header: React.FC<HeaderProps> = ({ activeRoute }) => {
 
           <div className="header-actions">
             <Link className="btn btn-gold btn-sm" href={ROUTES.DONATION} onClick={() => handleLinkClick(ROUTES.DONATION)}>Contribute</Link>
-            {!isAuthenticated && (
-              <Link className="btn btn-primary btn-sm" href={ROUTES.MEMBERSHIP} onClick={() => handleLinkClick(ROUTES.MEMBERSHIP)}>Become a Member</Link>
+            {!isAuthLoading && !isAuthenticated && (
+              <Link className="btn btn-primary btn-sm hdr-auth-in" href={ROUTES.MEMBERSHIP} onClick={() => handleLinkClick(ROUTES.MEMBERSHIP)}>Become a Member</Link>
             )}
-            {isAuthenticated ? (
+            {/* Until the first check answers, hold the space instead of guessing "signed out". */}
+            {isAuthLoading ? (
+              <span className="mp-skel hdr-auth-skel" aria-hidden="true" />
+            ) : isAuthenticated ? (
               <div className="nav-item signin-item member-profile-item">
                 <button type="button" className="icon-btn member-profile-btn" aria-haspopup="true">
                   <span className="member-avatar">

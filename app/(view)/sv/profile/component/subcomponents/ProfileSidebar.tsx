@@ -16,6 +16,7 @@ interface ProfileSidebarProps {
   photoMsg: { text: string; bad: boolean } | null;
   onPhotoChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onSignOut: () => void;
+  isSigningOut: boolean;
 }
 
 export const ProfileSidebar: React.FC<ProfileSidebarProps> = ({
@@ -26,6 +27,7 @@ export const ProfileSidebar: React.FC<ProfileSidebarProps> = ({
   photoMsg,
   onPhotoChange,
   onSignOut,
+  isSigningOut,
 }) => {
   const photoInput = useRef<HTMLInputElement>(null);
   const pickPhoto = () => photoInput.current?.click();
@@ -96,9 +98,9 @@ export const ProfileSidebar: React.FC<ProfileSidebarProps> = ({
             )}
           </React.Fragment>
         ))}
-        <button className="mp-link mp-out" type="button" onClick={onSignOut}>
+        <button className="mp-link mp-out" type="button" onClick={onSignOut} disabled={isSigningOut} aria-busy={isSigningOut}>
           <ProfileIcon name="logout" />
-          <span>Log out</span>
+          <span>{isSigningOut ? 'Signing out…' : 'Log out'}</span>
         </button>
       </nav>
     </aside>

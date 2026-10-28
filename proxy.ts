@@ -23,6 +23,20 @@ const PROTECTED_API_ROUTES = [
 ];
 
 /**
+ * A ?redirect= target as a path on this site, or null. Resolving it against the site's origin
+ * catches every form a browser would send elsewhere ("//evil.com", "/\evil.com", "https:...").
+ */
+function sameSiteRedirect(redirect: string | null, origin: string): string | null {
+  if (!redirect) return null;
+  try {
+    const url = new URL(redirect, origin);
+    return url.origin === origin ? `${url.pathname}${url.search}${url.hash}` : null;
+  } catch {
+    return null;
+  }
+}
+
+/**
  * Public auth pages that should redirect to home if user is already authenticated
  */
 const AUTH_PAGES = [
@@ -44,9 +58,11 @@ export async function proxy(request: NextRequest) {
   const sessionCookie = request.cookies.get(SESSION_COOKIE_NAME)?.value;
   const session = sessionCookie ? await verifySessionToken(sessionCookie) : null;
 
-  // 1. If already authenticated and navigating to login/signin page, redirect to the member's profile
+  // 1. If already authenticated and navigating to login/signin page, go where sign-in would have
+  //    sent them: a same-site ?redirect=, else the member's profile
   if (isAuthPage && session) {
-    return NextResponse.redirect(new URL("/sv/profile", request.url));
+    const target = sameSiteRedirect(request.nextUrl.searchParams.get("redirect"), request.nextUrl.origin) ?? "/sv/profile";
+    return NextResponse.redirect(new URL(target, request.url));
   }
 
   // 2. Legacy /member-portal redirect to /sv/member-portal

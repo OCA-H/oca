@@ -33,6 +33,7 @@ export const ProfileView: React.FC = () => {
     sentWishes,
     sendWish,
     handleSignOut,
+    isSigningOut,
   } = useProfileHandler();
   // Starts with the profile when the card is the panel being opened, instead of after it.
   const membershipCard = useMembershipCard(panel === 'card');
@@ -61,7 +62,7 @@ export const ProfileView: React.FC = () => {
   const back = () => showPanel('dashboard');
 
   return (
-    <div className="mp-loaded">
+    <div className={`mp-loaded${isSigningOut ? ' is-leaving' : ''}`}>
       <ProfileHero firstName={profile.firstName || profile.fullName} membershipType={profile.membershipType} batchYear={profile.batchYear} />
 
       <section className="mp-shell">
@@ -74,6 +75,7 @@ export const ProfileView: React.FC = () => {
             photoMsg={photoMsg}
             onPhotoChange={handlePhotoChange}
             onSignOut={handleSignOut}
+            isSigningOut={isSigningOut}
           />
 
           <main className="mp-main">

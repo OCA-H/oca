@@ -1,5 +1,6 @@
 import { ApiError, apiRequest } from "@/app/(view)/common/services/api.service";
 import { ROUTES } from "@/app/(view)/common/helper/routes";
+import { signOutMember } from "@/app/(view)/common/helper/useAuth";
 
 /**
  * Calls a members-area API. A 401 (session expired, or the account is gone) or 403 (account
@@ -11,8 +12,7 @@ async function svRequest<T>(url: string, options?: Parameters<typeof apiRequest>
     return await apiRequest<T>(url, options);
   } catch (error) {
     if (error instanceof ApiError && (error.status === 401 || error.status === 403) && typeof window !== "undefined") {
-      await apiRequest("/api/auth/sign-out", { method: "POST" }).catch(() => undefined);
-      window.dispatchEvent(new CustomEvent("oca_auth_change", { detail: { isAuthenticated: false } }));
+      await signOutMember();
       const back = `${window.location.pathname}${window.location.search}`;
       window.location.replace(`${ROUTES.MEMBER_SIGNIN}?redirect=${encodeURIComponent(back)}`);
     }
@@ -99,9 +99,5 @@ export const profileService = {
 
   sendSuggestion: async (subject: string, message: string): Promise<void> => {
     await svRequest("/api/sv/profile/suggestion", { method: "POST", body: { subject, message } });
-  },
-
-  signOut: async (): Promise<void> => {
-    await apiRequest("/api/auth/sign-out", { method: "POST" }).catch(() => undefined);
   },
 };

@@ -8626,3 +8626,39 @@ section[id^="ec-"] {
 .mp-skel-crest{flex-shrink:0; width:50px; height:50px; border-radius:50%;}
 .mp-ecard.is-invalid{filter:grayscale(.85); opacity:.8;}
 .mp-btns .btn:disabled{opacity:.5; cursor:not-allowed;}
+
+/* ---------- Sign-in hand-off: welcome over the form, then on to the members area ---------- */
+.si-main{position:relative;}
+.si-main > *:not(.si-handoff){transition:opacity .3s ease;}
+.si-main.is-handing-off > *:not(.si-handoff){opacity:0; pointer-events:none;}
+.si-handoff{position:absolute; inset:0; z-index:2; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:10px; padding:40px; text-align:center; background:#fff; border-radius:inherit; animation:mpFadeIn .35s ease-out both;}
+.si-handoff > *{animation:mpRiseIn .45s cubic-bezier(.2,.7,.3,1) both;}
+.si-handoff > :nth-child(2){animation-delay:.08s;}
+.si-handoff > :nth-child(3){animation-delay:.14s;}
+.si-handoff > :nth-child(4){animation-delay:.2s;}
+.si-handoff-ico{display:flex; align-items:center; justify-content:center; width:56px; height:56px; margin-bottom:8px; border-radius:50%; background:var(--tint-teal); color:var(--brand);}
+.si-handoff-ico svg{width:28px; height:28px;}
+.si-handoff h2{margin:0; font-size:24px; line-height:1.25; color:var(--navy);}
+.si-handoff p{margin:0; font-size:14.5px; color:var(--text-soft);}
+.si-handoff-bar{position:relative; display:block; width:min(220px, 70%); height:4px; margin-top:16px; border-radius:4px; overflow:hidden; background:var(--tint-navy);}
+.si-handoff-bar::after{content:""; position:absolute; inset:0; width:40%; border-radius:inherit; background:var(--brand); animation:siHandoffBar 1.1s ease-in-out infinite;}
+@keyframes siHandoffBar{from{transform:translateX(-100%);} to{transform:translateX(250%);}}
+
+/* the members area arrives as its skeleton, faded in rather than snapped in */
+.mp-loading{animation:mpFadeIn .3s ease-out both;}
+
+/* header: a neutral placeholder while the signed-in state is still being checked */
+.hdr-auth-skel{display:inline-block; width:112px; height:36px; border-radius:100px; vertical-align:middle;}
+.header-actions .member-profile-item, .header-actions .signin-item, .header-actions .hdr-auth-in{animation:mpFadeIn .25s ease-out both;}
+
+@media (prefers-reduced-motion: reduce){
+  .si-handoff, .si-handoff > *, .mp-loading, .header-actions .member-profile-item, .header-actions .signin-item, .header-actions .hdr-auth-in{animation:none;}
+  .si-handoff-bar::after{animation:none; width:100%;}
+  .si-main > *:not(.si-handoff){transition:none;}
+}
+
+/* signing out: the members area dims while member sign-in opens */
+.mp-loaded .mp-hero .wrap, .mp-loaded .mp-shell{transition:opacity .3s ease;}
+.mp-loaded.is-leaving .mp-hero .wrap, .mp-loaded.is-leaving .mp-shell{opacity:.45; pointer-events:none;}
+.mp-out:disabled{cursor:progress; opacity:.7;}
+@media (prefers-reduced-motion: reduce){ .mp-loaded .mp-hero .wrap, .mp-loaded .mp-shell{transition:none;} }

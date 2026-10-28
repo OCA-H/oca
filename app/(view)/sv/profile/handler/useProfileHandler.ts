@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
-import { ROUTES } from '@/app/(view)/common/helper/routes';
+import { SIGNED_OUT_ROUTE, signOutMember } from '@/app/(view)/common/helper/useAuth';
 import { profileContent, type ProfilePanel } from '../content';
 import { profileHelper } from '../helper';
 import { profileService, type MemberProfile } from '../services';
@@ -126,10 +126,12 @@ export function useProfileHandler() {
 
   const sendWish = (name: string) => setSentWishes((prev) => (prev.includes(name) ? prev : [...prev, name]));
 
+  const [isSigningOut, setIsSigningOut] = useState(false);
   const handleSignOut = async () => {
-    await profileService.signOut();
-    window.dispatchEvent(new CustomEvent('oca_auth_change', { detail: { isAuthenticated: false } }));
-    router.push(ROUTES.HOME);
+    if (isSigningOut) return;
+    setIsSigningOut(true);
+    await signOutMember();
+    router.replace(SIGNED_OUT_ROUTE);
   };
 
   return {
@@ -145,6 +147,7 @@ export function useProfileHandler() {
     sentWishes,
     sendWish,
     handleSignOut,
+    isSigningOut,
   };
 }
 

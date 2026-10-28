@@ -6,6 +6,26 @@ import { ROUTES } from '@/app/(view)/common/helper/routes';
 import { memberSignInHelper } from '../helper';
 import { memberSignInService } from '../services';
 
+/** Long enough to read the welcome, short enough not to feel like waiting. */
+const HANDOFF_MS = 900;
+
+/**
+ * Where to go after signing in: ?redirect= when it stays on this site, else the member's profile.
+ * Resolving it against this origin catches every form a browser would send elsewhere
+ * ("//evil.com", "/\evil.com", "https://...").
+ */
+export function signInTarget(): string {
+  if (typeof window === 'undefined') return ROUTES.PROFILE;
+  const redirect = new URLSearchParams(window.location.search).get('redirect');
+  if (!redirect) return ROUTES.PROFILE;
+  try {
+    const url = new URL(redirect, window.location.origin);
+    return url.origin === window.location.origin ? `${url.pathname}${url.search}${url.hash}` : ROUTES.PROFILE;
+  } catch {
+    return ROUTES.PROFILE;
+  }
+}
+
 export function useMemberSignInHandler() {
   const router = useRouter();
   const [user, setUser] = useState('');
@@ -13,6 +33,8 @@ export function useMemberSignInHandler() {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [feedback, setFeedback] = useState<{ type: 'error' | 'success'; text: string } | null>(null);
+  /** Set once sign-in succeeds: the page shows the welcome hand-off until the next page opens. */
+  const [welcomeName, setWelcomeName] = useState<string | null>(null);
 
   const toggleShowPassword = () => {
     setShowPassword((prev) => !prev);
@@ -47,36 +69,25 @@ export function useMemberSignInHandler() {
     }
 
     setIsLoading(true);
+    let response;
     try {
-      const response = await memberSignInService.login({ user, pass: password });
-      setFeedback({
-        type: 'success',
-        text: `Welcome back, ${response.data?.fullName || 'Columban'}! Redirecting...`,
-      });
-
-      // Check for redirect query parameter in URL, otherwise go to the member's profile
-      let targetUrl: string = ROUTES.PROFILE;
-      if (typeof window !== 'undefined') {
-        const params = new URLSearchParams(window.location.search);
-        const redirectParam = params.get('redirect');
-        if (redirectParam && redirectParam.startsWith('/') && !redirectParam.startsWith('//')) {
-          targetUrl = redirectParam;
-        }
-      }
-
-      if (typeof window !== 'undefined') {
-        window.dispatchEvent(new CustomEvent('oca_auth_change', { detail: { isAuthenticated: true } }));
-      }
-
-      setTimeout(() => {
-        router.push(targetUrl);
-      }, 700);
+      response = await memberSignInService.login({ user, pass: password });
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : 'Sign in failed. Please verify your details.';
       setFeedback({ type: 'error', text: message });
-    } finally {
       setIsLoading(false);
+      return;
     }
+
+    // One hand-off, straight to the target: the welcome fades in over the form while the next
+    // page is fetched, then replace() moves there, so Back does not return to this form.
+    const target = signInTarget();
+    const fullName = response.data?.fullName || 'Columban';
+    setWelcomeName(fullName.split(' ').find((part) => part && !part.endsWith('.')) || fullName);
+    router.prefetch(target);
+    window.dispatchEvent(new CustomEvent('oca_auth_change', { detail: { isAuthenticated: true } }));
+    await new Promise((resolve) => setTimeout(resolve, HANDOFF_MS));
+    router.replace(target);
   };
 
   return {
@@ -88,6 +99,7 @@ export function useMemberSignInHandler() {
     toggleShowPassword,
     isLoading,
     feedback,
+    welcomeName,
     handleSubmit,
     fillDemoCredentials,
   };

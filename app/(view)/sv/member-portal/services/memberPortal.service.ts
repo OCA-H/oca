@@ -30,12 +30,4 @@ export const memberPortalService = {
 
     return json.data as MemberProfile;
   },
-
-  signOut: async (): Promise<void> => {
-    await fetch("/api/auth/sign-out", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      credentials: "include",
-    });
-  },
 };

@@ -4,7 +4,7 @@ import React, { useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { memberSignInContent } from '../content';
-import { useMemberSignInHandler } from '../handler';
+import { signInTarget, useMemberSignInHandler } from '../handler';
 import { useAuth } from '@/app/(view)/common/helper/useAuth';
 
 export const MemberSignInView: React.FC = () => {
@@ -19,19 +19,20 @@ export const MemberSignInView: React.FC = () => {
     toggleShowPassword,
     isLoading,
     feedback,
+    welcomeName,
     handleSubmit,
     fillDemoCredentials,
   } = useMemberSignInHandler();
 
+  // Already signed in when this page opened (e.g. Back from the members area): go on to the
+  // members area. The proxy does this for a fresh load; this covers pages restored in the browser.
+  // A sign-in made here navigates itself once its welcome has shown.
+  const isAlreadySignedIn = isAuthenticated && !welcomeName;
   useEffect(() => {
-    if (isAuthenticated) {
-      router.replace('/');
-    }
-  }, [isAuthenticated, router]);
+    if (isAlreadySignedIn) router.replace(signInTarget());
+  }, [isAlreadySignedIn, router]);
 
-  if (isAuthenticated) {
-    return null;
-  }
+  const isHandingOff = Boolean(welcomeName) || isAlreadySignedIn;
 
   return (
     <>
@@ -117,7 +118,19 @@ export const MemberSignInView: React.FC = () => {
               </p>
             </aside>
 
-            <div className="si-main">
+            <div className={`si-main${isHandingOff ? ' is-handing-off' : ''}`}>
+              {isHandingOff && (
+                <div className="si-handoff" role="status" aria-live="polite">
+                  <span className="si-handoff-ico" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none">
+                      <path d="M5 12.5l4.2 4.2L19 7" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                  </span>
+                  <h2>{welcomeName ? `Welcome back, ${welcomeName}` : 'You are signed in'}</h2>
+                  <p>Opening your members area…</p>
+                  <span className="si-handoff-bar" aria-hidden="true" />
+                </div>
+              )}
               <div className="si-head">
                 <h1>{memberSignInContent.main.title}</h1>
                 <p>{memberSignInContent.main.subtitle}</p>
@@ -189,7 +202,7 @@ export const MemberSignInView: React.FC = () => {
                 </div>
               </div>
 
-              <form onSubmit={handleSubmit}>
+              <form onSubmit={handleSubmit} aria-hidden={isHandingOff || undefined} inert={isHandingOff || undefined}>
                 <div className="field">
                   <label htmlFor="si-user">{memberSignInContent.main.userLabel}</label>
                   <input
@@ -232,8 +245,8 @@ export const MemberSignInView: React.FC = () => {
                     {memberSignInContent.main.forgotPasswordText}
                   </Link>
                 </div>
-                <button className="btn btn-primary si-wide" type="submit" disabled={isLoading}>
-                  {isLoading ? 'Logging in...' : memberSignInContent.main.loginButtonText}
+                <button className="btn btn-primary si-wide" type="submit" disabled={isLoading || isHandingOff}>
+                  {isLoading ? 'Signing in…' : memberSignInContent.main.loginButtonText}
                 </button>
                 <div className="si-or">
                   <span>{memberSignInContent.main.orText}</span>
@@ -242,8 +255,9 @@ export const MemberSignInView: React.FC = () => {
                   {memberSignInContent.main.registerButtonText}
                 </Link>
               </form>
-              {feedback && (
+              {feedback && !isHandingOff && (
                 <p
+                  role={feedback.type === 'error' ? 'alert' : 'status'}
                   style={{
                     marginTop: '14px',
                     fontSize: '13.5px',

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { SIGNED_OUT_ROUTE, signOutMember } from '@/app/(view)/common/helper/useAuth';
 import { memberPortalService, type MemberProfile } from '../services';
 
 export function useMemberPortalHandler() {
@@ -41,15 +42,8 @@ export function useMemberPortalHandler() {
 
   const handleSignOut = async () => {
     setIsSigningOut(true);
-    try {
-      await memberPortalService.signOut();
-      if (typeof window !== 'undefined') {
-        window.dispatchEvent(new CustomEvent('oca_auth_change', { detail: { isAuthenticated: false } }));
-      }
-      router.push('/');
-    } catch {
-      router.push('/');
-    }
+    await signOutMember();
+    router.replace(SIGNED_OUT_ROUTE);
   };
 
   return {
