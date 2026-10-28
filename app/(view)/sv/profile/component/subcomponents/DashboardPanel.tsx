@@ -1,7 +1,6 @@
 import React from 'react';
 import Link from 'next/link';
 import { profileContent, type ProfilePanel, type ProfileTile } from '../../content';
-import { profileHelper } from '../../helper';
 import type { MemberProfile } from '../../services';
 import { PanelHead } from './PanelHead';
 import { PanelLink } from './PanelLink';
@@ -14,7 +13,7 @@ interface DashboardPanelProps {
 }
 
 export const DashboardPanel: React.FC<DashboardPanelProps> = ({ profile, hidden, onShowPanel }) => {
-  const { dashboard, donor, birthdays } = profileContent;
+  const { dashboard, comingSoon } = profileContent;
 
   // Tiles that show the member's own details instead of a fixed line.
   const details = (tile: ProfileTile): React.ReactNode => {
@@ -24,24 +23,6 @@ export const DashboardPanel: React.FC<DashboardPanelProps> = ({ profile, hidden,
           <>
             <span className="mp-mini">{profile.membershipType}</span>
             <span className="mp-id">{profile.memberId}</span>
-          </>
-        );
-      case 'donor':
-        return (
-          <>
-            <span className="mp-mini mp-mini--gold">{donor.tileBadge}</span>
-            {tile.desc}
-          </>
-        );
-      case 'birthdays':
-        return (
-          <>
-            <span className="mp-stack">
-              {birthdays.people.map((person) => (
-                <i key={person.name}>{profileHelper.getInitials(person.name)}</i>
-              ))}
-            </span>
-            {birthdays.people.length} Columbans celebrate today.
           </>
         );
       default:
@@ -67,6 +48,23 @@ export const DashboardPanel: React.FC<DashboardPanelProps> = ({ profile, hidden,
       <div className="mp-tiles">
         {dashboard.tiles.map((tile) => {
           const className = `mp-tile${tile.tone ? ` mp-tile--${tile.tone}` : ''}`;
+
+          // Not built yet: the same card, quietened, with a badge instead of an action.
+          if (tile.soon) {
+            return (
+              <div key={tile.label} className={`${className} is-soon`} aria-disabled="true">
+                <span className="mp-tile-ico">
+                  <ProfileIcon name={tile.icon} />
+                </span>
+                <span className="mp-tile-t">{tile.label}</span>
+                <span className="mp-tile-d">{tile.desc}</span>
+                <span className="mp-tile-act">
+                  <span className="soon-tag">{comingSoon.badge}</span>
+                </span>
+              </div>
+            );
+          }
+
           const body = (
             <>
               {tile.href && (

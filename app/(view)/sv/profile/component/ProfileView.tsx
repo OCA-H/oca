@@ -4,20 +4,19 @@ import React from 'react';
 import Link from 'next/link';
 import { ROUTES } from '@/app/(view)/common/helper/routes';
 import type { MemberProfile } from '../services';
-import { useMembershipCard, useProfileHandler } from '../handler';
+import { useMembershipCard, useProfileHandler, useProfilePhoto } from '../handler';
 import {
   AccountPanel,
-  BirthdaysPanel,
   CardPanel,
+  ComingSoonPanel,
   DashboardPanel,
-  DonorPanel,
   HelpCard,
   PasswordPanel,
   ProfileHero,
   ProfileSidebar,
   ProfileSkeleton,
-  SuggestionPanel,
 } from './subcomponents';
+import { SOON_PANELS, profileContent } from '../content';
 
 export const ProfileView: React.FC = () => {
   const {
@@ -27,17 +26,13 @@ export const ProfileView: React.FC = () => {
     error,
     panel,
     showPanel,
-    photoSrc,
-    photoMsg,
-    handlePhotoChange,
-    sentWishes,
-    sendWish,
     handleSignOut,
     isSigningOut,
     sessionKey,
   } = useProfileHandler();
   // Starts with the profile when the card is the panel being opened, instead of after it.
   const membershipCard = useMembershipCard(panel === 'card', sessionKey);
+  const { photoSrc, photoMsg, isPhotoLoading, isPhotoUploading, handlePhotoChange } = useProfilePhoto(profile, setProfile, sessionKey);
   const saveProfile = (saved: MemberProfile) => {
     setProfile(saved);
     membershipCard.refresh();
@@ -73,6 +68,8 @@ export const ProfileView: React.FC = () => {
             panel={panel}
             onShowPanel={showPanel}
             photoSrc={photoSrc}
+            isPhotoLoading={isPhotoLoading}
+            isPhotoUploading={isPhotoUploading}
             photoMsg={photoMsg}
             onPhotoChange={handlePhotoChange}
             onSignOut={handleSignOut}
@@ -90,9 +87,13 @@ export const ProfileView: React.FC = () => {
               hidden={panel !== 'card'}
               onBack={back}
             />
-            <DonorPanel hidden={panel !== 'donor'} onBack={back} />
-            <BirthdaysPanel hidden={panel !== 'birthdays'} onBack={back} sentWishes={sentWishes} onWish={sendWish} />
-            <SuggestionPanel hidden={panel !== 'suggest'} onBack={back} />
+            {/* Sections not built yet still have an address; opening it shows Coming soon. */}
+            {profileContent.nav
+              .flatMap(({ items }) => items)
+              .filter((item) => item.panel && SOON_PANELS.has(item.panel))
+              .map((item) => (
+                <ComingSoonPanel key={item.panel} panel={item.panel!} label={item.label} hidden={panel !== item.panel} onBack={back} />
+              ))}
             <PasswordPanel hidden={panel !== 'password'} onBack={back} />
             <HelpCard />
           </main>

@@ -3,11 +3,9 @@
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import { SIGNED_OUT_ROUTE, signOutMember } from '@/app/(view)/common/helper/useAuth';
-import { profileContent, type ProfilePanel } from '../content';
+import type { ProfilePanel } from '../content';
 import { profileHelper } from '../helper';
 import { profileService, type MemberProfile } from '../services';
-
-const { photo } = profileContent;
 
 export function useProfileHandler() {
   const router = useRouter();
@@ -17,10 +15,6 @@ export function useProfileHandler() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const scrollTo = useRef<ProfilePanel | null>(null);
-  const [photoSrc, setPhotoSrc] = useState<string | null>(null);
-  const [photoMsg, setPhotoMsg] = useState<{ text: string; bad: boolean } | null>(null);
-  const [sentWishes, setSentWishes] = useState<string[]>([]);
-  const photoTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
   useEffect(() => {
     let isMounted = true;
@@ -29,7 +23,6 @@ export function useProfileHandler() {
       .then((data) => {
         if (!isMounted) return;
         setProfile(data);
-        setPhotoSrc(data.avatarUrl);
       })
       .catch((err: unknown) => {
         if (isMounted) setError(err instanceof Error ? err.message : 'Could not load your profile.');
@@ -39,7 +32,6 @@ export function useProfileHandler() {
       });
     return () => {
       isMounted = false;
-      clearTimeout(photoTimer.current);
     };
   }, []);
 
@@ -97,35 +89,6 @@ export function useProfileHandler() {
     revealPanel(panel);
   }, [panel, revealPanel]);
 
-  const sayPhoto = (text: string, bad = false) => {
-    clearTimeout(photoTimer.current);
-    setPhotoMsg({ text, bad });
-    if (!bad) photoTimer.current = setTimeout(() => setPhotoMsg(null), 4000);
-  };
-
-  /** Checks the chosen image and previews it in the oval. */
-  const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const input = e.currentTarget;
-    const file = input.files?.[0];
-    if (!file) return;
-    if (!photo.types.test(file.type)) {
-      sayPhoto(photo.badType, true);
-    } else if (file.size > photo.maxBytes) {
-      sayPhoto(photo.tooBig, true);
-    } else {
-      const reader = new FileReader();
-      reader.onload = () => {
-        setPhotoSrc(reader.result as string);
-        sayPhoto(photo.updated);
-      };
-      reader.onerror = () => sayPhoto(photo.unreadable, true);
-      reader.readAsDataURL(file);
-    }
-    input.value = '';
-  };
-
-  const sendWish = (name: string) => setSentWishes((prev) => (prev.includes(name) ? prev : [...prev, name]));
-
   const [isSigningOut, setIsSigningOut] = useState(false);
   /** Changes on every sign-out, so data loaded for the previous member (the card) is dropped too. */
   const [sessionKey, setSessionKey] = useState(0);
@@ -148,9 +111,6 @@ export function useProfileHandler() {
       setProfile(null);
       setIsLoading(true);
       setError(null);
-      setPhotoSrc(null);
-      setPhotoMsg(null);
-      setSentWishes([]);
       setIsSigningOut(false);
       setSessionKey((key) => key + 1);
     };
@@ -163,11 +123,6 @@ export function useProfileHandler() {
     error,
     panel,
     showPanel,
-    photoSrc,
-    photoMsg,
-    handlePhotoChange,
-    sentWishes,
-    sendWish,
     handleSignOut,
     isSigningOut,
     sessionKey,

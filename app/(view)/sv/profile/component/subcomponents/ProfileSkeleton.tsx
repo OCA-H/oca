@@ -57,7 +57,8 @@ const DashboardSkeleton: React.FC = () => (
  * It reuses the real layout classes and the real (static) menu, so the loaded page lands
  * exactly where the skeleton was and nothing jumps.
  */
-export const ProfileSkeleton: React.FC<{ panel: ProfilePanel }> = ({ panel }) => {
+/** `panel` left out: the page is not known yet, so no menu item is highlighted and the panel is generic. */
+export const ProfileSkeleton: React.FC<{ panel?: ProfilePanel }> = ({ panel }) => {
   const { breadcrumb, hero, nav } = profileContent;
 
   return (
@@ -104,10 +105,14 @@ export const ProfileSkeleton: React.FC<{ panel: ProfilePanel }> = ({ panel }) =>
                 <React.Fragment key={group}>
                   <p className="mp-group">{group}</p>
                   {items.map((item) => (
-                    <span key={item.label} className={`mp-link${item.panel === panel ? ' is-active' : ''}`}>
+                    <span key={item.label} className={`mp-link${item.panel === panel ? ' is-active' : ''}${item.soon ? ' is-soon' : ''}`}>
                       <ProfileIcon name={item.icon} />
                       <span>{item.label}</span>
-                      {item.href && <ProfileIcon name="ext" className="mp-ext" />}
+                      {item.soon ? (
+                        <span className="soon-tag">{profileContent.comingSoon.tag}</span>
+                      ) : (
+                        item.href && <ProfileIcon name="ext" className="mp-ext" />
+                      )}
                     </span>
                   ))}
                 </React.Fragment>

@@ -21,13 +21,15 @@ export async function apiRequest<T = Record<string, unknown>>(
   url: string,
   options: { method?: 'GET' | 'POST' | 'PATCH' | 'PUT' | 'DELETE'; body?: unknown } = {}
 ): Promise<T> {
+  // FormData (file uploads) goes as multipart, with the browser setting its own boundary.
+  const isForm = typeof FormData !== 'undefined' && options.body instanceof FormData;
   let res: Response;
   try {
     res = await fetch(url, {
       method: options.method ?? 'GET',
-      headers: { 'Content-Type': 'application/json' },
+      headers: isForm ? undefined : { 'Content-Type': 'application/json' },
       credentials: 'include',
-      ...(options.body !== undefined && { body: JSON.stringify(options.body) }),
+      ...(options.body !== undefined && { body: isForm ? (options.body as FormData) : JSON.stringify(options.body) }),
     });
   } catch {
     throw new ApiError('We could not reach the server. Please check your connection and try again.', 0);

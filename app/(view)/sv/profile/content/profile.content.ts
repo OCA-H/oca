@@ -29,12 +29,14 @@ export type ProfileIcon =
   | "lock"
   | "logout";
 
-/** A menu entry either swaps the panel in place or leaves the members area. */
+/** A menu entry either swaps the panel in place, leaves the members area, or is not ready yet. */
 export interface ProfileNavItem {
   label: string;
   icon: ProfileIcon;
   panel?: ProfilePanel;
   href?: string;
+  /** Not built yet: shown with a "Soon" tag, and goes nowhere. */
+  soon?: boolean;
 }
 
 export interface ProfileTile extends ProfileNavItem {
@@ -54,22 +56,22 @@ export const profileContent = {
       items: [
         { label: "My Account", icon: "user", panel: "account" },
         { label: "e-Membership Card", icon: "card", panel: "card" },
-        { label: "Donor Pass", icon: "ticket", panel: "donor" },
+        { label: "Donor Pass", icon: "ticket", panel: "donor", soon: true },
       ],
     },
     {
       group: "Community",
       items: [
-        { label: "Today’s Birthday", icon: "gift", panel: "birthdays" },
-        { label: "OCA Directory", icon: "people", href: ROUTES.HOME_CONNECT },
-        { label: "Internship Program List", icon: "briefcase", href: ROUTES.HOME_CONNECT },
+        { label: "Today’s Birthday", icon: "gift", panel: "birthdays", soon: true },
+        { label: "OCA Directory", icon: "people", soon: true },
+        { label: "Internship Program List", icon: "briefcase", soon: true },
       ],
     },
     {
       group: "Give & support",
       items: [
-        { label: "Contribute", icon: "rupee", href: ROUTES.DONATION },
-        { label: "Suggestion Box", icon: "chat", panel: "suggest" },
+        { label: "Contribute", icon: "rupee", soon: true },
+        { label: "Suggestion Box", icon: "chat", panel: "suggest", soon: true },
       ],
     },
     { group: "Account", items: [{ label: "Change Password", icon: "lock", panel: "password" }] },
@@ -85,18 +87,27 @@ export const profileContent = {
       cta: "Get your pass",
       href: ROUTES.ANNUAL_DINNER_PASSES,
     },
-    // The card and birthday tiles also show live details; see DashboardPanel.
+    // The card tile also shows live details; see DashboardPanel. "soon" tiles are shown but go nowhere.
     tiles: [
       { label: "e-Membership Card", icon: "card", panel: "card", desc: "", action: "View card" },
-      { label: "Donor Pass", icon: "ticket", panel: "donor", tone: "gold", desc: "Unlocks partner offers.", action: "Take your pass" },
+      { label: "Donor Pass", icon: "ticket", panel: "donor", tone: "gold", desc: "Unlocks partner offers.", action: "Take your pass", soon: true },
       { label: "My Account", icon: "user", panel: "account", desc: "Keep your phone and address current.", action: "Update details" },
-      { label: "Today’s Birthday", icon: "gift", panel: "birthdays", tone: "blue", desc: "", action: "Send wishes" },
-      { label: "OCA Directory", icon: "people", href: ROUTES.HOME_CONNECT, tone: "blue", desc: "Find batchmates by batch, city or name.", action: "Search the directory" },
-      { label: "Internship Program List", icon: "briefcase", href: ROUTES.HOME_CONNECT, tone: "blue", desc: "Short placements with Columban-run firms.", action: "Browse placements" },
-      { label: "Contribute", icon: "rupee", href: ROUTES.DONATION, tone: "gold", desc: "Back the School and your fellow Columbans.", action: "Contribute" },
-      { label: "Suggestion Box", icon: "chat", panel: "suggest", tone: "gold", desc: "Tell the Secretariat what to improve.", action: "Share an idea" },
+      { label: "Today’s Birthday", icon: "gift", panel: "birthdays", tone: "blue", desc: "Send wishes to fellow Columbans.", action: "Send wishes", soon: true },
+      { label: "OCA Directory", icon: "people", tone: "blue", desc: "Find batchmates by batch, city or name.", action: "Search the directory", soon: true },
+      { label: "Internship Program List", icon: "briefcase", tone: "blue", desc: "Short placements with Columban-run firms.", action: "Browse placements", soon: true },
+      { label: "Contribute", icon: "rupee", tone: "gold", desc: "Back the School and your fellow Columbans.", action: "Contribute", soon: true },
+      { label: "Suggestion Box", icon: "chat", panel: "suggest", tone: "gold", desc: "Tell the Secretariat what to improve.", action: "Share an idea", soon: true },
       { label: "Change Password", icon: "lock", panel: "password", tone: "slate", desc: "Keep your member login secure.", action: "Change password" },
     ] as ProfileTile[],
+  },
+
+  /** Shown in place of a panel that is not built yet, if its address is opened directly. */
+  comingSoon: {
+    tag: "Soon",
+    badge: "Coming soon",
+    title: "Coming soon",
+    lead: "We are still building this part of the members area. It will be ready here soon.",
+    back: "Back to dashboard",
   },
 
   account: {
@@ -171,7 +182,7 @@ export const profileContent = {
 
   password: {
     title: "Change Password",
-    lead: "Choose a new password for your member login.",
+    lead: "Choose a new password for your member login: at least 8 characters, different from your current one.",
     success: "Your password has been updated.",
     successNote: "Use the new one the next time you sign in.",
     mismatch: "The two new passwords do not match.",
@@ -187,10 +198,17 @@ export const profileContent = {
 
   photo: {
     types: /^image\/(png|jpe?g|webp)$/i,
-    maxBytes: 5 * 1024 * 1024,
+    // Matches the server's limit (PROFILE_PHOTO_RULES); checked here first to save a wasted upload.
+    maxBytes: 10 * 1024 * 1024,
     updated: "Photo updated.",
+    uploading: "Uploading your photo…",
     badType: "Please choose a JPG, PNG or WebP image.",
-    tooBig: "That image is over 5 MB. Please choose a smaller one.",
-    unreadable: "Sorry, that image could not be read. Please try another.",
+    tooBig: "That image is over 10 MB. Please choose a smaller one.",
+    uploadFailed: "We could not save your photo. Please try again.",
   },
 };
+
+/** Panels marked "soon" in the menu: their address shows the Coming soon panel instead. */
+export const SOON_PANELS = new Set<ProfilePanel>(
+  profileContent.nav.flatMap(({ items }) => items).filter((item) => item.soon && item.panel).map((item) => item.panel!)
+);

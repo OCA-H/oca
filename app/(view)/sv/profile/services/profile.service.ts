@@ -11,13 +11,17 @@ async function svRequest<T>(url: string, options?: Parameters<typeof apiRequest>
   try {
     return await apiRequest<T>(url, options);
   } catch (error) {
-    if (error instanceof ApiError && (error.status === 401 || error.status === 403) && typeof window !== "undefined") {
-      await signOutMember();
-      const back = `${window.location.pathname}${window.location.search}`;
-      window.location.replace(`${ROUTES.MEMBER_SIGNIN}?redirect=${encodeURIComponent(back)}`);
-    }
+    if (error instanceof ApiError) await endSessionIfRevoked(error.status);
     throw error;
   }
+}
+
+/** 401 / 403 from a members-area API: sign out and return to this panel after signing in again. */
+async function endSessionIfRevoked(status: number): Promise<void> {
+  if ((status !== 401 && status !== 403) || typeof window === "undefined") return;
+  await signOutMember();
+  const back = `${window.location.pathname}${window.location.search}`;
+  window.location.replace(`${ROUTES.MEMBER_SIGNIN}?redirect=${encodeURIComponent(back)}`);
 }
 
 export interface ProfileAddress {
@@ -86,6 +90,24 @@ export const profileService = {
   getCard: async (): Promise<MembershipCard> => {
     const json = await svRequest<{ data: MembershipCard }>("/api/sv/profile/card");
     return json.data;
+  },
+
+  /** Uploads a new profile photo; the saved profile comes back with its new photo address. */
+  uploadPhoto: async (file: File): Promise<MemberProfile> => {
+    const form = new FormData();
+    form.append("photo", file);
+    const json = await svRequest<{ data: MemberProfile }>("/api/sv/profile/photo", { method: "POST", body: form });
+    return json.data;
+  },
+
+  /** The member's photo as a Blob, to show through an object URL. */
+  getPhotoBlob: async (url: string): Promise<Blob> => {
+    const res = await fetch(url, { credentials: "include" });
+    if (!res.ok) {
+      await endSessionIfRevoked(res.status);
+      throw new ApiError("We could not load your photo.", res.status);
+    }
+    return res.blob();
   },
 
   updateProfile: async (update: ProfileUpdate): Promise<MemberProfile> => {

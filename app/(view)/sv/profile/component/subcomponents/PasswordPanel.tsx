@@ -13,7 +13,7 @@ const FIELDS = [
 
 export const PasswordPanel: React.FC<{ hidden: boolean; onBack: () => void }> = ({ hidden, onBack }) => {
   const { password } = profileContent;
-  const { values, setValue, visible, toggleVisible, isMismatch, fieldErrors, error, isSaving, isSaved, handleSubmit } =
+  const { values, setValue, visible, toggleVisible, isMismatch, isComplete, fieldErrors, error, isSaving, isSaved, handleSubmit } =
     usePasswordForm();
 
   return (
@@ -23,12 +23,12 @@ export const PasswordPanel: React.FC<{ hidden: boolean; onBack: () => void }> = 
         <b>{password.success}</b> {password.successNote}
       </PanelSuccess>
       {error && (
-        <p className="ms-error" role="alert">
+        <p className="ms-error mp-fade" role="alert">
           {error}
         </p>
       )}
 
-      <form className="cf-form mp-form mp-form--narrow" id="mp-password-form" autoComplete="off" onSubmit={handleSubmit}>
+      <form className="cf-form mp-form mp-form--narrow" id="mp-password-form" autoComplete="off" onSubmit={handleSubmit} aria-busy={isSaving}>
         {FIELDS.map((field) => (
           <div className="field" key={field.name}>
             <label htmlFor={field.id}>{field.label}</label>
@@ -38,6 +38,8 @@ export const PasswordPanel: React.FC<{ hidden: boolean; onBack: () => void }> = 
                 name={field.name}
                 type={visible[field.name] ? 'text' : 'password'}
                 required
+                minLength={field.name === 'current' ? undefined : 8}
+                maxLength={128}
                 autoComplete={field.autoComplete}
                 value={values[field.name]}
                 onChange={(e) => setValue(field.name, e.target.value)}
@@ -60,8 +62,9 @@ export const PasswordPanel: React.FC<{ hidden: boolean; onBack: () => void }> = 
           </div>
         ))}
         <div className="mp-actions">
-          <button className="btn btn-primary" type="submit" disabled={isSaving || isMismatch}>
-            {isSaving ? 'Updating…' : 'Update password'}
+          <button className={`btn btn-primary mp-save${isSaving ? ' is-saving' : ''}`} type="submit" disabled={isSaving || isMismatch || !isComplete}>
+            <span className="mp-spinner" aria-hidden="true" />
+            <span>{isSaving ? 'Updating…' : 'Update password'}</span>
           </button>
         </div>
       </form>

@@ -13,6 +13,8 @@ interface ProfileSidebarProps {
   panel: ProfilePanel;
   onShowPanel: (panel: ProfilePanel) => void;
   photoSrc: string | null;
+  isPhotoLoading: boolean;
+  isPhotoUploading: boolean;
   photoMsg: { text: string; bad: boolean } | null;
   onPhotoChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onSignOut: () => void;
@@ -24,6 +26,8 @@ export const ProfileSidebar: React.FC<ProfileSidebarProps> = ({
   panel,
   onShowPanel,
   photoSrc,
+  isPhotoLoading,
+  isPhotoUploading,
   photoMsg,
   onPhotoChange,
   onSignOut,
@@ -37,24 +41,32 @@ export const ProfileSidebar: React.FC<ProfileSidebarProps> = ({
     <aside className="mp-side" aria-label="Members menu">
       <div className="mp-profile">
         <div className="mp-photo-box">
-          <div className="mp-photo-wrap">
-            {photoSrc ? (
+          <div className={`mp-photo-wrap${isPhotoUploading ? ' is-uploading' : ''}`} aria-busy={isPhotoLoading || isPhotoUploading}>
+            {isPhotoLoading ? (
+              <span className="mp-skel mp-photo-skel" aria-label={`Loading ${name}'s photo`} />
+            ) : photoSrc ? (
+              // Keyed by the image, so each new photo fades in rather than snapping over the last.
               // eslint-disable-next-line @next/next/no-img-element
-              <img className="mp-photo" src={photoSrc} alt={name} />
+              <img key={photoSrc} className="mp-photo" src={photoSrc} alt={name} />
             ) : (
               <span className="mp-photo-initials" aria-label={name}>
                 {profileHelper.getInitials(profile.fullName)}
               </span>
             )}
+            {isPhotoUploading && (
+              <span className="mp-photo-busy" aria-hidden="true">
+                <span className="mp-photo-spin" />
+              </span>
+            )}
           </div>
-          <button className="mp-cam" type="button" aria-label="Change photo" onClick={pickPhoto}>
+          <button className="mp-cam" type="button" aria-label="Change photo" onClick={pickPhoto} disabled={isPhotoUploading}>
             <ProfileIcon name="camera" />
           </button>
         </div>
         <div className="mp-profile-t">
           <b>{name}</b>
           <small>{profileHelper.membershipLine(profile)}</small>
-          <button className="mp-photo-btn" type="button" onClick={pickPhoto}>
+          <button className="mp-photo-btn" type="button" onClick={pickPhoto} disabled={isPhotoUploading}>
             <ProfileIcon name="camera" />
             Change photo
           </button>
@@ -77,7 +89,13 @@ export const ProfileSidebar: React.FC<ProfileSidebarProps> = ({
           <React.Fragment key={group}>
             <p className="mp-group">{group}</p>
             {items.map((item) =>
-              item.panel ? (
+              item.soon ? (
+                <span key={item.label} className="mp-link is-soon" aria-disabled="true">
+                  <ProfileIcon name={item.icon} />
+                  <span>{item.label}</span>
+                  <span className="soon-tag">{profileContent.comingSoon.tag}</span>
+                </span>
+              ) : item.panel ? (
                 <PanelLink
                   key={item.label}
                   className={`mp-link${panel === item.panel ? ' is-active' : ''}`}

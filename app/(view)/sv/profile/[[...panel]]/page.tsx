@@ -6,7 +6,7 @@ import { Header, Footer } from '@/app/(view)/common';
 
 type ProfilePageProps = { params: Promise<{ panel?: string[] }> };
 
-/** /sv/profile is the dashboard; /sv/profile/<slug> opens that panel. Anything else is a 404. */
+/** /sv/profile is the dashboard; /sv/profile/<slug> opens that panel. Anything else is not found. */
 async function panelFor(params: ProfilePageProps['params']) {
   const { panel: segments } = await params;
   const panel = segments && segments.length > 1 ? null : profileHelper.panelFromSlug(segments?.[0]);
@@ -15,7 +15,7 @@ async function panelFor(params: ProfilePageProps['params']) {
 }
 
 // Every panel's address is known up front, so each one prerenders with its own pathname and
-// title. Any other address renders on request, where panelFor turns it into a 404.
+// title. Any other address renders on request, where panelFor shows the not-found page.
 export function generateStaticParams() {
   return [{ panel: [] }, ...Object.values(PROFILE_PANEL_SLUGS).map((slug) => ({ panel: [slug] }))];
 }
@@ -29,20 +29,26 @@ export async function generateMetadata({ params }: ProfilePageProps) {
   };
 }
 
+/** Everything that depends on the address, so it stays inside Suspense. */
+async function ProfilePanel({ params }: ProfilePageProps) {
+  await panelFor(params);
+  return <ProfileView />;
+}
+
 // Protected: proxy.ts sends signed-out visitors of /sv/* to member sign-in, and every
 // /api/sv/profile route checks the session again before reading or writing data.
-// The address is checked before anything streams, so an unknown one gets a real 404 status.
-// ProfileView reads the pathname on the client, so it sits inside Suspense: with Partial
-// Prefetching, Next.js also builds one shell for this route where the pathname is unknown.
-export default async function ProfilePage({ params }: ProfilePageProps) {
-  const panel = await panelFor(params);
+// The address (params here, the pathname in ProfileView) is only read inside Suspense, so the
+// header, layout and skeleton show at once on navigation instead of waiting on the server.
+// The cost: an unknown address shows the not-found page with status 200 rather than 404,
+// which does not matter for pages that need a sign-in and are never indexed.
+export default function ProfilePage({ params }: ProfilePageProps) {
   return (
     <>
       <Header />
       <main id="app">
         <div className="page is-active" id="page-members">
-          <Suspense fallback={<ProfileSkeleton panel={panel} />}>
-            <ProfileView />
+          <Suspense fallback={<ProfileSkeleton />}>
+            <ProfilePanel params={params} />
           </Suspense>
         </div>
       </main>

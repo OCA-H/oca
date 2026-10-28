@@ -3,6 +3,8 @@ import { HttpError, type FieldErrors } from "@/app/api/core/httpError";
 import { Mailer } from "@/app/api/core/mailer";
 import { isUniqueViolation } from "@/app/api/core/baseRepository";
 import { hashPassword, verifyPassword } from "@/app/api/core/auth";
+import { storage, type StoredFile } from "@/app/api/core/storage";
+import type { UploadedFile } from "@/app/api/core/fileUpload";
 import { MembershipRepository } from "@/app/api/features/(pview)/membership/repository";
 import { UserRepository } from "../../user/repository/userRepository";
 import type { SignInMethod } from "@/app/api/core/session";
@@ -32,9 +34,24 @@ const MAX_LENGTH: Record<string, number> = {
   country: 100,
 };
 
+/** Where a member's photo lives in storage. There is only ever one: a new upload replaces it. */
+const photoFolder = (userId: number) => `users/${userId}/profile`;
+
+/**
+ * The photo's address for the browser: our own API, never the bucket. The version changes with
+ * every upload, so a new photo is never served from a cached copy of the old one.
+ */
+function photoUrl(user: User): string | null {
+  if (!user.avatarUrl) return null;
+  const version = Number(user.metadata?.avatarVersion) || user.updatedAt.getTime();
+  return `/api/sv/profile/photo?v=${version}`;
+}
+
 /** Membership types that never lapse, so the card reads "Valid: For life". */
 const LIFETIME_TYPES = ["Life Member", "Honorary Member"];
 const MIN_PASSWORD_LENGTH = 8;
+/** Hashing cost grows with length, so very long input could be used to tie up the server. */
+const MAX_PASSWORD_LENGTH = 128;
 const SECRETARIAT_EMAIL = process.env.SECRETARIAT_EMAIL || "info@oldcolumban.net";
 
 const text = (value: unknown) => (typeof value === "string" ? value.trim() : "");
@@ -87,7 +104,7 @@ function toProfile(user: User, signInMethod: SignInMethod | undefined): MemberPr
     house: user.house,
     membershipType: user.membershipType,
     status: user.status,
-    avatarUrl: user.avatarUrl,
+    avatarUrl: photoUrl(user),
     address: {
       line1: text(address.line1),
       line2: text(address.line2),
@@ -228,15 +245,46 @@ export class ProfileService {
     }
   }
 
+  /** Stores the member's photo as users/{id}/profile/profile.{ext}, replacing any earlier one. */
+  async setPhoto(userId: number, photo: UploadedFile, signInMethod: SignInMethod | undefined): Promise<MemberProfile> {
+    const user = await this.findUser(userId);
+    const path = await storage.replaceIn(photoFolder(userId), `profile.${photo.extension}`, photo.bytes, {
+      contentType: photo.contentType,
+    });
+    const updated = await this.users.update(userId, {
+      avatarUrl: path,
+      metadata: { ...user.metadata, avatarVersion: Date.now() },
+    });
+    return toProfile(updated!, signInMethod);
+  }
+
+  /** The member's own photo, or null if they have none. */
+  async getPhoto(userId: number): Promise<StoredFile | null> {
+    const user = await this.findUser(userId);
+    // Only ever a file inside this member's own folder, whatever the column holds.
+    if (!user.avatarUrl?.startsWith(`${photoFolder(userId)}/`)) return null;
+    return storage.download(user.avatarUrl);
+  }
+
   async changePassword(userId: number, current: string, next: string): Promise<void> {
     const user = await this.findUser(userId);
 
-    if (!verifyPassword(current, user.passwordHash, user.passwordSalt)) {
+    if (!current || current.length > MAX_PASSWORD_LENGTH || !verifyPassword(current, user.passwordHash, user.passwordSalt)) {
       throw HttpError.badRequest("Some details need fixing.", { current: "Your current password is not correct." });
     }
     if (next.length < MIN_PASSWORD_LENGTH) {
       throw HttpError.badRequest("Some details need fixing.", {
         new: `Password must be at least ${MIN_PASSWORD_LENGTH} characters.`,
+      });
+    }
+    if (next.length > MAX_PASSWORD_LENGTH) {
+      throw HttpError.badRequest("Some details need fixing.", {
+        new: `Password must be at most ${MAX_PASSWORD_LENGTH} characters.`,
+      });
+    }
+    if (next === current) {
+      throw HttpError.badRequest("Some details need fixing.", {
+        new: "Choose a password different from your current one.",
       });
     }
 

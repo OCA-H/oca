@@ -8665,3 +8665,27 @@ section[id^="ec-"] {
 .mp-loaded.is-leaving .mp-hero .wrap, .mp-loaded.is-leaving .mp-shell{opacity:.45; pointer-events:none;}
 .mp-out:disabled{cursor:progress; opacity:.7;}
 @media (prefers-reduced-motion: reduce){ .mp-loaded .mp-hero .wrap, .mp-loaded .mp-shell{transition:none;} }
+
+/* profile photo: shimmer while the saved photo loads, fade-in when it lands, overlay while uploading */
+.mp-photo-wrap{position:relative;}
+.mp-photo-skel{display:block; width:100%; height:100%; border-radius:50%;}
+.mp-photo-wrap img{animation:mpFadeIn .35s ease-out both;}
+.mp-photo-busy{position:absolute; inset:0; display:flex; align-items:center; justify-content:center; border-radius:50%; background:rgba(11,60,30,.38); animation:mpFadeIn .2s ease-out both;}
+.mp-photo-spin{width:28px; height:28px; border-radius:50%; border:3px solid rgba(255,255,255,.35); border-top-color:#fff; animation:ps-spin .8s linear infinite;}
+.mp-cam:disabled, .mp-photo-btn:disabled{opacity:.6; cursor:progress; transform:none;}
+@media (prefers-reduced-motion: reduce){ .mp-photo-wrap img, .mp-photo-busy{animation:none;} .mp-photo-spin{animation-duration:1.6s;} }
+
+/* members area: sections not built yet */
+.mp-link.is-soon{cursor:default; color:var(--text-soft);}
+.mp-link.is-soon:hover{background:none;}
+.mp-link.is-soon:hover svg{color:var(--text-soft);}
+.mp-link.is-soon > span:not(.soon-tag){flex:1; min-width:0;}
+.mp-link.is-soon .soon-tag{margin-left:auto;}
+.mp-tile.is-soon{cursor:default; background:#FBFCFB;}
+.mp-tile.is-soon:hover{transform:none; box-shadow:none; border-color:var(--border);}
+.mp-tile.is-soon .mp-tile-ico{filter:grayscale(.6); opacity:.75;}
+.mp-tile.is-soon .mp-tile-t{color:var(--text-soft);}
+.mp-soon{display:flex; flex-direction:column; align-items:center; gap:16px; padding:40px 20px 16px; text-align:center;}
+.mp-soon-ico{display:flex; align-items:center; justify-content:center; width:64px; height:64px; border-radius:20px; background:var(--tint-teal); color:var(--brand-mid);}
+.mp-soon-ico svg{width:30px; height:30px;}
+@media (max-width:900px){ .mp-link.is-soon > span:not(.soon-tag){flex:none;} .mp-link.is-soon .soon-tag{margin-left:6px;} }
