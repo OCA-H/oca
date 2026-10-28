@@ -1,7 +1,14 @@
 'use client';
 
 import React from 'react';
+import { CustomDropdown, type DropdownOption } from '@/app/(view)/common/component/CustomDropdown';
 import type { PassTier } from '../../content';
+
+const countOptions = (max: number): DropdownOption[] =>
+  [...Array(max + 1)].map((_, i) => ({ label: i === 0 ? 'None' : String(i), value: String(i) }));
+
+const TEACHER_OPTIONS = countOptions(10);
+const CHILD_OPTIONS = countOptions(6);
 
 interface PassAddonsProps {
   currentTier: PassTier | null;
@@ -53,18 +60,15 @@ export const PassAddons: React.FC<PassAddonsProps> = ({
           <label htmlFor="ad-teachers" className="dn-sr">
             Number of teachers to sponsor
           </label>
-          <select
+          <CustomDropdown
             id="ad-teachers"
             name="teachers"
-            value={teachers}
-            onChange={(e) => setTeachers(parseInt(e.target.value, 10))}
-          >
-            {[...Array(11)].map((_, i) => (
-              <option key={i} value={i}>
-                {i === 0 ? 'None' : i}
-              </option>
-            ))}
-          </select>
+            value={String(teachers)}
+            onChange={(val) => setTeachers(parseInt(val, 10) || 0)}
+            options={TEACHER_OPTIONS}
+            placeholder="None"
+            ariaLabel="Number of teachers to sponsor"
+          />
         </div>
       </div>
 
@@ -93,35 +97,29 @@ export const PassAddons: React.FC<PassAddonsProps> = ({
             <label htmlFor="ad-under12">
               Children under 12 <span className="dn-note">&#8377;2,500 per child</span>
             </label>
-            <select
+            <CustomDropdown
               id="ad-under12"
               name="under12"
-              value={under12}
-              onChange={(e) => setUnder12(parseInt(e.target.value, 10))}
-            >
-              {[...Array(7)].map((_, i) => (
-                <option key={i} value={i}>
-                  {i === 0 ? 'None' : i}
-                </option>
-              ))}
-            </select>
+              value={String(under12)}
+              onChange={(val) => setUnder12(parseInt(val, 10) || 0)}
+              options={CHILD_OPTIONS}
+              placeholder="None"
+              ariaLabel="Children under 12"
+            />
           </div>
           <div className="field">
             <label htmlFor="ad-above12">
               Children above 12 <span className="dn-note">&#8377;3,000 per child</span>
             </label>
-            <select
+            <CustomDropdown
               id="ad-above12"
               name="above12"
-              value={above12}
-              onChange={(e) => setAbove12(parseInt(e.target.value, 10))}
-            >
-              {[...Array(7)].map((_, i) => (
-                <option key={i} value={i}>
-                  {i === 0 ? 'None' : i}
-                </option>
-              ))}
-            </select>
+              value={String(above12)}
+              onChange={(val) => setAbove12(parseInt(val, 10) || 0)}
+              options={CHILD_OPTIONS}
+              placeholder="None"
+              ariaLabel="Children above 12"
+            />
           </div>
         </div>
       </div>
