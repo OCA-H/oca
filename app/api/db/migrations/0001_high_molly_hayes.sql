@@ -1,3 +1,27 @@
+CREATE TABLE "users" (
+	"id" serial PRIMARY KEY NOT NULL,
+	"member_id" varchar(50) NOT NULL,
+	"email" varchar(255) NOT NULL,
+	"mobile" varchar(30),
+	"full_name" varchar(150) NOT NULL,
+	"password_hash" text NOT NULL,
+	"password_salt" varchar(64) NOT NULL,
+	"role" varchar(50) DEFAULT 'member' NOT NULL,
+	"batch_year" varchar(20),
+	"house" varchar(50),
+	"membership_type" varchar(50) DEFAULT 'Life Member' NOT NULL,
+	"status" varchar(30) DEFAULT 'active' NOT NULL,
+	"avatar_url" varchar(500),
+	"metadata" jsonb,
+	"last_login_at" timestamp with time zone,
+	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
+	"updated_at" timestamp with time zone DEFAULT now() NOT NULL
+);
+--> statement-breakpoint
+CREATE UNIQUE INDEX "users_member_id_unique" ON "users" USING btree ("member_id");--> statement-breakpoint
+CREATE UNIQUE INDEX "users_email_unique" ON "users" USING btree ("email");--> statement-breakpoint
+CREATE INDEX "users_mobile_idx" ON "users" USING btree ("mobile");--> statement-breakpoint
+CREATE INDEX "users_batch_year_idx" ON "users" USING btree ("batch_year");--> statement-breakpoint
 CREATE TABLE "membership_applications" (
 	"id" serial PRIMARY KEY NOT NULL,
 	"order_id" varchar(30) NOT NULL,

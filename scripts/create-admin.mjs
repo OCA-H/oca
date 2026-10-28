@@ -53,7 +53,7 @@ function hashPassword(password) {
 function databaseUrl(env = process.env) {
   const missing = ["DB_HOST", "DB_PORT", "DB_USER", "DB_PASSWORD", "DB_NAME"].filter((key) => !env[key]);
   if (missing.length > 0) fail(`${missing.join(", ")} not set. Add them to .env (see .env.example).`);
-  const ssl = env.DB_SSL === "true" ? "?sslmode=require" : "";
+  const ssl = env.DB_SSL === "true" ? "?sslmode=require&uselibpqcompat=true" : "";
   return `postgres://${encodeURIComponent(env.DB_USER)}:${encodeURIComponent(env.DB_PASSWORD)}@${env.DB_HOST}:${env.DB_PORT}/${encodeURIComponent(env.DB_NAME)}${ssl}`;
 }
 

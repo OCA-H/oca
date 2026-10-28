@@ -12,11 +12,13 @@ export function missingDatabaseSettings(env: Env = process.env): string[] {
   return REQUIRED_SETTINGS.filter((key) => !env[key]);
 }
 
-/** postgres://user:password@host:port/name, with credentials encoded and sslmode=require when DB_SSL=true. */
+/** postgres://user:password@host:port/name, with credentials encoded and SSL turned on when DB_SSL=true. */
 export function buildDatabaseUrl(env: Env = process.env): string {
   const user = encodeURIComponent(env.DB_USER ?? "");
   const password = encodeURIComponent(env.DB_PASSWORD ?? "");
   const name = encodeURIComponent(env.DB_NAME ?? "");
-  const ssl = env.DB_SSL === "true" ? "?sslmode=require" : "";
+  // libpq's "require": encrypted, without checking the certificate against a CA. Hosted Postgres
+  // such as Supabase signs with its own CA, which node-postgres's stricter "require" rejects.
+  const ssl = env.DB_SSL === "true" ? "?sslmode=require&uselibpqcompat=true" : "";
   return `postgres://${user}:${password}@${env.DB_HOST}:${env.DB_PORT}/${name}${ssl}`;
 }
