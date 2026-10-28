@@ -91,6 +91,9 @@ export const PassTierCard: React.FC<PassTierCardProps> = ({ group, selectedPass,
     }
   };
 
+  // The pill shows only the eligibility; any " · ..." suffix (e.g. "opens after Early Bird") is covered elsewhere in the card
+  const pill = group.batchEligibility?.split(' · ')[0];
+
   // Collect perks from metadata if present
   const perks: string[] = [];
   group.passes.forEach((p) => {
@@ -109,7 +112,7 @@ export const PassTierCard: React.FC<PassTierCardProps> = ({ group, selectedPass,
         <span className="dn-tier-ico">{renderTierIcon()}</span>
         <div>
           <h4>{group.tierTitle}</h4>
-          {group.batchEligibility && <span className="dn-tier-pill">{group.batchEligibility}</span>}
+          {pill && <span className="dn-tier-pill">{pill}</span>}
         </div>
       </div>
 
@@ -125,7 +128,7 @@ export const PassTierCard: React.FC<PassTierCardProps> = ({ group, selectedPass,
               <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="1.7" />
               <path d="M12 7v5l3.2 2" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
-            {group.statusNote || 'Not open yet'}
+            Not open yet
           </span>
         </div>
       ) : (
@@ -145,7 +148,9 @@ export const PassTierCard: React.FC<PassTierCardProps> = ({ group, selectedPass,
                 <span className="dn-radio" aria-hidden="true"></span>
                 <span className="dn-pass-t">
                   <b>{pass.title}</b>
-                  {pass.statusNote && <em className="dn-left">{pass.statusNote}</em>}
+                  {pass.statusNote && pass.statusNote !== pass.title && (
+                    <em className="dn-left">{pass.statusNote}</em>
+                  )}
                 </span>
                 <span className="dn-price">&#8377;{pass.price.toLocaleString('en-IN')}</span>
               </label>
