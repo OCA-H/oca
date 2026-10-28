@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import type { HomeContent } from '@/app/api/(features)/(pview)/site/schema/sectionSpecs';
 import { Header, Footer, Lightbox } from '@/app/(view)/common';
 import { useHomeHandler } from '../handler/useHomeHandler';
 import {
@@ -20,7 +21,8 @@ import {
   ContactSection,
 } from '.';
 
-export const HomeView: React.FC = () => {
+/** `content` is what admins edit in the admin panel; see app/(view)/(pv)/page.tsx. */
+export const HomeView: React.FC<{ content: HomeContent }> = ({ content }) => {
   useHomeHandler();
 
   return (
@@ -30,18 +32,18 @@ export const HomeView: React.FC = () => {
       <main id="app">
         <div className="page is-active" id="page-home">
           <HeroSection />
-          <EventsSection />
+          <EventsSection content={content.events} />
           <HighlightsSection />
-          <OfferingsSection />
-          <NoticeBoardSection />
-          <HangoutSection />
+          <OfferingsSection content={content.notices} />
+          <NoticeBoardSection content={content.spotlight} />
+          <HangoutSection content={content.hangout} />
           <BirthdaysSection />
-          <SocialConscienceSection />
+          <SocialConscienceSection content={content.social} />
           <BenefitsSection />
           <ConnectSection />
           <MissionSection />
           <GallerySection />
-          <CommitteeSection />
+          <CommitteeSection content={content.committee} />
           <ContactSection />
         </div>
       </main>

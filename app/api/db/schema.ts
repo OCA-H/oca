@@ -6,3 +6,4 @@ export * from "../(features)/(pview)/event-pass/schema";
 export * from "../(features)/(pview)/auth/schema";
 export * from "../(features)/(pview)/membership/schema";
 export * from "../(features)/sv/contribution/schema";
+export * from "../(features)/(pview)/site/schema/siteContentSchema";

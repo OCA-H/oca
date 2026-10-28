@@ -1,18 +1,40 @@
 import React from 'react';
-import Link from 'next/link';
-import { ROUTES } from '@/app/(view)/common/helper/routes';
+import type { HomeHangoutContent } from '@/app/api/(features)/(pview)/site/schema/sectionSpecs';
+import { SiteLink, toneAt } from './SiteLink';
 
-export const HangoutSection: React.FC = () => {
+/** Photo posts take these icons in turn. */
+const PHOTO_ICONS = [
+  <path key="heart" d="M13 21l-1-1-6.36-6.36a5 5 0 1 1 7.07-7.07L13 7l.29-.43a5 5 0 1 1 7.07 7.07L14 20l-1 1Z" stroke="#fff" strokeWidth="1.4"/>,
+  <React.Fragment key="person"><circle cx="12" cy="8" r="4" stroke="#fff" strokeWidth="1.4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6" stroke="#fff" strokeWidth="1.4"/></React.Fragment>,
+  <path key="sport" d="M4 21v-2a4 4 0 0 1 4-4h8a4 4 0 0 1 4 4v2M12 3l2 4-2 1-2-1 2-4Z" stroke="#fff" strokeWidth="1.4"/>,
+  <path key="school" d="M3 21h18M5 21V7l7-4 7 4v14M9 21v-6h6v6" stroke="#fff" strokeWidth="1.4"/>,
+];
+
+/** The intro, with the admin's chosen words in gold. */
+function Intro({ intro, highlight }: { intro: string; highlight: string }) {
+  const at = highlight ? intro.indexOf(highlight) : -1;
+  if (at < 0) return <>{intro}</>;
+  return (
+    <>
+      {intro.slice(0, at)}
+      <span style={{ color: "var(--gold)", fontWeight: "600" }}>{highlight}</span>
+      {intro.slice(at + highlight.length)}
+    </>
+  );
+}
+
+export const HangoutSection: React.FC<{ content: HomeHangoutContent }> = ({ content }) => {
+  let photoCount = 0;
   return (
     <section className="section band-dark" id="hangout">
       <div className="wrap">
         <div className="section-head">
           <div className="copy">
-            <span className="eyebrow">OCA Hangout</span>
-            <h2 style={{ whiteSpace: "nowrap" }}>Photos &amp; videos from the community</h2>
-            <p style={{ color: "#AFC8B6" }}>Cricket, lunches and reunions — <span style={{ color: "var(--gold)", fontWeight: "600" }}>posted live</span> by batches around the world.</p>
+            {content.eyebrow && <span className="eyebrow">{content.eyebrow}</span>}
+            <h2 style={{ whiteSpace: "nowrap" }}>{content.title}</h2>
+            {content.intro && <p style={{ color: "#AFC8B6" }}><Intro intro={content.intro} highlight={content.highlight} /></p>}
           </div>
-          <Link className="btn btn-gold btn-sm" href={ROUTES.EVENT_PHOTOGRAPHS}>View all →</Link>
+          {content.ctaHref && <SiteLink className="btn btn-gold btn-sm" href={content.ctaHref}>{content.ctaLabel || 'View all →'}</SiteLink>}
         </div>
     
         <div className="post-carousel-wrap">
@@ -21,93 +43,34 @@ export const HangoutSection: React.FC = () => {
           </button>
     
           <div className="post-carousel" id="postCarousel">
-            <article className="post-card" data-type="video">
-              <div className="post-media duo-navy">
-                <img className="tile-img" src="https://www.oldcolumban.net/wp-content/uploads/2025/12/annual-lunch.jpg" alt="Annual Lunch highlights" loading="lazy" decoding="async" />
-                <div className="play-btn"><span><svg viewBox="0 0 24 24" fill="none"><path d="M8 5v14l11-7L8 5Z" fill="currentColor"/></svg></span></div>
-                <button className="mute-btn" data-muted="true" aria-label="Unmute"><svg viewBox="0 0 24 24" fill="none"><path d="M11 5 6 9H3v6h3l5 4V5Z" stroke="#fff" strokeWidth="1.6" strokeLinejoin="round"/><path d="M16 9l6 6M22 9l-6 6" stroke="#fff" strokeWidth="1.6" strokeLinecap="round"/></svg></button>
-                <span className="post-duration">2:14</span>
-              </div>
-              <div className="post-body">
-                <div className="post-header">
-                  <div className="post-who"><div className="post-name">R. Kapoor</div><div className="post-batch">Batch '88</div></div>
+            {content.posts.map((post, i) => (
+              <article className="post-card" data-type={post.type} key={`${i}-${post.caption}`}>
+                <div className={`post-media ${toneAt(i)}`}>
+                  <img className="tile-img" src={post.image} alt={post.imageAlt} loading="lazy" decoding="async" />
+                  {post.type === 'video' ? (
+                    <>
+                      <div className="play-btn"><span><svg viewBox="0 0 24 24" fill="none"><path d="M8 5v14l11-7L8 5Z" fill="currentColor"/></svg></span></div>
+                      <button className="mute-btn" data-muted="true" aria-label="Unmute"><svg viewBox="0 0 24 24" fill="none"><path d="M11 5 6 9H3v6h3l5 4V5Z" stroke="#fff" strokeWidth="1.6" strokeLinejoin="round"/><path d="M16 9l6 6M22 9l-6 6" stroke="#fff" strokeWidth="1.6" strokeLinecap="round"/></svg></button>
+                      {post.duration && <span className="post-duration">{post.duration}</span>}
+                    </>
+                  ) : (
+                    <div className="tile-icon"><svg viewBox="0 0 24 24" fill="none">{PHOTO_ICONS[photoCount++ % PHOTO_ICONS.length]}</svg></div>
+                  )}
                 </div>
-                <p className="post-caption-text">Annual Lunch highlights reel — what a turnout this year!</p>
-                <div className="post-time">2 days ago</div>
-              </div>
-            </article>
-    
-            <article className="post-card" data-type="photo">
-              <div className="post-media duo-teal">
-                <img className="tile-img" src="https://www.oldcolumban.net/wp-content/uploads/2017/10/b38eafcb-e18b-484c-b1c6-1d1782b1b92a.jpg" alt="Columbans reunited" loading="lazy" decoding="async" />
-                <div className="tile-icon"><svg viewBox="0 0 24 24" fill="none"><path d="M13 21l-1-1-6.36-6.36a5 5 0 1 1 7.07-7.07L13 7l.29-.43a5 5 0 1 1 7.07 7.07L14 20l-1 1Z" stroke="#fff" strokeWidth="1.4"/></svg></div>
-              </div>
-              <div className="post-body">
-                <div className="post-header">
-                  <div className="post-who"><div className="post-name">S. Mehta</div><div className="post-batch">Batch '95</div></div>
+                <div className="post-body">
+                  {(post.name || post.batch) && (
+                    <div className="post-header">
+                      <div className="post-who">
+                        {post.name && <div className="post-name">{post.name}</div>}
+                        {post.batch && <div className="post-batch">{post.batch}</div>}
+                      </div>
+                    </div>
+                  )}
+                  <p className="post-caption-text">{post.caption}</p>
+                  {post.time && <div className="post-time">{post.time}</div>}
                 </div>
-                <p className="post-caption-text">Brotherhood, decades on. So good to see everyone again.</p>
-                <div className="post-time">3 days ago</div>
-              </div>
-            </article>
-    
-            <article className="post-card" data-type="photo">
-              <div className="post-media duo-gold">
-                <img className="tile-img" src="https://www.oldcolumban.net/wp-content/uploads/2023/02/IMG_1792.jpg" alt="At the OCA Secretariat" loading="lazy" decoding="async" />
-                <div className="tile-icon"><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="4" stroke="#fff" strokeWidth="1.4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6" stroke="#fff" strokeWidth="1.4"/></svg></div>
-              </div>
-              <div className="post-body">
-                <div className="post-header">
-                  <div className="post-who"><div className="post-name">A. Bose</div><div className="post-batch">Batch '79</div></div>
-                </div>
-                <p className="post-caption-text">Batch of '85 reunion — 40 years on and still causing trouble.</p>
-                <div className="post-time">5 days ago</div>
-              </div>
-            </article>
-    
-            <article className="post-card" data-type="video">
-              <div className="post-media duo-teal">
-                <img className="tile-img" src="https://www.oldcolumban.net/wp-content/uploads/2022/10/Bro-Foley-Cricket-2022.jpg" alt="Cricket at the Brother Foley Memorial" loading="lazy" decoding="async" />
-                <div className="play-btn"><span><svg viewBox="0 0 24 24" fill="none"><path d="M8 5v14l11-7L8 5Z" fill="currentColor"/></svg></span></div>
-                <button className="mute-btn" data-muted="true" aria-label="Unmute"><svg viewBox="0 0 24 24" fill="none"><path d="M11 5 6 9H3v6h3l5 4V5Z" stroke="#fff" strokeWidth="1.6" strokeLinejoin="round"/><path d="M16 9l6 6M22 9l-6 6" stroke="#fff" strokeWidth="1.6" strokeLinecap="round"/></svg></button>
-                <span className="post-duration">0:48</span>
-              </div>
-              <div className="post-body">
-                <div className="post-header">
-                  <div className="post-who"><div className="post-name">V. Trivedi</div><div className="post-batch">Batch '02</div></div>
-                </div>
-                <p className="post-caption-text">Cricket at the nets before Sports Day kicks off.</p>
-                <div className="post-time">1 week ago</div>
-              </div>
-            </article>
-    
-            <article className="post-card" data-type="photo">
-              <div className="post-media duo-navy">
-                <img className="tile-img" src="https://www.oldcolumban.net/wp-content/uploads/2022/11/sponsor-new.jpg" alt="Tournament sponsorship" loading="lazy" decoding="async" />
-                <div className="tile-icon"><svg viewBox="0 0 24 24" fill="none"><path d="M4 21v-2a4 4 0 0 1 4-4h8a4 4 0 0 1 4 4v2M12 3l2 4-2 1-2-1 2-4Z" stroke="#fff" strokeWidth="1.4"/></svg></div>
-              </div>
-              <div className="post-body">
-                <div className="post-header">
-                  <div className="post-who"><div className="post-name">H. Khanna</div><div className="post-batch">Batch '91</div></div>
-                </div>
-                <p className="post-caption-text">Sports Day 2024 — the tug of war never disappoints.</p>
-                <div className="post-time">1 week ago</div>
-              </div>
-            </article>
-    
-            <article className="post-card" data-type="photo">
-              <div className="post-media duo-gold">
-                <img className="tile-img" src="https://www.oldcolumban.net/wp-content/uploads/2020/03/hp2-donate-image.jpg" alt="Back on campus" loading="lazy" decoding="async" />
-                <div className="tile-icon"><svg viewBox="0 0 24 24" fill="none"><path d="M3 21h18M5 21V7l7-4 7 4v14M9 21v-6h6v6" stroke="#fff" strokeWidth="1.4"/></svg></div>
-              </div>
-              <div className="post-body">
-                <div className="post-header">
-                  <div className="post-who"><div className="post-name">P. Nair</div><div className="post-batch">Batch '00</div></div>
-                </div>
-                <p className="post-caption-text">Back on the old campus — the quad hasn't changed a bit.</p>
-                <div className="post-time">2 weeks ago</div>
-              </div>
-            </article>
+              </article>
+            ))}
           </div>
     
           <button className="post-nav next" aria-label="Next">

@@ -1,0 +1,161 @@
+import { SITE_SECTION_KEYS, type HomeContent, type SiteSectionKey } from "../schema/sectionSpecs";
+
+// What each section shows until an admin saves it: the content the home page was built with.
+
+const U = "https://www.oldcolumban.net/wp-content/uploads/";
+const NOTICE_IMAGE = U + "2016/03/OCA_Newsletter-Volume11.jpg";
+
+export const HOME_DEFAULTS: HomeContent = {
+  events: {
+    eyebrow: "On the calendar",
+    title: "Upcoming Events",
+    intro: "Inviting well-connected Columbans of all batches to take responsibility and leadership as \"Batch Coordinators.\" Email us at info@oldcolumban.net.",
+    items: [
+      {
+        image: U + "2025/12/annual-lunch.jpg",
+        imageAlt: "OCA Annual Dinner Get Together",
+        dateChip: "18 DEC 2026",
+        caption: "Annual Dinner",
+        date: "Friday, 18 December 2026",
+        title: "OCA – Annual Dinner Get Together",
+        desc: "An evening with Columbans of every batch, at the Qutub Golf Course.",
+        ctaLabel: "View Details →",
+        ctaHref: "/annual-dinner",
+      },
+      {
+        image: U + "2022/10/Bro-Foley-Cricket-2022.jpg",
+        imageAlt: "Brother Foley Memorial Interschool Cricket Tournament",
+        dateChip: "DEC 2022",
+        caption: "Cricket Tournament",
+        date: "Dec 2022 – Jan 2023",
+        title: "Brother Foley Memorial Interschool Cricket Tournament",
+        desc: "An interschool cricket tournament held in memory of Brother Foley.",
+        ctaLabel: "View Details →",
+        ctaHref: "/sports",
+      },
+      {
+        image: U + "2022/11/sponsor-new.jpg",
+        imageAlt: "Sponsorship appeal for the Brother Oman Memorial Tournament",
+        dateChip: "SPONSORSHIP: ₹1.5L",
+        caption: "Cricket Tournament",
+        date: "Sponsorship: ₹1.50 Lacs",
+        title: "Brother Oman Memorial Interschool Cricket Tournament",
+        desc: "Principal's appeal for sponsorship of this memorial tournament.",
+        ctaLabel: "View Details →",
+        ctaHref: "/sports#sponsor",
+      },
+    ],
+  },
+
+  notices: {
+    eyebrow: "OCA Notice Board",
+    title: "News & Notice(s)",
+    intro: "The latest word from the OCA Secretariat — AGM notices, elections and community updates.",
+    updatedLabel: "Updated Nov 19, 2025",
+    items: [
+      { date: "November 19, 2025", title: "OCA – AGM 2025 Reminder & Balance Sheet" },
+      { date: "October 31, 2025", title: "OCA – AGM and Election Notice 2025" },
+      { date: "October 14, 2024", title: "OCA – AGM MOM 23rd April 2023" },
+      { date: "September 25, 2024", title: "OCA AGM Notice to be held on 17th October, 2024" },
+      { date: "March 10, 2023", title: "OCA – AGM and Election Notice 2023" },
+      { date: "October 14, 2022", title: "Become members of the Old Columban Association – Principal Letter" },
+    ].map((notice) => ({ ...notice, image: NOTICE_IMAGE, imageAlt: "OCA newsletter and notice", href: "" })),
+  },
+
+  spotlight: {
+    eyebrow: "In the spotlight",
+    title: "Columban Newsmakers",
+    intro: "Columbans making the School proud across public life, business and the arts.",
+    image: "/images/chandrachud-spotlight.png",
+    imageAlt: "Congratulations to Justice Dr. D. Y. Chandrachud, Batch of 1975, on being appointed Chief Justice of India",
+    pill: "News Makers · Achievers",
+    headline: "Congratulating Columban Justice D. Y. Chandrachud",
+    body: "OCA proudly celebrates fellow Columban Justice Dhananjaya Y. Chandrachud on his tenure as Chief Justice of India — one of many Columbans making the school proud across public life, business and the arts.",
+    linkLabel: "See more News Makers →",
+    linkHref: "/#news-makers",
+  },
+
+  hangout: {
+    eyebrow: "OCA Hangout",
+    title: "Photos & videos from the community",
+    intro: "Cricket, lunches and reunions — posted live by batches around the world.",
+    highlight: "posted live",
+    ctaLabel: "View all →",
+    ctaHref: "/#event-photographs",
+    posts: [
+      { type: "video", image: U + "2025/12/annual-lunch.jpg", imageAlt: "Annual Lunch highlights", duration: "2:14", name: "R. Kapoor", batch: "Batch '88", caption: "Annual Lunch highlights reel — what a turnout this year!", time: "2 days ago" },
+      { type: "photo", image: U + "2017/10/b38eafcb-e18b-484c-b1c6-1d1782b1b92a.jpg", imageAlt: "Columbans reunited", duration: "", name: "S. Mehta", batch: "Batch '95", caption: "Brotherhood, decades on. So good to see everyone again.", time: "3 days ago" },
+      { type: "photo", image: U + "2023/02/IMG_1792.jpg", imageAlt: "At the OCA Secretariat", duration: "", name: "A. Bose", batch: "Batch '79", caption: "Batch of '85 reunion — 40 years on and still causing trouble.", time: "5 days ago" },
+      { type: "video", image: U + "2022/10/Bro-Foley-Cricket-2022.jpg", imageAlt: "Cricket at the Brother Foley Memorial", duration: "0:48", name: "V. Trivedi", batch: "Batch '02", caption: "Cricket at the nets before Sports Day kicks off.", time: "1 week ago" },
+      { type: "photo", image: U + "2022/11/sponsor-new.jpg", imageAlt: "Tournament sponsorship", duration: "", name: "H. Khanna", batch: "Batch '91", caption: "Sports Day 2024 — the tug of war never disappoints.", time: "1 week ago" },
+      { type: "photo", image: U + "2020/03/hp2-donate-image.jpg", imageAlt: "Back on campus", duration: "", name: "P. Nair", batch: "Batch '00", caption: "Back on the old campus — the quad hasn't changed a bit.", time: "2 weeks ago" },
+    ],
+  },
+
+  social: {
+    eyebrow: "OCA Social Conscience",
+    title: "Your help is very important",
+    intro: "Our prime objective is assisting the School with funds, amenities and inputs from the alumni.",
+    causes: [
+      {
+        status: "featured",
+        image: U + "2020/03/hp2-donate-image.jpg",
+        imageAlt: "Teachers Benevolent Fund",
+        badge: "Featured Cause",
+        title: "Teachers Benevolent Fund",
+        desc: "",
+        progress: 7,
+        raised: "₹15,68,928",
+        goal: "₹2,00,00,000",
+        href: "/#teachers-benevolent-fund",
+        ctaHref: "/donation#give-form",
+      },
+      {
+        status: "muted",
+        image: U + "2023/02/IMG_1792.jpg",
+        imageAlt: "OCA Breakfast Programme",
+        badge: "Suspended",
+        title: "OCA Breakfast Programme",
+        desc: "Currently suspended. We'll share an update here when the programme resumes.",
+        progress: 0,
+        raised: "",
+        goal: "",
+        href: "",
+        ctaHref: "",
+      },
+      {
+        status: "muted",
+        image: U + "2017/10/b38eafcb-e18b-484c-b1c6-1d1782b1b92a.jpg",
+        imageAlt: "Support a Child programme",
+        badge: "Coming Soon",
+        title: "Support a Child",
+        desc: "A new sponsorship programme is being prepared — check back soon.",
+        progress: 0,
+        raised: "",
+        goal: "",
+        href: "",
+        ctaHref: "",
+      },
+    ],
+  },
+
+  committee: {
+    eyebrow: "Governance",
+    title: "Executive Committee, 2023 – 25",
+    members: [
+      { image: U + "2022/02/SVK-Profile-Pic-n.png", imageAlt: "Santosh V. Kalyani, President", name: "Santosh V. Kalyani", role: "President", initials: "SVK" },
+      { image: U + "2022/05/Anurag-agarawal-n-1.png", imageAlt: "Anurag Aggarwal, Secretary", name: "Anurag Aggarwal", role: "Secretary", initials: "AA" },
+      { image: U + "2020/02/Pranav-Uppal.jpg", imageAlt: "Kuwar Pranav Pratap Uppal, Treasurer", name: "Kuwar Pranav Pratap Uppal", role: "Treasurer", initials: "KU" },
+    ],
+  },
+};
+
+/** Each section key's defaults, as stored data. */
+export const SECTION_DEFAULTS: Record<SiteSectionKey, object> = {
+  [SITE_SECTION_KEYS.homeEvents]: HOME_DEFAULTS.events,
+  [SITE_SECTION_KEYS.homeNotices]: HOME_DEFAULTS.notices,
+  [SITE_SECTION_KEYS.homeSpotlight]: HOME_DEFAULTS.spotlight,
+  [SITE_SECTION_KEYS.homeHangout]: HOME_DEFAULTS.hangout,
+  [SITE_SECTION_KEYS.homeSocial]: HOME_DEFAULTS.social,
+  [SITE_SECTION_KEYS.aboutCommittee]: HOME_DEFAULTS.committee,
+};

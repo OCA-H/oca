@@ -1,6 +1,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { profileContent, type ProfilePanel, type ProfileTile } from '../../content';
+import { profileHelper } from '../../helper';
 import type { MemberProfile } from '../../services';
 import { PanelHead } from './PanelHead';
 import { PanelLink } from './PanelLink';
@@ -13,7 +14,8 @@ interface DashboardPanelProps {
 }
 
 export const DashboardPanel: React.FC<DashboardPanelProps> = ({ profile, hidden, onShowPanel }) => {
-  const { dashboard, comingSoon } = profileContent;
+  const { dashboard, comingSoon, admin } = profileContent;
+  const tiles = profileHelper.isAdmin(profile) ? [admin.tile, ...dashboard.tiles] : dashboard.tiles;
 
   // Tiles that show the member's own details instead of a fixed line.
   const details = (tile: ProfileTile): React.ReactNode => {
@@ -46,7 +48,7 @@ export const DashboardPanel: React.FC<DashboardPanelProps> = ({ profile, hidden,
       </div>
 
       <div className="mp-tiles">
-        {dashboard.tiles.map((tile) => {
+        {tiles.map((tile) => {
           const className = `mp-tile${tile.tone ? ` mp-tile--${tile.tone}` : ''}`;
 
           // Not built yet: the same card, quietened, with a badge instead of an action.

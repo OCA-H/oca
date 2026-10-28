@@ -104,6 +104,7 @@ function toProfile(user: User, signInMethod: SignInMethod | undefined): MemberPr
     house: user.house,
     membershipType: user.membershipType,
     status: user.status,
+    role: user.role,
     avatarUrl: photoUrl(user),
     address: {
       line1: text(address.line1),

@@ -1,5 +1,5 @@
 import { ROUTES } from "@/app/(view)/common/helper/routes";
-import { PROFILE_PANEL_SLUGS, type ProfilePanel } from "../content";
+import { PROFILE_PANEL_SLUGS, profileContent, type ProfilePanel } from "../content";
 import type { MemberProfile, ProfileUpdate } from "../services";
 
 const PANEL_BY_SLUG = Object.fromEntries(
@@ -20,6 +20,14 @@ export const profileHelper = {
     const rest = pathname.replace(/\/+$/, "").slice(ROUTES.PROFILE.length).replace(/^\//, "");
     return profileHelper.panelFromSlug(rest || undefined) ?? "dashboard";
   },
+
+  isAdmin: (profile: MemberProfile): boolean => profile.role === "admin",
+
+  /** The menu: admins get the Administration group, right after the Overview. */
+  navFor: (profile: MemberProfile) =>
+    profileHelper.isAdmin(profile)
+      ? [profileContent.nav[0], profileContent.admin.nav, ...profileContent.nav.slice(1)]
+      : profileContent.nav,
 
   getInitials: (name: string): string =>
     name

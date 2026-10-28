@@ -29,6 +29,8 @@ export interface MemberProfile {
   house: string | null;
   membershipType: string;
   status: string;
+  /** "member" or "admin"; admins also get the admin panel. */
+  role: string;
   avatarUrl: string | null;
   address: ProfileAddress;
   /** Fields the member cannot change here, because this session signed in with them. */

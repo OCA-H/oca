@@ -51,6 +51,8 @@ export interface MemberProfile {
   house: string | null;
   membershipType: string;
   status: string;
+  /** "member" or "admin"; admins also get the admin panel. */
+  role: string;
   avatarUrl: string | null;
   address: ProfileAddress;
   lockedFields: LockedField[];

@@ -27,6 +27,8 @@ export const Header: React.FC<HeaderProps> = ({ activeRoute }) => {
   const { isAuthenticated, isLoading: isAuthLoading, user, signOut } = useAuth();
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const activeNav = activeRoute ? NAV_MAP[activeRoute] : undefined;
+  // Only shows the link; /sv/admin and its APIs check the role themselves.
+  const isAdmin = user?.role === 'admin';
 
   const handleLinkClick = (_href?: string) => {
     setMobileNavOpen(false);
@@ -143,6 +145,7 @@ export const Header: React.FC<HeaderProps> = ({ activeRoute }) => {
                     </div>
                   </div>
                   <Link href={ROUTES.PROFILE} onClick={() => handleLinkClick(ROUTES.PROFILE)}>My Profile</Link>
+                  {isAdmin && <Link href={ROUTES.ADMIN} onClick={() => handleLinkClick(ROUTES.ADMIN)}>Admin Panel</Link>}
                   <button type="button" className="member-signout" onClick={() => { signOut(); }}>
                     Sign Out
                   </button>
@@ -253,6 +256,9 @@ export const Header: React.FC<HeaderProps> = ({ activeRoute }) => {
                 )}
               </div>
               <Link className="btn btn-primary" href={ROUTES.PROFILE} onClick={() => handleLinkClick(ROUTES.PROFILE)}>My Profile</Link>
+              {isAdmin && (
+                <Link className="btn btn-ghost" href={ROUTES.ADMIN} onClick={() => handleLinkClick(ROUTES.ADMIN)}>Admin Panel</Link>
+              )}
               <button
                 className="btn btn-ghost"
                 type="button"

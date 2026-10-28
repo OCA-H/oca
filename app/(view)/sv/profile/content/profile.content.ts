@@ -27,7 +27,8 @@ export type ProfileIcon =
   | "rupee"
   | "chat"
   | "lock"
-  | "logout";
+  | "logout"
+  | "shield";
 
 /** A menu entry either swaps the panel in place, leaves the members area, or is not ready yet. */
 export interface ProfileNavItem {
@@ -99,6 +100,22 @@ export const profileContent = {
       { label: "Suggestion Box", icon: "chat", panel: "suggest", tone: "gold", desc: "Tell the Secretariat what to improve.", action: "Share an idea", soon: true },
       { label: "Change Password", icon: "lock", panel: "password", tone: "slate", desc: "Keep your member login secure.", action: "Change password" },
     ] as ProfileTile[],
+  },
+
+  /** Shown to admins only, in the menu and on the dashboard. */
+  admin: {
+    nav: { group: "Administration", items: [{ label: "Admin Panel", icon: "shield", href: ROUTES.ADMIN }] } as {
+      group: string;
+      items: ProfileNavItem[];
+    },
+    tile: {
+      label: "Admin Panel",
+      icon: "shield",
+      href: ROUTES.ADMIN,
+      tone: "gold",
+      desc: "Update the website’s images and text.",
+      action: "Manage the website",
+    } as ProfileTile,
   },
 
   /** Shown in place of a panel that is not built yet, if its address is opened directly. */

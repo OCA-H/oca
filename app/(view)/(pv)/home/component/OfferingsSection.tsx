@@ -1,16 +1,19 @@
 import React from 'react';
+import type { HomeNoticesContent } from '@/app/api/(features)/(pview)/site/schema/sectionSpecs';
+import { SiteLink, toneAt } from './SiteLink';
 
-export const OfferingsSection: React.FC = () => {
+/** The OCA Notice Board: News & Notices. */
+export const OfferingsSection: React.FC<{ content: HomeNoticesContent }> = ({ content }) => {
   return (
-    <section className="section tint-teal" style={{ paddingTop: "80px" }}>
+    <section className="section tint-teal" id="notices" style={{ paddingTop: "80px" }}>
       <div className="wrap">
         <div className="section-head">
           <div className="copy">
-            <span className="eyebrow">OCA Notice Board</span>
-            <h2>News &amp; Notice(s)</h2>
-            <p>The latest word from the OCA Secretariat — AGM notices, elections and community updates.</p>
+            {content.eyebrow && <span className="eyebrow">{content.eyebrow}</span>}
+            <h2>{content.title}</h2>
+            {content.intro && <p>{content.intro}</p>}
           </div>
-          <span className="pill live">Updated Nov 19, 2025</span>
+          {content.updatedLabel && <span className="pill live">{content.updatedLabel}</span>}
         </div>
     
         <div className="notice-carousel-wrap">
@@ -19,72 +22,19 @@ export const OfferingsSection: React.FC = () => {
           </button>
     
           <div className="notice-cards" id="noticeCards">
-            <article className="notice-card">
-              <div className="notice-card-media photo-tile duo-navy">
-                <img className="tile-img" src="https://www.oldcolumban.net/wp-content/uploads/2016/03/OCA_Newsletter-Volume11.jpg" alt="OCA newsletter and notice" loading="lazy" decoding="async" />
-                <div className="tile-icon"><svg viewBox="0 0 24 24" fill="none"><path d="M9 12h6M9 16h6M9 8h6M5 21V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16l-3-2-2 2-2-2-2 2-2-2-3 2Z" stroke="#fff" strokeWidth="1.4"/></svg></div>
-              </div>
-              <div className="notice-card-body">
-                <div className="notice-card-date">November 19, 2025</div>
-                <h4 className="notice-card-title">OCA – AGM 2025 Reminder &amp; Balance Sheet</h4>
-                <a className="qa-link" href="#">Read more →</a>
-              </div>
-            </article>
-            <article className="notice-card">
-              <div className="notice-card-media photo-tile duo-teal">
-                <img className="tile-img" src="https://www.oldcolumban.net/wp-content/uploads/2016/03/OCA_Newsletter-Volume11.jpg" alt="OCA newsletter and notice" loading="lazy" decoding="async" />
-                <div className="tile-icon"><svg viewBox="0 0 24 24" fill="none"><path d="M9 12h6M9 16h6M9 8h6M5 21V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16l-3-2-2 2-2-2-2 2-2-2-3 2Z" stroke="#fff" strokeWidth="1.4"/></svg></div>
-              </div>
-              <div className="notice-card-body">
-                <div className="notice-card-date">October 31, 2025</div>
-                <h4 className="notice-card-title">OCA – AGM and Election Notice 2025</h4>
-                <a className="qa-link" href="#">Read more →</a>
-              </div>
-            </article>
-            <article className="notice-card">
-              <div className="notice-card-media photo-tile duo-gold">
-                <img className="tile-img" src="https://www.oldcolumban.net/wp-content/uploads/2016/03/OCA_Newsletter-Volume11.jpg" alt="OCA newsletter and notice" loading="lazy" decoding="async" />
-                <div className="tile-icon"><svg viewBox="0 0 24 24" fill="none"><path d="M9 12h6M9 16h6M9 8h6M5 21V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16l-3-2-2 2-2-2-2 2-2-2-3 2Z" stroke="#fff" strokeWidth="1.4"/></svg></div>
-              </div>
-              <div className="notice-card-body">
-                <div className="notice-card-date">October 14, 2024</div>
-                <h4 className="notice-card-title">OCA – AGM MOM 23rd April 2023</h4>
-                <a className="qa-link" href="#">Read more →</a>
-              </div>
-            </article>
-            <article className="notice-card">
-              <div className="notice-card-media photo-tile duo-navy">
-                <img className="tile-img" src="https://www.oldcolumban.net/wp-content/uploads/2016/03/OCA_Newsletter-Volume11.jpg" alt="OCA newsletter and notice" loading="lazy" decoding="async" />
-                <div className="tile-icon"><svg viewBox="0 0 24 24" fill="none"><path d="M9 12h6M9 16h6M9 8h6M5 21V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16l-3-2-2 2-2-2-2 2-2-2-3 2Z" stroke="#fff" strokeWidth="1.4"/></svg></div>
-              </div>
-              <div className="notice-card-body">
-                <div className="notice-card-date">September 25, 2024</div>
-                <h4 className="notice-card-title">OCA AGM Notice to be held on 17th October, 2024</h4>
-                <a className="qa-link" href="#">Read more →</a>
-              </div>
-            </article>
-            <article className="notice-card">
-              <div className="notice-card-media photo-tile duo-teal">
-                <img className="tile-img" src="https://www.oldcolumban.net/wp-content/uploads/2016/03/OCA_Newsletter-Volume11.jpg" alt="OCA newsletter and notice" loading="lazy" decoding="async" />
-                <div className="tile-icon"><svg viewBox="0 0 24 24" fill="none"><path d="M9 12h6M9 16h6M9 8h6M5 21V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16l-3-2-2 2-2-2-2 2-2-2-3 2Z" stroke="#fff" strokeWidth="1.4"/></svg></div>
-              </div>
-              <div className="notice-card-body">
-                <div className="notice-card-date">March 10, 2023</div>
-                <h4 className="notice-card-title">OCA – AGM and Election Notice 2023</h4>
-                <a className="qa-link" href="#">Read more →</a>
-              </div>
-            </article>
-            <article className="notice-card">
-              <div className="notice-card-media photo-tile duo-gold">
-                <img className="tile-img" src="https://www.oldcolumban.net/wp-content/uploads/2016/03/OCA_Newsletter-Volume11.jpg" alt="OCA newsletter and notice" loading="lazy" decoding="async" />
-                <div className="tile-icon"><svg viewBox="0 0 24 24" fill="none"><path d="M9 12h6M9 16h6M9 8h6M5 21V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16l-3-2-2 2-2-2-2 2-2-2-3 2Z" stroke="#fff" strokeWidth="1.4"/></svg></div>
-              </div>
-              <div className="notice-card-body">
-                <div className="notice-card-date">October 14, 2022</div>
-                <h4 className="notice-card-title">Become members of the Old Columban Association – Principal Letter</h4>
-                <a className="qa-link" href="#">Read more →</a>
-              </div>
-            </article>
+            {content.items.map((notice, i) => (
+              <article className="notice-card" key={`${i}-${notice.title}`}>
+                <div className={`notice-card-media photo-tile ${toneAt(i)}`}>
+                  <img className="tile-img" src={notice.image} alt={notice.imageAlt} loading="lazy" decoding="async" />
+                  <div className="tile-icon"><svg viewBox="0 0 24 24" fill="none"><path d="M9 12h6M9 16h6M9 8h6M5 21V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16l-3-2-2 2-2-2-2 2-2-2-3 2Z" stroke="#fff" strokeWidth="1.4"/></svg></div>
+                </div>
+                <div className="notice-card-body">
+                  {notice.date && <div className="notice-card-date">{notice.date}</div>}
+                  <h4 className="notice-card-title">{notice.title}</h4>
+                  {notice.href && <SiteLink className="qa-link" href={notice.href}>Read more →</SiteLink>}
+                </div>
+              </article>
+            ))}
           </div>
     
           <button className="notice-nav next" aria-label="Next">

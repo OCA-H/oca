@@ -85,7 +85,7 @@ export const ProfileSidebar: React.FC<ProfileSidebarProps> = ({
       </div>
 
       <nav className="mp-nav" aria-label="Members sections">
-        {profileContent.nav.map(({ group, items }) => (
+        {profileHelper.navFor(profile).map(({ group, items }) => (
           <React.Fragment key={group}>
             <p className="mp-group">{group}</p>
             {items.map((item) =>

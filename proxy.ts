@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { verifySessionToken, SESSION_COOKIE_NAME } from "./app/api/core/session";
+import { USER_ROLES } from "./app/api/(features)/(pview)/auth/schema/userSchema";
 
 /**
  * Check if the requested route is a secure view (/sv/...) or protected route
@@ -13,6 +14,9 @@ function isSecureViewRoute(pathname: string): boolean {
     pathname.startsWith("/member-portal/")
   );
 }
+
+/** The admin panel. Its APIs (/api/sv/admin) check the role again, against the database. */
+const ADMIN_ROUTE = "/sv/admin";
 
 /**
  * List of API routes that require authenticated session
@@ -100,7 +104,12 @@ export async function proxy(request: NextRequest) {
     return NextResponse.redirect(signInUrl);
   }
 
-  // 4. If authenticated, pass session context via request headers to downstream pages/components
+  // 5. The admin panel is for admins: anyone else goes to their own profile
+  if (session && (pathname === ADMIN_ROUTE || pathname.startsWith(`${ADMIN_ROUTE}/`)) && session.user.role !== USER_ROLES.admin) {
+    return NextResponse.redirect(new URL("/sv/profile", request.url));
+  }
+
+  // 6. If authenticated, pass session context via request headers to downstream pages/components
   const requestHeaders = new Headers(request.headers);
   // Never pass on identity headers the caller made up; only the verified session sets them.
   for (const name of ["x-user-id", "x-user-email", "x-user-role", "x-user-name"]) requestHeaders.delete(name);

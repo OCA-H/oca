@@ -1,26 +1,24 @@
 import React from 'react';
-import Link from 'next/link';
-import { ROUTES } from '@/app/(view)/common/helper/routes';
+import type { HomeSpotlightContent } from '@/app/api/(features)/(pview)/site/schema/sectionSpecs';
+import { SiteLink } from './SiteLink';
 
-export const NoticeBoardSection: React.FC = () => {
+/** In the spotlight: Columban Newsmakers. */
+export const NoticeBoardSection: React.FC<{ content: HomeSpotlightContent }> = ({ content }) => {
   return (
-    <section className="section" style={{ background: '#fff' }}>
+    <section className="section" id="spotlight" style={{ background: '#fff' }}>
       <div className="wrap">
         <div className="section-head stack">
-          <span className="eyebrow">In the spotlight</span>
-          <h2>Columban Newsmakers</h2>
-          <p>Columbans making the School proud across public life, business and the arts.</p>
+          {content.eyebrow && <span className="eyebrow">{content.eyebrow}</span>}
+          <h2>{content.title}</h2>
+          {content.intro && <p>{content.intro}</p>}
         </div>
         <div className="spotlight">
           <div className="spotlight-poster">
-            <img
-              src="/images/chandrachud-spotlight.png"
-              alt="Congratulations to Justice Dr. D. Y. Chandrachud, Batch of 1975, on being appointed Chief Justice of India"
-            />
+            <img src={content.image} alt={content.imageAlt} />
           </div>
           <div className="spotlight-body">
             <div className="spotlight-top-row">
-              <span className="pill">News Makers · Achievers</span>
+              {content.pill && <span className="pill">{content.pill}</span>}
               <div className="donor-strip" title="Columbans who've taken their donor pass">
                 <div className="donor-chip">SK</div>
                 <div className="donor-chip">AA</div>
@@ -29,13 +27,13 @@ export const NoticeBoardSection: React.FC = () => {
                 <span className="donor-strip-label">taken their donor pass</span>
               </div>
             </div>
-            <h3>Congratulating Columban Justice D. Y. Chandrachud</h3>
-            <p>
-              OCA proudly celebrates fellow Columban Justice Dhananjaya Y. Chandrachud on his tenure as Chief Justice of India — one of many Columbans making the school proud across public life, business and the arts.
-            </p>
-            <Link className="qa-link" style={{ marginTop: '14px', display: 'inline-block' }} href={ROUTES.NEWS_MAKERS}>
-              See more News Makers →
-            </Link>
+            <h3>{content.headline}</h3>
+            {content.body && <p>{content.body}</p>}
+            {content.linkHref && (
+              <SiteLink className="qa-link" style={{ marginTop: '14px', display: 'inline-block' }} href={content.linkHref}>
+                {content.linkLabel || 'Read more →'}
+              </SiteLink>
+            )}
           </div>
         </div>
       </div>
