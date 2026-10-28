@@ -9,3 +9,8 @@ export * from './ListEditor';
 export * from './SectionEditorPanel';
 export * from './AdminSkeleton';
 export * from './AdminDenied';
+export * from './RecordPanelFrame';
+export * from './EventPassesPanel';
+export * from './EventBookingsPanel';
+export * from './AdminSwitch';
+export * from './ContributionHeadsPanel';

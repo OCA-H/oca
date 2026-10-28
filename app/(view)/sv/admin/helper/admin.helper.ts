@@ -1,6 +1,6 @@
 import { ROUTES } from "@/app/(view)/common/helper/routes";
 import { SECTION_SPECS, sectionSpec } from "@/app/api/(features)/(pview)/site/schema/sectionSpecs";
-import type { AdminPanel } from "../content";
+import { RECORD_PANELS, type AdminPanel, type RecordPanel } from "../content";
 import type { FieldSpec, ListSpec, SectionData, SectionItem } from "../services";
 
 /** A list entry in the editor, with an id that stays with it while entries are moved around. */
@@ -18,11 +18,23 @@ export const adminHelper = {
   /** The panel for the address segments after /sv/admin, or null when they are not one of ours. */
   panelFromSegments: (segments: string[] | undefined): AdminPanel | null => {
     if (!segments || segments.length === 0) return "dashboard";
+    if (segments.length === 1 && segments[0] in RECORD_PANELS) return segments[0] as RecordPanel;
     return sectionSpec(segments.join("."))?.key ?? null;
   },
 
   /** Every panel's address segments, for prerendering. */
-  allPanelSegments: (): string[][] => [[], ...SECTION_SPECS.map((spec) => spec.key.split("."))],
+  allPanelSegments: (): string[][] => [
+    [],
+    ...SECTION_SPECS.map((spec) => spec.key.split(".")),
+    ...Object.keys(RECORD_PANELS).map((panel) => [panel]),
+  ],
+
+  /** The panel's name, for the page title; null for the dashboard. */
+  panelLabel: (panel: AdminPanel): string | null =>
+    panel === "dashboard" ? null : panel in RECORD_PANELS ? RECORD_PANELS[panel as RecordPanel].label : (sectionSpec(panel)?.label ?? null),
+
+  /** "₹1,25,000". */
+  formatRupees: (amount: number): string => `₹${amount.toLocaleString("en-IN")}`,
 
   /** The panel for the current pathname, falling back to the dashboard. */
   panelFromPath: (pathname: string): AdminPanel => {

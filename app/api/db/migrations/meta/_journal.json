@@ -43,6 +43,13 @@
       "when": 1793184906871,
       "tag": "0005_site_content",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1793190364539,
+      "tag": "0006_event_pass_seats",
+      "breakpoints": true
     }
   ]
 }

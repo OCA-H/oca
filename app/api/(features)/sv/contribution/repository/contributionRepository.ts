@@ -1,5 +1,5 @@
 import "server-only";
-import { and, asc, eq, isNull } from "drizzle-orm";
+import { and, asc, count, eq, isNull, sum } from "drizzle-orm";
 import { BaseRepository } from "@/app/api/core/baseRepository";
 import {
   contributionDocuments,
@@ -11,10 +11,57 @@ import {
   type NewContributionDocument,
 } from "../schema/contributionSchema";
 
+export interface FundTotals {
+  fundId: number;
+  /** Contributions of any status: a fund with any cannot be deleted. */
+  contributions: number;
+  paid: number;
+  raised: number;
+}
+
 export class ContributionRepository extends BaseRepository {
   /** Every fund, in the order the form lists them. */
   async listFunds(): Promise<ContributionFund[]> {
     return this.db.select().from(contributionFunds).orderBy(asc(contributionFunds.sortOrder), asc(contributionFunds.id));
+  }
+
+  async findFundById(id: number): Promise<ContributionFund | null> {
+    const results = await this.db.select().from(contributionFunds).where(eq(contributionFunds.id, id)).limit(1);
+    return results[0] ?? null;
+  }
+
+  async updateFund(
+    id: number,
+    data: Partial<Pick<ContributionFund, "label" | "note" | "unitAmount" | "maxUnits" | "status" | "sortOrder">>
+  ): Promise<ContributionFund | null> {
+    const results = await this.db
+      .update(contributionFunds)
+      .set({ ...data, updatedAt: new Date() })
+      .where(eq(contributionFunds.id, id))
+      .returning();
+    return results[0] ?? null;
+  }
+
+  async deleteFund(id: number): Promise<boolean> {
+    const results = await this.db.delete(contributionFunds).where(eq(contributionFunds.id, id)).returning({ id: contributionFunds.id });
+    return results.length > 0;
+  }
+
+  /** Per fund: how many contributions it has, how many were paid, and the money raised. */
+  async totalsByFund(): Promise<FundTotals[]> {
+    const [all, paid] = await Promise.all([
+      this.db.select({ fundId: contributions.fundId, n: count() }).from(contributions).groupBy(contributions.fundId),
+      this.db
+        .select({ fundId: contributions.fundId, n: count(), raised: sum(contributions.amount) })
+        .from(contributions)
+        .where(eq(contributions.status, "paid"))
+        .groupBy(contributions.fundId),
+    ]);
+    return all.map((row) => {
+      const p = paid.find((r) => r.fundId === row.fundId);
+      // Postgres returns sums as text.
+      return { fundId: row.fundId, contributions: row.n, paid: p?.n ?? 0, raised: Number(p?.raised ?? 0) };
+    });
   }
 
   async findFundByCode(code: string): Promise<ContributionFund | null> {

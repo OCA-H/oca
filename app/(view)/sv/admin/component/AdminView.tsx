@@ -3,7 +3,17 @@
 import React from 'react';
 import { SECTION_SPECS } from '@/app/api/(features)/(pview)/site/schema/sectionSpecs';
 import { useAdminHandler } from '../handler';
-import { AdminDashboardPanel, AdminDenied, AdminHero, AdminSidebar, AdminSkeleton, SectionEditorPanel } from './subcomponents';
+import {
+  AdminDashboardPanel,
+  AdminDenied,
+  AdminHero,
+  AdminSidebar,
+  AdminSkeleton,
+  ContributionHeadsPanel,
+  EventBookingsPanel,
+  EventPassesPanel,
+  SectionEditorPanel,
+} from './subcomponents';
 
 export const AdminView: React.FC = () => {
   const { admin, sections, isLoading, error, isDenied, panel, showPanel, markSaved, handleSignOut, isSigningOut } = useAdminHandler();
@@ -27,6 +37,9 @@ export const AdminView: React.FC = () => {
             {SECTION_SPECS.map((spec) => (
               <SectionEditorPanel key={spec.key} spec={spec} isActive={panel === spec.key} onBack={back} onSaved={markSaved} />
             ))}
+            <EventPassesPanel isActive={panel === 'passes'} onBack={back} />
+            <EventBookingsPanel isActive={panel === 'bookings'} onBack={back} />
+            <ContributionHeadsPanel isActive={panel === 'funds'} onBack={back} />
           </main>
         </div>
       </section>

@@ -117,6 +117,60 @@ export class ContributionService {
   }
 
   /**
+   * The admin panel's edit of a contribution head: its wording, order, whether it takes
+   * contributions, and for a per-unit fund (Sponsor a teacher) the unit price and limit.
+   */
+  async updateFundFromAdmin(id: number, payload: Record<string, unknown>): Promise<ContributionFund> {
+    const fund = await this.repository.findFundById(id);
+    if (!fund) throw HttpError.notFound("That contribution head no longer exists.");
+
+    const fields: FieldErrors = {};
+    const text = (key: string, label: string, max: number, required = false): string | null => {
+      const value = typeof payload[key] === "string" ? (payload[key] as string).trim() : "";
+      if (required && !value) fields[key] = `${label} is required.`;
+      else if (value.length > max) fields[key] = `${label} must be ${max} characters or fewer.`;
+      return value || null;
+    };
+    const whole = (key: string, label: string, min: number): number => {
+      const value = payload[key];
+      const number = typeof value === "number" ? value : Number.NaN;
+      if (!Number.isInteger(number) || number < min) fields[key] = `${label} must be a whole number, ${min} or more.`;
+      return number;
+    };
+
+    const label = text("label", "Name", 100, true);
+    const note = text("note", "Note", 100);
+    const sortOrder = whole("sortOrder", "Order on the form", 0);
+    const status = payload.status;
+    if (status !== "active" && status !== "suspended") fields.status = "Choose whether the head is active or inactive.";
+    // Only a per-unit fund has a unit price; the others take any amount.
+    const perUnit = fund.unitAmount !== null;
+    const unitAmount = perUnit ? whole("unitAmount", "Price per unit", 1) : null;
+    const maxUnits = perUnit ? whole("maxUnits", "Most units at once", 1) : null;
+    if (Object.keys(fields).length > 0) throw HttpError.badRequest("Some details need fixing.", fields);
+
+    const updated = await this.repository.updateFund(id, { label: label!, note, sortOrder, status: status as string, unitAmount, maxUnits });
+    if (!updated) throw HttpError.notFound("That contribution head no longer exists.");
+    return updated;
+  }
+
+  /**
+   * Deletes a contribution head that nobody has contributed to. One with contributions is kept:
+   * they are financial records and point at it, so it can only be made inactive.
+   */
+  async deleteFund(id: number): Promise<void> {
+    const fund = await this.repository.findFundById(id);
+    if (!fund) throw HttpError.notFound("That contribution head no longer exists.");
+    const used = (await this.repository.totalsByFund()).find((t) => t.fundId === id)?.contributions ?? 0;
+    if (used > 0) {
+      throw HttpError.conflict(
+        `${fund.label} has ${used} contribution${used === 1 ? "" : "s"} recorded against it, so it cannot be deleted. Make it inactive instead.`
+      );
+    }
+    await this.repository.deleteFund(id);
+  }
+
+  /**
    * Validates the contribution form (multipart, for the optional 80G documents), stores it as
    * pending against the signed-in member and returns the encrypted CCAvenue request.
    */

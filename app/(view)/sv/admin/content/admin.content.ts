@@ -1,8 +1,11 @@
 import { ROUTES } from "@/app/(view)/common/helper/routes";
 import { SECTION_SPECS, type SectionSpec, type SiteSectionKey } from "@/app/api/(features)/(pview)/site/schema/sectionSpecs";
 
-/** The open panel: the dashboard, or the editor for one section (its key, e.g. "home.events"). */
-export type AdminPanel = "dashboard" | SiteSectionKey;
+/** Panels that show records from the database rather than editing a section of the site. */
+export type RecordPanel = "passes" | "bookings" | "funds";
+
+/** The open panel: the dashboard, the editor for one section (its key, e.g. "home.events"), or a record panel. */
+export type AdminPanel = "dashboard" | SiteSectionKey | RecordPanel;
 
 export type AdminIconName =
   | "dashboard"
@@ -32,7 +35,8 @@ export type AdminIconName =
   | "info"
   | "layers"
   | "moon"
-  | "sun";
+  | "sun"
+  | "ticket";
 
 export const SECTION_ICONS: Record<SiteSectionKey, AdminIconName> = {
   "home.events": "calendar",
@@ -44,6 +48,34 @@ export const SECTION_ICONS: Record<SiteSectionKey, AdminIconName> = {
   "events.dinner": "moon",
   "events.lunch": "sun",
 };
+
+/** The record panels, in menu order, under their menu group. Each has its own address, e.g. /sv/admin/passes. */
+export const RECORD_PANELS: Record<RecordPanel, { group: string; label: string; description: string; icon: AdminIconName }> = {
+  passes: {
+    group: "Annual Dinner passes",
+    label: "Passes & seats",
+    description: "Prices, seats left and which Annual Dinner passes are open for booking.",
+    icon: "ticket",
+  },
+  bookings: {
+    group: "Annual Dinner passes",
+    label: "Pass bookings",
+    description: "Every Annual Dinner pass booking, with the member's details and payment.",
+    icon: "people",
+  },
+  funds: {
+    group: "Contributions",
+    label: "Contribution heads",
+    description: "What members can contribute to: change the wording, turn a head on or off, or delete it.",
+    icon: "heart",
+  },
+};
+
+/** The record panels' menu groups, in order, with their panels. */
+export const RECORD_GROUPS: { group: string; icon: AdminIconName; panels: RecordPanel[] }[] = [
+  { group: "Annual Dinner passes", icon: "ticket", panels: ["passes", "bookings"] },
+  { group: "Contributions", icon: "heart", panels: ["funds"] },
+];
 
 /** A menu entry swaps the panel in place, leaves the admin panel, or is not ready yet. */
 export interface AdminNavItem {
@@ -87,6 +119,12 @@ export const adminContent = {
       icon,
       collapsible: true,
       items: sectionItems(page as SectionSpec["page"]),
+    })),
+    ...RECORD_GROUPS.map(({ group, icon, panels }) => ({
+      group,
+      icon,
+      collapsible: true,
+      items: panels.map((panel) => ({ label: RECORD_PANELS[panel].label, icon: RECORD_PANELS[panel].icon, panel })),
     })),
     {
       // Pages whose content is still written into the code; they become editable one by one.
@@ -154,6 +192,105 @@ export const adminContent = {
     tooBig: "That image is over 10 MB. Please choose a smaller one.",
     failed: "We could not upload that image. Please try again.",
     none: "No image",
+  },
+
+  records: {
+    loadError: "We could not load this list.",
+    retry: "Try again",
+    refresh: "Refresh",
+    empty: "Nothing here yet.",
+    view: "Open",
+  },
+
+  passes: {
+    viewOnSite: "View on site",
+    seats: (left: number | null, total: number | null) =>
+      total === null ? "Unlimited seats" : `${left ?? 0} of ${total} seats left`,
+    sold: (paid: number) => `${paid} paid for`,
+    open: "Open",
+    locked: "Locked",
+    soldOut: "Sold out",
+    groups: { booking: "Booking & seats", card: "Shown on the pass card" },
+    statusOptions: [
+      { value: "active", label: "Open for booking" },
+      { value: "locked", label: "Locked (shown, cannot be booked)" },
+    ],
+    stats: { seats: "Seats left", sold: "Passes paid for", revenue: "Taken in payments" },
+    fields: {
+      label: "Name on the site",
+      price: "Price (₹)",
+      totalQuantity: "Seats in total",
+      availableQuantity: "Seats left",
+      status: "Booking",
+      statusNote: "Note on the card",
+      batchEligibility: "Who can book",
+      displayOrder: "Order on the page",
+      description: "Description",
+    },
+    hints: {
+      availableQuantity: "Goes down by one with every paid booking.",
+      statusNote: "Shown on the pass card. A note such as \"42 left\" keeps counting down by itself.",
+    },
+    save: "Save pass",
+    saving: "Saving…",
+    reset: "Undo changes",
+    saved: "Saved. The Annual Dinner page now shows your changes.",
+  },
+
+  bookings: {
+    filters: [
+      { value: "", label: "All" },
+      { value: "paid", label: "Paid" },
+      { value: "pending", label: "Pending" },
+      { value: "failed", label: "Failed" },
+      { value: "cancelled", label: "Cancelled" },
+    ],
+    search: "Search name, member ID, email or order",
+    stats: { paid: "Paid bookings", revenue: "Taken in payments", oversold: "Paid after sell-out" },
+    booked: "Booked",
+    paidOn: "Paid",
+    guests: (b: { spouseName: string | null; teachers: number; childrenUnder12: number; childrenAbove12: number }) =>
+      [
+        b.spouseName && `Spouse: ${b.spouseName}`,
+        b.teachers > 0 && `${b.teachers} teacher${b.teachers === 1 ? "" : "s"}`,
+        b.childrenUnder12 > 0 && `${b.childrenUnder12} under 12`,
+        b.childrenAbove12 > 0 && `${b.childrenAbove12} over 12`,
+      ].filter(Boolean).join(" · ") || "Member only",
+    oversold: "Paid after the last pass went: follow up with the member.",
+    shown: (shown: number, total: number) => {
+      const noun = total === 1 ? "booking" : "bookings";
+      return shown === total ? `${total} ${noun}` : `${shown} of ${total} ${noun}`;
+    },
+    none: "No bookings match.",
+  },
+
+  funds: {
+    perUnit: (amount: number, unit: string | null) => `₹${amount.toLocaleString("en-IN")} per ${unit ?? "unit"}`,
+    anyAmount: "Any amount",
+    raised: (paid: number, raised: string) => `${paid} paid · ${raised}`,
+    switchLabel: "Accepting contributions",
+    on: "Active",
+    off: "Inactive",
+    offHint: "Inactive heads stay on the form, marked as suspended, and cannot be paid into.",
+    stats: { active: "Active heads", paid: "Paid contributions", raised: "Raised" },
+    fields: {
+      label: "Name",
+      note: "Note under the name",
+      sortOrder: "Order on the form",
+      unitAmount: "Price per unit (₹)",
+      maxUnits: "Most units at once",
+    },
+    hints: { note: "For example \"₹5,000 per teacher\" or \"Currently suspended\"." },
+    save: "Save changes",
+    saving: "Saving…",
+    reset: "Undo changes",
+    saved: "Saved. The contribution form now shows your changes.",
+    delete: "Delete head",
+    deleting: "Deleting…",
+    confirm: (label: string) => `Delete "${label}" for good? It disappears from the contribution form.`,
+    confirmYes: "Yes, delete",
+    cancel: "Keep it",
+    cannotDelete: (n: number) => `Has ${n} contribution${n === 1 ? "" : "s"}: make it inactive instead of deleting.`,
   },
 
   denied: {

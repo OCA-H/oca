@@ -9,7 +9,7 @@ const PAYMENT_STATUS_PATH = "/sv/contribution/payment-status";
 const SIGN_IN_MESSAGE = "Please sign in to make a contribution.";
 
 // Contributions can be made by signed-in members, but no endpoint here reads them back: the only
-// GET is the list of funds. Reading contributions is for a future admin-only area.
+// GET is the list of funds. Contribution heads are managed from the admin panel (/api/sv/admin).
 export class ContributionController extends BaseController {
   constructor(private readonly service: ContributionService) {
     super();

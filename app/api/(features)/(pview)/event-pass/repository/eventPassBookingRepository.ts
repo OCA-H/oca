@@ -1,5 +1,5 @@
 import "server-only";
-import { and, eq, gt, ne, sql } from "drizzle-orm";
+import { and, count, desc, eq, gt, ne, sql, sum } from "drizzle-orm";
 import { BaseRepository } from "@/app/api/core/baseRepository";
 import { eventPasses } from "../schema/eventPassSchema";
 import {
@@ -8,7 +8,40 @@ import {
   type NewEventPassBooking,
 } from "../schema/eventPassBookingSchema";
 
+/** The admin panel shows at most this many bookings at once, newest first. */
+const ADMIN_LIST_LIMIT = 2000;
+
+export interface PassSales {
+  eventPassId: number;
+  paid: number;
+  revenue: number;
+}
+
 export class EventPassBookingRepository extends BaseRepository {
+  /** Newest first, optionally only one event's or one status's. */
+  async findAll(filter?: { eventName?: string; status?: string }): Promise<EventPassBooking[]> {
+    const conditions = [];
+    if (filter?.eventName) conditions.push(eq(eventPassBookings.eventName, filter.eventName));
+    if (filter?.status) conditions.push(eq(eventPassBookings.status, filter.status));
+    return this.db
+      .select()
+      .from(eventPassBookings)
+      .where(conditions.length > 0 ? and(...conditions) : undefined)
+      .orderBy(desc(eventPassBookings.createdAt), desc(eventPassBookings.id))
+      .limit(ADMIN_LIST_LIMIT);
+  }
+
+  /** Paid bookings and money taken, per pass. */
+  async paidSalesByPass(): Promise<PassSales[]> {
+    const rows = await this.db
+      .select({ eventPassId: eventPassBookings.eventPassId, paid: count(), revenue: sum(eventPassBookings.amount) })
+      .from(eventPassBookings)
+      .where(eq(eventPassBookings.status, "paid"))
+      .groupBy(eventPassBookings.eventPassId);
+    // Postgres returns sums as text.
+    return rows.map((row) => ({ eventPassId: row.eventPassId, paid: row.paid, revenue: Number(row.revenue ?? 0) }));
+  }
+
   async findByOrderId(orderId: string): Promise<EventPassBooking | null> {
     const results = await this.db
       .select()

@@ -132,6 +132,58 @@ export class EventPassService {
     return updated;
   }
 
+  /**
+   * The admin panel's edit: every editable detail of a pass, checked together so the form can show
+   * each problem beside its field. Seats left can never exceed the seats in total.
+   */
+  async updateFromAdmin(id: number, payload: Record<string, unknown>): Promise<EventPass> {
+    const existing = await this.repository.findById(id);
+    if (!existing) throw HttpError.notFound("That pass no longer exists.");
+
+    const fields: FieldErrors = {};
+    const text = (key: string, label: string, max: number, required = false): string | null => {
+      const value = typeof payload[key] === "string" ? (payload[key] as string).trim() : "";
+      if (required && !value) fields[key] = `${label} is required.`;
+      else if (value.length > max) fields[key] = `${label} must be ${max} characters or fewer.`;
+      return value || null;
+    };
+    const whole = (key: string, label: string): number => {
+      const value = payload[key];
+      const number = typeof value === "number" ? value : Number.NaN;
+      if (!Number.isInteger(number) || number < 0) fields[key] = `${label} must be a whole number, 0 or more.`;
+      return number;
+    };
+
+    const label = text("label", "Name on the site", 200, true);
+    const description = text("description", "Description", 500);
+    const batchEligibility = text("batchEligibility", "Who can book", 100);
+    const statusNote = text("statusNote", "Note on the card", 255);
+    const price = whole("price", "Price");
+    const totalQuantity = whole("totalQuantity", "Seats in total");
+    const availableQuantity = whole("availableQuantity", "Seats left");
+    const displayOrder = whole("displayOrder", "Order on the page");
+    const status = payload.status;
+    if (status !== "active" && status !== "locked") fields.status = "Choose whether the pass is open or locked.";
+    if (!fields.totalQuantity && !fields.availableQuantity && availableQuantity > totalQuantity) {
+      fields.availableQuantity = "Seats left cannot be more than the seats in total.";
+    }
+    if (Object.keys(fields).length > 0) throw HttpError.badRequest("Some details need fixing.", fields);
+
+    const updated = await this.repository.update(id, {
+      label: label!,
+      description,
+      batchEligibility,
+      statusNote,
+      price,
+      totalQuantity,
+      availableQuantity,
+      displayOrder,
+      status: status as string,
+    });
+    if (!updated) throw HttpError.notFound("That pass no longer exists.");
+    return updated;
+  }
+
   async delete(id: number): Promise<void> {
     const existing = await this.repository.findById(id);
     if (!existing) throw HttpError.notFound(`Pass with id ${id} not found.`);

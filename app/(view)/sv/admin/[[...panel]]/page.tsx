@@ -1,6 +1,5 @@
 import { Suspense } from 'react';
 import { notFound } from 'next/navigation';
-import { SECTION_SPECS } from '@/app/api/(features)/(pview)/site/schema/sectionSpecs';
 import { AdminView, adminHelper } from '@/app/(view)/sv/admin';
 import { AdminSkeleton } from '@/app/(view)/sv/admin/component/subcomponents';
 import { Header, Footer } from '@/app/(view)/common';
@@ -21,7 +20,7 @@ export function generateStaticParams() {
 
 export async function generateMetadata({ params }: AdminPageProps) {
   const panel = await panelFor(params);
-  const section = SECTION_SPECS.find((spec) => spec.key === panel)?.label;
+  const section = adminHelper.panelLabel(panel);
   return {
     title: `${section ? `${section} – ` : ''}Admin Panel – Old Columbans Association`,
     robots: { index: false },

@@ -1,6 +1,6 @@
 import React from 'react';
 import { SECTION_SPECS } from '@/app/api/(features)/(pview)/site/schema/sectionSpecs';
-import { adminContent, SECTION_ICONS, type AdminPanel } from '../../content';
+import { adminContent, RECORD_GROUPS, RECORD_PANELS, SECTION_ICONS, type AdminPanel } from '../../content';
 import { adminHelper } from '../../helper';
 import type { SectionSummary } from '../../services';
 import { AdminIcon } from './AdminIcon';
@@ -56,6 +56,27 @@ export const AdminDashboardPanel: React.FC<AdminDashboardPanelProps> = ({ sectio
                 </AdminPanelLink>
               );
             })}
+          </div>
+        </React.Fragment>
+      ))}
+
+      {RECORD_GROUPS.map(({ group, panels }) => (
+        <React.Fragment key={group}>
+          <h3 className="ad-subhead">{group}</h3>
+          <div className="mp-tiles">
+            {panels.map((panel) => (
+              <AdminPanelLink key={panel} className="mp-tile mp-tile--gold" panel={panel} onShow={onShowPanel}>
+                <span className="mp-tile-ico">
+                  <AdminIcon name={RECORD_PANELS[panel].icon} />
+                </span>
+                <span className="mp-tile-t">{RECORD_PANELS[panel].label}</span>
+                <span className="mp-tile-d">{RECORD_PANELS[panel].description}</span>
+                <span className="mp-tile-act">
+                  {adminContent.records.view}
+                  <AdminIcon name="go" />
+                </span>
+              </AdminPanelLink>
+            ))}
           </div>
         </React.Fragment>
       ))}
