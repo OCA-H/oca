@@ -5,8 +5,12 @@ import { loadEnvConfig } from "@next/env";
 import { defineConfig } from "drizzle-kit";
 import { buildDatabaseUrl, missingDatabaseSettings } from "./app/api/core/databaseConfig";
 
-// Same .env files `next dev` reads, so the DB_* settings only need setting once.
-loadEnvConfig(process.cwd());
+// Same .env files `next dev` reads, so the DB_* settings only need setting once. loadEnvConfig
+// reads .env.production (first, and it wins) unless told this is development, so the production
+// database is only used when asked for: NODE_ENV=production npm run db:migrate
+const isProduction = process.env.NODE_ENV === "production";
+const { loadedEnvFiles } = loadEnvConfig(process.cwd(), !isProduction);
+console.log(`Database settings from: ${loadedEnvFiles.map((file) => file.path).join(", ") || "the environment"}`);
 
 export default defineConfig({
   dialect: "postgresql",

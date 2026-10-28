@@ -8,7 +8,7 @@
 // Options: --email (required), --name, --member-id (defaults to the email), --mobile,
 // --password (else ADMIN_PASSWORD, else you are asked; asked is best, it stays out of shell history).
 // For an existing account the password only changes when one is given.
-// Uses the same DB_* settings as the app: .env locally, or the environment's own variables.
+// Uses .env (development) by default; NODE_ENV=production npm run admin:create ... for the live site.
 
 import crypto from "node:crypto";
 import readline from "node:readline";
@@ -19,7 +19,13 @@ import pg from "pg";
 const MIN_PASSWORD_LENGTH = 8;
 const MAX_PASSWORD_LENGTH = 128;
 
-nextEnv.loadEnvConfig(process.cwd());
+// Development settings (.env) unless NODE_ENV=production, as with npm run db:migrate. Without the
+// flag, loadEnvConfig would read .env.production first and quietly change the live database.
+const isProduction = process.env.NODE_ENV === "production";
+const { loadedEnvFiles } = nextEnv.loadEnvConfig(process.cwd(), !isProduction, { info() {}, error: console.error });
+console.log(
+  `Using ${isProduction ? "PRODUCTION" : "development"} settings from: ${loadedEnvFiles.map((f) => f.path).join(", ") || "the environment"}`
+);
 
 const { values: args } = parseArgs({
   options: {
