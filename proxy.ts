@@ -44,9 +44,9 @@ export async function proxy(request: NextRequest) {
   const sessionCookie = request.cookies.get(SESSION_COOKIE_NAME)?.value;
   const session = sessionCookie ? await verifySessionToken(sessionCookie) : null;
 
-  // 1. If already authenticated and navigating to login/signin page, redirect to home page
+  // 1. If already authenticated and navigating to login/signin page, redirect to the member's profile
   if (isAuthPage && session) {
-    return NextResponse.redirect(new URL("/", request.url));
+    return NextResponse.redirect(new URL("/sv/profile", request.url));
   }
 
   // 2. Legacy /member-portal redirect to /sv/member-portal

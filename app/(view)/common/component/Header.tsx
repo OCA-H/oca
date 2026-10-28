@@ -139,6 +139,7 @@ export const Header: React.FC<HeaderProps> = ({ activeRoute }) => {
                       {user?.membershipType && <span className="member-card-badge">{user.membershipType}</span>}
                     </div>
                   </div>
+                  <Link href={ROUTES.PROFILE} onClick={() => handleLinkClick(ROUTES.PROFILE)}>My Profile</Link>
                   <button type="button" className="member-signout" onClick={() => { signOut(); }}>
                     Sign Out
                   </button>
@@ -248,6 +249,7 @@ export const Header: React.FC<HeaderProps> = ({ activeRoute }) => {
                   <div style={{ fontSize: '11px', color: '#666' }}>ID: {user.memberId}</div>
                 )}
               </div>
+              <Link className="btn btn-primary" href={ROUTES.PROFILE} onClick={() => handleLinkClick(ROUTES.PROFILE)}>My Profile</Link>
               <button
                 className="btn btn-ghost"
                 type="button"

@@ -53,6 +53,7 @@ export const ROUTES = {
   PAGE_PARTNER_ORGANIZATION: '/partner-organization',
   PAGE_MEMBER_PORTAL: '/sv/member-portal',
   MEMBER_PORTAL: '/sv/member-portal',
+  PROFILE: '/sv/profile',
   SV: '/sv',
 
   // External Portal Links

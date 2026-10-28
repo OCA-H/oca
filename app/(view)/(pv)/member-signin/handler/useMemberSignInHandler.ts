@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { ROUTES } from '@/app/(view)/common/helper/routes';
 import { memberSignInHelper } from '../helper';
 import { memberSignInService } from '../services';
 
@@ -53,12 +54,12 @@ export function useMemberSignInHandler() {
         text: `Welcome back, ${response.data?.fullName || 'Columban'}! Redirecting...`,
       });
 
-      // Check for redirect query parameter in URL, otherwise go to the home page
-      let targetUrl = '/';
+      // Check for redirect query parameter in URL, otherwise go to the member's profile
+      let targetUrl: string = ROUTES.PROFILE;
       if (typeof window !== 'undefined') {
         const params = new URLSearchParams(window.location.search);
         const redirectParam = params.get('redirect');
-        if (redirectParam && redirectParam.startsWith('/')) {
+        if (redirectParam && redirectParam.startsWith('/') && !redirectParam.startsWith('//')) {
           targetUrl = redirectParam;
         }
       }
