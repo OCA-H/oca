@@ -6,17 +6,27 @@ import { profileService, type MembershipCard } from '../services';
 /**
  * Loads the e-Membership Card the first time its panel is open, and again after `refresh`
  * (when My Account saves a new name or batch). A refresh keeps the current card on screen
- * and swaps in the new one, so only the very first load shows the skeleton.
+ * and swaps in the new one, so only the very first load shows the skeleton. A new `sessionKey`
+ * (after a sign-out) drops the card entirely, so one member never sees the last member's card.
  */
-export function useMembershipCard(isActive: boolean) {
+export function useMembershipCard(isActive: boolean, sessionKey: number) {
   const [card, setCard] = useState<MembershipCard | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [version, setVersion] = useState(0);
-  const loadedVersion = useRef(-1);
+  const loadedKey = useRef<string | null>(null);
+
+  // Signed out and back in: forget the previous member's card before showing anything.
+  const [cardSession, setCardSession] = useState(sessionKey);
+  if (cardSession !== sessionKey) {
+    setCardSession(sessionKey);
+    setCard(null);
+    setError(null);
+  }
 
   useEffect(() => {
-    if (!isActive || loadedVersion.current === version) return;
-    loadedVersion.current = version;
+    const key = `${sessionKey}:${version}`;
+    if (!isActive || loadedKey.current === key) return;
+    loadedKey.current = key;
     let isCurrent = true;
     let isDone = false;
 
@@ -37,9 +47,9 @@ export function useMembershipCard(isActive: boolean) {
     return () => {
       isCurrent = false;
       // Left the panel before the answer came: ask again next time it opens.
-      if (!isDone) loadedVersion.current = -1;
+      if (!isDone) loadedKey.current = null;
     };
-  }, [isActive, version]);
+  }, [isActive, version, sessionKey]);
 
   const refresh = useCallback(() => setVersion((v) => v + 1), []);
 

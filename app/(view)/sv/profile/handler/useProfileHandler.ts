@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import { SIGNED_OUT_ROUTE, signOutMember } from '@/app/(view)/common/helper/useAuth';
 import { profileContent, type ProfilePanel } from '../content';
@@ -127,12 +127,34 @@ export function useProfileHandler() {
   const sendWish = (name: string) => setSentWishes((prev) => (prev.includes(name) ? prev : [...prev, name]));
 
   const [isSigningOut, setIsSigningOut] = useState(false);
+  /** Changes on every sign-out, so data loaded for the previous member (the card) is dropped too. */
+  const [sessionKey, setSessionKey] = useState(0);
+  const hasSignedOut = useRef(false);
   const handleSignOut = async () => {
     if (isSigningOut) return;
     setIsSigningOut(true);
+    hasSignedOut.current = true;
     await signOutMember();
     router.replace(SIGNED_OUT_ROUTE);
   };
+
+  // Next.js keeps this page alive (hidden) after leaving it and restores it as it was. After a
+  // sign-out, forget the member as the page is hidden: if someone signs in again on this browser,
+  // the members area comes back as a fresh skeleton and loads their details, never the last ones.
+  useLayoutEffect(() => {
+    return () => {
+      if (!hasSignedOut.current) return;
+      hasSignedOut.current = false;
+      setProfile(null);
+      setIsLoading(true);
+      setError(null);
+      setPhotoSrc(null);
+      setPhotoMsg(null);
+      setSentWishes([]);
+      setIsSigningOut(false);
+      setSessionKey((key) => key + 1);
+    };
+  }, []);
 
   return {
     profile,
@@ -148,6 +170,7 @@ export function useProfileHandler() {
     sendWish,
     handleSignOut,
     isSigningOut,
+    sessionKey,
   };
 }
 

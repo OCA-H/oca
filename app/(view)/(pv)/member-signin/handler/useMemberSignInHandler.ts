@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useLayoutEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { ROUTES } from '@/app/(view)/common/helper/routes';
 import { memberSignInHelper } from '../helper';
@@ -35,6 +35,23 @@ export function useMemberSignInHandler() {
   const [feedback, setFeedback] = useState<{ type: 'error' | 'success'; text: string } | null>(null);
   /** Set once sign-in succeeds: the page shows the welcome hand-off until the next page opens. */
   const [welcomeName, setWelcomeName] = useState<string | null>(null);
+  const hasSignedIn = useRef(false);
+
+  // Next.js keeps this page alive (hidden) after leaving it and restores it as it was, so coming
+  // back after signing out would show the old welcome and the typed password. Once a sign-in has
+  // gone through, reset everything as the page is hidden; it returns as a fresh form.
+  useLayoutEffect(() => {
+    return () => {
+      if (!hasSignedIn.current) return;
+      hasSignedIn.current = false;
+      setWelcomeName(null);
+      setIsLoading(false);
+      setFeedback(null);
+      setShowPassword(false);
+      setPassword('');
+      setUser('');
+    };
+  }, []);
 
   const toggleShowPassword = () => {
     setShowPassword((prev) => !prev);
@@ -81,6 +98,7 @@ export function useMemberSignInHandler() {
 
     // One hand-off, straight to the target: the welcome fades in over the form while the next
     // page is fetched, then replace() moves there, so Back does not return to this form.
+    hasSignedIn.current = true;
     const target = signInTarget();
     const fullName = response.data?.fullName || 'Columban';
     setWelcomeName(fullName.split(' ').find((part) => part && !part.endsWith('.')) || fullName);

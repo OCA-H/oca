@@ -34,9 +34,10 @@ export const ProfileView: React.FC = () => {
     sendWish,
     handleSignOut,
     isSigningOut,
+    sessionKey,
   } = useProfileHandler();
   // Starts with the profile when the card is the panel being opened, instead of after it.
-  const membershipCard = useMembershipCard(panel === 'card');
+  const membershipCard = useMembershipCard(panel === 'card', sessionKey);
   const saveProfile = (saved: MemberProfile) => {
     setProfile(saved);
     membershipCard.refresh();
