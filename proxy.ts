@@ -77,6 +77,8 @@ export async function proxy(request: NextRequest) {
 
   // 4. If authenticated, pass session context via request headers to downstream pages/components
   const requestHeaders = new Headers(request.headers);
+  // Never pass on identity headers the caller made up; only the verified session sets them.
+  for (const name of ["x-user-id", "x-user-email", "x-user-role", "x-user-name"]) requestHeaders.delete(name);
   if (session) {
     requestHeaders.set("x-user-id", String(session.user.id));
     requestHeaders.set("x-user-email", session.user.email);

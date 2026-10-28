@@ -12,6 +12,11 @@ const RESET_LINK_TTL_MINUTES = 30;
 /** Stops the form being used to flood a member's inbox. */
 const RESET_EMAIL_COOLDOWN_SECONDS = 60;
 const MIN_PASSWORD_LENGTH = 8;
+/**
+ * The demo members have passwords written in this repository (one is an admin), so they are
+ * only ever created in development. A production database never gets them, even when empty.
+ */
+const CAN_SEED_DEMO_USERS = process.env.NODE_ENV !== "production";
 
 const hashResetToken = (token: string) => crypto.createHash("sha256").update(token).digest("hex");
 
@@ -62,9 +67,8 @@ export class UserService {
       throw HttpError.badRequest("Please enter your password.");
     }
 
-    // Auto seed demo users if table is empty so sign-in works immediately
-    const count = await this.repository.count();
-    if (count === 0) {
+    // In development, seed demo users if the table is empty so sign-in works immediately
+    if (CAN_SEED_DEMO_USERS && (await this.repository.count()) === 0) {
       await this.repository.seedDefaultUsers();
     }
 
@@ -155,6 +159,7 @@ export class UserService {
   }
 
   async seedDemoUsers(): Promise<SafeUser[]> {
+    if (!CAN_SEED_DEMO_USERS) throw HttpError.notFound("Not found.");
     const seeded = await this.repository.seedDefaultUsers();
     return seeded.map(toSafeUser);
   }

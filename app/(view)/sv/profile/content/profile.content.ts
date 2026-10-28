@@ -120,7 +120,24 @@ export const profileContent = {
     lead: "Your digital membership card.",
     org: "Old Columbans Association",
     school: "St. Columba’s School, New Delhi",
-    validity: "For life",
+    // Shown under "Valid" when the membership type has no fixed term on record.
+    activeLabel: "Active",
+    labels: {
+      member: "Member",
+      membership: "Membership",
+      memberId: "Member ID",
+      batch: "Batch",
+      house: "House",
+      memberSince: "Member since",
+      order: "Order reference",
+      paidVia: "Paid via",
+      amount: "Amount paid",
+      valid: "Valid",
+    },
+    notValid: "Not active",
+    notValidNote: "This membership is not active right now, so the card cannot be used. Please write to the Secretariat.",
+    loadError: "We could not load your membership card.",
+    retry: "Try again",
   },
 
   donor: {

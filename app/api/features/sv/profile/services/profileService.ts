@@ -3,10 +3,11 @@ import { HttpError, type FieldErrors } from "@/app/api/core/httpError";
 import { Mailer } from "@/app/api/core/mailer";
 import { isUniqueViolation } from "@/app/api/core/baseRepository";
 import { hashPassword, verifyPassword } from "@/app/api/core/auth";
+import { MembershipRepository } from "@/app/api/features/(pview)/membership/repository";
 import { UserRepository } from "../../user/repository/userRepository";
 import type { SignInMethod } from "@/app/api/core/session";
 import type { User } from "../../user/schema/userSchema";
-import type { LockedField, MemberProfile, ProfileAddress, ProfileUpdate } from "../schema/profileSchema";
+import type { LockedField, MemberProfile, MembershipCard, ProfileAddress, ProfileUpdate } from "../schema/profileSchema";
 
 const TITLES = ["Mr.", "Mrs.", "Ms.", "Miss", "Dr.", "Prof.", "Br.", "Fr."];
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -14,6 +15,25 @@ const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const MOBILE_PATTERN = /^\+?\d{7,15}$/;
 /** The oldest batch the membership form offers. */
 const FIRST_BATCH_YEAR = 1941;
+/** Longest value each My Account field takes, in line with the columns the membership form fills. */
+const MAX_LENGTH: Record<string, number> = {
+  title: 20,
+  firstName: 80,
+  middleName: 80,
+  lastName: 80,
+  email: 255,
+  mobile: 20,
+  line1: 200,
+  line2: 200,
+  line3: 200,
+  city: 100,
+  state: 100,
+  zip: 20,
+  country: 100,
+};
+
+/** Membership types that never lapse, so the card reads "Valid: For life". */
+const LIFETIME_TYPES = ["Life Member", "Honorary Member"];
 const MIN_PASSWORD_LENGTH = 8;
 const SECRETARIAT_EMAIL = process.env.SECRETARIAT_EMAIL || "info@oldcolumban.net";
 
@@ -82,10 +102,39 @@ function toProfile(user: User, signInMethod: SignInMethod | undefined): MemberPr
 }
 
 export class ProfileService {
-  constructor(private readonly users: UserRepository) {}
+  constructor(
+    private readonly users: UserRepository,
+    private readonly memberships: MembershipRepository
+  ) {}
 
   async get(userId: number, signInMethod: SignInMethod | undefined): Promise<MemberProfile> {
     return toProfile(await this.findUser(userId), signInMethod);
+  }
+
+  /** The e-Membership Card: the member's own record, plus the membership they paid for, if any. */
+  async getCard(userId: number): Promise<MembershipCard> {
+    const user = await this.findUser(userId);
+    const paid = await this.memberships.findPaidByUserId(userId);
+    const { firstName, lastName } = nameParts(user);
+
+    return {
+      memberId: user.memberId,
+      name: [firstName, lastName].filter(Boolean).join(" ") || user.fullName,
+      membershipType: user.membershipType,
+      batchYear: user.batchYear,
+      house: user.house,
+      status: user.status,
+      validity: LIFETIME_TYPES.includes(user.membershipType) ? "For life" : null,
+      memberSince: (paid?.paidAt ?? user.createdAt).toISOString(),
+      payment: paid && {
+        orderId: paid.orderId,
+        amount: paid.amount,
+        currency: paid.currency,
+        paidAt: paid.paidAt?.toISOString() ?? null,
+        // CCAvenue sends the text "null" for fields it leaves empty.
+        paymentMode: paid.paymentMode && paid.paymentMode !== "null" ? paid.paymentMode : null,
+      },
+    };
   }
 
   /**
@@ -116,6 +165,12 @@ export class ProfileService {
     };
 
     const fields: FieldErrors = {};
+    const { address, ...rest } = data;
+    for (const [key, value] of Object.entries({ ...rest, ...address })) {
+      const max = MAX_LENGTH[key];
+      if (max && value.length > max) fields[key] = `Please keep this under ${max} characters.`;
+    }
+    if (!TITLES.includes(data.title) && data.title) fields.title = "Choose a title from the list.";
     if (!data.firstName) fields.firstName = "First name is required.";
     if (!data.lastName) fields.lastName = "Last name is required.";
     if (!EMAIL_PATTERN.test(data.email)) fields.email = "Enter a valid email address.";
@@ -149,9 +204,10 @@ export class ProfileService {
     if (Object.keys(fields).length > 0) throw HttpError.badRequest("Some details need fixing.", fields);
 
     const { title, firstName, middleName, lastName } = data;
+    const fullName = [title, firstName, middleName, lastName].filter(Boolean).join(" ");
     try {
       const updated = await this.users.update(userId, {
-        fullName: [title, firstName, middleName, lastName].filter(Boolean).join(" "),
+        fullName: fullName.slice(0, 150),
         email: data.email,
         mobile: data.mobile,
         batchYear: data.batchYear || null,
@@ -209,9 +265,16 @@ export class ProfileService {
     });
   }
 
+  /**
+   * The signed-in member's row. Sessions are signed cookies that last a week, so this is where
+   * an account deactivated since sign-in stops working instead of waiting for the cookie to expire.
+   */
   private async findUser(userId: number): Promise<User> {
     const user = await this.users.findById(userId);
-    if (!user) throw HttpError.notFound("Member not found.");
+    if (!user) throw HttpError.unauthorized("Your session is no longer valid. Please sign in again.");
+    if (user.status !== "active") {
+      throw HttpError.forbidden("Your account is currently inactive. Please contact the OCA Secretariat.");
+    }
     return user;
   }
 }

@@ -23,8 +23,21 @@ export interface SessionData {
 export const SESSION_COOKIE_NAME = "oca_session";
 export const SESSION_EXPIRY_SECONDS = 7 * 24 * 60 * 60; // 7 days
 
-export const AUTH_SECRET =
-  process.env.AUTH_SECRET || "oca_secret_key_alumni_community_secure_salt_2026";
+/** Development-only fallback. It is public in the source, so it must never sign real sessions. */
+const DEV_AUTH_SECRET = "oca_secret_key_alumni_community_secure_salt_2026";
+
+/**
+ * The key that signs sessions. Read when a token is signed or checked, not at import, so a
+ * build without the variable still compiles; a running production server refuses to work without it.
+ */
+function authSecret(): string {
+  const secret = process.env.AUTH_SECRET;
+  if (secret) return secret;
+  if (process.env.NODE_ENV === "production") {
+    throw new Error("AUTH_SECRET is not set. Refusing to sign or verify sessions with the development key.");
+  }
+  return DEV_AUTH_SECRET;
+}
 
 /** Base64URL encode string or Uint8Array */
 export function base64UrlEncode(input: string | Uint8Array): string {
@@ -88,7 +101,7 @@ export async function createSessionToken(user: SessionUser): Promise<string> {
   };
 
   const payloadEncoded = base64UrlEncode(JSON.stringify(payload));
-  const signature = await signHmacWeb(payloadEncoded, AUTH_SECRET);
+  const signature = await signHmacWeb(payloadEncoded, authSecret());
   return `${payloadEncoded}.${signature}`;
 }
 
@@ -102,7 +115,7 @@ export async function verifySessionToken(token: string): Promise<SessionData | n
 
   const [payloadEncoded, signature] = parts;
   try {
-    const expectedSig = await signHmacWeb(payloadEncoded, AUTH_SECRET);
+    const expectedSig = await signHmacWeb(payloadEncoded, authSecret());
     if (signature !== expectedSig) return null;
 
     const jsonStr = base64UrlDecode(payloadEncoded);

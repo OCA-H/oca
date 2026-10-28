@@ -28,7 +28,8 @@ export interface SvAuthOptions {
  * Inspects:
  * 1. HTTP cookie (oca_session)
  * 2. Authorization header (Bearer <token>)
- * 3. Forwarded proxy headers (x-user-id, x-user-email, x-user-role)
+ * Only a signed token counts. Plain headers such as x-user-id are never trusted as identity:
+ * anyone can send them, so trusting them would let a caller act as any member.
  */
 export async function extractSvSession(request: Request): Promise<SessionData | null> {
   // 1. Try Cookie header
@@ -49,27 +50,6 @@ export async function extractSvSession(request: Request): Promise<SessionData | 
       const session = await verifySessionToken(bearerToken);
       if (session) return session;
     }
-  }
-
-  // 3. Check for upstream verified proxy headers
-  const userId = request.headers.get("x-user-id");
-  const userEmail = request.headers.get("x-user-email");
-  const userRole = request.headers.get("x-user-role");
-  const userName = request.headers.get("x-user-name");
-
-  if (userId && userEmail && userRole) {
-    return {
-      user: {
-        id: Number(userId),
-        memberId: `OCA-${userId}`,
-        email: userEmail,
-        fullName: userName ? decodeURIComponent(userName) : userEmail.split("@")[0],
-        role: userRole,
-        membershipType: "Regular",
-      },
-      iat: Math.floor(Date.now() / 1000),
-      exp: Math.floor(Date.now() / 1000) + 3600,
-    };
   }
 
   return null;

@@ -1,6 +1,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { profileContent, type ProfilePanel } from '../../content';
+import { CardSkeleton } from './CardPanel';
 import { ProfileIcon } from './ProfileIcon';
 
 const Bar: React.FC<{ className?: string; style?: React.CSSProperties }> = ({ className = '', style }) => (
@@ -119,7 +120,22 @@ export const ProfileSkeleton: React.FC<{ panel: ProfilePanel }> = ({ panel }) =>
           </aside>
 
           <main className="mp-main" aria-hidden="true">
-            <section className="mp-panel">{panel === 'dashboard' ? <DashboardSkeleton /> : <FormPanelSkeleton />}</section>
+            <section className="mp-panel">
+              {panel === 'dashboard' ? (
+                <DashboardSkeleton />
+              ) : panel === 'card' ? (
+                <>
+                  <Bar className="mp-skel-back" />
+                  <div className="mp-head">
+                    <Bar className="mp-skel-title" />
+                    <Bar className="mp-skel-line" style={{ width: '40%', marginTop: 12 }} />
+                  </div>
+                  <CardSkeleton />
+                </>
+              ) : (
+                <FormPanelSkeleton />
+              )}
+            </section>
           </main>
         </div>
       </section>

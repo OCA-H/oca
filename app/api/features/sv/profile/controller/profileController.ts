@@ -2,6 +2,7 @@ import "server-only";
 import { BaseController } from "@/app/api/core/baseController";
 import type { SessionData } from "@/app/api/core/session";
 import { withSvAuth } from "../../middleware/svAuthMiddleware";
+import { MembershipRepository } from "@/app/api/features/(pview)/membership/repository";
 import { userRepository } from "../../user/controller/userController";
 import { ProfileService } from "../services/profileService";
 
@@ -16,6 +17,11 @@ export class ProfileController extends BaseController {
   /** GET /api/sv/profile */
   get = withSvAuth((_request: Request, session: SessionData) =>
     this.handle(async () => this.ok({ data: await this.service.get(session.user.id, session.user.signInMethod) }))
+  );
+
+  /** GET /api/sv/profile/card */
+  getCard = withSvAuth((_request: Request, session: SessionData) =>
+    this.handle(async () => this.ok({ data: await this.service.getCard(session.user.id) }))
   );
 
   /** PATCH /api/sv/profile */
@@ -48,4 +54,4 @@ export class ProfileController extends BaseController {
   );
 }
 
-export const profileController = new ProfileController(new ProfileService(userRepository));
+export const profileController = new ProfileController(new ProfileService(userRepository, new MembershipRepository()));

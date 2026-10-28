@@ -38,6 +38,14 @@ export const profileHelper = {
   membershipLine: (profile: MemberProfile): string =>
     [profile.membershipType, profile.batchYear && `Batch of ${profile.batchYear}`].filter(Boolean).join(" · "),
 
+  /** "2026-12-18T…" → "18 December 2026". */
+  formatDate: (iso: string): string =>
+    new Date(iso).toLocaleDateString("en-IN", { day: "numeric", month: "long", year: "numeric" }),
+
+  /** 2000, "INR" → "₹2,000". */
+  formatAmount: (amount: number, currency: string): string =>
+    new Intl.NumberFormat("en-IN", { style: "currency", currency, maximumFractionDigits: 0 }).format(amount),
+
   toForm: (profile: MemberProfile): ProfileUpdate => ({
     title: profile.title,
     firstName: profile.firstName,

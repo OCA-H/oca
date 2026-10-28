@@ -1,5 +1,5 @@
 import "server-only";
-import { eq } from "drizzle-orm";
+import { and, desc, eq } from "drizzle-orm";
 import { BaseRepository } from "@/app/api/core/baseRepository";
 import {
   membershipApplications,
@@ -13,6 +13,18 @@ export class MembershipRepository extends BaseRepository {
       .select()
       .from(membershipApplications)
       .where(eq(membershipApplications.orderId, orderId))
+      .limit(1);
+
+    return results[0] ?? null;
+  }
+
+  /** The member's paid membership, newest first if there is more than one. */
+  async findPaidByUserId(userId: number): Promise<MembershipApplication | null> {
+    const results = await this.db
+      .select()
+      .from(membershipApplications)
+      .where(and(eq(membershipApplications.userId, userId), eq(membershipApplications.status, "paid")))
+      .orderBy(desc(membershipApplications.paidAt))
       .limit(1);
 
     return results[0] ?? null;

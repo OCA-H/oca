@@ -3,7 +3,8 @@
 import React from 'react';
 import Link from 'next/link';
 import { ROUTES } from '@/app/(view)/common/helper/routes';
-import { useProfileHandler } from '../handler';
+import type { MemberProfile } from '../services';
+import { useMembershipCard, useProfileHandler } from '../handler';
 import {
   AccountPanel,
   BirthdaysPanel,
@@ -33,6 +34,12 @@ export const ProfileView: React.FC = () => {
     sendWish,
     handleSignOut,
   } = useProfileHandler();
+  // Starts with the profile when the card is the panel being opened, instead of after it.
+  const membershipCard = useMembershipCard(panel === 'card');
+  const saveProfile = (saved: MemberProfile) => {
+    setProfile(saved);
+    membershipCard.refresh();
+  };
 
   if (isLoading) return <ProfileSkeleton panel={panel} />;
 
@@ -71,8 +78,15 @@ export const ProfileView: React.FC = () => {
 
           <main className="mp-main">
             <DashboardPanel profile={profile} hidden={panel !== 'dashboard'} onShowPanel={showPanel} />
-            <AccountPanel profile={profile} hidden={panel !== 'account'} onBack={back} onSaved={setProfile} />
-            <CardPanel profile={profile} hidden={panel !== 'card'} onBack={back} />
+            <AccountPanel profile={profile} hidden={panel !== 'account'} onBack={back} onSaved={saveProfile} />
+            <CardPanel
+              card={membershipCard.card}
+              isLoading={membershipCard.isLoading}
+              error={membershipCard.error}
+              onRetry={membershipCard.retry}
+              hidden={panel !== 'card'}
+              onBack={back}
+            />
             <DonorPanel hidden={panel !== 'donor'} onBack={back} />
             <BirthdaysPanel hidden={panel !== 'birthdays'} onBack={back} sentWishes={sentWishes} onWish={sendWish} />
             <SuggestionPanel hidden={panel !== 'suggest'} onBack={back} />

@@ -35,6 +35,30 @@ export interface MemberProfile {
   lockedFields: LockedField[];
 }
 
+/** What the e-Membership Card shows. */
+export interface MembershipCard {
+  memberId: string;
+  /** "Aryan Mehra": the name without its title. */
+  name: string;
+  membershipType: string;
+  batchYear: string | null;
+  house: string | null;
+  /** "active" while the member can sign in; anything else shows the card as not valid. */
+  status: string;
+  /** "For life" for life and honorary members; null when the type has no fixed term on record. */
+  validity: string | null;
+  /** When the membership was paid for, else when the account was made. ISO date. */
+  memberSince: string;
+  /** The paid membership order, when the member joined through the online form. */
+  payment: {
+    orderId: string;
+    amount: number;
+    currency: string;
+    paidAt: string | null;
+    paymentMode: string | null;
+  } | null;
+}
+
 export interface ProfileUpdate {
   title: string;
   firstName: string;
