@@ -33,6 +33,28 @@ export const adminHelper = {
   panelLabel: (panel: AdminPanel): string | null =>
     panel === "dashboard" ? null : panel in RECORD_PANELS ? RECORD_PANELS[panel as RecordPanel].label : (sectionSpec(panel)?.label ?? null),
 
+  /**
+   * The fields whose value differs between two forms, for the confirm dialog. A select shows its
+   * option's label; `format` can dress a value (e.g. as rupees).
+   */
+  formChanges: <F extends Record<string, string>>(
+    fields: FieldSpec[],
+    before: F,
+    after: F,
+    format: Partial<Record<keyof F, (value: string) => string>> = {}
+  ): { label: string; from: string; to: string }[] =>
+    fields
+      .filter((field) => (before[field.key] ?? "").trim() !== (after[field.key] ?? "").trim())
+      .map((field) => {
+        const show = (value: string) => {
+          const option = field.options?.find((o) => o.value === value);
+          if (option) return option.label;
+          const dress = format[field.key as keyof F];
+          return value.trim() && dress ? dress(value) : value.trim();
+        };
+        return { label: field.label, from: show(before[field.key] ?? ""), to: show(after[field.key] ?? "") };
+      }),
+
   /** "₹1,25,000". */
   formatRupees: (amount: number): string => `₹${amount.toLocaleString("en-IN")}`,
 

@@ -52,13 +52,13 @@ export const SECTION_ICONS: Record<SiteSectionKey, AdminIconName> = {
 /** The record panels, in menu order, under their menu group. Each has its own address, e.g. /sv/admin/passes. */
 export const RECORD_PANELS: Record<RecordPanel, { group: string; label: string; description: string; icon: AdminIconName }> = {
   passes: {
-    group: "Annual Dinner passes",
+    group: "Passes",
     label: "Passes & seats",
     description: "Prices, seats left and which Annual Dinner passes are open for booking.",
     icon: "ticket",
   },
   bookings: {
-    group: "Annual Dinner passes",
+    group: "Passes",
     label: "Pass bookings",
     description: "Every Annual Dinner pass booking, with the member's details and payment.",
     icon: "people",
@@ -73,7 +73,7 @@ export const RECORD_PANELS: Record<RecordPanel, { group: string; label: string; 
 
 /** The record panels' menu groups, in order, with their panels. */
 export const RECORD_GROUPS: { group: string; icon: AdminIconName; panels: RecordPanel[] }[] = [
-  { group: "Annual Dinner passes", icon: "ticket", panels: ["passes", "bookings"] },
+  { group: "Passes", icon: "ticket", panels: ["passes", "bookings"] },
   { group: "Contributions", icon: "heart", panels: ["funds"] },
 ];
 
@@ -210,7 +210,16 @@ export const adminContent = {
     open: "Open",
     locked: "Locked",
     soldOut: "Sold out",
-    groups: { booking: "Booking & seats", card: "Shown on the pass card" },
+    groups: {
+      booking: { title: "Booking & seats", lead: "What members pay, and how many can still book." },
+      card: { title: "Shown on the pass card", lead: "How this pass reads on the Annual Dinner page." },
+    },
+    confirm: {
+      title: (label: string) => `Save changes to ${label}?`,
+      body: "The Annual Dinner page shows these straight away.",
+      yes: "Save changes",
+      busy: "Saving…",
+    },
     statusOptions: [
       { value: "active", label: "Open for booking" },
       { value: "locked", label: "Locked (shown, cannot be booked)" },
@@ -271,7 +280,6 @@ export const adminContent = {
     switchLabel: "Accepting contributions",
     on: "Active",
     off: "Inactive",
-    offHint: "Inactive heads stay on the form, marked as suspended, and cannot be paid into.",
     stats: { active: "Active heads", paid: "Paid contributions", raised: "Raised" },
     fields: {
       label: "Name",
@@ -280,17 +288,39 @@ export const adminContent = {
       unitAmount: "Price per unit (₹)",
       maxUnits: "Most units at once",
     },
-    hints: { note: "For example \"₹5,000 per teacher\" or \"Currently suspended\"." },
+    hints: { note: "Shown under the name on the form, e.g. \"₹5,000 per teacher\"." },
+    groups: {
+      form: { title: "On the contribution form", lead: "How this head reads where members choose what to give." },
+      unit: { title: "Price per teacher", lead: "Members pay this much for each one they sponsor." },
+    },
+    confirmSave: { title: (label: string) => `Save changes to ${label}?`, body: "The contribution form shows these straight away.", yes: "Save changes" },
+    confirmOn: {
+      title: (label: string) => `Make ${label} active?`,
+      body: "Members can choose it and pay into it again.",
+      yes: "Make active",
+    },
+    confirmOff: {
+      title: (label: string) => `Make ${label} inactive?`,
+      body: "It stays on the contribution form, marked as suspended, but nobody can pay into it until you make it active again.",
+      yes: "Make inactive",
+    },
+    confirmDelete: {
+      title: (label: string) => `Delete ${label}?`,
+      body: "It is removed from the database and disappears from the contribution form. This cannot be undone.",
+      yes: "Delete for good",
+    },
+    busy: "Saving…",
     save: "Save changes",
     saving: "Saving…",
     reset: "Undo changes",
     saved: "Saved. The contribution form now shows your changes.",
     delete: "Delete head",
     deleting: "Deleting…",
-    confirm: (label: string) => `Delete "${label}" for good? It disappears from the contribution form.`,
-    confirmYes: "Yes, delete",
-    cancel: "Keep it",
-    cannotDelete: (n: number) => `Has ${n} contribution${n === 1 ? "" : "s"}: make it inactive instead of deleting.`,
+    cannotDelete: (total: number, paid: number) => {
+      const unpaid = total - paid;
+      const parts = [paid > 0 && `${paid} paid`, unpaid > 0 && `${unpaid} not completed`].filter(Boolean).join(", ");
+      return `Cannot be deleted: ${total} contribution${total === 1 ? " was" : "s were"} made under this head (${parts}). They are payment records and stay linked to it, so make the head inactive instead.`;
+    },
   },
 
   denied: {

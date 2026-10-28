@@ -13,15 +13,17 @@ interface FieldInputProps {
   onChange: (value: string | number) => void;
   onUpload: (file: File) => Promise<string>;
   error?: string;
+  /** Spans both columns of the form grid; text areas and images always do. */
+  wide?: boolean;
 }
 
 /** One field of a section, drawn from its spec. */
-export const FieldInput: React.FC<FieldInputProps> = ({ field, name, value, onChange, onUpload, error }) => {
+export const FieldInput: React.FC<FieldInputProps> = ({ field, name, value, onChange, onUpload, error, wide: forceWide }) => {
   const id = `ad-${name.replace(/\./g, '-')}`;
   const hintId = `${id}-hint`;
   const text = value === undefined ? '' : String(value);
   const counts = field.max && (field.type === 'text' || field.type === 'textarea');
-  const wide = field.type === 'textarea' || field.type === 'image';
+  const wide = forceWide || field.type === 'textarea' || field.type === 'image';
   const described = error || field.hint ? hintId : undefined;
   const common = { id, name, 'aria-describedby': described, 'aria-invalid': Boolean(error) || undefined };
 

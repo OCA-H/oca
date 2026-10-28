@@ -7,7 +7,7 @@ import { adminService, type AdminFund, type FundChanges } from '../services';
 /** Form values: numbers stay strings while typed, so a cleared box is not read as 0. */
 export type FundForm = { label: string; note: string; sortOrder: string; unitAmount: string; maxUnits: string };
 
-const toForm = (fund: AdminFund): FundForm => ({
+export const fundToForm = (fund: AdminFund): FundForm => ({
   label: fund.label,
   note: fund.note ?? '',
   sortOrder: String(fund.sortOrder),
@@ -18,25 +18,30 @@ const toForm = (fund: AdminFund): FundForm => ({
 // An empty number box goes as NaN, which the API rejects beside that field.
 const toNumber = (value: string) => (value.trim() === '' ? Number.NaN : Number(value));
 
+/** What the confirm dialog is asking about. */
+export type FundAction = { kind: 'save' } | { kind: 'status'; active: boolean } | { kind: 'delete' };
+
 /**
- * One contribution head: its edit form, the active switch (saved straight away) and delete.
- * `onSaved` gets the head as saved; `onDeleted` is called once it is gone.
+ * One contribution head: its edit form, the active switch and delete. Every one of them asks
+ * first: it opens a confirm dialog, and only the dialog's confirm button writes to the database.
  */
 export function useFundEditor(fund: AdminFund, onSaved: (fund: AdminFund) => void, onDeleted: (id: number) => void) {
-  const [form, setForm] = useState<FundForm>(() => toForm(fund));
+  const [form, setForm] = useState<FundForm>(() => fundToForm(fund));
   const [shownVersion, setShownVersion] = useState(fund.updatedAt);
+  const [fieldErrors, setFieldErrors] = useState<ApiFieldErrors>({});
   if (fund.updatedAt !== shownVersion) {
     // The head changed (saved here, or fetched again): the form starts again from it.
     setShownVersion(fund.updatedAt);
-    setForm(toForm(fund));
+    setForm(fundToForm(fund));
+    setFieldErrors({});
   }
-  const [fieldErrors, setFieldErrors] = useState<ApiFieldErrors>({});
   const [error, setError] = useState<string | null>(null);
-  const [busy, setBusy] = useState<'save' | 'switch' | 'delete' | null>(null);
+  const [action, setAction] = useState<FundAction | null>(null);
+  const [isBusy, setIsBusy] = useState(false);
   const [isSaved, setIsSaved] = useState(false);
-  const [isConfirmingDelete, setIsConfirmingDelete] = useState(false);
 
-  const isDirty = JSON.stringify(form) !== JSON.stringify(toForm(fund));
+  const saved = fundToForm(fund);
+  const isDirty = JSON.stringify(form) !== JSON.stringify(saved);
   const perUnit = fund.unitAmount !== null;
 
   const setField = (key: keyof FundForm, value: string) => {
@@ -50,74 +55,85 @@ export function useFundEditor(fund: AdminFund, onSaved: (fund: AdminFund) => voi
   };
 
   const reset = () => {
-    setForm(toForm(fund));
+    setForm(saved);
     setFieldErrors({});
     setError(null);
   };
 
-  const save = async (values: FundForm, status: string, kind: 'save' | 'switch') => {
-    setBusy(kind);
+  const ask = (next: FundAction) => {
     setError(null);
     setIsSaved(false);
-    const changes: FundChanges = {
-      label: values.label,
-      note: values.note,
-      status,
-      sortOrder: toNumber(values.sortOrder),
-      unitAmount: perUnit ? toNumber(values.unitAmount) : null,
-      maxUnits: perUnit ? toNumber(values.maxUnits) : null,
-    };
-    try {
-      const saved = await adminService.updateFund(fund.id, changes);
-      setFieldErrors({});
-      if (kind === 'save') setIsSaved(true);
-      onSaved(saved);
-    } catch (err) {
-      if (err instanceof ApiError) setFieldErrors(err.fields);
-      setError(err instanceof Error ? err.message : 'Could not save this head.');
-    } finally {
-      setBusy(null);
-    }
+    setAction(next);
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (busy || !isDirty) return;
-    save(form, fund.status, 'save');
+    if (!isBusy && isDirty) ask({ kind: 'save' });
   };
 
-  /** The switch saves just the status, from the head as saved (unsaved edits stay in the form). */
-  const setActive = (on: boolean) => save(toForm(fund), on ? 'active' : 'suspended', 'switch');
+  const cancel = () => {
+    setAction(null);
+    setError(null);
+  };
 
-  const confirmDelete = async () => {
-    setBusy('delete');
+  const changesFrom = (values: FundForm, status: string): FundChanges => ({
+    label: values.label,
+    note: values.note,
+    status,
+    sortOrder: toNumber(values.sortOrder),
+    unitAmount: perUnit ? toNumber(values.unitAmount) : null,
+    maxUnits: perUnit ? toNumber(values.maxUnits) : null,
+  });
+
+  const confirm = async () => {
+    if (!action) return;
+    setIsBusy(true);
     setError(null);
     try {
-      await adminService.deleteFund(fund.id);
-      onDeleted(fund.id);
+      if (action.kind === 'delete') {
+        await adminService.deleteFund(fund.id);
+        setAction(null);
+        onDeleted(fund.id);
+        return;
+      }
+      // The switch saves only the status, from the head as saved: unsaved edits stay in the form.
+      const result =
+        action.kind === 'save'
+          ? await adminService.updateFund(fund.id, changesFrom(form, fund.status))
+          : await adminService.updateFund(fund.id, changesFrom(saved, action.active ? 'active' : 'suspended'));
+      setAction(null);
+      if (action.kind === 'save') setIsSaved(true);
+      onSaved(result);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Could not delete this head.');
-      setIsConfirmingDelete(false);
-      setBusy(null);
+      const fields = err instanceof ApiError ? err.fields : {};
+      if (Object.keys(fields).length > 0) {
+        // Problems with fields are shown beside them, so the dialog steps aside.
+        setFieldErrors(fields);
+        setAction(null);
+      }
+      setError(err instanceof Error ? err.message : 'Could not save this head.');
+    } finally {
+      setIsBusy(false);
     }
   };
 
   return {
     form,
+    saved,
     setField,
     fieldErrors,
     error,
-    busy,
+    isBusy,
     isSaved,
     isDirty,
     perUnit,
     reset,
     handleSubmit,
-    setActive,
-    isConfirmingDelete,
-    askDelete: () => setIsConfirmingDelete(true),
-    cancelDelete: () => setIsConfirmingDelete(false),
-    confirmDelete,
+    action,
+    askStatus: (active: boolean) => ask({ kind: 'status', active }),
+    askDelete: () => ask({ kind: 'delete' }),
+    cancel,
+    confirm,
   };
 }
 

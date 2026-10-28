@@ -6,6 +6,7 @@ import { adminContent, type AdminPanel } from '../../content';
 import { useFundEditor, useRecordList } from '../../handler';
 import { adminHelper } from '../../helper';
 import { adminService, type AdminFund, type FieldSpec } from '../../services';
+import { AdminConfirmDialog } from './AdminConfirmDialog';
 import { AdminIcon } from './AdminIcon';
 import { AdminSwitch } from './AdminSwitch';
 import { FieldInput } from './FieldInput';
@@ -14,15 +15,17 @@ import { RecordPanelFrame } from './RecordPanelFrame';
 const text = adminContent.funds;
 
 // Limits match ContributionService.updateFundFromAdmin; the unit fields are for per-unit heads only.
-const FIELDS: FieldSpec[] = [
+type FormField = FieldSpec & { wide?: boolean };
+const FORM_FIELDS: FormField[] = [
   { key: 'label', label: text.fields.label, type: 'text', required: true, max: 100 },
-  { key: 'note', label: text.fields.note, type: 'text', max: 100, hint: text.hints.note },
   { key: 'sortOrder', label: text.fields.sortOrder, type: 'number', min: 0 },
+  { key: 'note', label: text.fields.note, type: 'text', max: 100, hint: text.hints.note, wide: true },
 ];
-const UNIT_FIELDS: FieldSpec[] = [
+const UNIT_FIELDS: FormField[] = [
   { key: 'unitAmount', label: text.fields.unitAmount, type: 'number', min: 1 },
   { key: 'maxUnits', label: text.fields.maxUnits, type: 'number', min: 1 },
 ];
+const rupees = (value: string) => adminHelper.formatRupees(Number(value));
 
 // The form has no images.
 const noUpload = () => Promise.reject(new Error('No uploads here.'));
@@ -39,7 +42,42 @@ const FundItem: React.FC<FundItemProps> = ({ fund, onSaved, onDeleted }) => {
   const bodyId = `ad-fund-${fund.id}`;
   const isOn = fund.status === 'active';
   const hasError = Object.keys(editor.fieldErrors).length > 0;
-  const fields = editor.perUnit ? [...FIELDS, ...UNIT_FIELDS] : FIELDS;
+  const groups = [
+    { ...text.groups.form, fields: FORM_FIELDS },
+    ...(editor.perUnit ? [{ ...text.groups.unit, fields: UNIT_FIELDS }] : []),
+  ];
+  const canDelete = fund.contributions === 0;
+
+  const renderField = (field: FormField) => (
+    <FieldInput
+      key={field.key}
+      field={field}
+      wide={field.wide}
+      name={`fund-${fund.id}-${field.key}`}
+      value={editor.form[field.key as keyof typeof editor.form]}
+      onChange={(value) => editor.setField(field.key as keyof typeof editor.form, String(value))}
+      onUpload={noUpload}
+      error={editor.fieldErrors[field.key]}
+    />
+  );
+
+  const dialog = (() => {
+    const action = editor.action;
+    if (!action) return null;
+    if (action.kind === 'save') {
+      return {
+        ...text.confirmSave,
+        title: text.confirmSave.title(fund.label),
+        changes: adminHelper.formChanges([...FORM_FIELDS, ...UNIT_FIELDS], editor.saved, editor.form, { unitAmount: rupees }),
+        busy: text.busy,
+      };
+    }
+    if (action.kind === 'status') {
+      const copy = action.active ? text.confirmOn : text.confirmOff;
+      return { ...copy, title: copy.title(fund.label), busy: text.busy };
+    }
+    return { ...text.confirmDelete, title: text.confirmDelete.title(fund.label), busy: text.deleting, danger: true };
+  })();
 
   return (
     <li className={`ad-item ad-rec${isOn ? '' : ' is-off'}${isOpen ? ' is-open' : ''}${hasError ? ' has-error' : ''}`}>
@@ -59,14 +97,14 @@ const FundItem: React.FC<FundItemProps> = ({ fund, onSaved, onDeleted }) => {
         </button>
         <AdminSwitch
           checked={isOn}
-          onChange={editor.setActive}
-          disabled={editor.busy !== null}
+          onChange={editor.askStatus}
+          disabled={editor.isBusy}
           label={`${text.switchLabel}: ${fund.label}`}
           onText={text.on}
           offText={text.off}
         />
       </div>
-      {!isOpen && editor.error && (
+      {!isOpen && editor.error && !editor.action && (
         <p className="ms-error ad-rec-error" role="alert">
           {editor.error}
         </p>
@@ -74,69 +112,58 @@ const FundItem: React.FC<FundItemProps> = ({ fund, onSaved, onDeleted }) => {
 
       {isOpen && (
         <div className="ad-item-body" id={bodyId}>
-          <form className="cf-form mp-form" noValidate onSubmit={editor.handleSubmit} aria-busy={editor.busy === 'save'}>
-            <div className="ad-grid ad-pass-group">
-              {fields.map((field) => (
-                <FieldInput
-                  key={field.key}
-                  field={field}
-                  name={`fund-${fund.id}-${field.key}`}
-                  value={editor.form[field.key as keyof typeof editor.form]}
-                  onChange={(value) => editor.setField(field.key as keyof typeof editor.form, String(value))}
-                  onUpload={noUpload}
-                  error={editor.fieldErrors[field.key]}
-                />
-              ))}
-            </div>
-            {!isOn && <p className="mp-hint">{text.offHint}</p>}
+          <form className="cf-form mp-form ad-recform" noValidate onSubmit={editor.handleSubmit} aria-busy={editor.isBusy}>
+            {groups.map((group) => (
+              <fieldset className="ad-section" key={group.title}>
+                <legend className="ad-section-head">
+                  <b>{group.title}</b>
+                  <span>{group.lead}</span>
+                </legend>
+                <div className="ad-grid">{group.fields.map(renderField)}</div>
+              </fieldset>
+            ))}
             <div className="ad-message">
               <div className="mp-ok" role="status" hidden={!editor.isSaved}>
                 <AdminIcon name="check" />
                 <p>{text.saved}</p>
               </div>
-              {editor.error && (
+              {editor.error && !editor.action && (
                 <p className="ms-error" role="alert">
                   {editor.error}
                 </p>
               )}
             </div>
-            <div className="ad-pass-actions">
-              <button
-                className={`btn btn-primary mp-save${editor.busy === 'save' ? ' is-saving' : ''}`}
-                type="submit"
-                disabled={editor.busy !== null || !editor.isDirty}
-              >
-                <span className="mp-spinner" aria-hidden="true" />
-                <span>{editor.busy === 'save' ? text.saving : text.save}</span>
-              </button>
-              <button className="cf-reset" type="button" onClick={editor.reset} disabled={editor.busy !== null || !editor.isDirty}>
-                {text.reset}
-              </button>
-              <button
-                className="ad-delete"
-                type="button"
-                onClick={editor.askDelete}
-                disabled={editor.busy !== null || fund.contributions > 0 || editor.isConfirmingDelete}
-                title={fund.contributions > 0 ? text.cannotDelete(fund.contributions) : undefined}
-              >
+            <div className="ad-form-foot">
+              <button className="ad-delete" type="button" onClick={editor.askDelete} disabled={editor.isBusy || !canDelete}>
                 <AdminIcon name="trash" />
                 {text.delete}
               </button>
+              {editor.isDirty && <span className="ad-dirty">{adminContent.editor.unsaved}</span>}
+              <button className="cf-reset" type="button" onClick={editor.reset} disabled={editor.isBusy || !editor.isDirty}>
+                {text.reset}
+              </button>
+              <button className="btn btn-primary mp-save" type="submit" disabled={editor.isBusy || !editor.isDirty}>
+                {text.save}
+              </button>
             </div>
-            {fund.contributions > 0 && <p className="mp-hint ad-delete-note">{text.cannotDelete(fund.contributions)}</p>}
-            {editor.isConfirmingDelete && (
-              <div className="ad-confirm" role="alertdialog" aria-label={text.delete}>
-                <p>{text.confirm(fund.label)}</p>
-                <button className="btn btn-primary ad-danger" type="button" onClick={editor.confirmDelete} disabled={editor.busy !== null}>
-                  {editor.busy === 'delete' ? text.deleting : text.confirmYes}
-                </button>
-                <button className="cf-reset" type="button" onClick={editor.cancelDelete} disabled={editor.busy !== null}>
-                  {text.cancel}
-                </button>
-              </div>
-            )}
+            {!canDelete && <p className="ad-delete-note">{text.cannotDelete(fund.contributions, fund.paid)}</p>}
           </form>
         </div>
+      )}
+
+      {dialog && (
+        <AdminConfirmDialog
+          title={dialog.title}
+          body={dialog.body}
+          changes={'changes' in dialog ? dialog.changes : undefined}
+          confirmLabel={dialog.yes}
+          busyLabel={dialog.busy}
+          danger={'danger' in dialog}
+          isBusy={editor.isBusy}
+          error={editor.error}
+          onCancel={editor.cancel}
+          onConfirm={editor.confirm}
+        />
       )}
     </li>
   );

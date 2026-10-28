@@ -14,3 +14,4 @@ export * from './EventPassesPanel';
 export * from './EventBookingsPanel';
 export * from './AdminSwitch';
 export * from './ContributionHeadsPanel';
+export * from './AdminConfirmDialog';
