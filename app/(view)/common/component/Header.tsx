@@ -156,7 +156,7 @@ export const Header: React.FC<HeaderProps> = ({ activeRoute }) => {
                 </button>
                 <div className="dropdown dropdown-right">
                   <Link href={ROUTES.MEMBER_SIGNIN} onClick={() => handleLinkClick(ROUTES.MEMBER_SIGNIN)}>As an OCA Member</Link>
-                  <Link href={ROUTES.PARTNER_ORGANIZATION} onClick={() => handleLinkClick(ROUTES.PARTNER_ORGANIZATION)}>As a Partner Organization</Link>
+                  <div className="dropdown-soon"><span>As a Partner Organization</span><span className="soon-tag">Coming soon</span></div>
                 </div>
               </div>
             )}
@@ -222,7 +222,7 @@ export const Header: React.FC<HeaderProps> = ({ activeRoute }) => {
           <>
             <Link className="sub" href={ROUTES.MEMBERSHIP} onClick={() => handleLinkClick(ROUTES.MEMBERSHIP)}>Become a Member</Link>
             <Link className="sub" href={ROUTES.MEMBER_SIGNIN} onClick={() => handleLinkClick(ROUTES.MEMBER_SIGNIN)}>As an OCA Member</Link>
-            <Link className="sub" href={ROUTES.PARTNER_ORGANIZATION} onClick={() => handleLinkClick(ROUTES.PARTNER_ORGANIZATION)}>As a Partner Organization</Link>
+            <span className="sub sub-soon">As a Partner Organization<span className="soon-tag">Soon</span></span>
           </>
         )}
 
@@ -262,7 +262,9 @@ export const Header: React.FC<HeaderProps> = ({ activeRoute }) => {
           ) : (
             <>
               <Link className="btn btn-ghost" href={ROUTES.MEMBER_SIGNIN} onClick={() => handleLinkClick(ROUTES.MEMBER_SIGNIN)}>Sign in as OCA Member</Link>
-              <Link className="btn btn-ghost" href={ROUTES.PARTNER_ORGANIZATION} onClick={() => handleLinkClick(ROUTES.PARTNER_ORGANIZATION)}>Sign in as Partner Organization</Link>
+              <span className="btn btn-ghost" aria-disabled="true" style={{ opacity: 0.6, cursor: 'not-allowed' }}>
+                Sign in as Partner Organization<span className="soon-tag" style={{ marginLeft: '8px' }}>Soon</span>
+              </span>
             </>
           )}
         </div>
