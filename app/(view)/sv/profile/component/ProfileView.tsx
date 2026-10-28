@@ -14,6 +14,7 @@ import {
   PasswordPanel,
   ProfileHero,
   ProfileSidebar,
+  ProfileSkeleton,
   SuggestionPanel,
 } from './subcomponents';
 
@@ -33,22 +34,18 @@ export const ProfileView: React.FC = () => {
     handleSignOut,
   } = useProfileHandler();
 
-  if (isLoading || !profile) {
+  if (isLoading) return <ProfileSkeleton />;
+
+  if (!profile) {
     return (
-      <section className="mp-shell" style={{ minHeight: '60vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <section className="mp-shell mp-fade" style={{ minHeight: '60vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
         <div style={{ textAlign: 'center', maxWidth: '480px', padding: '32px' }}>
-          {isLoading ? (
-            <p style={{ color: 'var(--navy)', fontWeight: 500 }}>Loading your members area…</p>
-          ) : (
-            <>
-              <p className="ms-error" role="alert">
-                {error || 'Your session could not be verified.'}
-              </p>
-              <Link href={ROUTES.MEMBER_SIGNIN} className="btn btn-primary" style={{ marginTop: '16px' }}>
-                Go to Member Sign In
-              </Link>
-            </>
-          )}
+          <p className="ms-error" role="alert">
+            {error || 'Your session could not be verified.'}
+          </p>
+          <Link href={ROUTES.MEMBER_SIGNIN} className="btn btn-primary" style={{ marginTop: '16px' }}>
+            Go to Member Sign In
+          </Link>
         </div>
       </section>
     );
@@ -57,7 +54,7 @@ export const ProfileView: React.FC = () => {
   const back = () => showPanel('dashboard');
 
   return (
-    <>
+    <div className="mp-loaded">
       <ProfileHero firstName={profile.firstName || profile.fullName} membershipType={profile.membershipType} batchYear={profile.batchYear} />
 
       <section className="mp-shell">
@@ -84,7 +81,7 @@ export const ProfileView: React.FC = () => {
           </main>
         </div>
       </section>
-    </>
+    </div>
   );
 };
 

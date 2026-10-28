@@ -8,6 +8,7 @@ interface DiscardDialogProps {
 /** The same confirm dialog the membership form uses before clearing a form. */
 export const DiscardDialog: React.FC<DiscardDialogProps> = ({ onCancel, onConfirm }) => (
   <div
+    className="mp-backdrop"
     style={{
       position: 'fixed',
       inset: 0,

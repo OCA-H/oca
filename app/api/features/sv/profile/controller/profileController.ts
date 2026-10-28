@@ -15,14 +15,14 @@ export class ProfileController extends BaseController {
 
   /** GET /api/sv/profile */
   get = withSvAuth((_request: Request, session: SessionData) =>
-    this.handle(async () => this.ok({ data: await this.service.get(session.user.id) }))
+    this.handle(async () => this.ok({ data: await this.service.get(session.user.id, session.user.signInMethod) }))
   );
 
   /** PATCH /api/sv/profile */
   update = withSvAuth((request: Request, session: SessionData) =>
     this.handle(async () => {
       const body = await this.readJson(request);
-      const profile = await this.service.update(session.user.id, body);
+      const profile = await this.service.update(session.user.id, body, session.user.signInMethod);
       return this.ok({ message: "Your details have been saved.", data: profile });
     })
   );

@@ -1,3 +1,6 @@
+/** Which identifier the member typed at sign-in. */
+export type SignInMethod = "memberId" | "email" | "mobile";
+
 export interface SessionUser {
   id: number;
   memberId: string;
@@ -7,6 +10,8 @@ export interface SessionUser {
   batchYear?: string | null;
   house?: string | null;
   membershipType: string;
+  /** Missing on sessions created before it was recorded. */
+  signInMethod?: SignInMethod;
 }
 
 export interface SessionData {

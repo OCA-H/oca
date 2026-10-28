@@ -7,6 +7,7 @@ import { useAccountForm } from '../../handler';
 import type { MemberProfile, ProfileAddress } from '../../services';
 import { FieldError, PanelHead, PanelSuccess } from './PanelHead';
 import { DiscardDialog } from './DiscardDialog';
+import { ProfileIcon } from './ProfileIcon';
 
 interface AccountPanelProps {
   profile: MemberProfile;
@@ -21,6 +22,8 @@ export const AccountPanel: React.FC<AccountPanelProps> = ({ profile, hidden, onB
     form,
     setField,
     setAddress,
+    isLocked,
+    isDirty,
     fieldErrors,
     error,
     isSaving,
@@ -52,6 +55,43 @@ export const AccountPanel: React.FC<AccountPanelProps> = ({ profile, hidden, onB
     </div>
   );
 
+  /** Email or mobile: read-only, with a lock and a note, when this session signed in with it. */
+  const contactInput = (key: 'email' | 'mobile', id: string, label: string, type: string, autoComplete: string, hint?: string) => {
+    const locked = isLocked(key);
+    const hintId = `${id}-hint`;
+    return (
+      <div className="field">
+        <label htmlFor={id}>
+          {label}
+          {!locked && ' *'}
+        </label>
+        <div className={`mp-input${locked ? ' is-locked' : ''}`}>
+          <input
+            id={id}
+            name={key}
+            type={type}
+            required={!locked}
+            readOnly={locked}
+            aria-readonly={locked || undefined}
+            aria-describedby={locked || hint ? hintId : undefined}
+            value={form[key]}
+            onChange={(e) => setField(key, e.target.value)}
+            autoComplete={locked ? 'off' : autoComplete}
+            inputMode={key === 'mobile' ? 'tel' : undefined}
+          />
+          {locked && <ProfileIcon name="lock" className="mp-input-lock" />}
+        </div>
+        {fieldErrors[key] ? (
+          <FieldError message={fieldErrors[key]} />
+        ) : locked ? (
+          <p className="mp-hint" id={hintId}>{account.lockedHint[key]}</p>
+        ) : (
+          hint && <p className="mp-hint" id={hintId}>{hint}</p>
+        )}
+      </div>
+    );
+  };
+
   return (
     <section className="mp-panel" id="mp-account" aria-labelledby="mp-t-account" hidden={hidden}>
       <PanelHead panel="account" title={account.title} lead={account.lead} onBack={onBack} />
@@ -59,12 +99,12 @@ export const AccountPanel: React.FC<AccountPanelProps> = ({ profile, hidden, onB
         <b>{account.success}</b> {account.successNote}
       </PanelSuccess>
       {error && (
-        <p className="ms-error" role="alert">
+        <p className="ms-error mp-fade" role="alert">
           {error}
         </p>
       )}
 
-      <form className="cf-form mp-form" id="mp-account-form" autoComplete="on" onSubmit={handleSubmit}>
+      <form className="cf-form mp-form" id="mp-account-form" autoComplete="on" onSubmit={handleSubmit} aria-busy={isSaving}>
         <div className="field-row">
           <div className="field">
             <label htmlFor="mpa-title">Title</label>
@@ -83,14 +123,15 @@ export const AccountPanel: React.FC<AccountPanelProps> = ({ profile, hidden, onB
             <CustomDropdown
               id="mpa-batch"
               name="batch"
-              value={profile.batchYear ?? ''}
-              onChange={() => undefined}
+              value={form.batchYear}
+              onChange={(val) => setField('batchYear', val)}
               options={account.batches}
-              placeholder="Not on record"
-              disabled
+              placeholder="Select batch"
+              required={Boolean(profile.batchYear)}
+              searchable
               ariaLabel="Batch"
             />
-            <p className="mp-hint">{account.batchHint}</p>
+            {fieldErrors.batchYear ? <FieldError message={fieldErrors.batchYear} /> : <p className="mp-hint">{account.batchHint}</p>}
           </div>
         </div>
 
@@ -113,16 +154,8 @@ export const AccountPanel: React.FC<AccountPanelProps> = ({ profile, hidden, onB
 
         <hr className="ms-sep" />
         <div className="field-row">
-          <div className="field">
-            <label htmlFor="mpa-email">Email *</label>
-            <input id="mpa-email" name="email" type="email" required value={form.email} onChange={(e) => setField('email', e.target.value)} autoComplete="email" />
-            <FieldError message={fieldErrors.email} />
-          </div>
-          <div className="field">
-            <label htmlFor="mpa-mobile">Mobile *</label>
-            <input id="mpa-mobile" name="mobile" type="tel" required value={form.mobile} onChange={(e) => setField('mobile', e.target.value)} autoComplete="tel" />
-            <FieldError message={fieldErrors.mobile} />
-          </div>
+          {contactInput('email', 'mpa-email', 'Email', 'email', 'email')}
+          {contactInput('mobile', 'mpa-mobile', 'Mobile', 'tel', 'tel', account.mobileHint)}
         </div>
 
         <hr className="ms-sep" />
@@ -153,10 +186,11 @@ export const AccountPanel: React.FC<AccountPanelProps> = ({ profile, hidden, onB
         </div>
 
         <div className="mp-actions">
-          <button className="btn btn-primary" type="submit" disabled={isSaving}>
-            {isSaving ? 'Saving…' : 'Save changes'}
+          <button className={`btn btn-primary mp-save${isSaving ? ' is-saving' : ''}`} type="submit" disabled={isSaving || !isDirty}>
+            <span className="mp-spinner" aria-hidden="true" />
+            <span>{isSaving ? 'Saving…' : 'Save changes'}</span>
           </button>
-          <button className="cf-reset" type="button" onClick={openDiscard}>
+          <button className="cf-reset" type="button" onClick={openDiscard} disabled={isSaving || !isDirty}>
             Discard changes
           </button>
         </div>

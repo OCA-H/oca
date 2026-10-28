@@ -8558,3 +8558,60 @@ section[id^="ec-"] {
   .mp-ecard, .mp-ecard *{visibility:visible;}
   .mp-ecard{position:fixed; top:24px; left:24px; width:440px; -webkit-print-color-adjust:exact; print-color-adjust:exact;}
 }
+
+/* ---------- Members area: loading, transitions and locked fields ---------- */
+.mp-sr{position:absolute; width:1px; height:1px; margin:-1px; padding:0; overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap; border:0;}
+
+/* skeleton: sits in the real layout, so the loaded page replaces it without moving anything */
+.mp-skel{display:block; border-radius:var(--radius-s); background:linear-gradient(90deg, var(--tint-navy) 25%, #F4F8F5 50%, var(--tint-navy) 75%); background-size:200% 100%; animation:ps-shimmer 1.4s ease-in-out infinite;}
+.mp-skel--dark{background:linear-gradient(90deg, rgba(255,255,255,.10) 25%, rgba(255,255,255,.22) 50%, rgba(255,255,255,.10) 75%); background-size:200% 100%;}
+.mp-skel-h1{width:min(420px, 80%); height:.9em; margin-top:.1em; border-radius:10px;}
+.mp-skel-chip{width:112px; height:38px; border-radius:100px;}
+.mp-skel-photo{box-shadow:0 0 0 5px #fff, 0 0 0 6px var(--border);}
+.mp-skel-line{height:12px; border-radius:6px;}
+.mp-skel-name{width:62%; height:18px; margin:0 auto;}
+.mp-skel-sub{width:78%; margin:10px auto 0;}
+.mp-skel-link{cursor:default; pointer-events:none;}
+.mp-skel-ico{flex-shrink:0; width:19px; height:19px; border-radius:6px;}
+.mp-skel-title{width:200px; height:28px; border-radius:8px;}
+.mp-skel-feature{height:148px; margin-bottom:32px; border-radius:var(--radius-l);}
+.mp-skel-tile{cursor:default; pointer-events:none;}
+@media (max-width:900px){
+  .mp-skel-name, .mp-skel-sub{margin-left:0;}
+  .mp-skel-photo{box-shadow:0 0 0 3px #fff, 0 0 0 4px var(--border);}
+  .mp-skel-link{width:110px;}
+  .mp-skel-feature{height:200px;}
+}
+
+/* loaded: the card shells stay still and only their contents fade in over the skeleton's place */
+@keyframes mpFadeIn{from{opacity:0;} to{opacity:1;}}
+@keyframes mpRiseIn{from{opacity:0; transform:translateY(6px);} to{opacity:1; transform:none;}}
+.mp-loaded .mp-hero .wrap > *,
+.mp-loaded .mp-profile,
+.mp-loaded .mp-nav{animation:mpFadeIn .32s ease-out both;}
+.mp-panel:not([hidden]){animation:mpRiseIn .26s cubic-bezier(.2,.7,.3,1) both;}
+.mp-fade, .mp-ok:not([hidden]){animation:mpRiseIn .24s ease-out both;}
+.mp-backdrop{animation:mpFadeIn .18s ease-out both;}
+.mp-backdrop .confirm-dialog{animation:mpRiseIn .22s cubic-bezier(.2,.7,.3,1) both;}
+
+/* email / mobile the member signed in with: read-only, with a lock */
+.mp-input{position:relative;}
+.mp-input.is-locked input{padding-right:40px; background:var(--bg); color:var(--text-soft); border-color:var(--border); cursor:not-allowed;}
+.mp-input.is-locked input:focus{outline:2px solid var(--border-strong); border-color:var(--border-strong);}
+.mp-input-lock{position:absolute; right:14px; top:50%; width:16px; height:16px; transform:translateY(-50%); color:var(--text-soft); pointer-events:none;}
+
+/* save button: the spinner slides in without the button changing width */
+.mp-save{display:inline-flex; align-items:center; justify-content:center; gap:0; transition:opacity .15s ease, background .15s ease;}
+.mp-save:disabled{opacity:.55; cursor:not-allowed;}
+.mp-save.is-saving{opacity:.85; cursor:progress;}
+.mp-spinner{width:0; height:16px; border-radius:50%; border:2px solid rgba(255,255,255,.35); border-top-color:#fff; border-width:0; opacity:0; transition:width .18s ease, margin .18s ease, opacity .18s ease;}
+.mp-save.is-saving .mp-spinner{width:16px; margin-right:10px; border-width:2px; opacity:1; animation:ps-spin .7s linear infinite;}
+.mp-actions .cf-reset{transition:opacity .15s ease;}
+.mp-actions .cf-reset:disabled{opacity:.45; cursor:not-allowed;}
+
+@media (prefers-reduced-motion: reduce){
+  .mp-skel{animation:none;}
+  .mp-loaded .mp-hero .wrap > *, .mp-loaded .mp-profile, .mp-loaded .mp-nav,
+  .mp-panel:not([hidden]), .mp-fade, .mp-ok:not([hidden]), .mp-backdrop, .mp-backdrop .confirm-dialog{animation:none;}
+  .mp-save.is-saving .mp-spinner{animation-duration:1.6s;}
+}

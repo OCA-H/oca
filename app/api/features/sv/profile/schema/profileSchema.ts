@@ -11,6 +11,9 @@ export interface ProfileAddress {
   country: string;
 }
 
+/** Contact fields that can be locked because the member signs in with them. */
+export type LockedField = "email" | "mobile";
+
 /** What the members area shows and edits. */
 export interface MemberProfile {
   id: number;
@@ -28,6 +31,8 @@ export interface MemberProfile {
   status: string;
   avatarUrl: string | null;
   address: ProfileAddress;
+  /** Fields the member cannot change here, because this session signed in with them. */
+  lockedFields: LockedField[];
 }
 
 export interface ProfileUpdate {
@@ -37,5 +42,6 @@ export interface ProfileUpdate {
   lastName: string;
   email: string;
   mobile: string;
+  batchYear: string;
   address: ProfileAddress;
 }

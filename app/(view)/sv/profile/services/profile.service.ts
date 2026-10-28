@@ -10,6 +10,9 @@ export interface ProfileAddress {
   country: string;
 }
 
+/** Contact fields the member signed in with, which stay read-only in My Account. */
+export type LockedField = "email" | "mobile";
+
 export interface MemberProfile {
   id: number;
   memberId: string;
@@ -26,12 +29,13 @@ export interface MemberProfile {
   status: string;
   avatarUrl: string | null;
   address: ProfileAddress;
+  lockedFields: LockedField[];
 }
 
 export type ProfileUpdate = Pick<
   MemberProfile,
   "title" | "firstName" | "middleName" | "lastName" | "email" | "mobile" | "address"
->;
+> & { batchYear: string };
 
 export const profileService = {
   getProfile: async (): Promise<MemberProfile> => {

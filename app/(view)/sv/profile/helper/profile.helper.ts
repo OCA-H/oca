@@ -25,6 +25,10 @@ export const profileHelper = {
     lastName: profile.lastName,
     email: profile.email,
     mobile: profile.mobile,
+    batchYear: profile.batchYear ?? "",
     address: { ...profile.address },
   }),
+
+  /** True when the form differs from what is saved, so Save and Discard have something to do. */
+  isDirty: (form: ProfileUpdate, saved: ProfileUpdate): boolean => JSON.stringify(form) !== JSON.stringify(saved),
 };

@@ -91,7 +91,12 @@ export const profileContent = {
     lead: "Keep your details up to date so batchmates and the Secretariat can reach you.",
     success: "Your details have been saved.",
     successNote: "Thank you for keeping them current.",
-    batchHint: "Batch is checked against School records. Write to the Secretariat if it needs correcting.",
+    batchHint: "The year you passed out of St. Columba’s.",
+    lockedHint: {
+      email: "You signed in with this email, so it can’t be changed here. Write to the Secretariat if it needs correcting.",
+      mobile: "You signed in with this number, so it can’t be changed here. Write to the Secretariat if it needs correcting.",
+    },
+    mobileHint: "Include the country code if you live outside India.",
     titles: MEMBERSHIP_CONTENT.titles,
     batches: MEMBERSHIP_CONTENT.batches,
     countries: MEMBERSHIP_CONTENT.countries,

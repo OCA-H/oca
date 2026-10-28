@@ -11,3 +11,4 @@ export * from './BirthdaysPanel';
 export * from './SuggestionPanel';
 export * from './PasswordPanel';
 export * from './HelpCard';
+export * from './ProfileSkeleton';

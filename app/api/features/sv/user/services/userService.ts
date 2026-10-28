@@ -6,7 +6,7 @@ import { UserRepository } from "../repository/userRepository";
 import { PasswordResetRepository } from "../repository/passwordResetRepository";
 import type { User, SafeUser } from "../schema/userSchema";
 import { passwordResetEmail } from "./passwordResetEmail";
-import { verifyPassword, hashPassword, createSessionToken, type SessionUser } from "@/app/api/core/auth";
+import { verifyPassword, hashPassword, createSessionToken, type SessionUser, type SignInMethod } from "@/app/api/core/auth";
 
 const RESET_LINK_TTL_MINUTES = 30;
 /** Stops the form being used to flood a member's inbox. */
@@ -21,7 +21,15 @@ export function toSafeUser(user: User): SafeUser {
   return safe;
 }
 
-export function toSessionUser(user: User): SessionUser {
+/** Works out which of the member's identifiers matched what they typed at sign-in. */
+export function signInMethodFor(user: User, identifier: string): SignInMethod {
+  const clean = identifier.trim();
+  if (clean.toLowerCase() === user.email.toLowerCase()) return "email";
+  if (user.mobile && clean === user.mobile) return "mobile";
+  return "memberId";
+}
+
+export function toSessionUser(user: User, signInMethod?: SignInMethod): SessionUser {
   return {
     id: user.id,
     memberId: user.memberId,
@@ -31,6 +39,7 @@ export function toSessionUser(user: User): SessionUser {
     batchYear: user.batchYear,
     house: user.house,
     membershipType: user.membershipType,
+    ...(signInMethod && { signInMethod }),
   };
 }
 
@@ -79,7 +88,7 @@ export class UserService {
     // Update last login timestamp asynchronously
     await this.repository.updateLastLogin(user.id);
 
-    const sessionUser = toSessionUser(user);
+    const sessionUser = toSessionUser(user, signInMethodFor(user, trimmedId));
     const token = await createSessionToken(sessionUser);
 
     return {
