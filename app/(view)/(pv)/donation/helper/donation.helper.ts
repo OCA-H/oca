@@ -1,15 +1,17 @@
-import { donationContent } from '../content/donation.content';
+import type { ContributionFund } from '../services/donation.service';
 
 export function formatCurrency(amount: number): string {
   const n = isNaN(amount) ? 0 : amount;
   return `₹${n.toLocaleString('en-IN')}`;
 }
 
-export function getHeadLabel(headId: string): string {
-  const head = donationContent.heads.find((h) => h.id === headId);
-  return head ? head.label : '';
+/** What the member pays: units × unit price on a per-unit fund, else the amount they chose. */
+export function calculateAmount(fund: ContributionFund | null, amount: number, units: number): number {
+  if (fund?.unitAmount) return (units || 1) * fund.unitAmount;
+  return amount;
 }
 
-export function calculateSponsorAmount(teachers: number, perTeacher: number = 5000): number {
-  return (teachers || 1) * perTeacher;
+/** "1 teacher", "3 teachers": the choices for a per-unit fund. */
+export function unitOptions(fund: ContributionFund): string[] {
+  return Array.from({ length: fund.maxUnits ?? 1 }, (_, i) => String(i + 1));
 }

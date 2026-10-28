@@ -55,6 +55,7 @@ export const ROUTES = {
   PAGE_MEMBER_PORTAL: '/sv/member-portal',
   MEMBER_PORTAL: '/sv/member-portal',
   PROFILE: '/sv/profile',
+  CONTRIBUTION_PAYMENT_STATUS: '/sv/contribution/payment-status',
   SV: '/sv',
 
   // External Portal Links

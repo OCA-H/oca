@@ -106,6 +106,33 @@ export async function createSessionToken(user: SessionUser): Promise<string> {
 }
 
 /**
+ * Signs any small payload for a round trip through the browser (e.g. a payment result in a URL),
+ * so it can be trusted when it comes back. `purpose` is part of what is signed, so a token made for
+ * one use is never accepted for another, nor as a session.
+ */
+export async function createSignedToken(purpose: string, data: object, expiresInSeconds: number): Promise<string> {
+  const exp = Math.floor(Date.now() / 1000) + expiresInSeconds;
+  const payloadEncoded = base64UrlEncode(JSON.stringify({ data, exp }));
+  const signature = await signHmacWeb(`${purpose}.${payloadEncoded}`, authSecret());
+  return `${payloadEncoded}.${signature}`;
+}
+
+/** The data in a createSignedToken token for this purpose, or null if it is forged, altered or expired. */
+export async function verifySignedToken<T>(purpose: string, token: string): Promise<T | null> {
+  const parts = token.split(".");
+  if (parts.length !== 2) return null;
+
+  const [payloadEncoded, signature] = parts;
+  try {
+    if (signature !== (await signHmacWeb(`${purpose}.${payloadEncoded}`, authSecret()))) return null;
+    const { data, exp } = JSON.parse(base64UrlDecode(payloadEncoded)) as { data: T; exp: number };
+    return exp >= Math.floor(Date.now() / 1000) ? data : null;
+  } catch {
+    return null;
+  }
+}
+
+/**
  * Verifies a token and returns the parsed SessionData if valid, or null.
  */
 export async function verifySessionToken(token: string): Promise<SessionData | null> {

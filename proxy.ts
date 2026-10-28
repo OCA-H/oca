@@ -23,6 +23,15 @@ const PROTECTED_API_ROUTES = [
 ];
 
 /**
+ * Payment gateway callbacks under /api/sv. CCAvenue posts the member's browser back from its own
+ * site, a cross-site POST that does not carry the (SameSite=Lax) session cookie. The response is
+ * trusted because only CCAvenue can encrypt it with our working key, not because of a session.
+ */
+const GATEWAY_CALLBACK_ROUTES = [
+  "/api/sv/contribution/payment/response",
+];
+
+/**
  * A ?redirect= target as a path on this site, or null. Resolving it against the site's origin
  * catches every form a browser would send elsewhere ("//evil.com", "/\evil.com", "https:...").
  */
@@ -49,9 +58,9 @@ export async function proxy(request: NextRequest) {
 
   const isProtectedRoute = isSecureViewRoute(pathname);
 
-  const isProtectedApiRoute = PROTECTED_API_ROUTES.some((route) =>
-    pathname === route || pathname.startsWith(`${route}/`)
-  );
+  const isProtectedApiRoute =
+    !GATEWAY_CALLBACK_ROUTES.includes(pathname) &&
+    PROTECTED_API_ROUTES.some((route) => pathname === route || pathname.startsWith(`${route}/`));
 
   const isAuthPage = AUTH_PAGES.some((page) => pathname === page);
 

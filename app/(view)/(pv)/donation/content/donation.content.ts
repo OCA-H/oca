@@ -1,12 +1,5 @@
 import { ROUTES } from '@/app/(view)/common/helper/routes';
 
-export interface ContributionHead {
-  id: string;
-  label: string;
-  note?: string;
-  isWarn?: boolean;
-}
-
 export interface PaymentOption {
   id: string;
   label: string;
@@ -46,10 +39,15 @@ export interface DonationContent {
       href: string;
     }[];
   };
-  heads: ContributionHead[];
-  perTeacherAmount: number;
+  lock: {
+    badge: string;
+    title: string;
+    description: string;
+    signInLabel: string;
+    joinLabel: string;
+    perks: string[];
+  };
   amountPresets: number[];
-  teacherOptions: string[];
   batches: string[];
   countries: string[];
   paymentOptions: PaymentOption[];
@@ -127,21 +125,20 @@ export const donationContent: DonationContent = {
       { text: 'Who administers the funds →', href: ROUTES.EXECUTIVE_COMMITTEE },
     ],
   },
-  heads: [
-    { id: 'tbf', label: 'Teachers Benevolent Fund' },
-    { id: 'sponsor', label: 'Sponsor a teacher', note: '₹5,000 per teacher' },
-    { id: 'general', label: 'General Contribution' },
-    { id: 'secretariat', label: 'OCA Secretariat Contribution' },
-    {
-      id: 'breakfast',
-      label: 'OCA Breakfast Programme',
-      note: 'Currently suspended',
-      isWarn: true,
-    },
-  ],
-  perTeacherAmount: 5000,
+  lock: {
+    badge: 'Members Only',
+    title: 'Make a contribution',
+    description:
+      'Contributions are made by members of the Association. Sign in to give, or become a member to join the Columbans who carry the School forward.',
+    signInLabel: 'Sign in to contribute',
+    joinLabel: 'Become a member',
+    perks: [
+      'Give to the fund that matters most to you',
+      '80G tax benefit on every contribution',
+      'Thank-you receipt emailed the moment you give',
+    ],
+  },
   amountPresets: [1100, 5100, 11000, 51000],
-  teacherOptions: ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10'],
   batches: [
     '2026', '2025', '2024', '2023', '2022', '2021', '2020', '2019', '2018', '2017',
     '2016', '2015', '2014', '2013', '2012', '2011', '2010', '2009', '2008', '2007',
@@ -192,7 +189,6 @@ export const donationContent: DonationContent = {
     { id: 'upi', label: 'UPI', desc: 'Any Indian bank app' },
     { id: 'card', label: 'Card', desc: 'Indian debit or credit' },
     { id: 'netbanking', label: 'Net banking', desc: 'From your bank account' },
-    { id: 'transfer', label: 'Bank transfer', desc: 'Details sent by email' },
   ],
   terms: [
     'All payments are accepted in Indian Rupees only.',

@@ -4928,6 +4928,18 @@ section[id] {
   color: var(--navy);
 }
 
+/* Contribution form: the same lock & blur as the dinner passes, over the form column only */
+.cf-gate {
+  position: relative;
+  min-width: 0;
+  border-radius: var(--radius-l);
+}
+
+.cf-gate .dn-passes-lock-overlay {
+  align-items: flex-start;
+  padding-top: 64px;
+}
+
 /* ---------- Annual Dinner Pass Lock & Blur Styles ---------- */
 .dn-passes-wrap {
   position: relative;
