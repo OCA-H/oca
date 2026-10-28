@@ -8478,7 +8478,8 @@ section[id^="ec-"] {
 .mp-ok[hidden]{display:none !important;}
 
 /* e-membership card */
-.mp-ecard-wrap{display:grid; grid-template-columns:minmax(0,440px) 1fr; gap:40px; align-items:center;}
+.mp-ecard-wrap{display:grid; grid-template-columns:minmax(0,440px) minmax(0,1fr); gap:40px; align-items:center;}
+.mp-ecard-side{min-width:0;}
 .mp-ecard{position:relative; aspect-ratio:1.586 / 1; border-radius:20px; padding:24px 26px; color:#fff; overflow:hidden; display:flex; flex-direction:column; justify-content:space-between; isolation:isolate;
   background:radial-gradient(120% 140% at 10% 0%, #1E6E38 0%, var(--brand-deep) 55%, var(--brand-darkest) 100%); box-shadow:0 22px 48px rgba(8,45,22,.32);}
 .mp-ecard::before{content:""; position:absolute; inset:10px; border:1px solid rgba(244,217,118,.34); border-radius:12px; pointer-events:none; z-index:-1;}
@@ -8492,9 +8493,11 @@ section[id^="ec-"] {
 .mp-ecard-meta{display:flex; gap:26px; margin-top:12px;}
 .mp-ecard-meta small{display:block; font-size:10.5px; font-weight:700; letter-spacing:.07em; text-transform:uppercase; color:rgba(255,255,255,.62);}
 .mp-ecard-meta b{display:block; font-size:14.5px; margin-top:2px;}
-.mp-dl{display:grid; grid-template-columns:110px 1fr; gap:14px 16px; margin:0 0 28px; font-size:14.5px;}
-.mp-dl dt{color:var(--text-soft); font-weight:600;}
-.mp-dl dd{margin:0; color:var(--text);}
+/* labels take their own width; values get the rest and wrap inside it, even long unbroken ones */
+.mp-dl{display:grid; grid-template-columns:max-content minmax(0,1fr); gap:14px 20px; margin:0 0 28px; font-size:14.5px;}
+.mp-dl dt{color:var(--text-soft); font-weight:600; white-space:nowrap;}
+.mp-dl dd{margin:0; min-width:0; color:var(--text); overflow-wrap:anywhere;}
+.mp-dl-code{font-size:13.5px; letter-spacing:.02em; font-variant-numeric:tabular-nums;}
 .mp-btns{display:flex; flex-wrap:wrap; gap:12px;}
 .mp-btns .btn{flex:1 1 150px; justify-content:center;}
 .mp-btns .btn svg{width:18px; height:18px; margin-right:8px;}

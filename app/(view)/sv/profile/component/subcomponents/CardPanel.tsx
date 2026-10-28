@@ -147,7 +147,7 @@ export const CardPanel: React.FC<CardPanelProps> = ({ card: data, isLoading, err
             {data.payment && (
               <>
                 <dt>{labels.order}</dt>
-                <dd>{data.payment.orderId}</dd>
+                <dd className="mp-dl-code">{data.payment.orderId}</dd>
                 <dt>{labels.amount}</dt>
                 <dd>
                   {profileHelper.formatAmount(data.payment.amount, data.payment.currency)}
