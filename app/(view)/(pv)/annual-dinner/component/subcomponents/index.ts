@@ -1,6 +1,5 @@
 export * from './PassLockOverlay';
 export * from './PassDummyPreview';
-export * from './PassBookingSuccess';
 export * from './PassTierCard';
 export * from './PassTierGrid';
 export * from './PassAddons';

@@ -2,27 +2,12 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import { PASS_OPTIONS, TEACHER_PRICE, UNDER12_PRICE, ABOVE12_PRICE, PassTier } from '../content';
-import { annualDinnerService, type ApiEventPass } from '../services/annualDinner.service';
+import { annualDinnerService, PassCheckoutError, type ApiEventPass } from '../services/annualDinner.service';
 import { useAuth, type AuthUser } from '@/app/(view)/common/helper/useAuth';
 
 export interface SummaryLine {
   label: string;
   amount: number;
-}
-
-export interface PassBookingResult {
-  bookingRef: string;
-  passId: string;
-  passTitle: string;
-  total: number;
-  userName: string;
-  userEmail: string;
-  memberId: string;
-  createdAt: string;
-  spouseName?: string;
-  teachers?: number;
-  under12?: number;
-  above12?: number;
 }
 
 export function useAnnualDinnerHandler() {
@@ -32,9 +17,8 @@ export function useAnnualDinnerHandler() {
   const [spouseName, setSpouseName] = useState<string>('');
   const [under12, setUnder12] = useState<number>(0);
   const [above12, setAbove12] = useState<number>(0);
-  const [submitted, setSubmitted] = useState<boolean>(false);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
-  const [bookingResult, setBookingResult] = useState<PassBookingResult | null>(null);
+  const [checkoutError, setCheckoutError] = useState<string | null>(null);
   const [apiPasses, setApiPasses] = useState<ApiEventPass[]>([]);
   const [isLoadingPasses, setIsLoadingPasses] = useState<boolean>(false);
 
@@ -64,6 +48,15 @@ export function useAnnualDinnerHandler() {
     };
   }, [isAuthenticated]);
 
+  // Coming back from CCAvenue with the browser's Back button restores this page as it was left
+  useEffect(() => {
+    const onPageShow = (e: PageTransitionEvent) => {
+      if (e.persisted) setIsSubmitting(false);
+    };
+    window.addEventListener('pageshow', onPageShow);
+    return () => window.removeEventListener('pageshow', onPageShow);
+  }, []);
+
   // Map API passes to PassTier record, falling back to static PASS_OPTIONS
   const passOptionsMap = useMemo<Record<string, PassTier>>(() => {
     if (apiPasses.length === 0) return PASS_OPTIONS;
@@ -91,6 +84,16 @@ export function useAnnualDinnerHandler() {
 
   const currentTier: PassTier | null = selectedPass ? passOptionsMap[selectedPass] || PASS_OPTIONS[selectedPass] : null;
 
+  // Add-on prices come from the pass's metadata, as the server charges them
+  const selectedMeta = selectedPass ? passesById[selectedPass]?.metadata : null;
+  const metaPrice = (key: string, fallback: number) => {
+    const value = selectedMeta?.[key];
+    return typeof value === 'number' ? value : fallback;
+  };
+  const teacherPrice = metaPrice('teacherSponsorPrice', TEACHER_PRICE);
+  const under12Price = metaPrice('childUnder12Price', UNDER12_PRICE);
+  const above12Price = metaPrice('childAbove12Price', ABOVE12_PRICE);
+
   const summaryLines: SummaryLine[] = [];
   let total = 0;
 
@@ -99,7 +102,7 @@ export function useAnnualDinnerHandler() {
     total += currentTier.price;
 
     if (teachers > 0) {
-      const amt = teachers * TEACHER_PRICE;
+      const amt = teachers * teacherPrice;
       summaryLines.push({
         label: `Sponsor ${teachers} teacher${teachers === 1 ? '' : 's'}`,
         amount: amt,
@@ -109,7 +112,7 @@ export function useAnnualDinnerHandler() {
 
     if (currentTier.group === 'golden') {
       if (under12 > 0) {
-        const amt = under12 * UNDER12_PRICE;
+        const amt = under12 * under12Price;
         summaryLines.push({
           label: `${under12} child${under12 === 1 ? '' : 'ren'} under 12`,
           amount: amt,
@@ -117,7 +120,7 @@ export function useAnnualDinnerHandler() {
         total += amt;
       }
       if (above12 > 0) {
-        const amt = above12 * ABOVE12_PRICE;
+        const amt = above12 * above12Price;
         summaryLines.push({
           label: `${above12} child${above12 === 1 ? '' : 'ren'} above 12`,
           amount: amt,
@@ -133,8 +136,7 @@ export function useAnnualDinnerHandler() {
     setSpouseName('');
     setUnder12(0);
     setAbove12(0);
-    setSubmitted(false);
-    setBookingResult(null);
+    setCheckoutError(null);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -142,46 +144,23 @@ export function useAnnualDinnerHandler() {
     if (!isAuthenticated || !selectedPass || !currentTier) return;
 
     setIsSubmitting(true);
+    setCheckoutError(null);
     try {
-      const refCode = `OCA-AD26-${Math.floor(1000 + Math.random() * 9000)}`;
-      const payload = {
-        bookingRef: refCode,
+      // The server prices the booking from the pass table; the total shown here is only a preview
+      const checkout = await annualDinnerService.checkout({
         eventName: 'annual-dinner',
         passId: selectedPass,
-        passTitle: currentTier.label,
-        total,
-        teachers: teachers > 0 ? teachers : undefined,
+        teachers,
         spouseName: currentTier.spouse ? spouseName.trim() : undefined,
-        under12: currentTier.group === 'golden' && under12 > 0 ? under12 : undefined,
-        above12: currentTier.group === 'golden' && above12 > 0 ? above12 : undefined,
-        memberId: user?.memberId || '',
-        userName: user?.fullName || 'Columban Member',
-        userEmail: user?.email || '',
-      };
-
-      await annualDinnerService.submitPassBooking(payload);
-
-      setBookingResult({
-        bookingRef: refCode,
-        passId: selectedPass,
-        passTitle: currentTier.label,
-        total,
-        userName: user?.fullName || 'Columban Member',
-        userEmail: user?.email || '',
-        memberId: user?.memberId || '',
-        createdAt: new Date().toLocaleDateString('en-IN', {
-          day: 'numeric',
-          month: 'short',
-          year: 'numeric',
-        }),
-        spouseName: currentTier.spouse && spouseName ? spouseName.trim() : undefined,
-        teachers: teachers > 0 ? teachers : undefined,
-        under12: currentTier.group === 'golden' && under12 > 0 ? under12 : undefined,
-        above12: currentTier.group === 'golden' && above12 > 0 ? above12 : undefined,
+        under12: currentTier.group === 'golden' ? under12 : 0,
+        above12: currentTier.group === 'golden' ? above12 : 0,
       });
-      setSubmitted(true);
-    } finally {
+      annualDinnerService.redirectToGateway(checkout);
+    } catch (error) {
       setIsSubmitting(false);
+      setCheckoutError(
+        error instanceof PassCheckoutError ? error.message : 'We could not start the payment. Please try again.'
+      );
     }
   };
 
@@ -199,9 +178,8 @@ export function useAnnualDinnerHandler() {
     currentTier,
     summaryLines,
     total,
-    submitted,
     isSubmitting,
-    bookingResult,
+    checkoutError,
     apiPasses,
     passesById,
     isLoadingPasses,

@@ -1,0 +1,88 @@
+import { ROUTES } from '@/app/(view)/common/helper/routes';
+
+export const PASS_PAYMENT_STATUS_CONTENT = {
+  loading: 'Confirming your payment with CCAvenue…',
+  receiptTitle: 'Annual Dinner pass',
+  totalLabel: { paid: 'Amount paid', other: 'Amount due' },
+  printLabel: 'Print receipt',
+  help: {
+    title: 'Need help?',
+    desc: 'Quote your order reference when you write or call, and the Secretariat will look into it.',
+    email: 'info@oldcolumban.net',
+    phone: '011-23748666',
+  },
+  states: {
+    paid: {
+      tone: 'success',
+      badge: 'Pass confirmed',
+      title: 'See you at the Dinner, {name}',
+      lead: 'Your payment has been received and your pass for the OCA Annual Dinner is booked. Keep this receipt for your records.',
+      receiptStatus: 'Paid',
+      nextTitle: 'Before the evening',
+      nextSteps: [
+        { title: 'Keep your order reference', desc: 'Your name is on the guest list; the reference below helps us find your booking quickly.' },
+        { title: 'Save the date', desc: 'Friday, 18 December 2026 at the Qutub Golf Course, New Delhi.' },
+        { title: 'Bring your batch along', desc: 'Passes are limited, so tell your batchmates to book theirs soon.' },
+      ],
+      primary: { label: 'Back to the Annual Dinner', href: ROUTES.ANNUAL_DINNER },
+      secondary: { label: 'Explore events', href: ROUTES.HOME_EVENTS },
+    },
+    failed: {
+      tone: 'danger',
+      badge: 'Payment unsuccessful',
+      title: 'Your payment could not be completed',
+      lead: 'Your bank or CCAvenue declined the transaction, so your pass is not booked yet. You can try again now.',
+      receiptStatus: 'Failed',
+      nextTitle: 'What you can do',
+      nextSteps: [
+        { title: 'Try again', desc: 'Most failures are temporary. Choose your pass again, or use a different card, UPI app or bank.' },
+        { title: 'Check with your bank', desc: 'Card limits, OTP timeouts and online-payment settings are the usual causes.' },
+        { title: 'Money debited?', desc: 'A failed payment that left your account is normally reversed by your bank within 5–7 working days. Write to us with the order reference if it is not.' },
+      ],
+      primary: { label: 'Try again', href: ROUTES.ANNUAL_DINNER_PASSES },
+      secondary: { label: 'Back to home', href: ROUTES.HOME },
+    },
+    cancelled: {
+      tone: 'neutral',
+      badge: 'Payment cancelled',
+      title: 'You cancelled the payment',
+      lead: 'No money has been taken and your pass is not booked. You can come back for it while passes last.',
+      receiptStatus: 'Cancelled',
+      nextTitle: 'Ready when you are',
+      nextSteps: [
+        { title: 'Choose your pass again', desc: 'Passes are limited, and Early Bird prices last only until they are gone.' },
+        { title: 'Have a question first?', desc: 'Write to the Secretariat about passes, add-ons or payment options before you pay.' },
+      ],
+      primary: { label: 'Choose a pass', href: ROUTES.ANNUAL_DINNER_PASSES },
+      secondary: { label: 'Back to home', href: ROUTES.HOME },
+    },
+    pending: {
+      tone: 'warning',
+      badge: 'Payment pending',
+      title: 'We are waiting for your bank to confirm',
+      lead: 'Your payment has not been confirmed yet. Please do not pay again — if money has left your account, this order will be updated shortly.',
+      receiptStatus: 'Awaiting confirmation',
+      nextTitle: 'What happens next',
+      nextSteps: [
+        { title: 'Give it a few minutes', desc: 'Some banks take a while to confirm. Refresh this page to see the latest status.' },
+        { title: 'Still pending?', desc: 'Write to the Secretariat with your order reference and we will check it with CCAvenue.' },
+      ],
+      primary: { label: 'Refresh status', href: '' },
+      secondary: { label: 'Back to home', href: ROUTES.HOME },
+    },
+    unknown: {
+      tone: 'danger',
+      badge: 'Status unavailable',
+      title: 'We could not confirm your payment',
+      lead: 'Something went wrong while reading the result from CCAvenue. Please do not pay again until you have checked with us.',
+      receiptStatus: 'Unconfirmed',
+      nextTitle: 'What you can do',
+      nextSteps: [
+        { title: 'Check your bank', desc: 'See whether the pass amount has left your account for this order.' },
+        { title: 'Contact the Secretariat', desc: 'Send us the order reference below and we will confirm your payment and pass.' },
+      ],
+      primary: { label: 'Back to the Annual Dinner', href: ROUTES.ANNUAL_DINNER },
+      secondary: { label: 'Back to home', href: ROUTES.HOME },
+    },
+  },
+} as const;

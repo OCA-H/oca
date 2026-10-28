@@ -4,13 +4,12 @@ import React from 'react';
 import type { AuthUser } from '@/app/(view)/common/helper/useAuth';
 import type { ApiEventPass } from '../../services/annualDinner.service';
 import type { PassTier } from '../../content';
-import type { SummaryLine, PassBookingResult } from '../../handler/useAnnualDinnerHandler';
+import type { SummaryLine } from '../../handler/useAnnualDinnerHandler';
 import { PassLockOverlay } from './PassLockOverlay';
 import { PassDummyPreview } from './PassDummyPreview';
 import { PassTierGrid } from './PassTierGrid';
 import { PassAddons } from './PassAddons';
 import { PassSubmitSection } from './PassSubmitSection';
-import { PassBookingSuccess } from './PassBookingSuccess';
 
 interface ChoosePassSectionProps {
   apiPasses: ApiEventPass[];
@@ -27,9 +26,8 @@ interface ChoosePassSectionProps {
   setAbove12: (num: number) => void;
   summaryLines: SummaryLine[];
   total: number;
-  submitted: boolean;
   isSubmitting: boolean;
-  bookingResult: PassBookingResult | null;
+  checkoutError: string | null;
   user: AuthUser | null;
   isAuthenticated: boolean;
   handleReset: () => void;
@@ -51,9 +49,8 @@ export const ChoosePassSection: React.FC<ChoosePassSectionProps> = ({
   setAbove12,
   summaryLines,
   total,
-  submitted,
   isSubmitting,
-  bookingResult,
+  checkoutError,
   user,
   isAuthenticated,
   handleReset,
@@ -74,56 +71,53 @@ export const ChoosePassSection: React.FC<ChoosePassSectionProps> = ({
           </p>
         </div>
 
-        {submitted && bookingResult ? (
-          <PassBookingSuccess bookingResult={bookingResult} onReset={handleReset} />
-        ) : (
-          <div className="dn-passes-wrap">
-            {!isAuthenticated && <PassLockOverlay />}
+        <div className="dn-passes-wrap">
+          {!isAuthenticated && <PassLockOverlay />}
 
-            {!isAuthenticated ? (
-              <PassDummyPreview />
-            ) : (
-              <div className="dn-passes-content">
-                <form className="cf-form dn-form" id="dinnerForm" onSubmit={handleSubmit} autoComplete="on">
-                  <div className="cf-step">
-                    <span className="cf-num">1</span>
-                    <h3>Your pass</h3>
-                  </div>
+          {!isAuthenticated ? (
+            <PassDummyPreview />
+          ) : (
+            <div className="dn-passes-content">
+              <form className="cf-form dn-form" id="dinnerForm" onSubmit={handleSubmit} autoComplete="on">
+                <div className="cf-step">
+                  <span className="cf-num">1</span>
+                  <h3>Your pass</h3>
+                </div>
 
-                  {/* Dynamically grouped tiers & pass options loaded from DB API */}
-                  <PassTierGrid
-                    passes={apiPasses}
-                    selectedPass={selectedPass}
-                    onSelectPass={setSelectedPass}
-                  />
+                {/* Dynamically grouped tiers & pass options loaded from DB API */}
+                <PassTierGrid
+                  passes={apiPasses}
+                  selectedPass={selectedPass}
+                  onSelectPass={setSelectedPass}
+                />
 
-                  {/* Add-ons */}
-                  <PassAddons
-                    currentTier={currentTier}
-                    teachers={teachers}
-                    setTeachers={setTeachers}
-                    spouseName={spouseName}
-                    setSpouseName={setSpouseName}
-                    under12={under12}
-                    setUnder12={setUnder12}
-                    above12={above12}
-                    setAbove12={setAbove12}
-                  />
+                {/* Add-ons */}
+                <PassAddons
+                  currentTier={currentTier}
+                  teachers={teachers}
+                  setTeachers={setTeachers}
+                  spouseName={spouseName}
+                  setSpouseName={setSpouseName}
+                  under12={under12}
+                  setUnder12={setUnder12}
+                  above12={above12}
+                  setAbove12={setAbove12}
+                />
 
-                  {/* Member Badge, Order Summary, & Actions */}
-                  <PassSubmitSection
-                    user={user}
-                    summaryLines={summaryLines}
-                    total={total}
-                    selectedPass={selectedPass}
-                    isSubmitting={isSubmitting}
-                    onReset={handleReset}
-                  />
-                </form>
-              </div>
-            )}
-          </div>
-        )}
+                {/* Member Badge, Order Summary, & Actions */}
+                <PassSubmitSection
+                  user={user}
+                  summaryLines={summaryLines}
+                  total={total}
+                  selectedPass={selectedPass}
+                  isSubmitting={isSubmitting}
+                  error={checkoutError}
+                  onReset={handleReset}
+                />
+              </form>
+            </div>
+          )}
+        </div>
       </div>
     </section>
   );

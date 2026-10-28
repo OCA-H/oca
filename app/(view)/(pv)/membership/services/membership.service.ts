@@ -1,9 +1,6 @@
-export interface MembershipCheckoutData {
-  orderId: string;
-  gatewayUrl: string;
-  accessCode: string;
-  encRequest: string;
-}
+import { redirectToCcAvenue, type CcAvenueCheckoutData } from '@/app/(view)/common/helper/ccavenue';
+
+export type MembershipCheckoutData = CcAvenueCheckoutData;
 
 export interface MembershipOrder {
   orderId: string;
@@ -47,20 +44,7 @@ export const membershipService = {
   },
 
   /** Sends the browser to CCAvenue with the encrypted order; the page navigates away. */
-  redirectToGateway: ({ gatewayUrl, accessCode, encRequest }: MembershipCheckoutData) => {
-    const form = document.createElement('form');
-    form.method = 'POST';
-    form.action = gatewayUrl;
-    for (const [name, value] of Object.entries({ encRequest, access_code: accessCode })) {
-      const input = document.createElement('input');
-      input.type = 'hidden';
-      input.name = name;
-      input.value = value;
-      form.appendChild(input);
-    }
-    document.body.appendChild(form);
-    form.submit();
-  },
+  redirectToGateway: redirectToCcAvenue,
 
   getOrder: async (orderId: string): Promise<MembershipOrder | null> => {
     try {

@@ -30,6 +30,7 @@ export const ROUTES = {
   DONATION_GIVE_FORM: '/donation#give-form',
   MEMBERSHIP_JOIN: '/membership#join',
   MEMBERSHIP_PAYMENT_STATUS: '/membership/payment-status',
+  ANNUAL_DINNER_PAYMENT_STATUS: '/annual-dinner/payment-status',
   ANNUAL_DINNER_PASSES: '/annual-dinner#passes',
   ANNUAL_DINNER_DETAILS: '/annual-dinner#details',
   SPORTS_SPONSOR: '/sports#sponsor',

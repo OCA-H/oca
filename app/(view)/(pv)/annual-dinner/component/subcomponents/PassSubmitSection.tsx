@@ -10,6 +10,7 @@ interface PassSubmitSectionProps {
   total: number;
   selectedPass: string | null;
   isSubmitting: boolean;
+  error: string | null;
   onReset: () => void;
 }
 
@@ -19,6 +20,7 @@ export const PassSubmitSection: React.FC<PassSubmitSectionProps> = ({
   total,
   selectedPass,
   isSubmitting,
+  error,
   onReset,
 }) => {
   return (
@@ -68,13 +70,19 @@ export const PassSubmitSection: React.FC<PassSubmitSectionProps> = ({
         </div>
       </div>
 
+      {error && (
+        <p className="ms-error" role="alert">
+          {error}
+        </p>
+      )}
+
       <div className="cf-actions">
         <button
           className="btn btn-primary"
           type="submit"
           disabled={!selectedPass || isSubmitting}
         >
-          {isSubmitting ? 'Reserving pass...' : 'Buy pass'}
+          {isSubmitting ? 'Redirecting to payment…' : 'Buy pass'}
         </button>
         <button className="cf-reset" type="button" onClick={onReset} disabled={isSubmitting}>
           Reset form
@@ -82,7 +90,7 @@ export const PassSubmitSection: React.FC<PassSubmitSectionProps> = ({
       </div>
 
       <p className="form-note">
-        Questions about passes? Write to <a href="mailto:info@oldcolumban.net">info@oldcolumban.net</a> or call
+        Payments are processed securely by CCAvenue. Questions about passes? Write to <a href="mailto:info@oldcolumban.net">info@oldcolumban.net</a> or call
         011-23748666.
       </p>
     </div>

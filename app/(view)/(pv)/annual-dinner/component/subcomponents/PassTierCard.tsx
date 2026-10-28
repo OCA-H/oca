@@ -135,20 +135,27 @@ export const PassTierCard: React.FC<PassTierCardProps> = ({ group, selectedPass,
         <>
           {group.passes.map((pass) => {
             const isChecked = selectedPass === pass.passId;
+            const isSoldOut = pass.availableQuantity === 0;
             return (
-              <label key={pass.passId} className={`dn-pass ${isChecked ? 'is-checked' : ''}`}>
+              <label
+                key={pass.passId}
+                className={`dn-pass ${isChecked ? 'is-checked' : ''} ${isSoldOut ? 'is-sold-out' : ''}`}
+              >
                 <input
                   type="radio"
                   name="pass"
                   value={pass.passId}
                   checked={isChecked}
                   onChange={() => onSelectPass(pass.passId)}
+                  disabled={isSoldOut}
                   required={!selectedPass}
                 />
                 <span className="dn-radio" aria-hidden="true"></span>
                 <span className="dn-pass-t">
                   <b>{pass.title}</b>
-                  {pass.statusNote && pass.statusNote !== pass.title && (
+                  {isSoldOut ? (
+                    <em className="dn-left">Sold out</em>
+                  ) : pass.statusNote && pass.statusNote !== pass.title && (
                     <em className="dn-left">{pass.statusNote}</em>
                   )}
                 </span>

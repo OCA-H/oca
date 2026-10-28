@@ -5751,6 +5751,19 @@ section[id^="ec-"] {
   transform: scale(1);
 }
 
+.dn-pass.is-sold-out {
+  opacity: .55;
+  cursor: not-allowed;
+}
+
+.dn-pass.is-sold-out:hover {
+  background: #fff;
+}
+
+.dn-pass.is-sold-out input {
+  cursor: not-allowed;
+}
+
 #dn-step2[hidden] {
   display: none !important;
 }

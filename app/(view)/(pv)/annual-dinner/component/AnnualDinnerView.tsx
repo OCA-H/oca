@@ -44,9 +44,8 @@ export const AnnualDinnerView: React.FC = () => {
         setAbove12={handler.setAbove12}
         summaryLines={handler.summaryLines}
         total={handler.total}
-        submitted={handler.submitted}
         isSubmitting={handler.isSubmitting}
-        bookingResult={handler.bookingResult}
+        checkoutError={handler.checkoutError}
         user={handler.user}
         isAuthenticated={handler.isAuthenticated}
         handleReset={handler.handleReset}
