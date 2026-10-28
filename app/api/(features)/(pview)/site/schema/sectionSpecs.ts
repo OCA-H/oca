@@ -17,6 +17,8 @@ export interface FieldSpec {
   hint?: string;
   placeholder?: string;
   options?: { value: string; label: string }[];
+  /** Starts a new block of the editor under this heading, for sections with many fields. */
+  heading?: string;
 }
 
 /** A repeating group inside a section: event cards, notices, posts. */
@@ -36,7 +38,7 @@ export interface ListSpec {
 export interface SectionSpec {
   key: SiteSectionKey;
   /** Which group of the admin menu the section is under. */
-  page: "home" | "about";
+  page: "home" | "about" | "events";
   label: string;
   description: string;
   /** Where the section sits on its page, for "View on site". */
@@ -52,6 +54,8 @@ export const SITE_SECTION_KEYS = {
   homeHangout: "home.hangout",
   homeSocial: "home.social",
   aboutCommittee: "about.committee",
+  eventsDinner: "events.dinner",
+  eventsLunch: "events.lunch",
 } as const;
 
 export type SiteSectionKey = (typeof SITE_SECTION_KEYS)[keyof typeof SITE_SECTION_KEYS];
@@ -167,6 +171,40 @@ export interface HomeCommitteeContent {
   members: HomeCommitteeMember[];
 }
 
+// ---------- Event pages ----------
+
+/** The banner at the top of an event page. */
+export interface EventHero {
+  eyebrow: string;
+  title: string;
+  lead: string;
+  image: string;
+  imageAlt: string;
+}
+
+/** /annual-dinner: banner, key facts and the "Choose your pass" heading. Pass prices are not here. */
+export interface EventDinnerContent extends EventHero {
+  date: string;
+  dateDetail: string;
+  venue: string;
+  venueDetail: string;
+  priceFact: string;
+  priceDetail: string;
+  passesEyebrow: string;
+  passesTitle: string;
+  passesIntro: string;
+}
+
+/** /annual-lunch: banner and key facts. */
+export interface EventLunchContent extends EventHero {
+  date: string;
+  dateDetail: string;
+  time: string;
+  timeDetail: string;
+  venue: string;
+  venueDetail: string;
+}
+
 /** Everything the home page reads from the database. */
 export interface HomeContent {
   events: HomeEventsContent;
@@ -193,6 +231,28 @@ const sectionHead = (introMax = 400): FieldSpec[] => [
 const image = (label = "Image"): FieldSpec[] => [
   { key: "image", label, type: "image", required: true, hint: IMAGE_HINT },
   { key: "imageAlt", label: "Image description", type: "text", max: 200, hint: ALT_HINT },
+];
+
+/** An event page's banner: heading, intro and its image. */
+const eventHero = (imageLabel: string): FieldSpec[] => [
+  { key: "eyebrow", label: "Eyebrow", type: "text", max: 60, heading: "Banner", hint: "The small line above the heading." },
+  { key: "title", label: "Heading", type: "text", max: 120, required: true },
+  { key: "lead", label: "Intro", type: "textarea", max: 400 },
+  ...image(imageLabel),
+];
+
+/** One of the boxes under an event's banner: the big line, and the small one under it. */
+const eventFact = (key: string, label: string, example: string, detailExample: string): FieldSpec[] => [
+  {
+    key,
+    label,
+    type: "text",
+    max: 40,
+    required: true,
+    placeholder: example,
+    ...(key === "date" && { heading: "Key facts", hint: "The big line in the box." }),
+  },
+  { key: `${key}Detail`, label: `${label} detail`, type: "text", max: 80, placeholder: detailExample, hint: "The small line under it." },
 ];
 
 export const SECTION_SPECS: SectionSpec[] = [
@@ -376,6 +436,38 @@ export const SECTION_SPECS: SectionSpec[] = [
         ],
       },
     ],
+  },
+  {
+    key: SITE_SECTION_KEYS.eventsDinner,
+    page: "events",
+    label: "Annual Dinner",
+    description: "The Annual Dinner page: banner, date and venue, and the “Choose your pass” heading.",
+    href: "/annual-dinner",
+    fields: [
+      ...eventHero("Poster"),
+      ...eventFact("date", "Date", "18 December", "Friday, 2026"),
+      ...eventFact("venue", "Venue", "Qutub Golf Course", "New Delhi"),
+      { key: "priceFact", label: "Price box", type: "text", max: 40, placeholder: "₹2,500", hint: "Only the text in the box. Pass prices themselves are set with the passes." },
+      { key: "priceDetail", label: "Price box detail", type: "text", max: 80, placeholder: "Passes from — limited numbers" },
+      { key: "passesEyebrow", label: "Eyebrow", type: "text", max: 60, heading: "Choose your pass", placeholder: "Passes" },
+      { key: "passesTitle", label: "Heading", type: "text", max: 120, required: true, placeholder: "Choose your pass" },
+      { key: "passesIntro", label: "Intro", type: "textarea", max: 400 },
+    ],
+    lists: [],
+  },
+  {
+    key: SITE_SECTION_KEYS.eventsLunch,
+    page: "events",
+    label: "Annual Lunch",
+    description: "The Annual Lunch page: banner, date, time and venue.",
+    href: "/annual-lunch",
+    fields: [
+      ...eventHero("Banner image"),
+      ...eventFact("date", "Date", "14 December", "Sunday, 2025"),
+      ...eventFact("time", "Time", "12 Noon", "Onwards"),
+      ...eventFact("venue", "Venue", "St. Columba’s", "School Grounds, Ashoka Place, New Delhi – 110 001"),
+    ],
+    lists: [],
   },
 ];
 

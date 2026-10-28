@@ -3,12 +3,14 @@
 import React from 'react';
 import Link from 'next/link';
 import { ROUTES } from '@/app/(view)/common/helper/routes';
+import type { EventDinnerContent } from '@/app/api/(features)/(pview)/site/schema/sectionSpecs';
 
 interface AnnualDinnerHeroProps {
+  content: EventDinnerContent;
   onScrollToAnchor: (id: string) => (e: React.MouseEvent<HTMLAnchorElement>) => void;
 }
 
-export const AnnualDinnerHero: React.FC<AnnualDinnerHeroProps> = ({ onScrollToAnchor }) => {
+export const AnnualDinnerHero: React.FC<AnnualDinnerHeroProps> = ({ content, onScrollToAnchor }) => {
   return (
     <>
       <nav className="crumb" aria-label="Breadcrumb">
@@ -24,12 +26,9 @@ export const AnnualDinnerHero: React.FC<AnnualDinnerHeroProps> = ({ onScrollToAn
       <section className="page-hero dn-hero">
         <div className="wrap">
           <div>
-            <span className="eyebrow">Save the date</span>
-            <h1>OCA Annual Dinner</h1>
-            <p className="lead">
-              One evening, every batch. Come for the reunion, stay for the stories &mdash; the Columban family is
-              gathering at the Qutub Golf Course.
-            </p>
+            {content.eyebrow && <span className="eyebrow">{content.eyebrow}</span>}
+            <h1>{content.title}</h1>
+            {content.lead && <p className="lead">{content.lead}</p>}
             <div className="page-hero-actions">
               <a className="btn btn-primary" href={ROUTES.ANNUAL_DINNER_PASSES} onClick={onScrollToAnchor('passes')}>
                 Get your pass
@@ -41,10 +40,7 @@ export const AnnualDinnerHero: React.FC<AnnualDinnerHeroProps> = ({ onScrollToAn
           </div>
           <div className="page-hero-media">
             <figure className="dn-poster">
-              <img
-                src="/images/annual-dinner-poster.jpg"
-                alt="Save the date: OCA Annual Dinner, 18th December, Qutub Golf Course. A poster with the OCA crest and an illustration of the St. Columba’s School building."
-              />
+              <img src={content.image} alt={content.imageAlt} />
             </figure>
           </div>
         </div>
@@ -54,16 +50,16 @@ export const AnnualDinnerHero: React.FC<AnnualDinnerHeroProps> = ({ onScrollToAn
       <div className="wrap">
         <div className="fact-strip fact-strip--3" id="details">
           <div className="fact">
-            <div className="fact-num">18 December</div>
-            <div className="fact-lbl">Friday, 2026</div>
+            <div className="fact-num">{content.date}</div>
+            {content.dateDetail && <div className="fact-lbl">{content.dateDetail}</div>}
           </div>
           <div className="fact">
-            <div className="fact-num fact-num--text">Qutub Golf Course</div>
-            <div className="fact-lbl">New Delhi</div>
+            <div className="fact-num fact-num--text">{content.venue}</div>
+            {content.venueDetail && <div className="fact-lbl">{content.venueDetail}</div>}
           </div>
           <div className="fact">
-            <div className="fact-num">&#8377;2,500</div>
-            <div className="fact-lbl">Passes from &mdash; limited numbers</div>
+            <div className="fact-num">{content.priceFact}</div>
+            {content.priceDetail && <div className="fact-lbl">{content.priceDetail}</div>}
           </div>
         </div>
       </div>

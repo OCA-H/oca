@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import type { EventDinnerContent } from '@/app/api/(features)/(pview)/site/schema/sectionSpecs';
 import { useAnnualDinnerHandler } from '../handler/useAnnualDinnerHandler';
 import {
   AnnualDinnerHero,
@@ -10,7 +11,7 @@ import {
   AnnualDinnerCTA,
 } from './subcomponents';
 
-export const AnnualDinnerView: React.FC = () => {
+export const AnnualDinnerView: React.FC<{ content: EventDinnerContent }> = ({ content }) => {
   const handler = useAnnualDinnerHandler();
 
   const scrollToAnchor = (id: string) => (e: React.MouseEvent<HTMLAnchorElement>) => {
@@ -23,13 +24,14 @@ export const AnnualDinnerView: React.FC = () => {
   return (
     <>
       {/* Hero & Key Facts Strip */}
-      <AnnualDinnerHero onScrollToAnchor={scrollToAnchor} />
+      <AnnualDinnerHero content={content} onScrollToAnchor={scrollToAnchor} />
 
       {/* About the Dinner & Passes at a Glance */}
       <AnnualDinnerAbout onScrollToAnchor={scrollToAnchor} />
 
       {/* Choose Your Pass (Driven by DB API data, with dummy background when unauthenticated) */}
       <ChoosePassSection
+        heading={{ eyebrow: content.passesEyebrow, title: content.passesTitle, intro: content.passesIntro }}
         apiPasses={handler.apiPasses}
         selectedPass={handler.selectedPass}
         setSelectedPass={handler.setSelectedPass}

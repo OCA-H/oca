@@ -47,6 +47,14 @@ export const adminHelper = {
   formatSavedDate: (iso: string): string =>
     new Date(iso).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" }),
 
+  /** A section's fields split into blocks at each field with a heading; the first block takes `firstHeading`. */
+  fieldBlocks: (fields: FieldSpec[], firstHeading: string): { heading: string; fields: FieldSpec[] }[] =>
+    fields.reduce<{ heading: string; fields: FieldSpec[] }[]>((blocks, field) => {
+      if (field.heading || blocks.length === 0) blocks.push({ heading: field.heading ?? firstHeading, fields: [] });
+      blocks[blocks.length - 1].fields.push(field);
+      return blocks;
+    }, []),
+
   /** An empty value of the field's kind: the first choice for a select, the smallest number. */
   blankValue: (field: FieldSpec): string | number =>
     field.type === "select" ? (field.options?.[0]?.value ?? "") : field.type === "number" ? (field.min ?? 0) : "",

@@ -5,7 +5,7 @@ import { HttpError } from "@/app/api/core/httpError";
 import { storage, type StoredFile } from "@/app/api/core/storage";
 import type { UploadedFile } from "@/app/api/core/fileUpload";
 import { SiteContentRepository } from "../repository/siteContentRepository";
-import { SECTION_SPECS, SITE_SECTION_KEYS, sectionSpec, type HomeContent, type SectionSpec, type SiteSectionKey } from "../schema/sectionSpecs";
+import { SECTION_SPECS, SITE_SECTION_KEYS, sectionSpec, type EventDinnerContent, type EventLunchContent, type HomeContent, type SectionSpec, type SiteSectionKey } from "../schema/sectionSpecs";
 import { SECTION_DEFAULTS } from "./siteDefaults";
 import { validateSection } from "./sectionValidator";
 
@@ -62,6 +62,22 @@ export async function getHomeContent(): Promise<HomeContent> {
     Object.entries(keys).map(([name, key]) => [name, withDefaults(key, saved.get(key))])
   ) as unknown as HomeContent;
 }
+
+/** One section's content (an event page's, say), cached and refreshed on save like the home page's. */
+async function getSectionContent(key: SiteSectionKey): Promise<Record<string, unknown>> {
+  "use cache";
+  cacheTag(SITE_CONTENT_TAG);
+  try {
+    return withDefaults(key, (await new SiteContentRepository().findByKey(key))?.data);
+  } catch (error) {
+    console.error(`Could not load site content "${key}"; the page is showing its defaults.`, error);
+    cacheLife("minutes");
+    return withDefaults(key, undefined);
+  }
+}
+
+export const getDinnerContent = async () => (await getSectionContent(SITE_SECTION_KEYS.eventsDinner)) as unknown as EventDinnerContent;
+export const getLunchContent = async () => (await getSectionContent(SITE_SECTION_KEYS.eventsLunch)) as unknown as EventLunchContent;
 
 export class SiteContentService {
   constructor(private readonly repository: SiteContentRepository) {}

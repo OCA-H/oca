@@ -80,11 +80,11 @@ export const SectionEditorPanel: React.FC<SectionEditorPanelProps> = ({ spec, is
           </div>
 
           <form className="cf-form mp-form" noValidate onSubmit={editor.handleSubmit} aria-busy={editor.isSaving}>
-            {spec.fields.length > 0 && (
-              <fieldset className="ad-fieldset">
-                <legend className="ad-subhead">{text.sectionText}</legend>
+            {adminHelper.fieldBlocks(spec.fields, text.sectionText).map((block) => (
+              <fieldset className="ad-fieldset" key={block.heading}>
+                <legend className="ad-subhead">{block.heading}</legend>
                 <div className="ad-grid">
-                  {spec.fields.map((field) => (
+                  {block.fields.map((field) => (
                     <FieldInput
                       key={field.key}
                       field={field}
@@ -97,7 +97,7 @@ export const SectionEditorPanel: React.FC<SectionEditorPanelProps> = ({ spec, is
                   ))}
                 </div>
               </fieldset>
-            )}
+            ))}
 
             {spec.lists.map((list) => (
               <ListEditor key={list.key} list={list} items={(form[list.key] as EditorItem[] | undefined) ?? []} editor={editor} />

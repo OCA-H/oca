@@ -8862,3 +8862,5 @@ section[id^="ec-"] {
   .ad-nav-items .mp-link{font-size:14.5px; padding:9px 15px;}
 }
 @media (prefers-reduced-motion: reduce){ .ad-group-chev{transition:none;} .ad-nav-group.is-open .ad-nav-items{animation:none;} }
+/* a section editor with several blocks of fields: a rule between them */
+.ad-fieldset + .ad-fieldset:not(.ad-list){padding-top:28px; border-top:1px solid var(--border);}

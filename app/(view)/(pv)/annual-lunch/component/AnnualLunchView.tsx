@@ -3,15 +3,16 @@
 import React from 'react';
 import Link from 'next/link';
 import { ROUTES } from '@/app/(view)/common/helper/routes';
+import type { EventLunchContent } from '@/app/api/(features)/(pview)/site/schema/sectionSpecs';
 
-export const AnnualLunchView: React.FC = () => {
+export const AnnualLunchView: React.FC<{ content: EventLunchContent }> = ({ content }) => {
   return (
     <>
       <nav className="crumb" aria-label="Breadcrumb">
         <div className="wrap">
           <Link href={ROUTES.HOME}>Home</Link>
           <span className="sep">/</span>
-          <span>Annual Lunch Get Together</span>
+          <span>{content.title}</span>
         </div>
       </nav>
 
@@ -19,12 +20,9 @@ export const AnnualLunchView: React.FC = () => {
       <section className="page-hero">
         <div className="wrap">
           <div>
-            <span className="eyebrow">OCA Flagship Event</span>
-            <h1>Annual Lunch Get Together</h1>
-            <p className="lead">
-              The Association&rsquo;s flagship gathering &mdash; Columbans of every batch, back together for an
-              afternoon of food, stories and fellowship.
-            </p>
+            {content.eyebrow && <span className="eyebrow">{content.eyebrow}</span>}
+            <h1>{content.title}</h1>
+            {content.lead && <p className="lead">{content.lead}</p>}
             <div className="page-hero-actions">
               <a
                 className="btn btn-primary"
@@ -42,8 +40,8 @@ export const AnnualLunchView: React.FC = () => {
             <div className="photo-tile duo-gold">
               <img
                 className="tile-img"
-                src="https://www.oldcolumban.net/wp-content/uploads/2025/12/annual-lunch.jpg"
-                alt="OCA Annual Lunch Get Together"
+                src={content.image}
+                alt={content.imageAlt}
                 loading="lazy"
                 decoding="async"
                 data-ph="photo"
@@ -57,16 +55,16 @@ export const AnnualLunchView: React.FC = () => {
       <div className="wrap">
         <div className="fact-strip fact-strip--3">
           <div className="fact">
-            <div className="fact-num">14 December</div>
-            <div className="fact-lbl">Sunday, 2025</div>
+            <div className="fact-num">{content.date}</div>
+            {content.dateDetail && <div className="fact-lbl">{content.dateDetail}</div>}
           </div>
           <div className="fact">
-            <div className="fact-num">12 Noon</div>
-            <div className="fact-lbl">Onwards</div>
+            <div className="fact-num">{content.time}</div>
+            {content.timeDetail && <div className="fact-lbl">{content.timeDetail}</div>}
           </div>
           <div className="fact">
-            <div className="fact-num">St. Columba&rsquo;s</div>
-            <div className="fact-lbl">School Grounds, Ashoka Place, New Delhi &ndash; 110 001</div>
+            <div className="fact-num">{content.venue}</div>
+            {content.venueDetail && <div className="fact-lbl">{content.venueDetail}</div>}
           </div>
         </div>
       </div>

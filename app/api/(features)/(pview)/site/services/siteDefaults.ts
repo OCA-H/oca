@@ -1,4 +1,10 @@
-import { SITE_SECTION_KEYS, type HomeContent, type SiteSectionKey } from "../schema/sectionSpecs";
+import {
+  SITE_SECTION_KEYS,
+  type EventDinnerContent,
+  type EventLunchContent,
+  type HomeContent,
+  type SiteSectionKey,
+} from "../schema/sectionSpecs";
 
 // What each section shows until an admin saves it: the content the home page was built with.
 
@@ -150,6 +156,38 @@ export const HOME_DEFAULTS: HomeContent = {
   },
 };
 
+export const DINNER_DEFAULTS: EventDinnerContent = {
+  eyebrow: "Save the date",
+  title: "OCA Annual Dinner",
+  lead: "One evening, every batch. Come for the reunion, stay for the stories — the Columban family is gathering at the Qutub Golf Course.",
+  image: "/images/annual-dinner-poster.jpg",
+  imageAlt:
+    "Save the date: OCA Annual Dinner, 18th December, Qutub Golf Course. A poster with the OCA crest and an illustration of the St. Columba’s School building.",
+  date: "18 December",
+  dateDetail: "Friday, 2026",
+  venue: "Qutub Golf Course",
+  venueDetail: "New Delhi",
+  priceFact: "₹2,500",
+  priceDetail: "Passes from — limited numbers",
+  passesEyebrow: "Passes",
+  passesTitle: "Choose your pass",
+  passesIntro: "Passes are limited — the numbers show how many are left. Once the Early Bird passes are gone, Regular passes open.",
+};
+
+export const LUNCH_DEFAULTS: EventLunchContent = {
+  eyebrow: "OCA Flagship Event",
+  title: "Annual Lunch Get Together",
+  lead: "The Association’s flagship gathering — Columbans of every batch, back together for an afternoon of food, stories and fellowship.",
+  image: U + "2025/12/annual-lunch.jpg",
+  imageAlt: "OCA Annual Lunch Get Together",
+  date: "14 December",
+  dateDetail: "Sunday, 2025",
+  time: "12 Noon",
+  timeDetail: "Onwards",
+  venue: "St. Columba’s",
+  venueDetail: "School Grounds, Ashoka Place, New Delhi – 110 001",
+};
+
 /** Each section key's defaults, as stored data. */
 export const SECTION_DEFAULTS: Record<SiteSectionKey, object> = {
   [SITE_SECTION_KEYS.homeEvents]: HOME_DEFAULTS.events,
@@ -158,4 +196,6 @@ export const SECTION_DEFAULTS: Record<SiteSectionKey, object> = {
   [SITE_SECTION_KEYS.homeHangout]: HOME_DEFAULTS.hangout,
   [SITE_SECTION_KEYS.homeSocial]: HOME_DEFAULTS.social,
   [SITE_SECTION_KEYS.aboutCommittee]: HOME_DEFAULTS.committee,
+  [SITE_SECTION_KEYS.eventsDinner]: DINNER_DEFAULTS,
+  [SITE_SECTION_KEYS.eventsLunch]: LUNCH_DEFAULTS,
 };

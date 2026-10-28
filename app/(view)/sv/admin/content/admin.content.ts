@@ -30,7 +30,9 @@ export type AdminIconName =
   | "people"
   | "home"
   | "info"
-  | "layers";
+  | "layers"
+  | "moon"
+  | "sun";
 
 export const SECTION_ICONS: Record<SiteSectionKey, AdminIconName> = {
   "home.events": "calendar",
@@ -39,6 +41,8 @@ export const SECTION_ICONS: Record<SiteSectionKey, AdminIconName> = {
   "home.hangout": "camera",
   "home.social": "heart",
   "about.committee": "people",
+  "events.dinner": "moon",
+  "events.lunch": "sun",
 };
 
 /** A menu entry swaps the panel in place, leaves the admin panel, or is not ready yet. */
@@ -62,6 +66,7 @@ export interface AdminNavGroup {
 const PAGE_GROUPS: Record<SectionSpec["page"], { group: string; icon: AdminIconName }> = {
   home: { group: "Home page", icon: "home" },
   about: { group: "About", icon: "info" },
+  events: { group: "Events", icon: "calendar" },
 };
 
 const sectionItems = (page: SectionSpec["page"]): AdminNavItem[] =>
@@ -89,8 +94,6 @@ export const adminContent = {
       icon: "layers",
       collapsible: true,
       items: [
-        { label: "Annual Dinner", icon: "page", soon: true },
-        { label: "Annual Lunch", icon: "page", soon: true },
         { label: "Executive Committee", icon: "page", soon: true },
         { label: "Sports", icon: "page", soon: true },
         { label: "Membership", icon: "page", soon: true },

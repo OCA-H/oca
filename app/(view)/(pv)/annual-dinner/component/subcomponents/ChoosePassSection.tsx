@@ -12,6 +12,8 @@ import { PassAddons } from './PassAddons';
 import { PassSubmitSection } from './PassSubmitSection';
 
 interface ChoosePassSectionProps {
+  /** Edited in the admin panel; the passes and prices themselves come from the event-pass API. */
+  heading: { eyebrow: string; title: string; intro: string };
   apiPasses: ApiEventPass[];
   selectedPass: string | null;
   setSelectedPass: (passId: string) => void;
@@ -35,6 +37,7 @@ interface ChoosePassSectionProps {
 }
 
 export const ChoosePassSection: React.FC<ChoosePassSectionProps> = ({
+  heading,
   apiPasses,
   selectedPass,
   setSelectedPass,
@@ -63,12 +66,9 @@ export const ChoosePassSection: React.FC<ChoosePassSectionProps> = ({
           className="section-head stack dn-passes-head"
           style={{ textAlign: 'center', marginLeft: 'auto', marginRight: 'auto', maxWidth: 'none' }}
         >
-          <span className="eyebrow">Passes</span>
-          <h2>Choose your pass</h2>
-          <p className="dn-lead">
-            Passes are limited &mdash; the numbers show how many are left. Once the Early Bird passes are gone, Regular
-            passes open.
-          </p>
+          {heading.eyebrow && <span className="eyebrow">{heading.eyebrow}</span>}
+          <h2>{heading.title}</h2>
+          {heading.intro && <p className="dn-lead">{heading.intro}</p>}
         </div>
 
         <div className="dn-passes-wrap">
