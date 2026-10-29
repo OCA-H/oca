@@ -14,6 +14,8 @@ export interface FieldSpec {
   max?: number;
   /** Smallest number accepted. */
   min?: number;
+  /** Numbers only: refuse fractions. */
+  integer?: boolean;
   hint?: string;
   placeholder?: string;
   options?: { value: string; label: string }[];
@@ -38,7 +40,7 @@ export interface ListSpec {
 export interface SectionSpec {
   key: SiteSectionKey;
   /** Which group of the admin menu the section is under. */
-  page: "home" | "about" | "events" | "settings";
+  page: "home" | "about" | "events" | "membership" | "settings";
   label: string;
   description: string;
   /** Where the section sits on its page, for "View on site". Settings that are not on a page have none. */
@@ -56,6 +58,7 @@ export const SITE_SECTION_KEYS = {
   aboutCommittee: "about.committee",
   eventsDinner: "events.dinner",
   eventsLunch: "events.lunch",
+  membershipFee: "membership.fee",
   settingsEmails: "settings.emails",
 } as const;
 
@@ -202,6 +205,13 @@ export interface EventLunchContent extends EventHero {
   timeDetail: string;
   venue: string;
   venueDetail: string;
+}
+
+// ---------- Membership ----------
+
+export interface MembershipFeeContent {
+  /** The one-time Life Membership fee in whole rupees: what the form shows and CCAvenue charges. */
+  fee: number;
 }
 
 // ---------- Settings, read by the server only ----------
@@ -472,6 +482,26 @@ export const SECTION_SPECS: SectionSpec[] = [
       ...eventFact("date", "Date", "14 December", "Sunday, 2025"),
       ...eventFact("time", "Time", "12 Noon", "Onwards"),
       ...eventFact("venue", "Venue", "St. Columba’s", "School Grounds, Ashoka Place, New Delhi – 110 001"),
+    ],
+    lists: [],
+  },
+  {
+    key: SITE_SECTION_KEYS.membershipFee,
+    page: "membership",
+    label: "Membership fee",
+    description: "The one-time Life Membership fee: shown on the membership form and charged at checkout.",
+    href: "/membership",
+    fields: [
+      {
+        key: "fee",
+        label: "Life Membership fee (₹)",
+        type: "number",
+        required: true,
+        min: 1,
+        max: 1000000,
+        integer: true,
+        hint: "Whole rupees. New applications are charged this from the moment you save; anyone already at the payment step pays the fee they were shown.",
+      },
     ],
     lists: [],
   },

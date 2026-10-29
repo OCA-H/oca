@@ -1,5 +1,8 @@
 import { ROUTES } from '@/app/(view)/common/helper/routes';
 
+// Wording that names the fee takes it already formatted ("₹2,000"): the amount is set in the
+// admin panel (Membership → Membership fee), so it is never written into this file.
+
 export const MEMBERSHIP_CONTENT = {
   hero: {
     eyebrow: 'Membership',
@@ -12,7 +15,6 @@ export const MEMBERSHIP_CONTENT = {
     description: 'Apply in three short steps. The Secretariat will be in touch to confirm your batch and complete your enrolment, and it lasts a lifetime.',
     fee: {
       label: 'Membership fee',
-      amount: '₹2,000',
       note: 'A one-time payment, asked at the last step.',
     },
     quote: {
@@ -21,15 +23,19 @@ export const MEMBERSHIP_CONTENT = {
     },
   },
   stepMessages: {
-    1: 'A one-time fee of <b>&#8377;2,000</b> is asked at the end.',
-    2: 'Payment of <b>&#8377;2,000</b> comes next.',
-    3: 'Check your details, then pay <b>&#8377;2,000</b> on CCAvenue.',
+    1: (fee: string) => `A one-time fee of <b>${fee}</b> is asked at the end.`,
+    2: (fee: string) => `Payment of <b>${fee}</b> comes next.`,
+    3: (fee: string) => `Check your details, then pay <b>${fee}</b> on CCAvenue.`,
+  },
+  feeText: {
+    step: (fee: string) => `${fee}, one-time`,
+    lifeMember: (fee: string) => `One payment of ${fee}. On the roll for good.`,
   },
   titles: ["Mr.", "Mrs.", "Ms.", "Miss", "Dr.", "Prof.", "Br.", "Fr."],
   batches: ["2026", "2025", "2024", "2023", "2022", "2021", "2020", "2019", "2018", "2017", "2016", "2015", "2014", "2013", "2012", "2011", "2010", "2009", "2008", "2007", "2006", "2005", "2004", "2003", "2002", "2001", "2000", "1999", "1998", "1997", "1996", "1995", "1994", "1993", "1992", "1991", "1990", "1989", "1988", "1987", "1986", "1985", "1984", "1983", "1982", "1981", "1980", "1979", "1978", "1977", "1976", "1975", "1974", "1973", "1972", "1971", "1970", "1969", "1968", "1967", "1966", "1965", "1964", "1963", "1962", "1961", "1960", "1959", "1958", "1957", "1956", "1955", "1954", "1953", "1952", "1951", "1950", "1949", "1948", "1947", "1946", "1945", "1944", "1943", "1942", "1941"],
   countries: ["Afghanistan", "Albania", "Algeria", "Andorra", "Angola", "Antigua and Barbuda", "Argentina", "Armenia", "Australia", "Austria", "Azerbaijan", "Bahamas", "Bahrain", "Bangladesh", "Barbados", "Belarus", "Belgium", "Belize", "Benin", "Bhutan", "Bolivia", "Bosnia and Herzegovina", "Botswana", "Brazil", "Brunei", "Bulgaria", "Burkina Faso", "Burundi", "Cabo Verde", "Cambodia", "Cameroon", "Canada", "Central African Republic (CAR)", "Chad", "Chile", "China", "Colombia", "Comoros", "Democratic Republic of the Congo", "Republic of the Congo", "Costa Rica", "Cote d'Ivoire", "Croatia", "Cuba", "Cyprus", "Czech Republic", "Denmark", "Djibouti", "Dominica", "Dominican Republic", "Ecuador", "Egypt", "El Salvador", "Equatorial Guinea", "Eritrea", "Estonia", "Ethiopia", "Fiji", "Finland", "France", "Gabon", "Gambia", "Georgia", "Germany", "Ghana", "Greece", "Grenada", "Guatemala", "Guinea", "Guinea-Bissau", "Guyana", "Haiti", "Honduras", "Hungary", "Iceland", "India", "Indonesia", "Iran", "Iraq", "Ireland", "Israel", "Italy", "Jamaica", "Japan", "Jordan", "Kazakhstan", "Kenya", "Kiribati", "Kosovo", "Kuwait", "Kyrgyzstan", "Laos", "Latvia", "Lebanon", "Lesotho", "Liberia", "Libya", "Liechtenstein", "Lithuania", "Luxembourg", "Macedonia", "Madagascar", "Malawi", "Malaysia", "Maldives", "Mali", "Malta", "Marshall Islands", "Mauritania", "Mauritius", "Mexico", "Micronesia", "Moldova", "Monaco", "Mongolia", "Montenegro", "Morocco", "Mozambique", "Myanmar (Burma)", "Namibia", "Nauru", "Nepal", "Netherlands", "New Zealand", "Nicaragua", "Niger", "Nigeria", "North Korea", "Norway", "Oman", "Pakistan", "Palau", "Palestine", "Panama", "Papua New Guinea", "Paraguay", "Peru", "Philippines", "Poland", "Portugal", "Puerto Rico", "Qatar", "Romania", "Russia", "Rwanda", "Saint Kitts and Nevis", "Saint Lucia", "Saint Vincent and the Grenadines", "Samoa", "San Marino", "Sao Tome and Principe", "Saudi Arabia", "Senegal", "Serbia", "Seychelles", "Sierra Leone", "Singapore", "Slovakia", "Slovenia", "Solomon Islands", "Somalia", "South Africa", "South Korea", "South Sudan", "Spain", "Sri Lanka", "Sudan", "Suriname", "Swaziland", "Sweden", "Switzerland", "Syria", "Taiwan", "Tajikistan", "Tanzania", "Thailand", "Timor-Leste", "Togo", "Tonga", "Trinidad and Tobago", "Tunisia", "Turkey", "Turkmenistan", "Tuvalu", "Uganda", "Ukraine", "United Arab Emirates (UAE)", "United Kingdom (UK)", "United States of America (USA)", "Uruguay", "Uzbekistan", "Vanuatu", "Vatican City (Holy See)", "Venezuela", "Vietnam", "Yemen", "Zambia", "Zimbabwe"],
   checkout: {
-    button: 'Pay ₹2,000',
+    button: (fee: string) => `Pay ${fee}`,
     redirecting: 'Taking you to CCAvenue…',
     note: 'You will pay on CCAvenue’s secure page by UPI, card, net banking or wallet, and come back here once it is done.',
   },
@@ -83,7 +89,7 @@ export const MEMBERSHIP_CONTENT = {
         receiptStatus: 'Cancelled',
         nextTitle: 'Ready when you are',
         nextSteps: [
-          { title: 'Apply again', desc: 'Fill in the short form again and pay ₹2,000 to join for life.' },
+          { title: 'Apply again', desc: 'Fill in the short form again and pay the one-time fee to join for life.' },
           { title: 'Have a question first?', desc: 'Write to the Secretariat about eligibility, batches or payment options before you pay.' },
         ],
         primary: { label: 'Apply again', href: ROUTES.MEMBERSHIP_JOIN },
@@ -111,7 +117,7 @@ export const MEMBERSHIP_CONTENT = {
         receiptStatus: 'Unconfirmed',
         nextTitle: 'What you can do',
         nextSteps: [
-          { title: 'Check your bank', desc: 'See whether ₹2,000 has left your account for this order.' },
+          { title: 'Check your bank', desc: 'See whether the amount below has left your account for this order.' },
           { title: 'Contact the Secretariat', desc: 'Send us the order reference below and we will confirm your payment and membership.' },
         ],
         primary: { label: 'Back to membership', href: ROUTES.MEMBERSHIP },

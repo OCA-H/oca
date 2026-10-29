@@ -5,8 +5,8 @@ import { HttpError } from "@/app/api/core/httpError";
 import { storage, type StoredFile } from "@/app/api/core/storage";
 import type { UploadedFile } from "@/app/api/core/fileUpload";
 import { SiteContentRepository } from "../repository/siteContentRepository";
-import { SECTION_SPECS, SITE_SECTION_KEYS, sectionSpec, type EmailSettingsContent, type EventDinnerContent, type EventLunchContent, type HomeContent, type SectionSpec, type SiteSectionKey } from "../schema/sectionSpecs";
-import { SECTION_DEFAULTS } from "./siteDefaults";
+import { SECTION_SPECS, SITE_SECTION_KEYS, sectionSpec, type EmailSettingsContent, type EventDinnerContent, type MembershipFeeContent, type EventLunchContent, type HomeContent, type SectionSpec, type SiteSectionKey } from "../schema/sectionSpecs";
+import { MEMBERSHIP_FEE_DEFAULTS, SECTION_DEFAULTS } from "./siteDefaults";
 import { splitEmails, validateSection } from "./sectionValidator";
 
 /** Every cached read of site content carries this tag, so a save refreshes the pages showing it. */
@@ -78,6 +78,12 @@ async function getSectionContent(key: SiteSectionKey): Promise<Record<string, un
 
 export const getDinnerContent = async () => (await getSectionContent(SITE_SECTION_KEYS.eventsDinner)) as unknown as EventDinnerContent;
 export const getLunchContent = async () => (await getSectionContent(SITE_SECTION_KEYS.eventsLunch)) as unknown as EventLunchContent;
+
+/** The Life Membership fee in rupees, as set in the admin panel (Membership → Membership fee). */
+export async function getMembershipFee(): Promise<number> {
+  const { fee } = (await getSectionContent(SITE_SECTION_KEYS.membershipFee)) as unknown as MembershipFeeContent;
+  return Number.isInteger(fee) && fee > 0 ? fee : MEMBERSHIP_FEE_DEFAULTS.fee;
+}
 
 /** The addresses to copy on a completed registration's email, as set in the admin panel. */
 export async function getRegistrationCcEmails(): Promise<string[]> {

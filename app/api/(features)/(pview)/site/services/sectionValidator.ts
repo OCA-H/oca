@@ -35,6 +35,7 @@ function checkField(spec: FieldSpec, raw: unknown, errors: FieldErrors, name: st
       if (spec.required) errors[name] = `${spec.label} is required.`;
       return spec.min ?? 0;
     }
+    if (spec.integer && !Number.isInteger(value)) errors[name] = `${spec.label} must be a whole number.`;
     if (spec.min !== undefined && value < spec.min) errors[name] = `${spec.label} must be at least ${spec.min}.`;
     if (spec.max !== undefined && value > spec.max) errors[name] = `${spec.label} must be at most ${spec.max}.`;
     return value;

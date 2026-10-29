@@ -7,11 +7,18 @@ import { useAuth } from '@/app/(view)/common/helper/useAuth';
 import { CustomDropdown, DatePicker } from '@/app/(view)/common';
 import { DATE_OF_BIRTH_PICKER } from '@/app/(view)/common/helper/common.helper';
 import { MEMBERSHIP_CONTENT } from '../content/membership.content';
+import { formatRupees } from '../helper/membership.helper';
 import { useMembershipHandler } from '../handler/useMembershipHandler';
 
-export const MembershipView: React.FC = () => {
+interface MembershipViewProps {
+  /** The Life Membership fee in rupees, as set in the admin panel. */
+  fee: number;
+}
+
+export const MembershipView: React.FC<MembershipViewProps> = ({ fee }) => {
   const { isAuthenticated } = useAuth();
   const content = MEMBERSHIP_CONTENT;
+  const feeLabel = formatRupees(fee);
   const {
     step,
     formData,
@@ -64,7 +71,7 @@ export const MembershipView: React.FC = () => {
             <p>{content.aside.description}</p>
             <div className="ms-fee">
               <span className="ms-fee-k">{content.aside.fee.label}</span>
-              <strong>{content.aside.fee.amount}</strong>
+              <strong>{feeLabel}</strong>
               <span className="ms-fee-n">{content.aside.fee.note}</span>
             </div>
             <div className="aside-quote">
@@ -115,7 +122,7 @@ export const MembershipView: React.FC = () => {
                   <span className="ms-dot">3</span>
                   <span className="ms-lab">
                     <b>Review &amp; pay</b>
-                    <small>&#8377;2,000, one-time</small>
+                    <small>{content.feeText.step(feeLabel)}</small>
                   </span>
                 </li>
               </ol>
@@ -124,7 +131,7 @@ export const MembershipView: React.FC = () => {
                 <span
                   id="ms-msg"
                   dangerouslySetInnerHTML={{
-                    __html: content.stepMessages[step as 1 | 2 | 3],
+                    __html: content.stepMessages[step as 1 | 2 | 3](feeLabel),
                   }}
                 />
               </p>
@@ -151,7 +158,7 @@ export const MembershipView: React.FC = () => {
                   <span>
                     <b>Life Member</b>
                     <small className="cf-note">
-                      One payment of &#8377;2,000. On the roll for good.
+                      {content.feeText.lifeMember(feeLabel)}
                     </small>
                   </span>
                   <em className="mb-badge">Selected</em>
@@ -522,11 +529,11 @@ export const MembershipView: React.FC = () => {
                   <span>
                     Life Membership <small>one-time</small>
                   </span>
-                  <b>&#8377;2,000</b>
+                  <b>{feeLabel}</b>
                 </div>
                 <div className="ms-bill-total">
                   <span>Total to pay</span>
-                  <strong>&#8377;2,000</strong>
+                  <strong>{feeLabel}</strong>
                 </div>
               </div>
               <ul className="cf-terms">
@@ -553,7 +560,7 @@ export const MembershipView: React.FC = () => {
                   disabled={isSubmitting}
                   aria-busy={isSubmitting}
                 >
-                  {isSubmitting ? content.checkout.redirecting : content.checkout.button}
+                  {isSubmitting ? content.checkout.redirecting : content.checkout.button(feeLabel)}
                 </button>
               </div>
             </div>

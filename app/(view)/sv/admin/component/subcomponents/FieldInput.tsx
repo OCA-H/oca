@@ -40,6 +40,7 @@ export const FieldInput: React.FC<FieldInputProps> = ({ field, name, value, onCh
           inputMode="numeric"
           min={field.min}
           max={field.max}
+          step={field.integer ? 1 : undefined}
           value={text}
           onChange={(e) => onChange(e.target.value === '' ? '' : Number(e.target.value))}
         />

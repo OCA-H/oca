@@ -24,6 +24,7 @@ const PATHS: Record<AdminIconName, React.ReactNode> = {
       <path d="m3.5 6.5 8.5 6.5 8.5-6.5" />
     </>
   ),
+  rupee: <path d="M7 5h10M7 9h10M7 5c5 0 7 1.5 7 4s-2 4-7 4l7 6" />,
   star: <path d="m12 3 2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1-4.4-4.3 6.1-.9L12 3Z" />,
   camera: (
     <>

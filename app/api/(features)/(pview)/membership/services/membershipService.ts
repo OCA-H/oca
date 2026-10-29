@@ -8,13 +8,13 @@ import { dateOfBirthError } from "@/app/api/core/dateOfBirth";
 import { Mailer } from "@/app/api/core/mailer";
 import { UserRepository } from "@/app/api/(features)/(pview)/auth/repository/userRepository";
 import type { User } from "@/app/api/(features)/(pview)/auth/schema/userSchema";
-import { getRegistrationCcEmails } from "@/app/api/(features)/(pview)/site/services/siteContentService";
+import { getMembershipFee, getRegistrationCcEmails } from "@/app/api/(features)/(pview)/site/services/siteContentService";
 import { MembershipRepository } from "../repository/membershipRepository";
 import type { MembershipApplication, MembershipPaymentStatus } from "../schema/membershipSchema";
 import { membershipWelcomeEmail } from "./membershipWelcomeEmail";
 
-/** Life membership fee in rupees. Always charged from here, never from the client. */
-export const MEMBERSHIP_FEE = 2000;
+// The Life Membership fee is set in the admin panel (Membership → Membership fee) and read with
+// getMembershipFee(). It is always charged from there, never from the client.
 export const MEMBERSHIP_TYPE = "Life Member";
 
 /**
@@ -119,6 +119,7 @@ export class MembershipService {
     }
 
     const { hash, salt } = hashPassword(password);
+    const fee = await getMembershipFee();
     const application = await this.repository.create({
       orderId: newOrderId(),
       membershipType: MEMBERSHIP_TYPE,
@@ -141,7 +142,7 @@ export class MembershipService {
       state,
       zip,
       country,
-      amount: MEMBERSHIP_FEE,
+      amount: fee,
       currency: "INR",
     });
 
