@@ -23,7 +23,7 @@ export const FieldInput: React.FC<FieldInputProps> = ({ field, name, value, onCh
   const hintId = `${id}-hint`;
   const text = value === undefined ? '' : String(value);
   const counts = field.max && (field.type === 'text' || field.type === 'textarea');
-  const wide = forceWide || field.type === 'textarea' || field.type === 'image';
+  const wide = forceWide || field.type === 'textarea' || field.type === 'image' || field.type === 'emails';
   const described = error || field.hint ? hintId : undefined;
   const common = { id, name, 'aria-describedby': described, 'aria-invalid': Boolean(error) || undefined };
 
@@ -58,8 +58,9 @@ export const FieldInput: React.FC<FieldInputProps> = ({ field, name, value, onCh
         <input
           {...common}
           type="text"
-          inputMode={field.type === 'link' ? 'url' : undefined}
-          spellCheck={field.type === 'link' ? false : undefined}
+          inputMode={field.type === 'link' ? 'url' : field.type === 'emails' ? 'email' : undefined}
+          spellCheck={field.type === 'link' || field.type === 'emails' ? false : undefined}
+          autoCapitalize={field.type === 'emails' ? 'none' : undefined}
           value={text}
           maxLength={field.type === 'link' ? 500 : field.max}
           onChange={(e) => onChange(e.target.value)}

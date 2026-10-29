@@ -1,5 +1,6 @@
 import {
   SITE_SECTION_KEYS,
+  type EmailSettingsContent,
   type EventDinnerContent,
   type EventLunchContent,
   type HomeContent,
@@ -186,6 +187,10 @@ export const LUNCH_DEFAULTS: EventLunchContent = {
   venueDetail: "School Grounds, Ashoka Place, New Delhi – 110 001",
 };
 
+export const EMAIL_SETTINGS_DEFAULTS: EmailSettingsContent = {
+  registrationCc: "ocacentre@gmail.com",
+};
+
 /** Each section key's defaults, as stored data. */
 export const SECTION_DEFAULTS: Record<SiteSectionKey, object> = {
   [SITE_SECTION_KEYS.homeEvents]: HOME_DEFAULTS.events,
@@ -196,4 +201,5 @@ export const SECTION_DEFAULTS: Record<SiteSectionKey, object> = {
   [SITE_SECTION_KEYS.aboutCommittee]: HOME_DEFAULTS.committee,
   [SITE_SECTION_KEYS.eventsDinner]: DINNER_DEFAULTS,
   [SITE_SECTION_KEYS.eventsLunch]: LUNCH_DEFAULTS,
+  [SITE_SECTION_KEYS.settingsEmails]: EMAIL_SETTINGS_DEFAULTS,
 };

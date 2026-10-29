@@ -3,7 +3,7 @@
 // add its spec here, its defaults in services/siteDefaults.ts, and read it where the page renders.
 // No server-only imports: the admin panel (a client component) imports this file too.
 
-export type FieldType = "text" | "textarea" | "image" | "link" | "select" | "number";
+export type FieldType = "text" | "textarea" | "image" | "link" | "select" | "number" | "emails";
 
 export interface FieldSpec {
   key: string;
@@ -38,11 +38,11 @@ export interface ListSpec {
 export interface SectionSpec {
   key: SiteSectionKey;
   /** Which group of the admin menu the section is under. */
-  page: "home" | "about" | "events";
+  page: "home" | "about" | "events" | "settings";
   label: string;
   description: string;
-  /** Where the section sits on its page, for "View on site". */
-  href: string;
+  /** Where the section sits on its page, for "View on site". Settings that are not on a page have none. */
+  href?: string;
   fields: FieldSpec[];
   lists: ListSpec[];
 }
@@ -56,6 +56,7 @@ export const SITE_SECTION_KEYS = {
   aboutCommittee: "about.committee",
   eventsDinner: "events.dinner",
   eventsLunch: "events.lunch",
+  settingsEmails: "settings.emails",
 } as const;
 
 export type SiteSectionKey = (typeof SITE_SECTION_KEYS)[keyof typeof SITE_SECTION_KEYS];
@@ -201,6 +202,13 @@ export interface EventLunchContent extends EventHero {
   timeDetail: string;
   venue: string;
   venueDetail: string;
+}
+
+// ---------- Settings, read by the server only ----------
+
+export interface EmailSettingsContent {
+  /** Comma-separated addresses copied on every completed membership registration email. */
+  registrationCc: string;
 }
 
 /** Everything the home page reads from the database. */
@@ -464,6 +472,23 @@ export const SECTION_SPECS: SectionSpec[] = [
       ...eventFact("date", "Date", "14 December", "Sunday, 2025"),
       ...eventFact("time", "Time", "12 Noon", "Onwards"),
       ...eventFact("venue", "Venue", "St. Columba’s", "School Grounds, Ashoka Place, New Delhi – 110 001"),
+    ],
+    lists: [],
+  },
+  {
+    key: SITE_SECTION_KEYS.settingsEmails,
+    page: "settings",
+    label: "Email settings",
+    description: "Who else receives a copy of the emails the website sends to members.",
+    fields: [
+      {
+        key: "registrationCc",
+        label: "CC on registration emails",
+        type: "emails",
+        max: 1000,
+        placeholder: "ocacentre@gmail.com, secretary@example.com",
+        hint: "Copied on the welcome email each new member gets once their membership payment goes through. Separate addresses with commas; leave empty to copy no one.",
+      },
     ],
     lists: [],
   },

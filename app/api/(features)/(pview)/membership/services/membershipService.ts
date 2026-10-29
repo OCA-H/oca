@@ -5,9 +5,13 @@ import { hashPassword } from "@/app/api/core/auth";
 import { isUniqueViolation } from "@/app/api/core/baseRepository";
 import { CcAvenue, type CcAvenueCheckout } from "@/app/api/core/ccavenue";
 import { dateOfBirthError } from "@/app/api/core/dateOfBirth";
+import { Mailer } from "@/app/api/core/mailer";
 import { UserRepository } from "@/app/api/(features)/(pview)/auth/repository/userRepository";
+import type { User } from "@/app/api/(features)/(pview)/auth/schema/userSchema";
+import { getRegistrationCcEmails } from "@/app/api/(features)/(pview)/site/services/siteContentService";
 import { MembershipRepository } from "../repository/membershipRepository";
 import type { MembershipApplication, MembershipPaymentStatus } from "../schema/membershipSchema";
+import { membershipWelcomeEmail } from "./membershipWelcomeEmail";
 
 /** Life membership fee in rupees. Always charged from here, never from the client. */
 export const MEMBERSHIP_FEE = 2000;
@@ -163,13 +167,20 @@ export class MembershipService {
 
   /**
    * Applies the result CCAvenue posts back. Safe to call more than once for the same order:
-   * a paid application is never changed again.
+   * a paid application is never changed again, and its welcome email goes out once.
    */
-  async handleGatewayResponse(encResp: string): Promise<MembershipApplication> {
+  async handleGatewayResponse(encResp: string, baseUrl: string): Promise<MembershipApplication> {
     const response = CcAvenue.parseResponse(encResp);
     const application = response.order_id ? await this.repository.findByOrderId(response.order_id) : null;
     if (!application) throw HttpError.notFound("We could not find this membership order.");
-    if (application.status === "paid") return application;
+    if (application.status === "paid") {
+      // Retries the welcome email if it failed the first time.
+      if (application.userId && !application.welcomeEmailSentAt) {
+        const member = await this.users.findById(application.userId);
+        if (member) await this.sendWelcome(application, member, baseUrl);
+      }
+      return application;
+    }
 
     let status = toPaymentStatus(response.order_status);
     let message = response.failure_message || response.status_message || null;
@@ -192,8 +203,10 @@ export class MembershipService {
     if (!updated) throw HttpError.notFound("We could not find this membership order.");
 
     if (status !== "paid") return updated;
-    const userId = await this.createMember(updated);
-    return (await this.repository.update(updated.id, { userId })) ?? updated;
+    const member = await this.createMember(updated);
+    const withMember = (await this.repository.update(updated.id, { userId: member.id })) ?? updated;
+    await this.sendWelcome(withMember, member, baseUrl);
+    return withMember;
   }
 
   async getOrderSummary(orderId: string): Promise<MembershipOrderSummary> {
@@ -220,8 +233,25 @@ export class MembershipService {
     };
   }
 
+  /**
+   * Emails the new member their welcome and payment acknowledgement, copying the addresses set
+   * under Email settings in the admin panel. A failure is logged, not thrown: the payment and
+   * account are already recorded, and the next response from CCAvenue for the order retries it.
+   */
+  private async sendWelcome(application: MembershipApplication, member: User, baseUrl: string): Promise<void> {
+    if (application.welcomeEmailSentAt) return;
+    if (!(await this.repository.claimWelcomeEmail(application.id))) return;
+    try {
+      const cc = (await getRegistrationCcEmails()).filter((email) => email !== application.email);
+      await Mailer.send(membershipWelcomeEmail({ application, memberId: member.memberId, cc, baseUrl }));
+    } catch (error) {
+      console.error(`Membership ${application.orderId}: welcome email to ${application.email} failed:`, error);
+      await this.repository.releaseWelcomeEmail(application.id).catch(() => {});
+    }
+  }
+
   /** Creates the member's account from a paid application, or reuses one already made for the email. */
-  private async createMember(application: MembershipApplication): Promise<number> {
+  private async createMember(application: MembershipApplication): Promise<User> {
     try {
       const user = await this.users.create({
         memberId: `OCA-${application.batchYear}-${String(application.id).padStart(4, "0")}`,
@@ -252,12 +282,12 @@ export class MembershipService {
           },
         },
       });
-      return user.id;
+      return user;
     } catch (error) {
       if (!isUniqueViolation(error, "users_email_unique")) throw error;
       const existing = await this.users.findByEmail(application.email);
       if (!existing) throw error;
-      return existing.id;
+      return existing;
     }
   }
 }

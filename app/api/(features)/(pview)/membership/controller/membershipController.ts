@@ -33,7 +33,7 @@ export class MembershipController extends BaseController {
     let form: FormData | null = null;
     try {
       form = await this.readForm(request);
-      const application = await this.service.handleGatewayResponse(String(form.get("encResp") ?? ""));
+      const application = await this.service.handleGatewayResponse(String(form.get("encResp") ?? ""), this.baseUrl(request));
       statusUrl.searchParams.set("order", application.orderId);
     } catch (error) {
       console.error("CCAvenue membership response failed:", error);

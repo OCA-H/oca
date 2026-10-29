@@ -1,0 +1,72 @@
+// Renders the icons the website's emails use to PNG files in public/images/email/. Email clients
+// (Gmail and Outlook above all) drop inline SVG, so emails link these PNGs by absolute address.
+// They are drawn in the members-area line style, on its 24px grid, in the site's theme colours.
+// Rendered at 3x so they stay sharp on high-density screens.
+//
+//   npm run email:icons
+//
+// Rerun after adding an icon or tone here; the PNGs are committed, so the live site serves them.
+// An email names an icon as "<name>-<tone>.png", e.g. "calendar-green.png".
+
+import { mkdir, writeFile } from "node:fs/promises";
+import path from "node:path";
+import sharp from "sharp";
+
+const OUT_DIR = path.join(process.cwd(), "public/images/email");
+const SIZE = 72;
+
+// The theme's colours (template/theme/colors.ts) that icons are drawn in.
+const TONES = {
+  green: "#14803C",
+  white: "#FFFFFF",
+  gold: "#C9A227",
+  soft: "#5A6B60",
+};
+
+// Line icons on a 24px grid, the same drawings as the members area where it has them.
+const ICONS = {
+  check: '<path d="m5.5 12.5 4.2 4.2L18.5 8" stroke-width="2.4"/>',
+  idcard: '<rect x="2.5" y="5" width="19" height="14" rx="2.5"/><circle cx="8.5" cy="11" r="2.2"/><path d="M5.5 16c.4-1.6 1.6-2.4 3-2.4s2.6.8 3 2.4M14 10h4.5M14 13.5h3"/>',
+  star: '<path d="m12 3 2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1-4.4-4.3 6.1-.9L12 3Z"/>',
+  cap: '<path d="m2 9.5 10-5 10 5-10 5-10-5Z"/><path d="M6 11.5v4.5c0 1.5 2.7 3 6 3s6-1.5 6-3v-4.5M22 9.5V15"/>',
+  receipt: '<path d="M14 3H6.5A1.5 1.5 0 0 0 5 4.5v15A1.5 1.5 0 0 0 6.5 21h11a1.5 1.5 0 0 0 1.5-1.5V8l-5-5ZM14 3v5h5M8.5 13h7M8.5 16.5h5"/>',
+  rupee: '<path d="M7 5h10M7 9h10M7 5c5 0 7 1.5 7 4s-2 4-7 4l7 6"/>',
+  calendar: '<rect x="3" y="4.5" width="18" height="16.5" rx="2.5"/><path d="M8 2.5v4M16 2.5v4M3 10h18"/>',
+  card: '<rect x="2.5" y="5" width="19" height="14" rx="2.5"/><path d="M2.5 10h19M6.5 15h4"/>',
+  shield: '<path d="M12 3 20 6v6c0 4.5-3.4 8-8 9-4.6-1-8-4.5-8-9V6l8-3Z"/><path d="m8.5 12 2.5 2.5 4.5-5"/>',
+  login: '<path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4M10 17l5-5-5-5M15 12H3"/>',
+  user: '<circle cx="12" cy="8" r="3.6"/><path d="M5 20c0-3.6 3.1-5.6 7-5.6s7 2 7 5.6"/>',
+  mail: '<rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3.5 6.5 8.5 6.5 8.5-6.5"/>',
+  phone: '<path d="M5 3.5h3.5l1.8 4.5-2.3 1.4a11 11 0 0 0 6.6 6.6l1.4-2.3 4.5 1.8V19a1.5 1.5 0 0 1-1.6 1.5A16.5 16.5 0 0 1 3.5 5.1 1.5 1.5 0 0 1 5 3.5Z"/>',
+  pin: '<path d="M12 21s-7-6.2-7-11.5a7 7 0 0 1 14 0C19 14.8 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.5"/>',
+};
+
+// Which tones each icon is needed in.
+const WANTED = {
+  check: ["white"],
+  idcard: ["green", "gold"],
+  star: ["green"],
+  cap: ["green"],
+  receipt: ["green"],
+  rupee: ["green"],
+  calendar: ["green"],
+  card: ["green"],
+  shield: ["green"],
+  login: ["green"],
+  user: ["green"],
+  mail: ["soft"],
+  phone: ["soft"],
+  pin: ["soft"],
+};
+
+const svg = (body, color) =>
+  `<svg xmlns="http://www.w3.org/2000/svg" width="${SIZE}" height="${SIZE}" viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${body}</svg>`;
+
+await mkdir(OUT_DIR, { recursive: true });
+for (const [name, tones] of Object.entries(WANTED)) {
+  for (const tone of tones) {
+    const png = await sharp(Buffer.from(svg(ICONS[name], TONES[tone]))).png({ compressionLevel: 9 }).toBuffer();
+    await writeFile(path.join(OUT_DIR, `${name}-${tone}.png`), png);
+  }
+}
+console.log(`Email icons written to ${path.relative(process.cwd(), OUT_DIR)}/`);

@@ -18,6 +18,12 @@ const PATHS: Record<AdminIconName, React.ReactNode> = {
     </>
   ),
   megaphone: <path d="M3 10.5v3a1.5 1.5 0 0 0 1.5 1.5H7l6 4.5v-15L7 9H4.5A1.5 1.5 0 0 0 3 10.5ZM17 8.5a5 5 0 0 1 0 7M7 15l1.5 5.5" />,
+  mail: (
+    <>
+      <rect x="3" y="5" width="18" height="14" rx="2" />
+      <path d="m3.5 6.5 8.5 6.5 8.5-6.5" />
+    </>
+  ),
   star: <path d="m12 3 2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1-4.4-4.3 6.1-.9L12 3Z" />,
   camera: (
     <>

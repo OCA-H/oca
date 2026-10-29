@@ -5,9 +5,9 @@ import { HttpError } from "@/app/api/core/httpError";
 import { storage, type StoredFile } from "@/app/api/core/storage";
 import type { UploadedFile } from "@/app/api/core/fileUpload";
 import { SiteContentRepository } from "../repository/siteContentRepository";
-import { SECTION_SPECS, SITE_SECTION_KEYS, sectionSpec, type EventDinnerContent, type EventLunchContent, type HomeContent, type SectionSpec, type SiteSectionKey } from "../schema/sectionSpecs";
+import { SECTION_SPECS, SITE_SECTION_KEYS, sectionSpec, type EmailSettingsContent, type EventDinnerContent, type EventLunchContent, type HomeContent, type SectionSpec, type SiteSectionKey } from "../schema/sectionSpecs";
 import { SECTION_DEFAULTS } from "./siteDefaults";
-import { validateSection } from "./sectionValidator";
+import { splitEmails, validateSection } from "./sectionValidator";
 
 /** Every cached read of site content carries this tag, so a save refreshes the pages showing it. */
 export const SITE_CONTENT_TAG = "site-content";
@@ -78,6 +78,12 @@ async function getSectionContent(key: SiteSectionKey): Promise<Record<string, un
 
 export const getDinnerContent = async () => (await getSectionContent(SITE_SECTION_KEYS.eventsDinner)) as unknown as EventDinnerContent;
 export const getLunchContent = async () => (await getSectionContent(SITE_SECTION_KEYS.eventsLunch)) as unknown as EventLunchContent;
+
+/** The addresses to copy on a completed registration's email, as set in the admin panel. */
+export async function getRegistrationCcEmails(): Promise<string[]> {
+  const settings = (await getSectionContent(SITE_SECTION_KEYS.settingsEmails)) as unknown as EmailSettingsContent;
+  return splitEmails(settings.registrationCc ?? "");
+}
 
 export class SiteContentService {
   constructor(private readonly repository: SiteContentRepository) {}

@@ -5,6 +5,12 @@ import type { FieldSpec, SectionData, SectionItem, SectionSpec, SectionValue } f
 // names its inputs: "title" for a section field, "items.2.title" for a field of the third event.
 
 const MAX_URL_LENGTH = 500;
+const EMAIL_PATTERN = /^[^\s@,]+@[^\s@,]+\.[^\s@,]+$/;
+
+/** "a@x.com,  B@y.com, a@x.com" → ["a@x.com", "b@y.com"]: trimmed, lowercased, without repeats. */
+export const splitEmails = (value: string): string[] => [
+  ...new Set(value.split(/[,;\s]+/).map((email) => email.trim().toLowerCase()).filter(Boolean)),
+];
 
 /**
  * Addresses a link or image may use: a path on this site ("/sports", "#events"), or an absolute
@@ -43,6 +49,15 @@ function checkField(spec: FieldSpec, raw: unknown, errors: FieldErrors, name: st
   if (spec.type === "select") {
     if (!spec.options?.some((option) => option.value === value)) errors[name] = `Choose a ${spec.label.toLowerCase()} from the list.`;
     return value;
+  }
+
+  if (spec.type === "emails") {
+    const emails = splitEmails(value);
+    const bad = emails.filter((email) => !EMAIL_PATTERN.test(email));
+    if (bad.length > 0) errors[name] = `${bad.length === 1 ? "This is not a valid email address" : "These are not valid email addresses"}: ${bad.join(", ")}.`;
+    const joined = emails.join(", ");
+    if (spec.max && joined.length > spec.max) errors[name] = `Please keep this under ${spec.max} characters.`;
+    return joined;
   }
 
   if (spec.type === "link" || spec.type === "image") {

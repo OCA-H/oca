@@ -9,6 +9,8 @@ import { HttpError } from "./httpError";
 
 export interface MailMessage {
   to: string;
+  /** Copied recipients, visible to everyone on the email. */
+  cc?: string[];
   subject: string;
   text: string;
   html: string;
@@ -90,7 +92,7 @@ export class Mailer {
       if (!this.printsToTerminal) {
         throw new Error(`Email not sent to ${message.to}: ${REQUIRED_SETTINGS.join(", ")} must be set.`);
       }
-      console.info(`\n[mailer] SMTP not configured; email not sent.\nTo: ${message.to}\nSubject: ${message.subject}\n\n${message.text}\n`);
+      console.info(`\n[mailer] SMTP not configured; email not sent.\nTo: ${message.to}${message.cc?.length ? `\nCc: ${message.cc.join(", ")}` : ""}\nSubject: ${message.subject}\n\n${message.text}\n`);
       return;
     }
 

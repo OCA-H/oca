@@ -40,6 +40,7 @@ export const membershipApplications = pgTable(
     gatewayResponse: jsonb("gateway_response").$type<Record<string, string>>(),
     userId: integer("user_id"),
     paidAt: timestamp("paid_at", { withTimezone: true }),
+    welcomeEmailSentAt: timestamp("welcome_email_sent_at", { withTimezone: true }),
     createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
     updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
   },

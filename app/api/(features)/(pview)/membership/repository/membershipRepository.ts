@@ -1,5 +1,5 @@
 import "server-only";
-import { and, desc, eq } from "drizzle-orm";
+import { and, desc, eq, isNull } from "drizzle-orm";
 import { BaseRepository } from "@/app/api/core/baseRepository";
 import {
   membershipApplications,
@@ -47,5 +47,27 @@ export class MembershipRepository extends BaseRepository {
       .returning();
 
     return results[0] ?? null;
+  }
+
+  /**
+   * Marks the welcome email as sent, only if it was not already. Returns false when another
+   * request got there first, so CCAvenue posting the same result twice sends one email.
+   */
+  async claimWelcomeEmail(id: number): Promise<boolean> {
+    const results = await this.db
+      .update(membershipApplications)
+      .set({ welcomeEmailSentAt: new Date() })
+      .where(and(eq(membershipApplications.id, id), isNull(membershipApplications.welcomeEmailSentAt)))
+      .returning({ id: membershipApplications.id });
+
+    return results.length > 0;
+  }
+
+  /** Undoes claimWelcomeEmail when the email could not be sent, so a later response can retry it. */
+  async releaseWelcomeEmail(id: number): Promise<void> {
+    await this.db
+      .update(membershipApplications)
+      .set({ welcomeEmailSentAt: null })
+      .where(eq(membershipApplications.id, id));
   }
 }

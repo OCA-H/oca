@@ -36,7 +36,8 @@ export type AdminIconName =
   | "layers"
   | "moon"
   | "sun"
-  | "ticket";
+  | "ticket"
+  | "mail";
 
 export const SECTION_ICONS: Record<SiteSectionKey, AdminIconName> = {
   "home.events": "calendar",
@@ -47,6 +48,7 @@ export const SECTION_ICONS: Record<SiteSectionKey, AdminIconName> = {
   "about.committee": "people",
   "events.dinner": "moon",
   "events.lunch": "sun",
+  "settings.emails": "mail",
 };
 
 /** The record panels, in menu order, under their menu group. Each has its own address, e.g. /sv/admin/passes. */
@@ -99,6 +101,7 @@ const PAGE_GROUPS: Record<SectionSpec["page"], { group: string; icon: AdminIconN
   home: { group: "Home page", icon: "home" },
   about: { group: "About", icon: "info" },
   events: { group: "Events", icon: "calendar" },
+  settings: { group: "Settings", icon: "mail" },
 };
 
 const sectionItems = (page: SectionSpec["page"]): AdminNavItem[] =>

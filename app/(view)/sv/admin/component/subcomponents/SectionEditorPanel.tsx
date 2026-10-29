@@ -39,10 +39,12 @@ export const SectionEditorPanel: React.FC<SectionEditorPanelProps> = ({ spec, is
           </h2>
           <p>{spec.description}</p>
         </div>
-        <a className="mp-photo-btn ad-view" href={spec.href} target="_blank" rel="noopener noreferrer">
-          {text.viewOnSite}
-          <AdminIcon name="ext" />
-        </a>
+        {spec.href && (
+          <a className="mp-photo-btn ad-view" href={spec.href} target="_blank" rel="noopener noreferrer">
+            {text.viewOnSite}
+            <AdminIcon name="ext" />
+          </a>
+        )}
       </div>
 
       {editor.loadError && (
