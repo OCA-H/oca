@@ -167,6 +167,14 @@ export const profileContent = {
     notValidNote: "This membership is not active right now, so the card cannot be used. Please write to the Secretariat.",
     loadError: "We could not load your membership card.",
     retry: "Try again",
+    export: {
+      download: "Download card",
+      downloading: "Preparing…",
+      print: "Print",
+      printing: "Preparing…",
+      printTitle: "OCA e-Membership Card",
+      failed: "We could not prepare your card. Please try again.",
+    },
   },
 
   donor: {

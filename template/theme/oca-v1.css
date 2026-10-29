@@ -8940,11 +8940,14 @@ section[id^="ec-"] {
 /* no photo yet: initials in the oval */
 .mp-photo-initials{display:flex; align-items:center; justify-content:center; width:100%; height:100%; background:var(--tint-teal); color:var(--brand-deep); font-family:var(--serif); font-size:clamp(22px, 4vw, 44px); font-weight:700; letter-spacing:.04em;}
 /* Download / Print on the e-membership card prints the card alone */
-/* Only on a page showing the e-card: elsewhere (the payment receipt, say) this would blank the page. */
+
+/* e-Membership Card print: while printing, the page shows only the card image (see useCardExport) */
+.mp-print-card{display:none;}
 @media print{
-  body:has(.mp-ecard) *{visibility:hidden;}
-  .mp-ecard, .mp-ecard *{visibility:visible;}
-  .mp-ecard{position:fixed; top:24px; left:24px; width:440px; -webkit-print-color-adjust:exact; print-color-adjust:exact;}
+  html.is-printing-card, html.is-printing-card body{background:#fff !important; margin:0 !important; padding:0 !important;}
+  html.is-printing-card body > *:not(.mp-print-card){display:none !important;}
+  html.is-printing-card .mp-print-card{display:block; padding:18mm;}
+  .mp-print-card img{display:block; width:85.6mm; height:54mm; -webkit-print-color-adjust:exact; print-color-adjust:exact;}
 }
 
 /* ---------- Members area: loading, transitions and locked fields ---------- */

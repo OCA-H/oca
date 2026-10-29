@@ -1,8 +1,9 @@
 'use client';
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { profileContent } from '../../content';
-import { profileHelper } from '../../helper';
+import { useCardExport } from '../../handler';
+import { profileHelper, type CardImageText } from '../../helper';
 import type { MembershipCard } from '../../services';
 import { PanelHead } from './PanelHead';
 import { ProfileIcon } from './ProfileIcon';
@@ -63,8 +64,21 @@ export const CardSkeleton: React.FC = () => (
 export const CardPanel: React.FC<CardPanelProps> = ({ card: data, isLoading, error, onRetry, hidden, onBack }) => {
   const { card } = profileContent;
   const { labels } = card;
-  // The print stylesheet keeps only the card; "Download" opens the same dialog to save it as a PDF.
-  const printCard = () => window.print();
+  const isValid = data?.status === 'active';
+  const validity = isValid ? data?.validity || card.activeLabel : card.notValid;
+  // What the downloaded or printed card says, drawn to match the card on screen.
+  const imageText = useMemo<CardImageText | null>(
+    () =>
+      data && {
+        org: card.org,
+        school: card.school,
+        tag: isValid ? data.membershipType : card.notValid,
+        validity,
+        labels: { batch: labels.batch, memberId: labels.memberId, valid: labels.valid },
+      },
+    [data, isValid, validity, card, labels]
+  );
+  const cardExport = useCardExport(data, imageText, !hidden);
 
   const body = () => {
     if (isLoading) {
@@ -88,8 +102,6 @@ export const CardPanel: React.FC<CardPanelProps> = ({ card: data, isLoading, err
       );
     }
 
-    const isValid = data.status === 'active';
-    const validity = isValid ? data.validity || card.activeLabel : card.notValid;
     const summary = [data.membershipType, data.batchYear && `Batch of ${data.batchYear}`].filter(Boolean).join(' · ');
 
     return (
@@ -157,15 +169,32 @@ export const CardPanel: React.FC<CardPanelProps> = ({ card: data, isLoading, err
             )}
           </dl>
           <div className="mp-btns">
-            <button className="btn btn-primary" type="button" onClick={printCard} disabled={!isValid}>
+            <button
+              className="btn btn-primary"
+              type="button"
+              onClick={cardExport.download}
+              disabled={!isValid || cardExport.busy !== null}
+              aria-busy={cardExport.busy === 'download'}
+            >
               <ProfileIcon name="download" />
-              Download card
+              {cardExport.busy === 'download' ? card.export.downloading : card.export.download}
             </button>
-            <button className="btn btn-secondary" type="button" onClick={printCard} disabled={!isValid}>
+            <button
+              className="btn btn-secondary"
+              type="button"
+              onClick={cardExport.print}
+              disabled={!isValid || cardExport.busy !== null}
+              aria-busy={cardExport.busy === 'print'}
+            >
               <ProfileIcon name="print" />
-              Print
+              {cardExport.busy === 'print' ? card.export.printing : card.export.print}
             </button>
           </div>
+          {cardExport.error && (
+            <p className="ms-error" role="alert" style={{ marginTop: 14 }}>
+              {cardExport.error}
+            </p>
+          )}
         </div>
       </div>
     );
