@@ -2,7 +2,12 @@ import React from 'react';
 import Link from 'next/link';
 import { ROUTES } from '@/app/(view)/common/helper/routes';
 
-export const HeroSection: React.FC = () => {
+/** `birthdayCount` is how many members have their birthday today; the ticker leaves it out when none do. */
+export const HeroSection: React.FC<{ birthdayCount: number }> = ({ birthdayCount }) => {
+  const birthdayNews = birthdayCount > 0 && (
+    <span><strong>Today:</strong> {birthdayCount} {birthdayCount === 1 ? 'Columban is' : 'Columbans are'} celebrating their birthday — send your wishes</span>
+  );
+
   return (
     <section className="hero" id="top">
       <div className="wrap">
@@ -36,11 +41,11 @@ export const HeroSection: React.FC = () => {
             <div className="ticker-track">
               <span><strong>New notice:</strong> OCA – AGM 2025 Reminder &amp; Balance Sheet posted Nov 19, 2025</span>
               <span><strong>Sponsorship open:</strong> Brother Oman Memorial Cricket Tournament — ₹1.50 Lacs</span>
-              <span><strong>Today:</strong> 4 Columbans celebrating their birthday — send your wishes</span>
+              {birthdayNews}
               <span><strong>Fund update:</strong> Teachers Benevolent Fund now at 7% of goal</span>
               <span><strong>New notice:</strong> OCA – AGM 2025 Reminder &amp; Balance Sheet posted Nov 19, 2025</span>
               <span><strong>Sponsorship open:</strong> Brother Oman Memorial Cricket Tournament — ₹1.50 Lacs</span>
-              <span><strong>Today:</strong> 4 Columbans celebrating their birthday — send your wishes</span>
+              {birthdayNews}
               <span><strong>Fund update:</strong> Teachers Benevolent Fund now at 7% of goal</span>
             </div>
           </div>

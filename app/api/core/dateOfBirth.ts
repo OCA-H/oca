@@ -6,7 +6,7 @@ export const EARLIEST_DATE_OF_BIRTH = "1900-01-01";
 const ISO_DATE = /^(\d{4})-(\d{2})-(\d{2})$/;
 
 /** Today as "YYYY-MM-DD" in India, where the members and the Secretariat are. */
-const todayInIndia = () => new Date().toLocaleDateString("en-CA", { timeZone: "Asia/Kolkata" });
+export const todayInIndia = () => new Date().toLocaleDateString("en-CA", { timeZone: "Asia/Kolkata" });
 
 /** True for a real calendar date, so "1985-02-30" is caught rather than rolled over into March. */
 function isCalendarDate(value: string): boolean {

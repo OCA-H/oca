@@ -3,3 +3,4 @@ export * from "./auth";
 export * from "./membership";
 export * from "./event-pass";
 export * from "./site";
+export * from "./birthday";

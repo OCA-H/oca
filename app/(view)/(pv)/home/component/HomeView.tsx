@@ -2,6 +2,7 @@
 
 import React from 'react';
 import type { HomeContent } from '@/app/api/(features)/(pview)/site/schema/sectionSpecs';
+import type { BirthdayMember } from '@/app/api/(features)/(pview)/birthday/schema';
 import { Header, Footer, Lightbox } from '@/app/(view)/common';
 import { useHomeHandler } from '../handler/useHomeHandler';
 import {
@@ -21,8 +22,11 @@ import {
   ContactSection,
 } from '.';
 
-/** `content` is what admins edit in the admin panel; see app/(view)/(pv)/page.tsx. */
-export const HomeView: React.FC<{ content: HomeContent }> = ({ content }) => {
+/**
+ * `content` is what admins edit in the admin panel, and `birthdays` the members whose date of
+ * birth is today; see app/(view)/(pv)/page.tsx.
+ */
+export const HomeView: React.FC<{ content: HomeContent; birthdays: BirthdayMember[] }> = ({ content, birthdays }) => {
   useHomeHandler();
 
   return (
@@ -31,13 +35,13 @@ export const HomeView: React.FC<{ content: HomeContent }> = ({ content }) => {
 
       <main id="app">
         <div className="page is-active" id="page-home">
-          <HeroSection />
+          <HeroSection birthdayCount={birthdays.length} />
           <EventsSection content={content.events} />
           <HighlightsSection />
           <OfferingsSection content={content.notices} />
           <NoticeBoardSection content={content.spotlight} />
           <HangoutSection content={content.hangout} />
-          <BirthdaysSection />
+          <BirthdaysSection birthdays={birthdays} />
           <SocialConscienceSection content={content.social} />
           <BenefitsSection />
           <ConnectSection />

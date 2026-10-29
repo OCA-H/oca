@@ -1,5 +1,5 @@
 import "server-only";
-import { eq, or } from "drizzle-orm";
+import { and, asc, eq, or, sql } from "drizzle-orm";
 import { BaseRepository } from "@/app/api/core/baseRepository";
 import { users, type User, type NewUser } from "../schema/userSchema";
 import { hashPassword } from "@/app/api/core/auth";
@@ -119,6 +119,26 @@ export class UserRepository extends BaseRepository {
       .limit(1);
 
     return results[0] ?? null;
+  }
+
+  /** Active members born on any of these days of the year (month 1–12), oldest batch first. */
+  async findActiveBornOn(days: Array<{ month: number; day: number }>): Promise<User[]> {
+    if (days.length === 0) return [];
+    return this.db
+      .select()
+      .from(users)
+      .where(
+        and(
+          eq(users.status, "active"),
+          or(
+            ...days.map(
+              ({ month, day }) =>
+                sql`extract(month from ${users.dateOfBirth}) = ${month}::int and extract(day from ${users.dateOfBirth}) = ${day}::int`
+            )
+          )
+        )
+      )
+      .orderBy(asc(users.batchYear), asc(users.fullName));
   }
 
   async create(data: NewUser): Promise<User> {
