@@ -5,6 +5,7 @@ import {
   type MembershipFeeContent,
   type EventDinnerContent,
   type EventLunchContent,
+  type EventSportsContent,
   type HomeContent,
   type SiteSectionKey,
 } from "../schema/sectionSpecs";
@@ -189,6 +190,25 @@ export const LUNCH_DEFAULTS: EventLunchContent = {
   venueDetail: "School Grounds, Ashoka Place, New Delhi – 110 001",
 };
 
+export const SPORTS_DEFAULTS: EventSportsContent = {
+  eyebrow: "OCA Sports",
+  title: "Brother Foley Memorial Cricket Tournament",
+  lead: "An interschool cricket tournament presented by the Old Columbans Association in memory of Brother Foley — played on the School grounds, in the Columban spirit.",
+  image: U + "2022/10/Bro-Foley-Cricket-2022.jpg",
+  imageAlt:
+    "Poster: Old Columbans Association presents the Bro. Foley Memorial Cricket Tournament, 5 to 12 November 2022, St. Columba's School Grounds",
+  posterChip: "2022 EDITION",
+  date: "5–12 November",
+  dateDetail: "2022 Edition",
+  venue: "St. Columba’s",
+  venueDetail: "School Grounds, Ashoka Place, New Delhi",
+  sponsorEyebrow: "Support the Game",
+  sponsorTitle: "Brother Oman Memorial Interschool Cricket Tournament",
+  sponsorAmount: "₹1.50 Lacs",
+  sponsorImage: U + "2022/11/sponsor-new.jpg",
+  sponsorImageAlt: "The Principal's sponsorship appeal for the Brother Oman Memorial Interschool Cricket Tournament",
+};
+
 export const MEMBERSHIP_FEE_DEFAULTS: MembershipFeeContent = {
   fee: 2000,
 };
@@ -219,6 +239,7 @@ export const SECTION_DEFAULTS: Record<SiteSectionKey, object> = {
   [SITE_SECTION_KEYS.aboutCommittee]: HOME_DEFAULTS.committee,
   [SITE_SECTION_KEYS.eventsDinner]: DINNER_DEFAULTS,
   [SITE_SECTION_KEYS.eventsLunch]: LUNCH_DEFAULTS,
+  [SITE_SECTION_KEYS.eventsSports]: SPORTS_DEFAULTS,
   [SITE_SECTION_KEYS.membershipFee]: MEMBERSHIP_FEE_DEFAULTS,
   [SITE_SECTION_KEYS.settingsEmails]: EMAIL_SETTINGS_DEFAULTS,
   [SITE_SECTION_KEYS.settingsContact]: CONTACT_DEFAULTS,

@@ -4,8 +4,9 @@ import React from 'react';
 import Link from 'next/link';
 import { ROUTES } from '@/app/(view)/common/helper/routes';
 import { useContact } from '@/app/(view)/common/component/ContactProvider';
+import type { EventSportsContent } from '@/app/api/(features)/(pview)/site/schema/sectionSpecs';
 
-export const SportsView: React.FC = () => {
+export const SportsView: React.FC<{ content: EventSportsContent }> = ({ content }) => {
   const contact = useContact();
   const enquiryHref = contact.mailto('Enquiry - OCA Sports');
   return (
@@ -24,12 +25,9 @@ export const SportsView: React.FC = () => {
       <section className="page-hero">
         <div className="wrap">
           <div>
-            <span className="eyebrow">OCA Sports</span>
-            <h1>Brother Foley Memorial Cricket Tournament</h1>
-            <p className="lead">
-              An interschool cricket tournament presented by the Old Columbans Association in memory of
-              Brother Foley &mdash; played on the School grounds, in the Columban spirit.
-            </p>
+            {content.eyebrow && <span className="eyebrow">{content.eyebrow}</span>}
+            <h1>{content.title}</h1>
+            {content.lead && <p className="lead">{content.lead}</p>}
             <div className="page-hero-actions">
               <a className="btn btn-primary" href={enquiryHref}>
                 Enquire about OCA Sports
@@ -43,12 +41,8 @@ export const SportsView: React.FC = () => {
           <div className="page-hero-media">
             <div className="sports-poster">
               <div className="poster-frame">
-                <img
-                  src="https://www.oldcolumban.net/wp-content/uploads/2022/10/Bro-Foley-Cricket-2022.jpg"
-                  alt="Poster: Old Columbans Association presents the Bro. Foley Memorial Cricket Tournament, 5 to 12 November 2022, St. Columba's School Grounds"
-                  decoding="async"
-                />
-                <span className="poster-chip">2022 EDITION</span>
+                <img src={content.image} alt={content.imageAlt} decoding="async" />
+                {content.posterChip && <span className="poster-chip">{content.posterChip}</span>}
               </div>
             </div>
           </div>
@@ -59,12 +53,12 @@ export const SportsView: React.FC = () => {
       <div className="wrap">
         <div className="fact-strip fact-strip--3">
           <div className="fact">
-            <div className="fact-num">5&ndash;12 November</div>
-            <div className="fact-lbl">2022 Edition</div>
+            <div className="fact-num">{content.date}</div>
+            {content.dateDetail && <div className="fact-lbl">{content.dateDetail}</div>}
           </div>
           <div className="fact">
-            <div className="fact-num">St. Columba&rsquo;s</div>
-            <div className="fact-lbl">School Grounds, Ashoka Place, New Delhi</div>
+            <div className="fact-num">{content.venue}</div>
+            {content.venueDetail && <div className="fact-lbl">{content.venueDetail}</div>}
           </div>
           <div className="fact">
             <div className="fact-num">{contact.phone}</div>
@@ -190,13 +184,13 @@ export const SportsView: React.FC = () => {
         <div className="wrap split-2 media-left">
           <div>
             <div className="section-head stack" style={{ marginBottom: '20px' }}>
-              <span className="eyebrow">Support the Game</span>
-              <h2>Brother Oman Memorial Interschool Cricket Tournament</h2>
+              {content.sponsorEyebrow && <span className="eyebrow">{content.sponsorEyebrow}</span>}
+              <h2>{content.sponsorTitle}</h2>
             </div>
             <div className="prose">
               <p>
                 The Principal has appealed for sponsorship of this memorial tournament, seeking{' '}
-                <strong>₹1.50 Lacs</strong> in support.
+                <strong>{content.sponsorAmount}</strong> in support.
               </p>
               <p>
                 If you or your organisation would like to help, write to the Secretariat &mdash; or contribute to the
@@ -204,7 +198,7 @@ export const SportsView: React.FC = () => {
               </p>
             </div>
             <div className="btn-row">
-              <a className="btn btn-primary" href={contact.mailto('Sponsorship - Brother Oman Memorial Cricket Tournament')}>
+              <a className="btn btn-primary" href={contact.mailto(`Sponsorship - ${content.sponsorTitle}`)}>
                 Enquire about sponsoring
               </a>
               <a className="btn btn-secondary" href={ROUTES.DONATION}>
@@ -217,8 +211,8 @@ export const SportsView: React.FC = () => {
             <div className="poster-wrap">
               <img
                 className="poster-img"
-                src="https://www.oldcolumban.net/wp-content/uploads/2022/11/sponsor-new.jpg"
-                alt="The Principal's sponsorship appeal for the Brother Oman Memorial Interschool Cricket Tournament"
+                src={content.sponsorImage}
+                alt={content.sponsorImageAlt}
                 loading="lazy"
                 decoding="async"
               />

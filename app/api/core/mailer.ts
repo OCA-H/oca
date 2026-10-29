@@ -13,6 +13,8 @@ export interface MailMessage {
   to: string;
   /** Copied recipients, visible to everyone on the email. */
   cc?: string[];
+  /** Where replies go, when not to MAIL_FROM: e.g. the visitor who wrote in through the contact form. */
+  replyTo?: string;
   subject: string;
   text: string;
   html: string;
@@ -97,7 +99,7 @@ export class Mailer {
         throw new Error(`Email not sent to ${message.to}: ${REQUIRED_SETTINGS.join(", ")} must be set.`);
       }
       const files = message.attachments?.map((file) => file.filename).join(", ");
-      console.info(`\n[mailer] SMTP not configured; email not sent.\nTo: ${message.to}${message.cc?.length ? `\nCc: ${message.cc.join(", ")}` : ""}${files ? `\nAttachments: ${files}` : ""}\nSubject: ${message.subject}\n\n${message.text}\n`);
+      console.info(`\n[mailer] SMTP not configured; email not sent.\nTo: ${message.to}${message.cc?.length ? `\nCc: ${message.cc.join(", ")}` : ""}${message.replyTo ? `\nReply-To: ${message.replyTo}` : ""}${files ? `\nAttachments: ${files}` : ""}\nSubject: ${message.subject}\n\n${message.text}\n`);
       return;
     }
 

@@ -58,6 +58,7 @@ export const SITE_SECTION_KEYS = {
   aboutCommittee: "about.committee",
   eventsDinner: "events.dinner",
   eventsLunch: "events.lunch",
+  eventsSports: "events.sports",
   membershipFee: "membership.fee",
   settingsEmails: "settings.emails",
   settingsContact: "settings.contact",
@@ -206,6 +207,20 @@ export interface EventLunchContent extends EventHero {
   timeDetail: string;
   venue: string;
   venueDetail: string;
+}
+
+/** /sports: the tournament banner and key facts, and the sponsorship appeal further down. */
+export interface EventSportsContent extends EventHero {
+  posterChip: string;
+  date: string;
+  dateDetail: string;
+  venue: string;
+  venueDetail: string;
+  sponsorEyebrow: string;
+  sponsorTitle: string;
+  sponsorAmount: string;
+  sponsorImage: string;
+  sponsorImageAlt: string;
 }
 
 // ---------- Membership ----------
@@ -507,6 +522,25 @@ export const SECTION_SPECS: SectionSpec[] = [
     lists: [],
   },
   {
+    key: SITE_SECTION_KEYS.eventsSports,
+    page: "events",
+    label: "OCA Sports",
+    description: "The OCA Sports page: tournament banner, dates and venue, and the sponsorship appeal.",
+    href: "/sports",
+    fields: [
+      ...eventHero("Tournament poster"),
+      { key: "posterChip", label: "Poster tag", type: "text", max: 30, placeholder: "2022 EDITION", hint: "The small tag on the poster. Leave empty to hide it." },
+      ...eventFact("date", "Dates", "5–12 November", "2022 Edition"),
+      ...eventFact("venue", "Venue", "St. Columba’s", "School Grounds, Ashoka Place, New Delhi"),
+      { key: "sponsorEyebrow", label: "Eyebrow", type: "text", max: 60, heading: "Sponsorship appeal", placeholder: "Support the Game" },
+      { key: "sponsorTitle", label: "Heading", type: "text", max: 120, required: true, placeholder: "Brother Oman Memorial Interschool Cricket Tournament" },
+      { key: "sponsorAmount", label: "Amount sought", type: "text", max: 40, required: true, placeholder: "₹1.50 Lacs" },
+      { key: "sponsorImage", label: "Appeal image", type: "image", required: true, hint: IMAGE_HINT },
+      { key: "sponsorImageAlt", label: "Image description", type: "text", max: 200, hint: ALT_HINT },
+    ],
+    lists: [],
+  },
+  {
     key: SITE_SECTION_KEYS.membershipFee,
     page: "membership",
     label: "Membership fee",
@@ -538,7 +572,7 @@ export const SECTION_SPECS: SectionSpec[] = [
         type: "emails",
         max: 1000,
         placeholder: "ocacentre@gmail.com, secretary@example.com",
-        hint: "Copied on every email the website sends: membership welcomes, Annual Dinner passes, contribution thank-yous and Suggestion Box messages. Password reset emails are never copied, as their link lets anyone set the member's password. Separate addresses with commas; leave empty to copy no one.",
+        hint: "Copied on every email the website sends: membership welcomes, Annual Dinner passes, contribution thank-yous and Suggestion Box messages. “Get in touch” messages go only to the email under Contact details. Password reset emails are never copied, as their link lets anyone set the member's password. Separate addresses with commas; leave empty to copy no one.",
       },
     ],
     lists: [],
@@ -551,7 +585,7 @@ export const SECTION_SPECS: SectionSpec[] = [
     href: "/#contact",
     fields: [
       { key: "name", label: "Contact name", type: "text", max: 80, required: true, heading: "Contact", placeholder: "The OCA Secretariat", hint: "Who members reach, and who signs the website's emails." },
-      { key: "email", label: "Email", type: "email", max: 255, required: true, placeholder: "info@oldcolumban.net", hint: "Shown on the site and in emails. Suggestion Box messages are sent here." },
+      { key: "email", label: "Email", type: "email", max: 255, required: true, placeholder: "info@oldcolumban.net", hint: "Shown on the site and in emails. Suggestion Box and “Get in touch” messages are sent here." },
       { key: "phone", label: "Phone", type: "text", max: 30, required: true, placeholder: "011-23748666", hint: "As it should read. Tapping it calls the digits." },
       { key: "address", label: "Address", type: "textarea", max: 200, required: true, placeholder: "St. Columba’s School, Ashoka Place, New Delhi – 110 001" },
       { key: "facebook", label: "Facebook", type: "link", heading: "Social media", placeholder: "https://www.facebook.com/…", hint: SOCIAL_HINT },

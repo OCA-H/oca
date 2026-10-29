@@ -36,6 +36,7 @@ export type AdminIconName =
   | "layers"
   | "moon"
   | "sun"
+  | "trophy"
   | "ticket"
   | "mail"
   | "phone"
@@ -50,6 +51,7 @@ export const SECTION_ICONS: Record<SiteSectionKey, AdminIconName> = {
   "about.committee": "people",
   "events.dinner": "moon",
   "events.lunch": "sun",
+  "events.sports": "trophy",
   "membership.fee": "rupee",
   "settings.emails": "mail",
   "settings.contact": "phone",
@@ -141,7 +143,6 @@ export const adminContent = {
       collapsible: true,
       items: [
         { label: "Executive Committee", icon: "page", soon: true },
-        { label: "Sports", icon: "page", soon: true },
       ],
     },
     {
