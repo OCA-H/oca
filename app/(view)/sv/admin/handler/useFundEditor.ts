@@ -5,7 +5,15 @@ import { ApiError, type ApiFieldErrors } from '@/app/(view)/common/services/api.
 import { adminService, type AdminFund, type FundChanges } from '../services';
 
 /** Form values: numbers stay strings while typed, so a cleared box is not read as 0. */
-export type FundForm = { label: string; note: string; sortOrder: string; unitAmount: string; maxUnits: string };
+export type FundForm = {
+  label: string;
+  note: string;
+  sortOrder: string;
+  unitAmount: string;
+  maxUnits: string;
+  minAmount: string;
+  maxAmount: string;
+};
 
 export const fundToForm = (fund: AdminFund): FundForm => ({
   label: fund.label,
@@ -13,6 +21,8 @@ export const fundToForm = (fund: AdminFund): FundForm => ({
   sortOrder: String(fund.sortOrder),
   unitAmount: fund.unitAmount === null ? '' : String(fund.unitAmount),
   maxUnits: fund.maxUnits === null ? '' : String(fund.maxUnits),
+  minAmount: String(fund.minAmount),
+  maxAmount: String(fund.maxAmount),
 });
 
 // An empty number box goes as NaN, which the API rejects beside that field.
@@ -83,6 +93,8 @@ export function useFundEditor(fund: AdminFund, onSaved: (fund: AdminFund) => voi
     sortOrder: toNumber(values.sortOrder),
     unitAmount: perUnit ? toNumber(values.unitAmount) : null,
     maxUnits: perUnit ? toNumber(values.maxUnits) : null,
+    minAmount: perUnit ? null : toNumber(values.minAmount),
+    maxAmount: perUnit ? null : toNumber(values.maxAmount),
   });
 
   const confirm = async () => {

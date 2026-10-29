@@ -14,7 +14,8 @@ import { RecordPanelFrame } from './RecordPanelFrame';
 
 const text = adminContent.funds;
 
-// Limits match ContributionService.updateFundFromAdmin; the unit fields are for per-unit heads only.
+// Limits match ContributionService.updateFundFromAdmin; the unit fields are for per-unit heads only,
+// the amount fields for every other head.
 type FormField = FieldSpec & { wide?: boolean };
 const FORM_FIELDS: FormField[] = [
   { key: 'label', label: text.fields.label, type: 'text', required: true, max: 100 },
@@ -24,6 +25,10 @@ const FORM_FIELDS: FormField[] = [
 const UNIT_FIELDS: FormField[] = [
   { key: 'unitAmount', label: text.fields.unitAmount, type: 'number', min: 1 },
   { key: 'maxUnits', label: text.fields.maxUnits, type: 'number', min: 1 },
+];
+const AMOUNT_FIELDS: FormField[] = [
+  { key: 'minAmount', label: text.fields.minAmount, type: 'number', min: 1, hint: text.hints.minAmount },
+  { key: 'maxAmount', label: text.fields.maxAmount, type: 'number', min: 1, hint: text.hints.maxAmount },
 ];
 const rupees = (value: string) => adminHelper.formatRupees(Number(value));
 
@@ -44,7 +49,7 @@ const FundItem: React.FC<FundItemProps> = ({ fund, onSaved, onDeleted }) => {
   const hasError = Object.keys(editor.fieldErrors).length > 0;
   const groups = [
     { ...text.groups.form, fields: FORM_FIELDS },
-    ...(editor.perUnit ? [{ ...text.groups.unit, fields: UNIT_FIELDS }] : []),
+    editor.perUnit ? { ...text.groups.unit, fields: UNIT_FIELDS } : { ...text.groups.amount, fields: AMOUNT_FIELDS },
   ];
   const canDelete = fund.contributions === 0;
 
@@ -68,7 +73,11 @@ const FundItem: React.FC<FundItemProps> = ({ fund, onSaved, onDeleted }) => {
       return {
         ...text.confirmSave,
         title: text.confirmSave.title(fund.label),
-        changes: adminHelper.formChanges([...FORM_FIELDS, ...UNIT_FIELDS], editor.saved, editor.form, { unitAmount: rupees }),
+        changes: adminHelper.formChanges([...FORM_FIELDS, ...UNIT_FIELDS, ...AMOUNT_FIELDS], editor.saved, editor.form, {
+          unitAmount: rupees,
+          minAmount: rupees,
+          maxAmount: rupees,
+        }),
         busy: text.busy,
       };
     }

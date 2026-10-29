@@ -295,11 +295,18 @@ export const adminContent = {
       sortOrder: "Order on the form",
       unitAmount: "Price per unit (₹)",
       maxUnits: "Most units at once",
+      minAmount: "Smallest amount (₹)",
+      maxAmount: "Largest amount (₹)",
     },
-    hints: { note: "Shown under the name on the form, e.g. \"₹5,000 per teacher\"." },
+    hints: {
+      note: "Shown under the name on the form, e.g. \"₹5,000 per teacher\".",
+      minAmount: "Members cannot give less than this.",
+      maxAmount: "Larger gifts are sent to the Secretariat instead.",
+    },
     groups: {
       form: { title: "On the contribution form", lead: "How this head reads where members choose what to give." },
       unit: { title: "Price per teacher", lead: "Members pay this much for each one they sponsor." },
+      amount: { title: "Amount limits", lead: "Members choose how much to give, within these limits." },
     },
     confirmSave: { title: (label: string) => `Save changes to ${label}?`, body: "The contribution form shows these straight away.", yes: "Save changes" },
     confirmOn: {

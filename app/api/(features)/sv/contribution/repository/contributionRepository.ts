@@ -32,7 +32,7 @@ export class ContributionRepository extends BaseRepository {
 
   async updateFund(
     id: number,
-    data: Partial<Pick<ContributionFund, "label" | "note" | "unitAmount" | "maxUnits" | "status" | "sortOrder">>
+    data: Partial<Pick<ContributionFund, "label" | "note" | "unitAmount" | "maxUnits" | "minAmount" | "maxAmount" | "status" | "sortOrder">>
   ): Promise<ContributionFund | null> {
     const results = await this.db
       .update(contributionFunds)

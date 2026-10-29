@@ -18,10 +18,6 @@ import type {
 } from "../schema/contributionSchema";
 import { contributionThankYouEmail } from "./contributionThankYouEmail";
 
-export const MIN_CONTRIBUTION = 100;
-/** A sanity ceiling against typos; larger gifts go through the Secretariat directly. */
-export const MAX_CONTRIBUTION = 10_000_000;
-
 const PAYMENT_METHODS = ["upi", "card", "netbanking"];
 
 /** PAN card and address proof for the 80G receipt. Two files fit inside the proxy's 11 MB body limit. */
@@ -44,6 +40,9 @@ export interface ContributionFundOption {
   unitAmount: number | null;
   unitLabel: string | null;
   maxUnits: number | null;
+  /** The amount a member may choose, on a fund without a unit price. */
+  minAmount: number;
+  maxAmount: number;
   suspended: boolean;
 }
 
@@ -103,6 +102,8 @@ const toFundOption = (fund: ContributionFund): ContributionFundOption => ({
   unitAmount: fund.unitAmount,
   unitLabel: fund.unitLabel,
   maxUnits: fund.maxUnits,
+  minAmount: fund.minAmount,
+  maxAmount: fund.maxAmount,
   suspended: fund.status !== "active",
 });
 
@@ -119,7 +120,8 @@ export class ContributionService {
 
   /**
    * The admin panel's edit of a contribution head: its wording, order, whether it takes
-   * contributions, and for a per-unit fund (Sponsor a teacher) the unit price and limit.
+   * contributions, the smallest and largest amount members may give, and for a per-unit fund
+   * (Sponsor a teacher) the unit price and limit instead.
    */
   async updateFundFromAdmin(id: number, payload: Record<string, unknown>): Promise<ContributionFund> {
     const fund = await this.repository.findFundById(id);
@@ -144,13 +146,27 @@ export class ContributionService {
     const sortOrder = whole("sortOrder", "Order on the form", 0);
     const status = payload.status;
     if (status !== "active" && status !== "suspended") fields.status = "Choose whether the head is active or inactive.";
-    // Only a per-unit fund has a unit price; the others take any amount.
+    // Only a per-unit fund has a unit price; the others take an amount between their limits.
     const perUnit = fund.unitAmount !== null;
     const unitAmount = perUnit ? whole("unitAmount", "Price per unit", 1) : null;
     const maxUnits = perUnit ? whole("maxUnits", "Most units at once", 1) : null;
+    const minAmount = perUnit ? fund.minAmount : whole("minAmount", "Smallest amount", 1);
+    const maxAmount = perUnit ? fund.maxAmount : whole("maxAmount", "Largest amount", 1);
+    if (!fields.minAmount && !fields.maxAmount && maxAmount < minAmount) {
+      fields.maxAmount = "Largest amount must be at least the smallest amount.";
+    }
     if (Object.keys(fields).length > 0) throw HttpError.badRequest("Some details need fixing.", fields);
 
-    const updated = await this.repository.updateFund(id, { label: label!, note, sortOrder, status: status as string, unitAmount, maxUnits });
+    const updated = await this.repository.updateFund(id, {
+      label: label!,
+      note,
+      sortOrder,
+      status: status as string,
+      unitAmount,
+      maxUnits,
+      minAmount,
+      maxAmount,
+    });
     if (!updated) throw HttpError.notFound("That contribution head no longer exists.");
     return updated;
   }
@@ -200,9 +216,9 @@ export class ContributionService {
       else amount = units * fund.unitAmount;
     } else if (fund) {
       amount = Number(text(form.get("amount")));
-      if (!Number.isInteger(amount) || amount < MIN_CONTRIBUTION) {
-        fields.amount = `Enter a whole amount of at least ₹${MIN_CONTRIBUTION}.`;
-      } else if (amount > MAX_CONTRIBUTION) {
+      if (!Number.isInteger(amount) || amount < fund.minAmount) {
+        fields.amount = `Enter a whole amount of at least ₹${fund.minAmount.toLocaleString("en-IN")}.`;
+      } else if (amount > fund.maxAmount) {
         fields.amount = `For a contribution this large, please write to the Secretariat at ${(await getContactDetails()).email}.`;
       }
     }

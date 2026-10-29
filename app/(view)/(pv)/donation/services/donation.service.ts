@@ -13,6 +13,9 @@ export interface ContributionFund {
   unitAmount: number | null;
   unitLabel: string | null;
   maxUnits: number | null;
+  /** The amount a member may choose, on a fund without a unit price. */
+  minAmount: number;
+  maxAmount: number;
   suspended: boolean;
 }
 

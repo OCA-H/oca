@@ -2,9 +2,9 @@
 
 import { useState, useCallback, useMemo, useEffect } from 'react';
 import { donationContent } from '../content/donation.content';
-import { formatCurrency, calculateAmount } from '../helper/donation.helper';
+import { formatCurrency, calculateAmount, amountError } from '../helper/donation.helper';
 import { donationService, type ContributionFund } from '../services/donation.service';
-import { ApiError } from '@/app/(view)/common/services/api.service';
+import { ApiError, type ApiFieldErrors } from '@/app/(view)/common/services/api.service';
 import { useAuth } from '@/app/(view)/common/helper/useAuth';
 import { profileService, type MemberProfile } from '@/app/(view)/sv/profile/services/profile.service';
 
@@ -101,6 +101,17 @@ export function useDonationHandler() {
   const [showResetModal, setShowResetModal] = useState<boolean>(false);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
+  /** Errors the server sent back for particular fields, shown beside them until the field changes. */
+  const [fieldErrors, setFieldErrors] = useState<ApiFieldErrors>({});
+
+  const clearFieldError = useCallback((...keys: string[]) => {
+    setFieldErrors((prev) => {
+      if (!keys.some((key) => key in prev)) return prev;
+      const next = { ...prev };
+      for (const key of keys) delete next[key];
+      return next;
+    });
+  }, []);
 
   // Funds are only loaded for a signed-in member; visitors see the locked preview instead.
   useEffect(() => {
@@ -177,21 +188,37 @@ export function useDonationHandler() {
     return () => document.removeEventListener('click', handleDocumentClick);
   }, [preselectFund]);
 
-  const handleFundChange = useCallback((code: string) => {
-    setFormData((prev) => ({ ...prev, fund: code }));
-  }, []);
+  const handleFundChange = useCallback(
+    (code: string) => {
+      setFormData((prev) => ({ ...prev, fund: code }));
+      clearFieldError('fund', 'amount', 'units');
+    },
+    [clearFieldError]
+  );
 
-  const handleAmountChip = useCallback((val: number) => {
-    setFormData((prev) => ({ ...prev, amount: val }));
-  }, []);
+  const handleAmountChip = useCallback(
+    (val: number) => {
+      setFormData((prev) => ({ ...prev, amount: val }));
+      clearFieldError('amount');
+    },
+    [clearFieldError]
+  );
 
-  const handleAmountChange = useCallback((val: number) => {
-    setFormData((prev) => ({ ...prev, amount: isNaN(val) ? 0 : val }));
-  }, []);
+  const handleAmountChange = useCallback(
+    (val: number) => {
+      setFormData((prev) => ({ ...prev, amount: isNaN(val) ? 0 : val }));
+      clearFieldError('amount');
+    },
+    [clearFieldError]
+  );
 
-  const handleUnitsChange = useCallback((units: string) => {
-    setFormData((prev) => ({ ...prev, units }));
-  }, []);
+  const handleUnitsChange = useCallback(
+    (units: string) => {
+      setFormData((prev) => ({ ...prev, units }));
+      clearFieldError('units');
+    },
+    [clearFieldError]
+  );
 
   const handleDropdownChange = useCallback((field: keyof DonationFormData, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
@@ -221,6 +248,8 @@ export function useDonationHandler() {
 
   const confirmReset = useCallback(() => {
     setFormData(initialFormData(profile));
+    setFieldErrors({});
+    setSubmitError(null);
     setShowResetModal(false);
   }, [profile]);
 
@@ -234,10 +263,32 @@ export function useDonationHandler() {
     return () => window.removeEventListener('pageshow', onPageShow);
   }, []);
 
+  const currentFund = useMemo(() => funds.find((f) => f.code === formData.fund) ?? null, [funds, formData.fund]);
+  const isPerUnit = Boolean(currentFund?.unitAmount);
+  const effectiveAmount = useMemo(
+    () => calculateAmount(currentFund, formData.amount, parseInt(formData.units, 10)),
+    [currentFund, formData.amount, formData.units]
+  );
+
+  /** What is wrong with the "Your contribution" step, checked as the member types; null when it can be paid. */
+  const contributionErrors = useMemo(
+    () => ({
+      fund: fieldErrors.fund ?? (currentFund?.suspended ? `${currentFund.label} is not accepting contributions right now.` : undefined),
+      amount: currentFund && !isPerUnit ? (amountError(currentFund, formData.amount) ?? fieldErrors.amount) : undefined,
+      units: isPerUnit ? fieldErrors.units : undefined,
+    }),
+    [fieldErrors, currentFund, isPerUnit, formData.amount]
+  );
+  const contributionError = contributionErrors.fund ?? contributionErrors.amount ?? contributionErrors.units ?? null;
+
   const handleSubmit = useCallback(
     async (e: React.FormEvent) => {
       e.preventDefault();
       if (isSubmitting) return;
+      if (contributionError) {
+        document.getElementById(isPerUnit ? 'd-units' : 'd-amount')?.focus();
+        return;
+      }
 
       const form = new FormData();
       const { panFile, addressFile, addressDoc, ...fields } = formData;
@@ -250,11 +301,13 @@ export function useDonationHandler() {
 
       setIsSubmitting(true);
       setSubmitError(null);
+      setFieldErrors({});
       try {
         const checkout = await donationService.checkout(form);
         donationService.redirectToGateway(checkout);
       } catch (error) {
         setIsSubmitting(false);
+        if (error instanceof ApiError) setFieldErrors(error.fields);
         const fieldMessage = error instanceof ApiError ? Object.values(error.fields)[0] : undefined;
         setSubmitError(
           fieldMessage ||
@@ -262,14 +315,7 @@ export function useDonationHandler() {
         );
       }
     },
-    [isSubmitting, formData]
-  );
-
-  const currentFund = useMemo(() => funds.find((f) => f.code === formData.fund) ?? null, [funds, formData.fund]);
-  const isPerUnit = Boolean(currentFund?.unitAmount);
-  const effectiveAmount = useMemo(
-    () => calculateAmount(currentFund, formData.amount, parseInt(formData.units, 10)),
-    [currentFund, formData.amount, formData.units]
+    [isSubmitting, formData, contributionError, isPerUnit]
   );
 
   const formattedAmount = useMemo(() => formatCurrency(effectiveAmount), [effectiveAmount]);
@@ -290,6 +336,8 @@ export function useDonationHandler() {
     showResetModal,
     isSubmitting,
     submitError,
+    contributionErrors,
+    contributionError,
     handleFundChange,
     handleAmountChip,
     handleAmountChange,

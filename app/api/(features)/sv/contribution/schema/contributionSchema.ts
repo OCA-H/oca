@@ -5,7 +5,8 @@ import { users } from "../../../(pview)/auth/schema/userSchema";
  * What members can contribute to (Teachers Benevolent Fund, Sponsor a teacher, ...). Seeded by
  * the migration that creates it; the form lists the funds from here and every contribution
  * points at one. A fund with `unit_amount` is paid per unit (e.g. ₹5,000 per teacher sponsored),
- * otherwise the member chooses the amount.
+ * otherwise the member chooses the amount, between `min_amount` and `max_amount` (set in the
+ * admin panel).
  */
 export const contributionFunds = pgTable(
   "contribution_funds",
@@ -17,6 +18,9 @@ export const contributionFunds = pgTable(
     unitAmount: integer("unit_amount"),
     unitLabel: varchar("unit_label", { length: 30 }),
     maxUnits: integer("max_units"),
+    /** Smallest and largest amount a member may choose on a fund without a unit price, in rupees. */
+    minAmount: integer("min_amount").notNull().default(100),
+    maxAmount: integer("max_amount").notNull().default(10000000),
     /** "active" or "suspended": a suspended fund is shown but cannot be paid into. */
     status: varchar("status", { length: 20 }).notNull().default("active"),
     sortOrder: integer("sort_order").notNull().default(0),

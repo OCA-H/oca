@@ -17,6 +17,8 @@ const toAdminFund = (fund: ContributionFund, totals?: FundTotals) => ({
   unitAmount: fund.unitAmount,
   unitLabel: fund.unitLabel,
   maxUnits: fund.maxUnits,
+  minAmount: fund.minAmount,
+  maxAmount: fund.maxAmount,
   status: fund.status,
   sortOrder: fund.sortOrder,
   updatedAt: fund.updatedAt.toISOString(),

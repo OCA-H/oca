@@ -1,0 +1,2 @@
+ALTER TABLE "contribution_funds" ADD COLUMN "min_amount" integer DEFAULT 100 NOT NULL;--> statement-breakpoint
+ALTER TABLE "contribution_funds" ADD COLUMN "max_amount" integer DEFAULT 10000000 NOT NULL;

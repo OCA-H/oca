@@ -19,6 +19,8 @@ export const ContributionForm: React.FC<{ handler: DonationHandler }> = ({ handl
     formattedAmount,
     isSubmitting,
     submitError,
+    contributionErrors,
+    contributionError,
     handleFundChange,
     handleAmountChip,
     handleAmountChange,
@@ -64,6 +66,11 @@ export const ContributionForm: React.FC<{ handler: DonationHandler }> = ({ handl
             </label>
           ))}
         </div>
+        {contributionErrors.fund && (
+          <p className="ms-error" role="alert" id="d-fund-error">
+            {contributionErrors.fund}
+          </p>
+        )}
       </fieldset>
 
       {!isPerUnit ? (
@@ -86,12 +93,21 @@ export const ContributionForm: React.FC<{ handler: DonationHandler }> = ({ handl
               id="d-amount"
               name="amount"
               type="number"
-              min="100"
+              min={currentFund?.minAmount}
+              max={currentFund?.maxAmount}
+              step="1"
               required
-              value={formData.amount}
-              onChange={(e) => handleAmountChange(parseInt(e.target.value, 10))}
+              value={formData.amount || ''}
+              onChange={(e) => handleAmountChange(Number(e.target.value))}
               aria-label="Amount in rupees"
+              aria-invalid={Boolean(contributionErrors.amount)}
+              aria-describedby={contributionErrors.amount ? 'd-amount-error' : undefined}
             />
+            {contributionErrors.amount && (
+              <p className="ms-error" role="alert" id="d-amount-error">
+                {contributionErrors.amount}
+              </p>
+            )}
           </div>
         </div>
       ) : (
@@ -107,6 +123,11 @@ export const ContributionForm: React.FC<{ handler: DonationHandler }> = ({ handl
                   onChange={handleUnitsChange}
                   options={unitOptions(currentFund)}
                 />
+                {contributionErrors.units && (
+                  <p className="ms-error" role="alert">
+                    {contributionErrors.units}
+                  </p>
+                )}
               </div>
               <div className="field">
                 <label>Contribution amount</label>
@@ -390,7 +411,7 @@ export const ContributionForm: React.FC<{ handler: DonationHandler }> = ({ handl
           <button
             className="btn btn-primary"
             type="submit"
-            disabled={isSubmitting || !currentFund}
+            disabled={isSubmitting || !currentFund || Boolean(contributionError)}
             aria-busy={isSubmitting}
           >
             {isSubmitting ? 'Redirecting to secure payment…' : 'Donate'}

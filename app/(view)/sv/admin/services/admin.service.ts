@@ -114,6 +114,9 @@ export interface AdminFund {
   unitAmount: number | null;
   unitLabel: string | null;
   maxUnits: number | null;
+  /** The amount members may choose, on a head without a unit price. */
+  minAmount: number;
+  maxAmount: number;
   status: "active" | "suspended" | string;
   sortOrder: number;
   updatedAt: string;
@@ -130,6 +133,8 @@ export interface FundChanges {
   sortOrder: number;
   unitAmount: number | null;
   maxUnits: number | null;
+  minAmount: number | null;
+  maxAmount: number | null;
 }
 
 export const adminService = {
