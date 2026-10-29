@@ -148,8 +148,8 @@ export const AccountPanel: React.FC<AccountPanelProps> = ({ profile, hidden, onB
             <input id="mpa-middle" name="middle" type="text" value={form.middleName} onChange={(e) => setField('middleName', e.target.value)} autoComplete="additional-name" />
           </div>
           <div className="field">
-            <label htmlFor="mpa-last">Last name *</label>
-            <input id="mpa-last" name="last" type="text" required value={form.lastName} onChange={(e) => setField('lastName', e.target.value)} autoComplete="family-name" />
+            <label htmlFor="mpa-last">Last name</label>
+            <input id="mpa-last" name="last" type="text" value={form.lastName} onChange={(e) => setField('lastName', e.target.value)} autoComplete="family-name" />
             <FieldError message={fieldErrors.lastName} />
           </div>
         </div>

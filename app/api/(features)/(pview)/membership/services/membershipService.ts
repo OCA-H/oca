@@ -89,7 +89,6 @@ export class MembershipService {
     const title = required("title", "Title");
     const batch = required("batch", "Batch");
     const firstName = required("first_name", "First name");
-    const lastName = required("last_name", "Last name");
     const dateOfBirth = required("dob", "Date of birth");
     const email = required("email", "Email").toLowerCase();
     const password = typeof payload.password === "string" ? payload.password : "";
@@ -127,7 +126,7 @@ export class MembershipService {
       batchYear: batch,
       firstName,
       middleName: text(payload.middle_name) || null,
-      lastName,
+      lastName: null,
       dateOfBirth,
       email,
       countryCode,
@@ -152,7 +151,7 @@ export class MembershipService {
       amount: application.amount.toFixed(2),
       redirect_url: responseUrl,
       cancel_url: responseUrl,
-      billing_name: [firstName, application.middleName, lastName].filter(Boolean).join(" "),
+      billing_name: [firstName, application.middleName].filter(Boolean).join(" "),
       billing_address: [addr1, application.addressLine2, application.addressLine3].filter(Boolean).join(", "),
       billing_city: city,
       billing_state: state,
@@ -270,6 +269,13 @@ export class MembershipService {
         status: NEW_MEMBER_STATUS,
         metadata: {
           membershipApplicationId: application.id,
+          // The profile form reads these instead of guessing the parts from fullName.
+          name: {
+            title: application.title,
+            firstName: application.firstName,
+            middleName: application.middleName ?? "",
+            lastName: application.lastName ?? "",
+          },
           countryCode: application.countryCode,
           shareEmail: application.shareEmail,
           address: {

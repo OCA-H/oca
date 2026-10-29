@@ -64,6 +64,13 @@
       "when": 1793255817500,
       "tag": "0008_membership_welcome_email",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1793259637923,
+      "tag": "0009_membership_last_name_optional",
+      "breakpoints": true
     }
   ]
 }

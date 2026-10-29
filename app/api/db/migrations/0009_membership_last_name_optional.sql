@@ -1,0 +1,1 @@
+ALTER TABLE "membership_applications" ALTER COLUMN "last_name" DROP NOT NULL;

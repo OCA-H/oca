@@ -2,6 +2,7 @@ import React from 'react';
 import Link from 'next/link';
 import { MEMBERSHIP_CONTENT } from '../../content/membership.content';
 import type { MembershipPaymentState, ReceiptRow } from '../../handler/useMembershipPaymentStatusHandler';
+import { formatPaymentDate } from '../../helper/membership.helper';
 import { PaymentStatusIcon } from './PaymentStatusIcon';
 
 interface PaymentReceiptCardProps {
@@ -42,6 +43,22 @@ export const PaymentReceiptCard: React.FC<PaymentReceiptCardProps> = ({
 
   return (
     <article className={`ps-card ps-tone-${copy.tone}`} aria-labelledby="ps-receipt-title">
+      {/* Letterhead: shown only when the receipt is printed or saved as PDF. */}
+      <div className="ps-print-head" aria-hidden="true">
+        {/* eslint-disable-next-line @next/next/no-img-element -- printed letterhead; next/image adds nothing here */}
+        <img src="/images/oca-crest.png" alt="" width={56} height={56} />
+        <div>
+          <b>{content.print.org}</b>
+          <span>{content.print.address}</span>
+        </div>
+        <div className="ps-print-meta">
+          <b>{content.print.title}</b>
+          <span>
+            {content.print.printedOn} {formatPaymentDate(new Date().toISOString())}
+          </span>
+        </div>
+      </div>
+
       <div className="ps-card-head">
         <div>
           <span className="ps-card-k">Old Columbans Association</span>
@@ -105,6 +122,11 @@ export const PaymentReceiptCard: React.FC<PaymentReceiptCardProps> = ({
           Payments are processed securely by CCAvenue in Indian Rupees.
           {isPaid && ' This page is your payment receipt; please keep the order reference for your records.'}
         </p>
+
+        <div className="ps-print-foot" aria-hidden="true">
+          <p>{content.print.note}</p>
+          <p>{content.print.contact}</p>
+        </div>
       </div>
     </article>
   );

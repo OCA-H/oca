@@ -14,7 +14,7 @@ export const membershipApplications = pgTable(
     batchYear: varchar("batch_year", { length: 20 }).notNull(),
     firstName: varchar("first_name", { length: 80 }).notNull(),
     middleName: varchar("middle_name", { length: 80 }),
-    lastName: varchar("last_name", { length: 80 }).notNull(),
+    lastName: varchar("last_name", { length: 80 }),
     dateOfBirth: date("date_of_birth", { mode: "string" }),
     email: varchar("email", { length: 255 }).notNull(),
     countryCode: varchar("country_code", { length: 8 }).notNull(),

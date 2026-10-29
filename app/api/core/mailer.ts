@@ -1,5 +1,6 @@
 import "server-only";
 import nodemailer, { type Transporter } from "nodemailer";
+import { inlineImages } from "./emailLayout";
 import { HttpError } from "./httpError";
 
 // Sends email through the SMTP mailbox in the SMTP_* settings (see .env.example).
@@ -99,6 +100,8 @@ export class Mailer {
     await this.transport.sendMail({
       from: process.env.MAIL_FROM || process.env.SMTP_USER,
       ...message,
+      // The crest and icons the HTML references by cid:, carried inside the message.
+      attachments: inlineImages(message.html),
     });
   }
 }

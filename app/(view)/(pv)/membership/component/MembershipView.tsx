@@ -196,7 +196,7 @@ export const MembershipView: React.FC<MembershipViewProps> = ({ fee }) => {
                 </div>
               </div>
 
-              <div className="cf-row3 eq">
+              <div className="field-row">
                 <div className="field">
                   <label htmlFor="m-first">First name *</label>
                   <input
@@ -219,19 +219,6 @@ export const MembershipView: React.FC<MembershipViewProps> = ({ fee }) => {
                     autoComplete="additional-name"
                     placeholder="Middle name"
                     value={formData.middle_name}
-                    onChange={handleChange}
-                  />
-                </div>
-                <div className="field">
-                  <label htmlFor="m-last">Last name *</label>
-                  <input
-                    id="m-last"
-                    name="last_name"
-                    type="text"
-                    required
-                    autoComplete="family-name"
-                    placeholder="Family name"
-                    value={formData.last_name}
                     onChange={handleChange}
                   />
                 </div>

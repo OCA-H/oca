@@ -193,7 +193,6 @@ export class ProfileService {
     }
     if (!TITLES.includes(data.title) && data.title) fields.title = "Choose a title from the list.";
     if (!data.firstName) fields.firstName = "First name is required.";
-    if (!data.lastName) fields.lastName = "Last name is required.";
     if (!EMAIL_PATTERN.test(data.email)) fields.email = "Enter a valid email address.";
     if (!data.mobile) fields.mobile = "Mobile is required.";
     else if (!locked.includes("mobile") && !MOBILE_PATTERN.test(data.mobile)) {

@@ -26,11 +26,11 @@ import type { MembershipApplication } from "../schema/membershipSchema";
 const gatewayValue = (value: string | null) => (value && value !== "null" ? value : null);
 
 /** The member's ID on a deep green card, in the style of the e-Membership Card. */
-const memberIdCard = (baseUrl: string, memberId: string, membershipType: string) => `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:${C.brandDeep};border-radius:12px;border-collapse:separate;">
+const memberIdCard = (memberId: string, membershipType: string) => `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:${C.brandDeep};border-radius:12px;border-collapse:separate;">
     <tr><td style="padding:20px 22px;">
       <table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr>
         <td valign="middle" width="44" style="width:44px;">
-          <table role="presentation" cellpadding="0" cellspacing="0"><tr><td align="center" valign="middle" width="36" height="36" style="width:36px;height:36px;border-radius:8px;background:rgba(201,162,39,.16);border:1px solid ${C.gold};">${emailIcon(baseUrl, "idcard", "gold", 20)}</td></tr></table>
+          <table role="presentation" cellpadding="0" cellspacing="0"><tr><td align="center" valign="middle" width="36" height="36" style="width:36px;height:36px;border-radius:8px;background:rgba(201,162,39,.16);border:1px solid ${C.gold};">${emailIcon("idcard", "gold", 20)}</td></tr></table>
         </td>
         <td valign="middle" style="font-family:Inter,-apple-system,'Segoe UI',Arial,sans-serif;">
           <p style="margin:0;font-size:11.5px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:${C.gold};">Your member ID</p>
@@ -102,7 +102,7 @@ export function membershipWelcomeEmail(params: {
     preheader: `Your ${application.membershipType} registration is complete. Member ID ${memberId}.`,
     footerNote: "Please keep this email as the acknowledgement of your membership payment.",
     rows: `${emailHero({
-      badge: iconBadge(baseUrl, "check", "white", { size: 64, bg: C.brand, ring: C.gold }),
+      badge: iconBadge("check", "white", { size: 64, bg: C.brand, ring: C.gold }),
       eyebrow: "Registration complete",
       title: `Welcome to the OCA, ${application.firstName}`,
       lead: "Your membership registration has gone through.",
@@ -113,11 +113,11 @@ export function membershipWelcomeEmail(params: {
           `Thank you for joining the Old Columbans Association as a ${escapeHtml(application.membershipType)}. We are delighted to welcome you back into the Columban family, and we look forward to seeing you at our gatherings.`,
           { soft: true, margin: "0 0 22px" }
         )}
-        ${memberIdCard(baseUrl, memberId, application.membershipType)}
+        ${memberIdCard(memberId, application.membershipType)}
         ${emailSubhead("Payment details")}
-        ${emailDetails(baseUrl, rows)}
+        ${emailDetails(rows)}
         ${emailSubhead("What’s next")}
-        ${emailSteps(baseUrl, steps)}
+        ${emailSteps(steps)}
         <table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr><td align="center" style="padding:28px 0 0;">${emailButton(signInUrl, "Sign in to the members’ area")}</td></tr></table>
         ${emailNote(
           `Questions about your membership? Write to the Secretariat at <a href="mailto:${SECRETARIAT.email}" style="color:${C.brandMid};font-weight:600;text-decoration:none;">${SECRETARIAT.email}</a>.`
