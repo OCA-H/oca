@@ -18,8 +18,8 @@ function CauseCard({ cause, index }: { cause: HomeCause; index: number }) {
   return (
     <div className={`cause-card${featured ? '' : ' muted'}`}>
       <div className={`photo-tile ${tone}`}>
+        <img className="tile-img" src={cause.image} alt={cause.imageAlt} loading="lazy" decoding="async" />
         <div className="tile-icon">
-          <img className="tile-img" src={cause.image} alt={cause.imageAlt} loading="lazy" decoding="async" />
           <svg viewBox="0 0 24 24" fill="none"><path d={CAUSE_ICONS[index % CAUSE_ICONS.length]} stroke="#fff" strokeWidth="1.4"/></svg>
         </div>
         {cause.badge && (
