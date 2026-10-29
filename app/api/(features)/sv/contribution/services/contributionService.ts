@@ -4,7 +4,7 @@ import { HttpError, type FieldErrors } from "@/app/api/core/httpError";
 import { CcAvenue, type CcAvenueCheckout } from "@/app/api/core/ccavenue";
 import { FILE_KINDS, readUploadedFile, type UploadRules, type UploadedFile } from "@/app/api/core/fileUpload";
 import { Mailer } from "@/app/api/core/mailer";
-import { getRegistrationCcEmails } from "@/app/api/(features)/(pview)/site/services/siteContentService";
+import { getContactDetails, getRegistrationCcEmails } from "@/app/api/(features)/(pview)/site/services/siteContentService";
 import { createSignedToken, verifySignedToken, type SessionData } from "@/app/api/core/session";
 import { storage } from "@/app/api/core/storage";
 import { UserRepository } from "@/app/api/(features)/(pview)/auth/repository/userRepository";
@@ -203,7 +203,7 @@ export class ContributionService {
       if (!Number.isInteger(amount) || amount < MIN_CONTRIBUTION) {
         fields.amount = `Enter a whole amount of at least ₹${MIN_CONTRIBUTION}.`;
       } else if (amount > MAX_CONTRIBUTION) {
-        fields.amount = "For a contribution this large, please write to the Secretariat at info@oldcolumban.net.";
+        fields.amount = `For a contribution this large, please write to the Secretariat at ${(await getContactDetails()).email}.`;
       }
     }
 
@@ -366,8 +366,9 @@ export class ContributionService {
     if (contribution.thankYouEmailSentAt) return;
     if (!(await this.repository.claimThankYouEmail(contribution.id))) return;
     try {
-      const cc = (await getRegistrationCcEmails()).filter((email) => email !== contribution.email);
-      await Mailer.send(contributionThankYouEmail(contribution, baseUrl, cc));
+      const [ccEmails, contact] = await Promise.all([getRegistrationCcEmails(), getContactDetails()]);
+      const cc = ccEmails.filter((email) => email !== contribution.email);
+      await Mailer.send(contributionThankYouEmail(contribution, baseUrl, cc, contact));
     } catch (error) {
       console.error(`Contribution ${contribution.orderId}: thank-you email to ${contribution.email} failed:`, error);
       await this.repository.releaseThankYouEmail(contribution.id).catch(() => {});

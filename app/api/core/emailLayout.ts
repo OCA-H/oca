@@ -1,10 +1,12 @@
 import "server-only";
 import type { Attachment } from "nodemailer/lib/mailer";
 import { themeColors } from "@/template/theme/colors";
+import { phoneHref, type ContactDetailsContent } from "@/app/api/(features)/(pview)/site/schema/sectionSpecs";
 import { EMAIL_IMAGES } from "./emailImages.generated";
 
 // The building blocks of the website's emails, in the site's theme: the branded frame (header,
-// gold rule, footer with the Secretariat's contacts) and the pieces that go inside it.
+// gold rule, footer with the Secretariat's contacts) and the pieces that go inside it. The contacts
+// are the ones set in the admin panel (Settings → Contact details): callers pass getContactDetails().
 // Table layout and inline styles throughout, because email clients ignore most CSS. The crest and
 // icons travel inside the email as inline attachments referenced by cid: (see inlineImages), so
 // they show without the site being reachable; each icon sits in a coloured cell, so the layout
@@ -37,13 +39,10 @@ const C = EMAIL_COLORS;
 const SANS = "Inter,-apple-system,'Segoe UI',Roboto,Arial,sans-serif";
 const SERIF = "Raleway,'Segoe UI',Arial,sans-serif";
 
-export const SECRETARIAT = {
-  name: "The OCA Secretariat",
-  email: "info@oldcolumban.net",
-  phone: "011-23748666",
-  phoneHref: "+911123748666",
-  address: "St. Columba’s School, Ashoka Place, New Delhi – 110 001",
-} as const;
+/** The contact lines that close every plain-text email: name, email · phone, address. */
+export const contactSignature = (contact: ContactDetailsContent) => `${contact.name}
+${contact.email} · ${contact.phone}
+${contact.address}`;
 
 export type EmailIcon =
   | "check"
@@ -196,8 +195,14 @@ export const emailNote = (html: string) =>
   `<p style="margin:24px 0 0;padding:14px 16px;background:${C.tintGold};border-left:3px solid ${C.gold};font-family:${SANS};font-size:13.5px;line-height:1.6;color:${C.textSoft};">${html}</p>`;
 
 /** The sign-off: "With warm regards, / The OCA Secretariat". */
-export const emailSignOff = (closing: string) =>
-  emailParagraph(`${escapeHtml(closing)},<br><b style="font-family:${SERIF};color:${C.brandDeep};">${SECRETARIAT.name}</b>`, { margin: "26px 0 0" });
+export const emailSignOff = (closing: string, contact: ContactDetailsContent) =>
+  emailParagraph(`${escapeHtml(closing)},<br><b style="font-family:${SERIF};color:${C.brandDeep};">${escapeHtml(contact.name)}</b>`, { margin: "26px 0 0" });
+
+/** The contact email as a link, for use inside a sentence. */
+export const emailContactLink = (contact: ContactDetailsContent) => {
+  const email = escapeHtml(contact.email);
+  return `<a href="mailto:${email}" style="color:${C.brandMid};font-weight:600;text-decoration:none;">${email}</a>`;
+};
 
 const footerLine = (icon: EmailIcon, html: string) => `<tr>
     <td width="22" valign="top" style="width:22px;padding:3px 0;">${emailIcon(icon, "soft", 14)}</td>
@@ -224,8 +229,17 @@ const MOBILE_CSS = `@media only screen and (max-width:480px){
  * The full email: branded header, the given body rows (<tr>s, e.g. from emailHero and a content
  * row), and the footer. `preheader` is the line inbox lists show beside the subject.
  */
-export function emailLayout(p: { baseUrl: string; title: string; preheader: string; rows: string; footerNote?: string }): string {
+export function emailLayout(p: {
+  baseUrl: string;
+  title: string;
+  preheader: string;
+  rows: string;
+  footerNote?: string;
+  contact: ContactDetailsContent;
+}): string {
   const base = escapeHtml(p.baseUrl);
+  const contact = p.contact;
+  const email = escapeHtml(contact.email);
   const link = `color:${C.brandMid};text-decoration:none;`;
   return `<!doctype html>
 <html lang="en"><head>
@@ -254,11 +268,11 @@ export function emailLayout(p: { baseUrl: string; title: string; preheader: stri
       ${p.rows}
       <tr><td class="oca-pad" style="padding:20px 32px 24px;background:${C.panel};border-top:1px solid ${C.border};">
         ${p.footerNote ? `<p style="margin:0 0 12px;font-family:${SANS};font-size:12.5px;line-height:1.6;color:${C.textSoft};">${p.footerNote}</p>` : ""}
-        <p style="margin:0 0 8px;font-family:${SERIF};font-size:13.5px;font-weight:700;color:${C.brandDeep};">${SECRETARIAT.name}</p>
+        <p style="margin:0 0 8px;font-family:${SERIF};font-size:13.5px;font-weight:700;color:${C.brandDeep};">${escapeHtml(contact.name)}</p>
         <table role="presentation" cellpadding="0" cellspacing="0">
-          ${footerLine("mail", `<a href="mailto:${SECRETARIAT.email}" style="${link}">${SECRETARIAT.email}</a>`)}
-          ${footerLine("phone", `<a href="tel:${SECRETARIAT.phoneHref}" style="${link}">${SECRETARIAT.phone}</a>`)}
-          ${footerLine("pin", escapeHtml(SECRETARIAT.address))}
+          ${footerLine("mail", `<a href="mailto:${email}" style="${link}">${email}</a>`)}
+          ${footerLine("phone", `<a href="${escapeHtml(phoneHref(contact.phone))}" style="${link}">${escapeHtml(contact.phone)}</a>`)}
+          ${footerLine("pin", escapeHtml(contact.address))}
         </table>
       </td></tr>
     </table>

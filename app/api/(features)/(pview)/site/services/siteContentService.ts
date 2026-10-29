@@ -5,7 +5,7 @@ import { HttpError } from "@/app/api/core/httpError";
 import { storage, type StoredFile } from "@/app/api/core/storage";
 import type { UploadedFile } from "@/app/api/core/fileUpload";
 import { SiteContentRepository } from "../repository/siteContentRepository";
-import { SECTION_SPECS, SITE_SECTION_KEYS, sectionSpec, type EmailSettingsContent, type EventDinnerContent, type MembershipFeeContent, type EventLunchContent, type HomeContent, type SectionSpec, type SiteSectionKey } from "../schema/sectionSpecs";
+import { SECTION_SPECS, SITE_SECTION_KEYS, sectionSpec, type ContactDetailsContent, type EmailSettingsContent, type EventDinnerContent, type MembershipFeeContent, type EventLunchContent, type HomeContent, type SectionSpec, type SiteSectionKey } from "../schema/sectionSpecs";
 import { MEMBERSHIP_FEE_DEFAULTS, SECTION_DEFAULTS } from "./siteDefaults";
 import { splitEmails, validateSection } from "./sectionValidator";
 
@@ -90,6 +90,9 @@ export async function getRegistrationCcEmails(): Promise<string[]> {
   const settings = (await getSectionContent(SITE_SECTION_KEYS.settingsEmails)) as unknown as EmailSettingsContent;
   return splitEmails(settings.registrationCc ?? "");
 }
+
+/** The Association's contact details, as set in the admin panel (Settings → Contact details). */
+export const getContactDetails = async () => (await getSectionContent(SITE_SECTION_KEYS.settingsContact)) as unknown as ContactDetailsContent;
 
 export class SiteContentService {
   constructor(private readonly repository: SiteContentRepository) {}

@@ -1,5 +1,6 @@
 import React from 'react';
 import Link from 'next/link';
+import { useContact } from '@/app/(view)/common/component/ContactProvider';
 import { MEMBERSHIP_CONTENT } from '../../content/membership.content';
 import type { MembershipPaymentState, ReceiptRow } from '../../handler/useMembershipPaymentStatusHandler';
 import { formatPaymentDate } from '../../helper/membership.helper';
@@ -23,6 +24,7 @@ export const PaymentReceiptCard: React.FC<PaymentReceiptCardProps> = ({
   onRefresh,
 }) => {
   const content = MEMBERSHIP_CONTENT.paymentStatus;
+  const contact = useContact();
   const copy = content.states[state];
   const isPaid = state === 'paid';
 
@@ -49,7 +51,7 @@ export const PaymentReceiptCard: React.FC<PaymentReceiptCardProps> = ({
         <img src="/images/oca-crest.png" alt="" width={56} height={56} />
         <div>
           <b>{content.print.org}</b>
-          <span>{content.print.address}</span>
+          <span>{contact.address}</span>
         </div>
         <div className="ps-print-meta">
           <b>{content.print.title}</b>
@@ -125,7 +127,7 @@ export const PaymentReceiptCard: React.FC<PaymentReceiptCardProps> = ({
 
         <div className="ps-print-foot" aria-hidden="true">
           <p>{content.print.note}</p>
-          <p>{content.print.contact}</p>
+          <p>{contact.name} · {contact.email} · {contact.phone}</p>
         </div>
       </div>
     </article>

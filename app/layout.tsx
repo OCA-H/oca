@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { Raleway, Inter } from "next/font/google";
 import "./globals.css";
+import { ContactProvider } from "@/app/(view)/common/component/ContactProvider";
+import { getContactDetails } from "@/app/api/(features)/(pview)/site/services/siteContentService";
 
 const raleway = Raleway({
   variable: "--font-raleway",
@@ -21,7 +23,9 @@ export const metadata: Metadata = {
   description: "The Old Columbans Association of St. Columba's School, New Delhi — fellowship, membership, governance and support for the school.",
 };
 
-export default function RootLayout({
+// The contact details come from a cached read (Settings → Contact details in the admin panel), so
+// pages still prerender; saving them refreshes every page.
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
@@ -36,7 +40,9 @@ export default function RootLayout({
           rel="stylesheet"
         />
       </head>
-      <body>{children}</body>
+      <body>
+        <ContactProvider contact={await getContactDetails()}>{children}</ContactProvider>
+      </body>
     </html>
   );
 }

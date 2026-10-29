@@ -3,7 +3,7 @@
 // add its spec here, its defaults in services/siteDefaults.ts, and read it where the page renders.
 // No server-only imports: the admin panel (a client component) imports this file too.
 
-export type FieldType = "text" | "textarea" | "image" | "link" | "select" | "number" | "emails";
+export type FieldType = "text" | "textarea" | "image" | "link" | "select" | "number" | "email" | "emails";
 
 export interface FieldSpec {
   key: string;
@@ -60,6 +60,7 @@ export const SITE_SECTION_KEYS = {
   eventsLunch: "events.lunch",
   membershipFee: "membership.fee",
   settingsEmails: "settings.emails",
+  settingsContact: "settings.contact",
 } as const;
 
 export type SiteSectionKey = (typeof SITE_SECTION_KEYS)[keyof typeof SITE_SECTION_KEYS];
@@ -221,6 +222,25 @@ export interface EmailSettingsContent {
   registrationCc: string;
 }
 
+/** How members reach the Association: shown in the footer, on the pages, and in every email. */
+export interface ContactDetailsContent {
+  /** "The OCA Secretariat": who the email and phone reach, and who signs the emails. */
+  name: string;
+  email: string;
+  /** As it is shown, e.g. "011-23748666"; the call link is made from its digits. */
+  phone: string;
+  address: string;
+  /** Social profiles for the footer; an empty one hides its icon. */
+  facebook: string;
+  x: string;
+  instagram: string;
+  youtube: string;
+  linkedin: string;
+}
+
+/** "011-23748666" → "tel:01123748666": the digits, and a leading + if there is one. */
+export const phoneHref = (phone: string): string => `tel:${phone.trim().startsWith("+") ? "+" : ""}${phone.replace(/\D/g, "")}`;
+
 /** Everything the home page reads from the database. */
 export interface HomeContent {
   events: HomeEventsContent;
@@ -236,6 +256,7 @@ export interface HomeContent {
 const IMAGE_HINT = "Upload a JPG, PNG or WebP, or paste an image address.";
 const ALT_HINT = "Describes the image for screen readers and search engines.";
 const LINK_HINT = "A page on this site (/annual-dinner) or a full address (https://…).";
+const SOCIAL_HINT = "The full address of the page (https://…). Leave empty to hide its icon in the footer.";
 
 /** Eyebrow, heading and intro: every section opens with them. */
 const sectionHead = (introMax = 400): FieldSpec[] => [
@@ -519,6 +540,25 @@ export const SECTION_SPECS: SectionSpec[] = [
         placeholder: "ocacentre@gmail.com, secretary@example.com",
         hint: "Copied on every email the website sends: membership welcomes, Annual Dinner passes, contribution thank-yous and Suggestion Box messages. Password reset emails are never copied, as their link lets anyone set the member's password. Separate addresses with commas; leave empty to copy no one.",
       },
+    ],
+    lists: [],
+  },
+  {
+    key: SITE_SECTION_KEYS.settingsContact,
+    page: "settings",
+    label: "Contact details",
+    description: "The email, phone and address shown in the footer, on every page that asks members to get in touch, and in the website's emails.",
+    href: "/#contact",
+    fields: [
+      { key: "name", label: "Contact name", type: "text", max: 80, required: true, heading: "Contact", placeholder: "The OCA Secretariat", hint: "Who members reach, and who signs the website's emails." },
+      { key: "email", label: "Email", type: "email", max: 255, required: true, placeholder: "info@oldcolumban.net", hint: "Shown on the site and in emails. Suggestion Box messages are sent here." },
+      { key: "phone", label: "Phone", type: "text", max: 30, required: true, placeholder: "011-23748666", hint: "As it should read. Tapping it calls the digits." },
+      { key: "address", label: "Address", type: "textarea", max: 200, required: true, placeholder: "St. Columba’s School, Ashoka Place, New Delhi – 110 001" },
+      { key: "facebook", label: "Facebook", type: "link", heading: "Social media", placeholder: "https://www.facebook.com/…", hint: SOCIAL_HINT },
+      { key: "x", label: "X (Twitter)", type: "link", placeholder: "https://x.com/…", hint: SOCIAL_HINT },
+      { key: "instagram", label: "Instagram", type: "link", placeholder: "https://www.instagram.com/…", hint: SOCIAL_HINT },
+      { key: "youtube", label: "YouTube", type: "link", placeholder: "https://www.youtube.com/@…", hint: SOCIAL_HINT },
+      { key: "linkedin", label: "LinkedIn", type: "link", placeholder: "https://www.linkedin.com/…", hint: SOCIAL_HINT },
     ],
     lists: [],
   },

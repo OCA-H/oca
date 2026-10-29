@@ -4,6 +4,7 @@ import React from 'react';
 import Link from 'next/link';
 import { ROUTES } from '@/app/(view)/common/helper/routes';
 import { useAuth } from '@/app/(view)/common/helper/useAuth';
+import { useContact } from '@/app/(view)/common/component/ContactProvider';
 import { CustomDropdown, DatePicker } from '@/app/(view)/common';
 import { DATE_OF_BIRTH_PICKER } from '@/app/(view)/common/helper/common.helper';
 import { MEMBERSHIP_CONTENT } from '../content/membership.content';
@@ -17,6 +18,7 @@ interface MembershipViewProps {
 
 export const MembershipView: React.FC<MembershipViewProps> = ({ fee }) => {
   const { isAuthenticated } = useAuth();
+  const contact = useContact();
   const content = MEMBERSHIP_CONTENT;
   const feeLabel = formatRupees(fee);
   const {
@@ -371,8 +373,8 @@ export const MembershipView: React.FC<MembershipViewProps> = ({ fee }) => {
               <p className="form-note">
                 The Secretariat verifies each application against School records before
                 enrolment. Questions? Write to{' '}
-                <a href="mailto:info@oldcolumban.net">info@oldcolumban.net</a> or call
-                011-23748666.
+                <a href={contact.mailto()}>{contact.email}</a> or call{' '}
+                <a href={contact.tel}>{contact.phone}</a>.
               </p>
             </div>
 

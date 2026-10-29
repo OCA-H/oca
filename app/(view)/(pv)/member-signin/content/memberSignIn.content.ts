@@ -90,7 +90,8 @@ export const forgotPasswordContent = {
   trouble: {
     text: 'No longer have access to that email? ',
     linkText: 'Contact the Secretariat',
-    linkHref: 'mailto:info@oldcolumban.net?subject=Help%20signing%20in',
+    /** Written to the contact email set in the admin panel. */
+    linkSubject: 'Help signing in',
   },
 };
 

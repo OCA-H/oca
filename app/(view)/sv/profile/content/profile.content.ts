@@ -217,9 +217,6 @@ export const profileContent = {
   help: {
     title: "Need a hand?",
     desc: "The Secretariat can help with your membership, payments and details.",
-    phone: "011-23748666",
-    phoneHref: "tel:01123748666",
-    email: "info@oldcolumban.net",
   },
 
   photo: {

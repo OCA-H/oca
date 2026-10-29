@@ -2,12 +2,14 @@
 
 import React from 'react';
 import Link from 'next/link';
+import { useContact } from '@/app/(view)/common/component/ContactProvider';
 import { memberSignInContent, forgotPasswordContent } from '../content';
 import { useForgotPasswordHandler } from '../handler';
 import { PasswordRecoverySide, PasswordRecoveryNotice } from './subcomponents';
 
 export const ForgotPasswordView: React.FC = () => {
   const content = forgotPasswordContent;
+  const contact = useContact();
   const { identifier, setIdentifier, isLoading, error, sentTo, handleSubmit, tryAgain } = useForgotPasswordHandler();
 
   return (
@@ -94,7 +96,7 @@ export const ForgotPasswordView: React.FC = () => {
               )}
               <p className="si-foot">
                 {content.trouble.text}
-                <a href={content.trouble.linkHref}>{content.trouble.linkText}</a>.
+                <a href={contact.mailto(content.trouble.linkSubject)}>{content.trouble.linkText}</a>.
               </p>
             </div>
           </div>

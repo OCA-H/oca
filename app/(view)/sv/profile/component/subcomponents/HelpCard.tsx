@@ -1,9 +1,11 @@
 import React from 'react';
+import { useContact } from '@/app/(view)/common/component/ContactProvider';
 import { profileContent } from '../../content';
 import { ProfileIcon } from './ProfileIcon';
 
 export const HelpCard: React.FC = () => {
   const { help } = profileContent;
+  const contact = useContact();
   return (
     <aside className="mp-help" aria-label="Help">
       <span className="mp-help-ico">
@@ -14,8 +16,8 @@ export const HelpCard: React.FC = () => {
         <span>{help.desc}</span>
       </div>
       <div className="mp-help-links">
-        <a href={help.phoneHref}>{help.phone}</a>
-        <a href={`mailto:${help.email}`}>{help.email}</a>
+        <a href={contact.tel}>{contact.phone}</a>
+        <a href={contact.mailto()}>{contact.email}</a>
       </div>
     </aside>
   );

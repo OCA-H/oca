@@ -3,11 +3,13 @@
 import React from 'react';
 import Link from 'next/link';
 import { ROUTES } from '@/app/(view)/common/helper/routes';
+import { useContact } from '@/app/(view)/common/component/ContactProvider';
 import { useDonationHandler } from '../handler/useDonationHandler';
 import { ContributionForm, ContributionLockOverlay, ContributionDummyPreview } from './subcomponents';
 
 export const DonationView: React.FC = () => {
   const handler = useDonationHandler();
+  const contact = useContact();
   const { content, isAuthenticated, showResetModal, closeResetModal, confirmReset, preselectFund } = handler;
 
   const { breadcrumbs, hero, aside, impact, featuredCause, trust, cta } = content;
@@ -227,9 +229,8 @@ export const DonationView: React.FC = () => {
               </svg>
               <h5>{trust.cells[2].title}</h5>
               <p>
-                Call the Secretariat on 011-23748666 or write to{' '}
-                <a href="mailto:info@oldcolumban.net">info@oldcolumban.net</a>. St. Columba&rsquo;s
-                School, Ashoka Place, New Delhi &ndash; 110 001.
+                Call the Secretariat on <a href={contact.tel}>{contact.phone}</a> or write to{' '}
+                <a href={contact.mailto()}>{contact.email}</a>. {contact.address}.
               </p>
             </div>
           </div>

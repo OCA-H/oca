@@ -1,7 +1,7 @@
 import "server-only";
 import { HttpError, type FieldErrors } from "@/app/api/core/httpError";
 import { Mailer } from "@/app/api/core/mailer";
-import { getRegistrationCcEmails } from "@/app/api/(features)/(pview)/site/services/siteContentService";
+import { getContactDetails, getRegistrationCcEmails } from "@/app/api/(features)/(pview)/site/services/siteContentService";
 import { isUniqueViolation } from "@/app/api/core/baseRepository";
 import { hashPassword, verifyPassword } from "@/app/api/core/auth";
 import { dateOfBirthError } from "@/app/api/core/dateOfBirth";
@@ -54,7 +54,6 @@ const LIFETIME_TYPES = ["Life Member", "Honorary Member"];
 const MIN_PASSWORD_LENGTH = 8;
 /** Hashing cost grows with length, so very long input could be used to tie up the server. */
 const MAX_PASSWORD_LENGTH = 128;
-const SECRETARIAT_EMAIL = process.env.SECRETARIAT_EMAIL || "info@oldcolumban.net";
 
 const text = (value: unknown) => (typeof value === "string" ? value.trim() : "");
 
@@ -305,8 +304,8 @@ export class ProfileService {
   }
 
   /**
-   * Emails the suggestion to the Secretariat, with the member's details so they can reply, copying
-   * the addresses set under Email settings in the admin panel.
+   * Emails the suggestion to the Secretariat (the email under Contact details in the admin panel),
+   * with the member's details so they can reply, copying the addresses set under Email settings.
    */
   async sendSuggestion(userId: number, subject: string, message: string): Promise<void> {
     const fields: FieldErrors = {};
@@ -320,9 +319,10 @@ export class ProfileService {
     const escape = (value: string) =>
       value.replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]!);
 
-    const cc = (await getRegistrationCcEmails()).filter((email) => email !== SECRETARIAT_EMAIL);
+    const [ccEmails, { email: secretariatEmail }] = await Promise.all([getRegistrationCcEmails(), getContactDetails()]);
+    const cc = ccEmails.filter((email) => email !== secretariatEmail);
     await Mailer.send({
-      to: SECRETARIAT_EMAIL,
+      to: secretariatEmail,
       ...(cc.length > 0 && { cc }),
       subject: `Member suggestion: ${subject}`,
       text: body,

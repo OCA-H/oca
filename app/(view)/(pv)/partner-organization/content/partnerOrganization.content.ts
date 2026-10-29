@@ -26,7 +26,8 @@ export const partnerOrganizationContent = {
   sideFooter: {
     question: 'Not a partner yet? ',
     linkText: 'Write to the Secretariat →',
-    linkHref: 'mailto:info@oldcolumban.net?subject=Becoming%20an%20OCA%20partner',
+    /** Written to the contact email set in the admin panel. */
+    linkSubject: 'Becoming an OCA partner',
   },
   main: {
     title: 'Partner Organization Login',

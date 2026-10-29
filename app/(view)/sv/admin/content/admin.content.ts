@@ -38,6 +38,7 @@ export type AdminIconName =
   | "sun"
   | "ticket"
   | "mail"
+  | "phone"
   | "rupee";
 
 export const SECTION_ICONS: Record<SiteSectionKey, AdminIconName> = {
@@ -51,6 +52,7 @@ export const SECTION_ICONS: Record<SiteSectionKey, AdminIconName> = {
   "events.lunch": "sun",
   "membership.fee": "rupee",
   "settings.emails": "mail",
+  "settings.contact": "phone",
 };
 
 /** The record panels, in menu order, under their menu group. Each has its own address, e.g. /sv/admin/passes. */

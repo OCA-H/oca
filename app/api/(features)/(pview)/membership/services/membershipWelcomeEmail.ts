@@ -1,9 +1,11 @@
 import "server-only";
 import type { MailMessage } from "@/app/api/core/mailer";
+import type { ContactDetailsContent } from "@/app/api/(features)/(pview)/site/schema/sectionSpecs";
 import {
   EMAIL_COLORS as C,
-  SECRETARIAT,
+  contactSignature,
   emailBody,
+  emailContactLink,
   emailButton,
   emailDetails,
   emailHero,
@@ -53,8 +55,9 @@ export function membershipWelcomeEmail(params: {
   memberId: string;
   cc: string[];
   baseUrl: string;
+  contact: ContactDetailsContent;
 }): MailMessage {
-  const { application, memberId, cc, baseUrl } = params;
+  const { application, memberId, cc, baseUrl, contact } = params;
   const fullName = [application.title, application.firstName, application.middleName, application.lastName]
     .filter(Boolean)
     .join(" ");
@@ -99,6 +102,7 @@ export function membershipWelcomeEmail(params: {
 
   const html = emailLayout({
     baseUrl,
+    contact,
     title: "Welcome to the Old Columbans Association",
     preheader: `Your ${application.membershipType} registration is complete. Member ID ${memberId}.`,
     footerNote: "Please keep this email as the acknowledgement of your membership payment.",
@@ -121,9 +125,9 @@ export function membershipWelcomeEmail(params: {
         ${emailSteps(steps)}
         <table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr><td align="center" style="padding:28px 0 0;">${emailButton(signInUrl, "Sign in to the members’ area")}</td></tr></table>
         ${emailNote(
-          `Questions about your membership? Write to the Secretariat at <a href="mailto:${SECRETARIAT.email}" style="color:${C.brandMid};font-weight:600;text-decoration:none;">${SECRETARIAT.email}</a>.`
+          `Questions about your membership? Write to the Secretariat at ${emailContactLink(contact)}.`
         )}
-        ${emailSignOff("With warm regards")}
+        ${emailSignOff("With warm regards", contact)}
       `)}`,
   });
 
@@ -139,14 +143,12 @@ ${rows.map(({ label, value }) => `${label}: ${value}`).join("\n")}
 WHAT'S NEXT
 ${steps.map((step) => `- ${step.title}: ${step.text}\n  ${step.href}`).join("\n")}
 
-Questions about your membership? Write to the Secretariat at ${SECRETARIAT.email}.
+Questions about your membership? Write to the Secretariat at ${contact.email}.
 
 Please keep this email as the acknowledgement of your membership payment.
 
 With warm regards,
-${SECRETARIAT.name}
-${SECRETARIAT.email} · ${SECRETARIAT.phone}
-${SECRETARIAT.address}`;
+${contactSignature(contact)}`;
 
   return {
     to: application.email,

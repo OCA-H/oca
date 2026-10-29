@@ -7,6 +7,7 @@ import { PaymentStatusIcon } from '@/app/(view)/(pv)/membership/component/subcom
 import { CONTRIBUTION_PAYMENT_STATUS_CONTENT } from '../content/contributionPaymentStatus.content';
 import { useContributionPaymentStatusHandler } from '../handler/useContributionPaymentStatusHandler';
 import type { ContributionResult } from '../services/contribution.service';
+import { useContact } from '@/app/(view)/common/component/ContactProvider';
 
 /** A heart, for a received contribution: thanks rather than a plain tick. */
 const HeartIcon: React.FC = () => (
@@ -33,7 +34,8 @@ export const ContributionPaymentStatusView: React.FC<ContributionPaymentStatusVi
     useContributionPaymentStatusHandler(result, orderRef);
   const content = CONTRIBUTION_PAYMENT_STATUS_CONTENT;
   const copy = content.states[state];
-  const helpSubject = encodeURIComponent(`Contribution${orderId ? ` – ${orderId}` : ''}`);
+  const contact = useContact();
+  const helpSubject = `Contribution${orderId ? ` – ${orderId}` : ''}`;
 
   return (
     <>
@@ -151,8 +153,8 @@ export const ContributionPaymentStatusView: React.FC<ContributionPaymentStatusVi
             <aside className="ps-help">
               <h4>{content.help.title}</h4>
               <p>{content.help.desc}</p>
-              <a href={`mailto:${content.help.email}?subject=${helpSubject}`}>{content.help.email}</a>
-              <a href={`tel:${content.help.phone.replace(/-/g, '')}`}>{content.help.phone}</a>
+              <a href={contact.mailto(helpSubject)}>{contact.email}</a>
+              <a href={contact.tel}>{contact.phone}</a>
             </aside>
           </div>
         </div>

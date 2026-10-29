@@ -1,5 +1,6 @@
 import {
   SITE_SECTION_KEYS,
+  type ContactDetailsContent,
   type EmailSettingsContent,
   type MembershipFeeContent,
   type EventDinnerContent,
@@ -196,6 +197,18 @@ export const EMAIL_SETTINGS_DEFAULTS: EmailSettingsContent = {
   registrationCc: "ocacentre@gmail.com",
 };
 
+export const CONTACT_DEFAULTS: ContactDetailsContent = {
+  name: "The OCA Secretariat",
+  email: "info@oldcolumban.net",
+  phone: "011-23748666",
+  address: "St. Columba’s School, Ashoka Place, New Delhi – 110 001",
+  facebook: "",
+  x: "",
+  instagram: "",
+  youtube: "",
+  linkedin: "",
+};
+
 /** Each section key's defaults, as stored data. */
 export const SECTION_DEFAULTS: Record<SiteSectionKey, object> = {
   [SITE_SECTION_KEYS.homeEvents]: HOME_DEFAULTS.events,
@@ -208,4 +221,5 @@ export const SECTION_DEFAULTS: Record<SiteSectionKey, object> = {
   [SITE_SECTION_KEYS.eventsLunch]: LUNCH_DEFAULTS,
   [SITE_SECTION_KEYS.membershipFee]: MEMBERSHIP_FEE_DEFAULTS,
   [SITE_SECTION_KEYS.settingsEmails]: EMAIL_SETTINGS_DEFAULTS,
+  [SITE_SECTION_KEYS.settingsContact]: CONTACT_DEFAULTS,
 };

@@ -3,9 +3,12 @@
 import React from 'react';
 import Link from 'next/link';
 import { ROUTES } from '@/app/(view)/common/helper/routes';
+import { useContact } from '@/app/(view)/common/component/ContactProvider';
 import type { EventLunchContent } from '@/app/api/(features)/(pview)/site/schema/sectionSpecs';
 
 export const AnnualLunchView: React.FC<{ content: EventLunchContent }> = ({ content }) => {
+  const contact = useContact();
+  const rsvpHref = contact.mailto('RSVP - OCA Annual Lunch 2025');
   return (
     <>
       <nav className="crumb" aria-label="Breadcrumb">
@@ -24,10 +27,7 @@ export const AnnualLunchView: React.FC<{ content: EventLunchContent }> = ({ cont
             <h1>{content.title}</h1>
             {content.lead && <p className="lead">{content.lead}</p>}
             <div className="page-hero-actions">
-              <a
-                className="btn btn-primary"
-                href="mailto:info@oldcolumban.net?subject=RSVP%20-%20OCA%20Annual%20Lunch%202025"
-              >
+              <a className="btn btn-primary" href={rsvpHref}>
                 RSVP for this year&rsquo;s Lunch
               </a>
               <a className="btn btn-secondary" href="https://www.oldcolumban.net/platinum-jubilee-lunch/">
@@ -166,10 +166,7 @@ export const AnnualLunchView: React.FC<{ content: EventLunchContent }> = ({ cont
             <p>RSVP with the Secretariat so we can plan the tables, the food and the fun &mdash; Columban-sized.</p>
           </div>
           <div className="cta-band-actions">
-            <a
-              className="btn btn-gold"
-              href="mailto:info@oldcolumban.net?subject=RSVP%20-%20OCA%20Annual%20Lunch%202025"
-            >
+            <a className="btn btn-gold" href={rsvpHref}>
               RSVP Now
             </a>
             <Link className="btn btn-secondary" href={ROUTES.MEMBERSHIP}>

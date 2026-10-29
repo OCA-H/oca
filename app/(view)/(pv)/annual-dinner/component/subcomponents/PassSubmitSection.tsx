@@ -2,6 +2,7 @@
 
 import React from 'react';
 import type { AuthUser } from '@/app/(view)/common/helper/useAuth';
+import { useContact } from '@/app/(view)/common/component/ContactProvider';
 import type { SummaryLine } from '../../handler/useAnnualDinnerHandler';
 
 interface PassSubmitSectionProps {
@@ -23,6 +24,7 @@ export const PassSubmitSection: React.FC<PassSubmitSectionProps> = ({
   error,
   onReset,
 }) => {
+  const contact = useContact();
   return (
     <div className="cf-submit">
       {user && (
@@ -90,8 +92,8 @@ export const PassSubmitSection: React.FC<PassSubmitSectionProps> = ({
       </div>
 
       <p className="form-note">
-        Payments are processed securely by CCAvenue. Questions about passes? Write to <a href="mailto:info@oldcolumban.net">info@oldcolumban.net</a> or call
-        011-23748666.
+        Payments are processed securely by CCAvenue. Questions about passes? Write to <a href={contact.mailto()}>{contact.email}</a> or call{' '}
+        <a href={contact.tel}>{contact.phone}</a>.
       </p>
     </div>
   );

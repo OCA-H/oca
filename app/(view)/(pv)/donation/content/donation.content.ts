@@ -15,7 +15,8 @@ export interface ImpactCell {
 export interface TrustCell {
   icon: 'secure' | 'accounted' | 'talk';
   title: string;
-  description: string;
+  /** Left out for "talk": that cell shows the contact details set in the admin panel. */
+  description?: string;
 }
 
 export interface DonationContent {
@@ -277,8 +278,6 @@ export const donationContent: DonationContent = {
       {
         icon: 'talk',
         title: 'Talk to us first',
-        description:
-          'Call the Secretariat on 011-23748666 or write to info@oldcolumban.net. St. Columba’s School, Ashoka Place, New Delhi – 110 001.',
       },
     ],
   },

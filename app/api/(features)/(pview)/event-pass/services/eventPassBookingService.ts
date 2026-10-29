@@ -5,7 +5,7 @@ import { CcAvenue, type CcAvenueCheckout } from "@/app/api/core/ccavenue";
 import { Mailer } from "@/app/api/core/mailer";
 import type { SessionData } from "@/app/api/core/session";
 import { UserRepository } from "@/app/api/(features)/(pview)/auth/repository/userRepository";
-import { getRegistrationCcEmails } from "@/app/api/(features)/(pview)/site/services/siteContentService";
+import { getContactDetails, getRegistrationCcEmails } from "@/app/api/(features)/(pview)/site/services/siteContentService";
 import { EventPassRepository } from "../repository/eventPassRepository";
 import { EventPassBookingRepository } from "../repository/eventPassBookingRepository";
 import type { EventPass } from "../schema/eventPassSchema";
@@ -275,8 +275,9 @@ export class EventPassBookingService {
         memberId: booking.memberId,
         batch,
       });
-      const cc = (await getRegistrationCcEmails()).filter((email) => email !== booking.email);
-      await Mailer.send(eventPassConfirmationEmail({ booking, card, includesSpouse, batch, cc, baseUrl }));
+      const [ccEmails, contact] = await Promise.all([getRegistrationCcEmails(), getContactDetails()]);
+      const cc = ccEmails.filter((email) => email !== booking.email);
+      await Mailer.send(eventPassConfirmationEmail({ booking, card, includesSpouse, batch, cc, baseUrl, contact }));
     } catch (error) {
       console.error(`Pass order ${booking.orderId}: pass email to ${booking.email} failed:`, error);
     }

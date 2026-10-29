@@ -1,5 +1,6 @@
 import "server-only";
 import type { MailMessage } from "@/app/api/core/mailer";
+import type { ContactDetailsContent } from "@/app/api/(features)/(pview)/site/schema/sectionSpecs";
 
 const escapeHtml = (value: string) =>
   value.replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]!);
@@ -11,8 +12,9 @@ export function passwordResetEmail(params: {
   resetUrl: string;
   expiresInMinutes: number;
   baseUrl: string;
+  contact: ContactDetailsContent;
 }): MailMessage {
-  const { to, resetUrl, expiresInMinutes, baseUrl } = params;
+  const { to, resetUrl, expiresInMinutes, baseUrl, contact } = params;
   const name = escapeHtml(params.name);
   const url = escapeHtml(resetUrl);
 
@@ -25,8 +27,8 @@ ${resetUrl}
 
 If you did not ask for this, you can ignore this email; your password will not change.
 
-The OCA Secretariat
-info@oldcolumban.net · 011-23748666`;
+${contact.name}
+${contact.email} · ${contact.phone}`;
 
   const html = `<!doctype html>
 <html><body style="margin:0;padding:0;background:#F5F8F5;font-family:Inter,-apple-system,Segoe UI,Arial,sans-serif;color:#12251A;">
@@ -49,8 +51,8 @@ info@oldcolumban.net · 011-23748666`;
         <p style="margin:22px 0 0;font-size:12.5px;line-height:1.6;color:#5A6B60;">Button not working? Paste this link into your browser:<br><a href="${url}" style="color:#14803C;word-break:break-all;">${url}</a></p>
       </td></tr>
       <tr><td style="padding:18px 32px;border-top:1px solid #D8E4DA;font-size:12.5px;line-height:1.6;color:#5A6B60;">
-        The OCA Secretariat &middot; <a href="mailto:info@oldcolumban.net" style="color:#14803C;">info@oldcolumban.net</a> &middot; 011-23748666<br>
-        St. Columba&rsquo;s School, Ashoka Place, New Delhi &ndash; 110 001
+        ${escapeHtml(contact.name)} &middot; <a href="mailto:${escapeHtml(contact.email)}" style="color:#14803C;">${escapeHtml(contact.email)}</a> &middot; ${escapeHtml(contact.phone)}<br>
+        ${escapeHtml(contact.address)}
       </td></tr>
     </table>
   </td></tr>

@@ -2,6 +2,7 @@ import "server-only";
 import crypto from "node:crypto";
 import { HttpError } from "@/app/api/core/httpError";
 import { Mailer } from "@/app/api/core/mailer";
+import { getContactDetails } from "@/app/api/(features)/(pview)/site/services/siteContentService";
 import { UserRepository } from "../repository/userRepository";
 import { PasswordResetRepository } from "../repository/passwordResetRepository";
 import type { User, SafeUser } from "../schema/userSchema";
@@ -137,6 +138,7 @@ export class UserService {
         resetUrl,
         expiresInMinutes: RESET_LINK_TTL_MINUTES,
         baseUrl,
+        contact: await getContactDetails(),
       })
     );
   }

@@ -2,12 +2,14 @@
 
 import React from 'react';
 import Link from 'next/link';
+import { useContact } from '@/app/(view)/common/component/ContactProvider';
 import { memberSignInContent, forgotPasswordContent, resetPasswordContent } from '../content';
 import { useResetPasswordHandler } from '../handler';
 import { PasswordRecoverySide, PasswordRecoveryNotice } from './subcomponents';
 
 export const ResetPasswordView: React.FC = () => {
   const content = resetPasswordContent;
+  const contact = useContact();
   const {
     stage,
     password,
@@ -121,7 +123,7 @@ export const ResetPasswordView: React.FC = () => {
 
               <p className="si-foot">
                 {forgotPasswordContent.trouble.text}
-                <a href={forgotPasswordContent.trouble.linkHref}>{forgotPasswordContent.trouble.linkText}</a>.
+                <a href={contact.mailto(forgotPasswordContent.trouble.linkSubject)}>{forgotPasswordContent.trouble.linkText}</a>.
               </p>
             </div>
           </div>

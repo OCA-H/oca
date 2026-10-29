@@ -3,8 +3,11 @@
 import React from 'react';
 import Link from 'next/link';
 import { ROUTES } from '@/app/(view)/common/helper/routes';
+import { useContact } from '@/app/(view)/common/component/ContactProvider';
 
 export const SportsView: React.FC = () => {
+  const contact = useContact();
+  const enquiryHref = contact.mailto('Enquiry - OCA Sports');
   return (
     <>
       <nav className="crumb" aria-label="Breadcrumb">
@@ -28,10 +31,7 @@ export const SportsView: React.FC = () => {
               Brother Foley &mdash; played on the School grounds, in the Columban spirit.
             </p>
             <div className="page-hero-actions">
-              <a
-                className="btn btn-primary"
-                href="mailto:info@oldcolumban.net?subject=Enquiry%20-%20OCA%20Sports"
-              >
+              <a className="btn btn-primary" href={enquiryHref}>
                 Enquire about OCA Sports
               </a>
               <a className="btn btn-secondary" href="#sponsor">
@@ -67,8 +67,8 @@ export const SportsView: React.FC = () => {
             <div className="fact-lbl">School Grounds, Ashoka Place, New Delhi</div>
           </div>
           <div className="fact">
-            <div className="fact-num">011-23748666</div>
-            <div className="fact-lbl">Enquiries &mdash; info@oldcolumban.net</div>
+            <div className="fact-num">{contact.phone}</div>
+            <div className="fact-lbl">Enquiries &mdash; {contact.email}</div>
           </div>
         </div>
       </div>
@@ -204,10 +204,7 @@ export const SportsView: React.FC = () => {
               </p>
             </div>
             <div className="btn-row">
-              <a
-                className="btn btn-primary"
-                href="mailto:info@oldcolumban.net?subject=Sponsorship%20-%20Brother%20Oman%20Memorial%20Cricket%20Tournament"
-              >
+              <a className="btn btn-primary" href={contact.mailto('Sponsorship - Brother Oman Memorial Cricket Tournament')}>
                 Enquire about sponsoring
               </a>
               <a className="btn btn-secondary" href={ROUTES.DONATION}>
@@ -243,7 +240,7 @@ export const SportsView: React.FC = () => {
             </p>
           </div>
           <div className="cta-band-actions">
-            <a className="btn btn-gold" href="mailto:info@oldcolumban.net?subject=Enquiry%20-%20OCA%20Sports">
+            <a className="btn btn-gold" href={enquiryHref}>
               Write to Us
             </a>
             <a className="btn btn-secondary" href="https://www.oldcolumban.net/platinum-jubilee-lunch/">

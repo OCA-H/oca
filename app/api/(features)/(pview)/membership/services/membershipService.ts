@@ -8,7 +8,7 @@ import { dateOfBirthError } from "@/app/api/core/dateOfBirth";
 import { Mailer } from "@/app/api/core/mailer";
 import { UserRepository } from "@/app/api/(features)/(pview)/auth/repository/userRepository";
 import type { User } from "@/app/api/(features)/(pview)/auth/schema/userSchema";
-import { getMembershipFee, getRegistrationCcEmails } from "@/app/api/(features)/(pview)/site/services/siteContentService";
+import { getContactDetails, getMembershipFee, getRegistrationCcEmails } from "@/app/api/(features)/(pview)/site/services/siteContentService";
 import { MembershipRepository } from "../repository/membershipRepository";
 import type { MembershipApplication, MembershipPaymentStatus } from "../schema/membershipSchema";
 import { membershipWelcomeEmail } from "./membershipWelcomeEmail";
@@ -242,8 +242,9 @@ export class MembershipService {
     if (application.welcomeEmailSentAt) return;
     if (!(await this.repository.claimWelcomeEmail(application.id))) return;
     try {
-      const cc = (await getRegistrationCcEmails()).filter((email) => email !== application.email);
-      await Mailer.send(membershipWelcomeEmail({ application, memberId: member.memberId, cc, baseUrl }));
+      const [ccEmails, contact] = await Promise.all([getRegistrationCcEmails(), getContactDetails()]);
+      const cc = ccEmails.filter((email) => email !== application.email);
+      await Mailer.send(membershipWelcomeEmail({ application, memberId: member.memberId, cc, baseUrl, contact }));
     } catch (error) {
       console.error(`Membership ${application.orderId}: welcome email to ${application.email} failed:`, error);
       await this.repository.releaseWelcomeEmail(application.id).catch(() => {});

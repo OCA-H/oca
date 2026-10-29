@@ -52,6 +52,13 @@ function checkField(spec: FieldSpec, raw: unknown, errors: FieldErrors, name: st
     return value;
   }
 
+  if (spec.type === "email") {
+    const email = value.toLowerCase();
+    if (!EMAIL_PATTERN.test(email)) errors[name] = "This is not a valid email address.";
+    else if (spec.max && email.length > spec.max) errors[name] = `Please keep this under ${spec.max} characters.`;
+    return email;
+  }
+
   if (spec.type === "emails") {
     const emails = splitEmails(value);
     const bad = emails.filter((email) => !EMAIL_PATTERN.test(email));

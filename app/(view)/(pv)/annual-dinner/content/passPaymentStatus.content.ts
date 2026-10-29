@@ -8,8 +8,6 @@ export const PASS_PAYMENT_STATUS_CONTENT = {
   help: {
     title: 'Need help?',
     desc: 'Quote your order reference when you write or call, and the Secretariat will look into it.',
-    email: 'info@oldcolumban.net',
-    phone: '011-23748666',
   },
   states: {
     paid: {

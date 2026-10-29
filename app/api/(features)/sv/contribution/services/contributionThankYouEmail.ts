@@ -1,5 +1,6 @@
 import "server-only";
 import type { MailMessage } from "@/app/api/core/mailer";
+import type { ContactDetailsContent } from "@/app/api/(features)/(pview)/site/schema/sectionSpecs";
 import type { ContributionWithFund } from "../schema/contributionSchema";
 
 const escapeHtml = (value: string) =>
@@ -35,9 +36,14 @@ export const fundLine = (contribution: ContributionWithFund) => {
 /**
  * The thank-you email sent once a contribution is paid: table layout and inline styles, because
  * email clients ignore most CSS. Doubles as the member's payment acknowledgement. `cc` is the
- * addresses set under Email settings in the admin panel.
+ * addresses set under Email settings in the admin panel; `contact` the Contact details set there.
  */
-export function contributionThankYouEmail(contribution: ContributionWithFund, baseUrl: string, cc: string[]): MailMessage {
+export function contributionThankYouEmail(
+  contribution: ContributionWithFund,
+  baseUrl: string,
+  cc: string[],
+  contact: ContactDetailsContent
+): MailMessage {
   const amount = rupees(contribution.amount);
   const towards = fundLine(contribution);
   const paymentMode = gatewayValue(contribution.paymentMode);
@@ -68,9 +74,9 @@ ${taxNote}
 Please keep this email as the acknowledgement of your payment.
 
 With gratitude,
-The OCA Secretariat
-info@oldcolumban.net · 011-23748666
-St. Columba's School, Ashoka Place, New Delhi – 110 001`;
+${contact.name}
+${contact.email} · ${contact.phone}
+${contact.address}`;
 
   const rowsHtml = rows
     .map(
@@ -104,12 +110,12 @@ St. Columba's School, Ashoka Place, New Delhi – 110 001`;
           ${rowsHtml}
         </table>
         <p style="margin:22px 0 0;padding:14px 16px;background:#FBF4E3;border-left:3px solid #C9A227;font-size:13.5px;line-height:1.6;color:#5A6B60;">${escapeHtml(taxNote)}</p>
-        <p style="margin:22px 0 0;font-size:15px;line-height:1.65;">With gratitude,<br><b style="color:#0F5E2D;">The OCA Secretariat</b></p>
+        <p style="margin:22px 0 0;font-size:15px;line-height:1.65;">With gratitude,<br><b style="color:#0F5E2D;">${escapeHtml(contact.name)}</b></p>
       </td></tr>
       <tr><td style="padding:18px 32px;border-top:1px solid #D8E4DA;font-size:12.5px;line-height:1.6;color:#5A6B60;">
         Please keep this email as the acknowledgement of your payment.<br>
-        The OCA Secretariat &middot; <a href="mailto:info@oldcolumban.net" style="color:#14803C;">info@oldcolumban.net</a> &middot; 011-23748666<br>
-        St. Columba&rsquo;s School, Ashoka Place, New Delhi &ndash; 110 001
+        ${escapeHtml(contact.name)} &middot; <a href="mailto:${escapeHtml(contact.email)}" style="color:#14803C;">${escapeHtml(contact.email)}</a> &middot; ${escapeHtml(contact.phone)}<br>
+        ${escapeHtml(contact.address)}
       </td></tr>
     </table>
   </td></tr>

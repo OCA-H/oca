@@ -6,10 +6,12 @@ import { useRouter } from 'next/navigation';
 import { partnerOrganizationContent } from '../content';
 import { usePartnerOrganizationHandler } from '../handler';
 import { useAuth } from '@/app/(view)/common/helper/useAuth';
+import { useContact } from '@/app/(view)/common/component/ContactProvider';
 
 export const PartnerOrganizationView: React.FC = () => {
   const router = useRouter();
   const { isAuthenticated } = useAuth();
+  const contact = useContact();
   const {
     user,
     setUser,
@@ -106,7 +108,7 @@ export const PartnerOrganizationView: React.FC = () => {
               </ul>
               <p className="si-side-foot">
                 {partnerOrganizationContent.sideFooter.question}
-                <a href={partnerOrganizationContent.sideFooter.linkHref}>
+                <a href={contact.mailto(partnerOrganizationContent.sideFooter.linkSubject)}>
                   {partnerOrganizationContent.sideFooter.linkText}
                 </a>
               </p>

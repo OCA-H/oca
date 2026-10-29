@@ -1,9 +1,11 @@
 import "server-only";
 import type { MailMessage } from "@/app/api/core/mailer";
+import type { ContactDetailsContent } from "@/app/api/(features)/(pview)/site/schema/sectionSpecs";
 import {
   EMAIL_COLORS as C,
-  SECRETARIAT,
+  contactSignature,
   emailBody,
+  emailContactLink,
   emailDetails,
   emailHero,
   emailLayout,
@@ -48,8 +50,9 @@ export function eventPassConfirmationEmail(params: {
   batch: string | null | undefined;
   cc: string[];
   baseUrl: string;
+  contact: ContactDetailsContent;
 }): MailMessage {
-  const { booking, card, includesSpouse, batch, cc, baseUrl } = params;
+  const { booking, card, includesSpouse, batch, cc, baseUrl, contact } = params;
   const amount = formatRupees(booking.amount);
   const paymentMode = gatewayValue(booking.paymentMode);
   const trackingId = gatewayValue(booking.trackingId);
@@ -81,12 +84,12 @@ export function eventPassConfirmationEmail(params: {
     ...(batch ? [] : ["your batch"]),
   ].join(" and ");
   const fixLine = missing
-    ? `Your pass shows ${PASS_CARD_MISSING} where ${missing} should be. Send it to the Secretariat at ${SECRETARIAT.email} and we will send you an updated pass.`
-    : `Spotted a mistake on it? Write to the Secretariat at ${SECRETARIAT.email} and we will send a corrected one.`;
-  const secretariatLink = `<a href="mailto:${SECRETARIAT.email}" style="color:${C.brandMid};font-weight:600;text-decoration:none;">${SECRETARIAT.email}</a>`;
+    ? `Your pass shows ${PASS_CARD_MISSING} where ${missing} should be. Send it to the Secretariat at ${contact.email} and we will send you an updated pass.`
+    : `Spotted a mistake on it? Write to the Secretariat at ${contact.email} and we will send a corrected one.`;
 
   const html = emailLayout({
     baseUrl,
+    contact,
     title: `Your ${EVENT.name} pass`,
     preheader: `Your ${booking.passLabel} pass for ${EVENT.date} is attached.`,
     footerNote: "Please keep this email as the acknowledgement of your pass payment.",
@@ -106,8 +109,8 @@ export function eventPassConfirmationEmail(params: {
         ${emailDetails(eventRows)}
         ${emailSubhead("Payment details")}
         ${emailDetails(paymentRows)}
-        ${emailNote(`${escapeHtml(fixLine).replace(SECRETARIAT.email, secretariatLink)} The pass is not transferable.`)}
-        ${emailSignOff("With warm regards")}
+        ${emailNote(`${escapeHtml(fixLine).replace(escapeHtml(contact.email), emailContactLink(contact))} The pass is not transferable.`)}
+        ${emailSignOff("With warm regards", contact)}
       `)}`,
   });
 
@@ -126,9 +129,7 @@ ${fixLine} The pass is not transferable.
 Please keep this email as the acknowledgement of your pass payment.
 
 With warm regards,
-${SECRETARIAT.name}
-${SECRETARIAT.email} · ${SECRETARIAT.phone}
-${SECRETARIAT.address}`;
+${contactSignature(contact)}`;
 
   return {
     to: booking.email,

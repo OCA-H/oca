@@ -3,6 +3,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { ROUTES } from '@/app/(view)/common/helper/routes';
+import { useContact } from '@/app/(view)/common/component/ContactProvider';
 import { PaymentStatusIcon } from '@/app/(view)/(pv)/membership/component/subcomponents/PaymentStatusIcon';
 import { PASS_PAYMENT_STATUS_CONTENT } from '../content/passPaymentStatus.content';
 import { formatRupees } from '../helper/annualDinner.helper';
@@ -13,7 +14,8 @@ export const PassPaymentStatusView: React.FC = () => {
     usePassPaymentStatusHandler();
   const content = PASS_PAYMENT_STATUS_CONTENT;
   const copy = content.states[state];
-  const helpSubject = encodeURIComponent(`Annual Dinner pass${order?.orderId ?? orderId ? ` – ${order?.orderId ?? orderId}` : ''}`);
+  const contact = useContact();
+  const helpSubject = `Annual Dinner pass${order?.orderId ?? orderId ? ` – ${order?.orderId ?? orderId}` : ''}`;
 
   return (
     <>
@@ -158,8 +160,8 @@ export const PassPaymentStatusView: React.FC = () => {
               <aside className="ps-help">
                 <h4>{content.help.title}</h4>
                 <p>{content.help.desc}</p>
-                <a href={`mailto:${content.help.email}?subject=${helpSubject}`}>{content.help.email}</a>
-                <a href={`tel:${content.help.phone.replace(/-/g, '')}`}>{content.help.phone}</a>
+                <a href={contact.mailto(helpSubject)}>{contact.email}</a>
+                <a href={contact.tel}>{contact.phone}</a>
               </aside>
             </div>
           )}

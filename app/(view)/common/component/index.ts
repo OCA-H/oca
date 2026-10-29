@@ -4,3 +4,4 @@ export * from './Footer';
 export * from './Lightbox';
 export * from './CustomDropdown';
 export * from './DatePicker';
+export * from './ContactProvider';

@@ -44,20 +44,16 @@ export const MEMBERSHIP_CONTENT = {
     receiptTitle: 'Payment summary',
     totalLabel: { paid: 'Amount paid', other: 'Amount due' },
     printLabel: 'Print receipt',
-    // Only on the printed receipt.
+    // Only on the printed receipt. The address and contact line under it come from the contact details.
     print: {
       org: 'Old Columbans Association',
-      address: 'St. Columba’s School, Ashoka Place, New Delhi – 110 001',
       title: 'Membership payment receipt',
       printedOn: 'Printed on',
       note: 'This is a computer-generated receipt and needs no signature. Payment was processed by CCAvenue in Indian Rupees.',
-      contact: 'The OCA Secretariat · info@oldcolumban.net · 011-23748666',
     },
     help: {
       title: 'Need help?',
       desc: 'Quote your order reference when you write or call, and the Secretariat will look into it.',
-      email: 'info@oldcolumban.net',
-      phone: '011-23748666',
     },
     states: {
       paid: {
