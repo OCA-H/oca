@@ -68,10 +68,6 @@ export const SocialConscienceSection: React.FC<{ content: HomeSocialContent }> =
           ))}
         </div>
     
-        <div style={{ textAlign: "center", marginTop: "26px" }}>
-          <button type="button" className="btn btn-secondary" disabled>View More</button>
-        </div>
-    
         <div className="ask-ribbon" style={{ display: "none" }}>
         </div>
       </div>

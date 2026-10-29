@@ -131,8 +131,6 @@ export interface HomeHangoutContent {
   title: string;
   intro: string;
   highlight: string;
-  ctaLabel: string;
-  ctaHref: string;
   posts: HomeHangoutPost[];
 }
 
@@ -338,8 +336,6 @@ export const SECTION_SPECS: SectionSpec[] = [
     fields: [
       ...sectionHead(300),
       { key: "highlight", label: "Words to highlight", type: "text", max: 60, hint: "Words from the intro to show in gold, e.g. “posted live”." },
-      { key: "ctaLabel", label: "Button text", type: "text", max: 40, placeholder: "View all →" },
-      { key: "ctaHref", label: "Button link", type: "link", hint: LINK_HINT },
     ],
     lists: [
       {
@@ -417,7 +413,7 @@ export const SECTION_SPECS: SectionSpec[] = [
     href: "/#committee",
     fields: [
       { key: "eyebrow", label: "Eyebrow", type: "text", max: 60, hint: "The small line above the heading." },
-      { key: "title", label: "Heading", type: "text", max: 120, required: true, placeholder: "Executive Committee, 2023 – 25" },
+      { key: "title", label: "Heading", type: "text", max: 120, required: true, placeholder: "Executive Committee, 2025 – 27" },
     ],
     lists: [
       {
@@ -429,7 +425,9 @@ export const SECTION_SPECS: SectionSpec[] = [
         min: 3,
         max: 3,
         fields: [
-          ...image("Photo"),
+          // Optional: a bearer without a photo shows their initials instead.
+          { key: "image", label: "Photo", type: "image", hint: IMAGE_HINT },
+          { key: "imageAlt", label: "Image description", type: "text", max: 200, hint: ALT_HINT },
           { key: "name", label: "Name", type: "text", max: 100, required: true },
           { key: "role", label: "Role", type: "text", max: 60, required: true, placeholder: "President" },
           { key: "initials", label: "Initials", type: "text", max: 4, placeholder: "SVK", hint: "Shown while the photo loads. Left empty, they come from the name." },

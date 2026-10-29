@@ -34,7 +34,6 @@ export const HangoutSection: React.FC<{ content: HomeHangoutContent }> = ({ cont
             <h2 style={{ whiteSpace: "nowrap" }}>{content.title}</h2>
             {content.intro && <p style={{ color: "#AFC8B6" }}><Intro intro={content.intro} highlight={content.highlight} /></p>}
           </div>
-          {content.ctaHref && <SiteLink className="btn btn-gold btn-sm" href={content.ctaHref}>{content.ctaLabel || 'View all →'}</SiteLink>}
         </div>
     
         <div className="post-carousel-wrap">

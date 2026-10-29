@@ -86,8 +86,6 @@ export const HOME_DEFAULTS: HomeContent = {
     title: "Photos & videos from the community",
     intro: "Cricket, lunches and reunions — posted live by batches around the world.",
     highlight: "posted live",
-    ctaLabel: "View all →",
-    ctaHref: "/#event-photographs",
     posts: [
       { type: "video", image: U + "2025/12/annual-lunch.jpg", imageAlt: "Annual Lunch highlights", duration: "2:14", name: "R. Kapoor", batch: "Batch '88", caption: "Annual Lunch highlights reel — what a turnout this year!", time: "2 days ago" },
       { type: "photo", image: U + "2017/10/b38eafcb-e18b-484c-b1c6-1d1782b1b92a.jpg", imageAlt: "Columbans reunited", duration: "", name: "S. Mehta", batch: "Batch '95", caption: "Brotherhood, decades on. So good to see everyone again.", time: "3 days ago" },
@@ -147,11 +145,11 @@ export const HOME_DEFAULTS: HomeContent = {
 
   committee: {
     eyebrow: "Governance",
-    title: "Executive Committee, 2023 – 25",
+    title: "Executive Committee, 2025 – 27",
     members: [
-      { image: U + "2022/02/SVK-Profile-Pic-n.png", imageAlt: "Santosh V. Kalyani, President", name: "Santosh V. Kalyani", role: "President", initials: "SVK" },
-      { image: U + "2022/05/Anurag-agarawal-n-1.png", imageAlt: "Anurag Aggarwal, Secretary", name: "Anurag Aggarwal", role: "Secretary", initials: "AA" },
-      { image: U + "2020/02/Pranav-Uppal.jpg", imageAlt: "Kuwar Pranav Pratap Uppal, Treasurer", name: "Kuwar Pranav Pratap Uppal", role: "Treasurer", initials: "KU" },
+      { image: "", imageAlt: "Samir Chopra, President", name: "Samir Chopra", role: "President", initials: "SC" },
+      { image: "", imageAlt: "Sudip Kohli, Secretary", name: "Sudip Kohli", role: "Secretary", initials: "SK" },
+      { image: "", imageAlt: "Sanjay Hans, Treasurer", name: "Sanjay Hans", role: "Treasurer", initials: "SH" },
     ],
   },
 };

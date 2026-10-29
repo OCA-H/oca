@@ -17,6 +17,8 @@ export function useGalleryHandler() {
     if (!album) return;
 
     const timer = setInterval(() => {
+      // Hold still while the lightbox is open so its arrows step from the photo on screen.
+      if (document.body.classList.contains('lb-open')) return;
       setSelectedPhotoIdx((prev) => {
         if (prev + 1 >= album.photos.length) {
           setSelectedAlbumIdx((prevAlbum) => (prevAlbum + 1) % galleryAlbums.length);
@@ -34,6 +36,21 @@ export function useGalleryHandler() {
     setSelectedPhotoIdx(0);
   };
 
+  /** Steps one photo forward or back, crossing into the neighbouring album at either end. */
+  const stepPhoto = (dir: 1 | -1) => {
+    const next = selectedPhotoIdx + dir;
+    if (next >= 0 && next < currentAlbum.photos.length) {
+      setSelectedPhotoIdx(next);
+      return;
+    }
+    const albumIdx = (selectedAlbumIdx + dir + galleryAlbums.length) % galleryAlbums.length;
+    setSelectedAlbumIdx(albumIdx);
+    setSelectedPhotoIdx(dir === 1 ? 0 : galleryAlbums[albumIdx].photos.length - 1);
+  };
+
+  const nextPhoto = () => stepPhoto(1);
+  const prevPhoto = () => stepPhoto(-1);
+
   return {
     galleryAlbums,
     selectedAlbumIdx,
@@ -43,6 +60,8 @@ export function useGalleryHandler() {
     isHovered,
     setIsHovered,
     selectAlbum,
+    nextPhoto,
+    prevPhoto,
   };
 }
 

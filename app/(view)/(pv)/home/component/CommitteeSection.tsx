@@ -24,7 +24,7 @@ export const CommitteeSection: React.FC<{ content: HomeCommitteeContent }> = ({ 
           {content.members.map((member, i) => (
             <div className="committee-card" key={`${i}-${member.name}`}>
               <div className={`committee-photo ${toneAt(i)} photo-tile`}>
-                <img className="tile-img" src={member.image} alt={member.imageAlt || `${member.name}, ${member.role}`} loading="lazy" decoding="async" />
+                {member.image && <img className="tile-img" src={member.image} alt={member.imageAlt || `${member.name}, ${member.role}`} loading="lazy" decoding="async" />}
                 <span className="initials">{member.initials || initialsOf(member.name)}</span>
               </div>
               <div className="committee-body"><h4>{member.name}</h4><div className="role">{member.role.toUpperCase()}</div></div>

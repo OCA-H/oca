@@ -12,7 +12,6 @@ export const BirthdaysSection: React.FC = () => {
               <p>5 Columbans celebrating today</p>
             </div>
           </div>
-          <a className="btn btn-ghost btn-sm" href="#">See all →</a>
         </div>
         <div className="bday-cards">
           <div className="bday-card">

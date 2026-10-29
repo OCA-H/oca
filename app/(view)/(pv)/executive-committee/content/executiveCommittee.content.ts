@@ -123,8 +123,6 @@ export const executiveCommitteeContent: ExecutiveCommitteeContent = {
           role: 'TREASURER',
           batch: 'Batch of 1982',
           initials: 'SH',
-          profession: 'Business',
-          email: 'hanssanjay@gmail.com',
         },
       ],
       members: [],

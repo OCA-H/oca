@@ -38,9 +38,12 @@ export const Lightbox: React.FC = () => {
   const [src, setSrc] = useState('');
   const [alt, setAlt] = useState('');
   const [caption, setCaption] = useState('');
+  const [hasNav, setHasNav] = useState(false);
 
   const closeBtnRef = useRef<HTMLButtonElement | null>(null);
   const lastFocusRef = useRef<HTMLElement | null>(null);
+  // The gallery stage the image came from, whose own arrows drive prev/next here.
+  const navStageRef = useRef<HTMLElement | null>(null);
   const isOpenRef = useRef(isOpen);
   isOpenRef.current = isOpen;
 
@@ -52,10 +55,10 @@ export const Lightbox: React.FC = () => {
       lastFocusRef.current.focus({ preventScroll: true });
     }
     lastFocusRef.current = null;
+    navStageRef.current = null;
   }, []);
 
-  const openLightbox = useCallback((img: HTMLImageElement, triggerEl: HTMLElement) => {
-    lastFocusRef.current = document.activeElement as HTMLElement;
+  const showImage = useCallback((img: HTMLImageElement, triggerEl: HTMLElement) => {
     const finalSrc = img.currentSrc || img.src;
     const finalAlt = img.alt || '';
     
@@ -70,9 +73,31 @@ export const Lightbox: React.FC = () => {
     setSrc(finalSrc);
     setAlt(finalAlt);
     setCaption(capText);
+  }, []);
+
+  const openLightbox = useCallback((img: HTMLImageElement, triggerEl: HTMLElement) => {
+    lastFocusRef.current = document.activeElement as HTMLElement;
+    const stage = triggerEl.closest<HTMLElement>('.media-stage');
+    navStageRef.current = stage?.querySelector('.stage-arrow') ? stage : null;
+    setHasNav(!!navStageRef.current);
+    showImage(img, triggerEl);
     setIsOpen(true);
     document.body.classList.add('lb-open');
-  }, []);
+  }, [showImage]);
+
+  /** Steps the gallery stage, then shows whatever photo it lands on. */
+  const stepImage = useCallback((dir: 'prev' | 'next') => {
+    const stage = navStageRef.current;
+    const arrow = stage?.querySelector<HTMLButtonElement>(`.stage-arrow.${dir}`);
+    if (!stage || !arrow) return;
+    arrow.click();
+    // Let React re-render the stage before reading its new image.
+    requestAnimationFrame(() => {
+      const tile = stage.querySelector<HTMLElement>('.photo-tile');
+      const img = tile?.querySelector<HTMLImageElement>('.tile-img');
+      if (tile && img) showImage(img, tile);
+    });
+  }, [showImage]);
 
   useEffect(() => {
     if (isOpen && closeBtnRef.current) {
@@ -132,6 +157,9 @@ export const Lightbox: React.FC = () => {
   // Global click & keyboard handlers
   useEffect(() => {
     const handleDocumentClick = (e: MouseEvent) => {
+      // stepImage clicks the stage arrows while open; that mustn't close the viewer.
+      if ((e.target as HTMLElement).closest('.stage-arrow')) return;
+
       if (isOpenRef.current) {
         closeLightbox();
         return;
@@ -151,6 +179,12 @@ export const Lightbox: React.FC = () => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
         closeLightbox();
+        return;
+      }
+
+      if (isOpenRef.current && (e.key === 'ArrowLeft' || e.key === 'ArrowRight')) {
+        e.preventDefault();
+        stepImage(e.key === 'ArrowLeft' ? 'prev' : 'next');
         return;
       }
 
@@ -186,7 +220,7 @@ export const Lightbox: React.FC = () => {
       window.removeEventListener('hashchange', handleHashChange);
       document.body.classList.remove('lb-open');
     };
-  }, [closeLightbox, openLightbox]);
+  }, [closeLightbox, openLightbox, stepImage]);
 
   return (
     <div
@@ -218,6 +252,36 @@ export const Lightbox: React.FC = () => {
           />
         </svg>
       </button>
+      {hasNav && (
+        <>
+          <button
+            className="lightbox-nav prev"
+            type="button"
+            aria-label="Previous image"
+            onClick={(e) => {
+              e.stopPropagation();
+              stepImage('prev');
+            }}
+          >
+            <svg viewBox="0 0 24 24" fill="none">
+              <path d="M15 5l-7 7 7 7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          </button>
+          <button
+            className="lightbox-nav next"
+            type="button"
+            aria-label="Next image"
+            onClick={(e) => {
+              e.stopPropagation();
+              stepImage('next');
+            }}
+          >
+            <svg viewBox="0 0 24 24" fill="none">
+              <path d="M9 5l7 7-7 7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          </button>
+        </>
+      )}
       <figure className="lightbox-fig" onClick={closeLightbox}>
         {src ? <img id="lightboxImg" src={src} alt={alt} /> : null}
         {caption ? <figcaption id="lightboxCap">{caption}</figcaption> : null}

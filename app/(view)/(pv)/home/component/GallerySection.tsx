@@ -1,9 +1,7 @@
 'use client';
 
 import React from 'react';
-import Link from 'next/link';
 import { useGalleryHandler } from '../handler';
-import { ROUTES } from '@/app/(view)/common/helper/routes';
 
 export const GallerySection: React.FC = () => {
   const {
@@ -14,6 +12,8 @@ export const GallerySection: React.FC = () => {
     currentPhoto,
     setIsHovered,
     selectAlbum,
+    nextPhoto,
+    prevPhoto,
   } = useGalleryHandler();
 
   return (
@@ -25,7 +25,6 @@ export const GallerySection: React.FC = () => {
             <h2>Moments from the OCA community</h2>
             <p>Browse by album — the story keeps playing, or jump straight to the one you want.</p>
           </div>
-          <Link className="btn btn-ghost btn-sm" href={ROUTES.EVENT_PHOTOGRAPHS}>View all photographs →</Link>
         </div>
     
         <div 
@@ -55,8 +54,15 @@ export const GallerySection: React.FC = () => {
                 <div className="s" id="stageSub">{currentAlbum.name} · {currentAlbum.time}</div>
               </div>
             </div>
+            {/* Siblings of the tile so clicks here don't open the lightbox. */}
+            <button type="button" className="stage-arrow prev" aria-label="Previous photo" onClick={prevPhoto}>
+              <svg viewBox="0 0 24 24" fill="none"><path d="M15 5l-7 7 7 7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+            </button>
+            <button type="button" className="stage-arrow next" aria-label="Next photo" onClick={nextPhoto}>
+              <svg viewBox="0 0 24 24" fill="none"><path d="M9 5l7 7-7 7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+            </button>
           </div>
-    
+
           <div className="album-tabs" id="albumTabs">
             {galleryAlbums.map((album, idx) => {
               const isActive = idx === selectedAlbumIdx;
