@@ -85,7 +85,7 @@ export async function getMembershipFee(): Promise<number> {
   return Number.isInteger(fee) && fee > 0 ? fee : MEMBERSHIP_FEE_DEFAULTS.fee;
 }
 
-/** The addresses to copy on a completed registration's email, as set in the admin panel. */
+/** The addresses to copy on every email the website sends (except password resets), as set in the admin panel. */
 export async function getRegistrationCcEmails(): Promise<string[]> {
   const settings = (await getSectionContent(SITE_SECTION_KEYS.settingsEmails)) as unknown as EmailSettingsContent;
   return splitEmails(settings.registrationCc ?? "");

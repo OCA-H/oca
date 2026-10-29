@@ -1,6 +1,7 @@
 import "server-only";
 import { HttpError, type FieldErrors } from "@/app/api/core/httpError";
 import { Mailer } from "@/app/api/core/mailer";
+import { getRegistrationCcEmails } from "@/app/api/(features)/(pview)/site/services/siteContentService";
 import { isUniqueViolation } from "@/app/api/core/baseRepository";
 import { hashPassword, verifyPassword } from "@/app/api/core/auth";
 import { dateOfBirthError } from "@/app/api/core/dateOfBirth";
@@ -303,7 +304,10 @@ export class ProfileService {
     await this.users.update(userId, { passwordHash: hash, passwordSalt: salt });
   }
 
-  /** Emails the suggestion to the Secretariat, with the member's details so they can reply. */
+  /**
+   * Emails the suggestion to the Secretariat, with the member's details so they can reply, copying
+   * the addresses set under Email settings in the admin panel.
+   */
   async sendSuggestion(userId: number, subject: string, message: string): Promise<void> {
     const fields: FieldErrors = {};
     if (!subject) fields.subject = "Please add a subject.";
@@ -316,8 +320,10 @@ export class ProfileService {
     const escape = (value: string) =>
       value.replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]!);
 
+    const cc = (await getRegistrationCcEmails()).filter((email) => email !== SECRETARIAT_EMAIL);
     await Mailer.send({
       to: SECRETARIAT_EMAIL,
+      ...(cc.length > 0 && { cc }),
       subject: `Member suggestion: ${subject}`,
       text: body,
       html: `<pre style="font-family:inherit;white-space:pre-wrap">${escape(body)}</pre>`,

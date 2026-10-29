@@ -4,6 +4,7 @@ import { HttpError, type FieldErrors } from "@/app/api/core/httpError";
 import { CcAvenue, type CcAvenueCheckout } from "@/app/api/core/ccavenue";
 import { FILE_KINDS, readUploadedFile, type UploadRules, type UploadedFile } from "@/app/api/core/fileUpload";
 import { Mailer } from "@/app/api/core/mailer";
+import { getRegistrationCcEmails } from "@/app/api/(features)/(pview)/site/services/siteContentService";
 import { createSignedToken, verifySignedToken, type SessionData } from "@/app/api/core/session";
 import { storage } from "@/app/api/core/storage";
 import { UserRepository } from "@/app/api/(features)/(pview)/auth/repository/userRepository";
@@ -357,14 +358,16 @@ export class ContributionService {
   }
 
   /**
-   * Emails the member their thank-you and payment acknowledgement. A failure is logged, not thrown:
+   * Emails the member their thank-you and payment acknowledgement, copying the addresses set under
+   * Email settings in the admin panel. A failure is logged, not thrown:
    * the payment is already recorded, and the next response from CCAvenue for the order retries it.
    */
   private async sendThankYou(contribution: ContributionWithFund, baseUrl: string): Promise<void> {
     if (contribution.thankYouEmailSentAt) return;
     if (!(await this.repository.claimThankYouEmail(contribution.id))) return;
     try {
-      await Mailer.send(contributionThankYouEmail(contribution, baseUrl));
+      const cc = (await getRegistrationCcEmails()).filter((email) => email !== contribution.email);
+      await Mailer.send(contributionThankYouEmail(contribution, baseUrl, cc));
     } catch (error) {
       console.error(`Contribution ${contribution.orderId}: thank-you email to ${contribution.email} failed:`, error);
       await this.repository.releaseThankYouEmail(contribution.id).catch(() => {});

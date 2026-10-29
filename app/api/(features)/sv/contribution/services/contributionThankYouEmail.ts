@@ -34,9 +34,10 @@ export const fundLine = (contribution: ContributionWithFund) => {
 
 /**
  * The thank-you email sent once a contribution is paid: table layout and inline styles, because
- * email clients ignore most CSS. Doubles as the member's payment acknowledgement.
+ * email clients ignore most CSS. Doubles as the member's payment acknowledgement. `cc` is the
+ * addresses set under Email settings in the admin panel.
  */
-export function contributionThankYouEmail(contribution: ContributionWithFund, baseUrl: string): MailMessage {
+export function contributionThankYouEmail(contribution: ContributionWithFund, baseUrl: string, cc: string[]): MailMessage {
   const amount = rupees(contribution.amount);
   const towards = fundLine(contribution);
   const paymentMode = gatewayValue(contribution.paymentMode);
@@ -117,6 +118,7 @@ St. Columba's School, Ashoka Place, New Delhi – 110 001`;
 
   return {
     to: contribution.email,
+    ...(cc.length > 0 && { cc }),
     subject: `Thank you for your contribution of ${amount} – Old Columbans Association`,
     text,
     html,

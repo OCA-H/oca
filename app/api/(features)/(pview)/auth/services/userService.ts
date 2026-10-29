@@ -129,6 +129,7 @@ export class UserService {
     );
 
     const resetUrl = `${baseUrl}/member-signin/reset-password?token=${token}`;
+    // Never copied to the Email settings CC list: anyone holding this link can set the password.
     await Mailer.send(
       passwordResetEmail({
         to: user.email,

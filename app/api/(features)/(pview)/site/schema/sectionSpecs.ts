@@ -217,7 +217,7 @@ export interface MembershipFeeContent {
 // ---------- Settings, read by the server only ----------
 
 export interface EmailSettingsContent {
-  /** Comma-separated addresses copied on every completed membership registration email. */
+  /** Comma-separated addresses copied on every email the website sends, except password resets. */
   registrationCc: string;
 }
 
@@ -513,11 +513,11 @@ export const SECTION_SPECS: SectionSpec[] = [
     fields: [
       {
         key: "registrationCc",
-        label: "CC on registration emails",
+        label: "CC on website emails",
         type: "emails",
         max: 1000,
         placeholder: "ocacentre@gmail.com, secretary@example.com",
-        hint: "Copied on the welcome email each new member gets once their membership payment goes through. Separate addresses with commas; leave empty to copy no one.",
+        hint: "Copied on every email the website sends: membership welcomes, Annual Dinner passes, contribution thank-yous and Suggestion Box messages. Password reset emails are never copied, as their link lets anyone set the member's password. Separate addresses with commas; leave empty to copy no one.",
       },
     ],
     lists: [],
