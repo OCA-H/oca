@@ -36,16 +36,10 @@ export function useGalleryHandler() {
     setSelectedPhotoIdx(0);
   };
 
-  /** Steps one photo forward or back, crossing into the neighbouring album at either end. */
+  /** Steps one photo forward or back within the current album, wrapping at either end. */
   const stepPhoto = (dir: 1 | -1) => {
-    const next = selectedPhotoIdx + dir;
-    if (next >= 0 && next < currentAlbum.photos.length) {
-      setSelectedPhotoIdx(next);
-      return;
-    }
-    const albumIdx = (selectedAlbumIdx + dir + galleryAlbums.length) % galleryAlbums.length;
-    setSelectedAlbumIdx(albumIdx);
-    setSelectedPhotoIdx(dir === 1 ? 0 : galleryAlbums[albumIdx].photos.length - 1);
+    const count = currentAlbum.photos.length;
+    setSelectedPhotoIdx((selectedPhotoIdx + dir + count) % count);
   };
 
   const nextPhoto = () => stepPhoto(1);

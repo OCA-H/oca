@@ -157,8 +157,9 @@ export const Lightbox: React.FC = () => {
   // Global click & keyboard handlers
   useEffect(() => {
     const handleDocumentClick = (e: MouseEvent) => {
-      // stepImage clicks the stage arrows while open; that mustn't close the viewer.
-      if ((e.target as HTMLElement).closest('.stage-arrow')) return;
+      // The viewer's own arrows, and the stage arrows stepImage clicks for them, mustn't close it.
+      // React listens on document here too, so their stopPropagation can't keep the click from us.
+      if ((e.target as Element).closest('.stage-arrow, .lightbox-nav')) return;
 
       if (isOpenRef.current) {
         closeLightbox();
