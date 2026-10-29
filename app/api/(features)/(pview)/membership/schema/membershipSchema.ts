@@ -1,4 +1,4 @@
-import { pgTable, serial, varchar, integer, boolean, timestamp, jsonb, uniqueIndex, index } from "drizzle-orm/pg-core";
+import { pgTable, serial, varchar, integer, boolean, date, timestamp, jsonb, uniqueIndex, index } from "drizzle-orm/pg-core";
 
 /**
  * One row per membership checkout. Created as "pending" before the member is sent to CCAvenue,
@@ -15,6 +15,7 @@ export const membershipApplications = pgTable(
     firstName: varchar("first_name", { length: 80 }).notNull(),
     middleName: varchar("middle_name", { length: 80 }),
     lastName: varchar("last_name", { length: 80 }).notNull(),
+    dateOfBirth: date("date_of_birth", { mode: "string" }),
     email: varchar("email", { length: 255 }).notNull(),
     countryCode: varchar("country_code", { length: 8 }).notNull(),
     mobile: varchar("mobile", { length: 20 }).notNull(),

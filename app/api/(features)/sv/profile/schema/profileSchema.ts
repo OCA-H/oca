@@ -26,6 +26,8 @@ export interface MemberProfile {
   email: string;
   mobile: string;
   batchYear: string | null;
+  /** "1985-03-24", or null for members who joined before it was asked. */
+  dateOfBirth: string | null;
   house: string | null;
   membershipType: string;
   status: string;
@@ -69,5 +71,7 @@ export interface ProfileUpdate {
   email: string;
   mobile: string;
   batchYear: string;
+  /** "1985-03-24", or "" when not given. */
+  dateOfBirth: string;
   address: ProfileAddress;
 }

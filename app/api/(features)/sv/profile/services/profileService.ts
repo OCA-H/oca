@@ -3,6 +3,7 @@ import { HttpError, type FieldErrors } from "@/app/api/core/httpError";
 import { Mailer } from "@/app/api/core/mailer";
 import { isUniqueViolation } from "@/app/api/core/baseRepository";
 import { hashPassword, verifyPassword } from "@/app/api/core/auth";
+import { dateOfBirthError } from "@/app/api/core/dateOfBirth";
 import { storage, type StoredFile } from "@/app/api/core/storage";
 import type { UploadedFile } from "@/app/api/core/fileUpload";
 import { MembershipRepository } from "@/app/api/(features)/(pview)/membership/repository";
@@ -101,6 +102,7 @@ function toProfile(user: User, signInMethod: SignInMethod | undefined): MemberPr
     email: user.email,
     mobile: user.mobile ?? "",
     batchYear: user.batchYear,
+    dateOfBirth: user.dateOfBirth,
     house: user.house,
     membershipType: user.membershipType,
     status: user.status,
@@ -171,6 +173,7 @@ export class ProfileService {
       email: locked.includes("email") ? user.email : text(payload.email).toLowerCase(),
       mobile: locked.includes("mobile") ? (user.mobile ?? "") : normalizeMobile(text(payload.mobile)),
       batchYear: text(payload.batchYear),
+      dateOfBirth: text(payload.dateOfBirth),
       address: {
         line1: text(input.line1),
         line2: text(input.line2),
@@ -204,6 +207,13 @@ export class ProfileService {
     } else if (user.batchYear) {
       fields.batchYear = "Batch is required.";
     }
+    // Optional for members who joined before it was asked, but once given it stays.
+    if (data.dateOfBirth) {
+      const dobError = dateOfBirthError(data.dateOfBirth);
+      if (dobError) fields.dateOfBirth = dobError;
+    } else if (user.dateOfBirth) {
+      fields.dateOfBirth = "Date of birth is required.";
+    }
     const requiredAddress: Array<[keyof ProfileAddress, string]> = [
       ["line1", "Address line 1"],
       ["city", "City"],
@@ -229,6 +239,7 @@ export class ProfileService {
         email: data.email,
         mobile: data.mobile,
         batchYear: data.batchYear || null,
+        dateOfBirth: data.dateOfBirth || null,
         metadata: {
           ...user.metadata,
           name: { title, firstName, middleName, lastName },

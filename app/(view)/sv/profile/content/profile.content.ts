@@ -138,6 +138,7 @@ export const profileContent = {
       mobile: "You signed in with this number, so it can’t be changed here. Write to the Secretariat if it needs correcting.",
     },
     mobileHint: "Include the country code if you live outside India.",
+    dobHint: "So batchmates can wish you on the day.",
     titles: MEMBERSHIP_CONTENT.titles,
     batches: MEMBERSHIP_CONTENT.batches,
     countries: MEMBERSHIP_CONTENT.countries,

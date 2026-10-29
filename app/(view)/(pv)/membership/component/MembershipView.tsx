@@ -4,7 +4,8 @@ import React from 'react';
 import Link from 'next/link';
 import { ROUTES } from '@/app/(view)/common/helper/routes';
 import { useAuth } from '@/app/(view)/common/helper/useAuth';
-import { CustomDropdown } from '@/app/(view)/common';
+import { CustomDropdown, DatePicker } from '@/app/(view)/common';
+import { DATE_OF_BIRTH_PICKER } from '@/app/(view)/common/helper/common.helper';
 import { MEMBERSHIP_CONTENT } from '../content/membership.content';
 import { useMembershipHandler } from '../handler/useMembershipHandler';
 
@@ -225,6 +226,22 @@ export const MembershipView: React.FC = () => {
                     placeholder="Family name"
                     value={formData.last_name}
                     onChange={handleChange}
+                  />
+                </div>
+              </div>
+
+              <div className="field-row">
+                <div className="field">
+                  <label htmlFor="m-dob">Date of birth *</label>
+                  <DatePicker
+                    id="m-dob"
+                    name="dob"
+                    value={formData.dob}
+                    onChange={(val) => handleDropdownChange('dob', val)}
+                    {...DATE_OF_BIRTH_PICKER}
+                    placeholder="Select date of birth"
+                    required
+                    ariaLabel="Date of birth"
                   />
                 </div>
               </div>

@@ -62,6 +62,7 @@ export const profileHelper = {
     email: profile.email,
     mobile: profile.mobile,
     batchYear: profile.batchYear ?? "",
+    dateOfBirth: profile.dateOfBirth ?? "",
     address: { ...profile.address },
   }),
 

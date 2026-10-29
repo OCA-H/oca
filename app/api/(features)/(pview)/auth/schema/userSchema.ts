@@ -1,4 +1,4 @@
-import { pgTable, serial, varchar, text, timestamp, jsonb, uniqueIndex, index } from "drizzle-orm/pg-core";
+import { pgTable, serial, varchar, text, date, timestamp, jsonb, uniqueIndex, index } from "drizzle-orm/pg-core";
 
 /** What users.role holds. Admins also get the admin panel (/sv/admin) for editing site content. */
 export const USER_ROLES = { member: "member", admin: "admin" } as const;
@@ -16,6 +16,7 @@ export const users = pgTable(
     passwordSalt: varchar("password_salt", { length: 64 }).notNull(),
     role: varchar("role", { length: 50 }).notNull().default("member"),
     batchYear: varchar("batch_year", { length: 20 }),
+    dateOfBirth: date("date_of_birth", { mode: "string" }),
     house: varchar("house", { length: 50 }),
     membershipType: varchar("membership_type", { length: 50 }).notNull().default("Life Member"),
     status: varchar("status", { length: 30 }).notNull().default("active"),

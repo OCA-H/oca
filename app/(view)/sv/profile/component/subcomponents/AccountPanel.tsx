@@ -2,6 +2,8 @@
 
 import React from 'react';
 import { CustomDropdown } from '@/app/(view)/common/component/CustomDropdown';
+import { DatePicker } from '@/app/(view)/common/component/DatePicker';
+import { DATE_OF_BIRTH_PICKER } from '@/app/(view)/common/helper/common.helper';
 import { profileContent } from '../../content';
 import { useAccountForm } from '../../handler';
 import type { MemberProfile, ProfileAddress } from '../../services';
@@ -149,6 +151,23 @@ export const AccountPanel: React.FC<AccountPanelProps> = ({ profile, hidden, onB
             <label htmlFor="mpa-last">Last name *</label>
             <input id="mpa-last" name="last" type="text" required value={form.lastName} onChange={(e) => setField('lastName', e.target.value)} autoComplete="family-name" />
             <FieldError message={fieldErrors.lastName} />
+          </div>
+        </div>
+
+        <div className="field-row">
+          <div className="field">
+            <label htmlFor="mpa-dob">Date of birth{profile.dateOfBirth ? ' *' : ''}</label>
+            <DatePicker
+              id="mpa-dob"
+              name="dob"
+              value={form.dateOfBirth}
+              onChange={(val) => setField('dateOfBirth', val)}
+              {...DATE_OF_BIRTH_PICKER}
+              placeholder="Select date of birth"
+              required={Boolean(profile.dateOfBirth)}
+              ariaLabel="Date of birth"
+            />
+            {fieldErrors.dateOfBirth ? <FieldError message={fieldErrors.dateOfBirth} /> : <p className="mp-hint">{account.dobHint}</p>}
           </div>
         </div>
 

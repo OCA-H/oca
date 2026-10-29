@@ -48,6 +48,8 @@ export interface MemberProfile {
   email: string;
   mobile: string;
   batchYear: string | null;
+  /** "1985-03-24", or null for members who joined before it was asked. */
+  dateOfBirth: string | null;
   house: string | null;
   membershipType: string;
   status: string;
@@ -81,7 +83,7 @@ export interface MembershipCard {
 export type ProfileUpdate = Pick<
   MemberProfile,
   "title" | "firstName" | "middleName" | "lastName" | "email" | "mobile" | "address"
-> & { batchYear: string };
+> & { batchYear: string; dateOfBirth: string };
 
 export const profileService = {
   getProfile: async (): Promise<MemberProfile> => {

@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useCallback, useEffect, useRef } from 'react';
+import { formatDateOfBirth } from '@/app/(view)/common/helper/common.helper';
 import { membershipService, MembershipCheckoutError } from '../services/membership.service';
 
 export interface MembershipFormData {
@@ -11,6 +12,8 @@ export interface MembershipFormData {
   first_name: string;
   middle_name: string;
   last_name: string;
+  /** "1985-03-24" */
+  dob: string;
   email: string;
   password: string;
   country_code: string;
@@ -34,6 +37,7 @@ const INITIAL_FORM_DATA: MembershipFormData = {
   first_name: '',
   middle_name: '',
   last_name: '',
+  dob: '',
   email: '',
   password: '',
   country_code: '+91',
@@ -163,6 +167,7 @@ export function useMembershipHandler() {
         first_name: '',
         middle_name: '',
         last_name: '',
+        dob: '',
         email: '',
         password: '',
         country_code: '+91',
@@ -251,6 +256,7 @@ export function useMembershipHandler() {
         .join(' '),
     },
     { label: 'Batch', value: formData.batch },
+    { label: 'Date of birth', value: formatDateOfBirth(formData.dob) },
     { label: 'Email', value: formData.email },
     {
       label: 'Mobile',

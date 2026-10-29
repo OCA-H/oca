@@ -4,6 +4,7 @@ import { HttpError, type FieldErrors } from "@/app/api/core/httpError";
 import { hashPassword } from "@/app/api/core/auth";
 import { isUniqueViolation } from "@/app/api/core/baseRepository";
 import { CcAvenue, type CcAvenueCheckout } from "@/app/api/core/ccavenue";
+import { dateOfBirthError } from "@/app/api/core/dateOfBirth";
 import { UserRepository } from "@/app/api/(features)/(pview)/auth/repository/userRepository";
 import { MembershipRepository } from "../repository/membershipRepository";
 import type { MembershipApplication, MembershipPaymentStatus } from "../schema/membershipSchema";
@@ -85,6 +86,7 @@ export class MembershipService {
     const batch = required("batch", "Batch");
     const firstName = required("first_name", "First name");
     const lastName = required("last_name", "Last name");
+    const dateOfBirth = required("dob", "Date of birth");
     const email = required("email", "Email").toLowerCase();
     const password = typeof payload.password === "string" ? payload.password : "";
     const countryCode = required("country_code", "Country code");
@@ -95,6 +97,10 @@ export class MembershipService {
     const zip = required("zip", "Zip");
     const country = required("country", "Country");
 
+    if (dateOfBirth) {
+      const dobError = dateOfBirthError(dateOfBirth);
+      if (dobError) fields.dob = dobError;
+    }
     if (email && !EMAIL_PATTERN.test(email)) fields.email = "Enter a valid email address.";
     if (password.length < MIN_PASSWORD_LENGTH) {
       fields.password = `Password must be at least ${MIN_PASSWORD_LENGTH} characters.`;
@@ -117,6 +123,7 @@ export class MembershipService {
       firstName,
       middleName: text(payload.middle_name) || null,
       lastName,
+      dateOfBirth,
       email,
       countryCode,
       mobile: mobile.replace(/[\s-]/g, ""),
@@ -226,6 +233,7 @@ export class MembershipService {
         passwordHash: application.passwordHash,
         passwordSalt: application.passwordSalt,
         batchYear: application.batchYear,
+        dateOfBirth: application.dateOfBirth,
         membershipType: application.membershipType,
         role: "member",
         status: NEW_MEMBER_STATUS,

@@ -8048,6 +8048,218 @@ section[id^="ec-"] {
   color: var(--text-soft);
 }
 
+/* ---------- Date picker: a calendar on the dropdown's trigger and panel ---------- */
+.c-datepicker-native {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  pointer-events: none;
+  z-index: -1;
+}
+
+.c-datepicker-icon {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  color: var(--text-soft);
+  transition: color .15s ease;
+}
+
+.c-datepicker.is-open .c-datepicker-icon {
+  color: var(--brand);
+}
+
+.c-datepicker .c-datepicker-panel {
+  right: auto;
+  width: 312px;
+  max-width: calc(100vw - 32px);
+  padding: 12px;
+}
+
+.c-datepicker-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.c-datepicker-nav,
+.c-datepicker-title {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  background: transparent;
+  border-radius: 8px;
+  font-family: var(--sans);
+  color: var(--text);
+  cursor: pointer;
+  transition: background .12s ease, color .12s ease;
+}
+
+.c-datepicker-nav {
+  width: 34px;
+  height: 34px;
+  color: var(--text-soft);
+}
+
+.c-datepicker-nav svg {
+  width: 18px;
+  height: 18px;
+}
+
+.c-datepicker-title {
+  gap: 4px;
+  height: 34px;
+  padding: 0 10px;
+  font-size: 14.5px;
+  font-weight: 700;
+}
+
+.c-datepicker-title svg {
+  width: 14px;
+  height: 14px;
+  color: var(--text-soft);
+}
+
+.c-datepicker-nav:hover:not(:disabled),
+.c-datepicker-title:hover:not(:disabled) {
+  background: var(--tint-teal);
+  color: var(--brand-deep);
+}
+
+.c-datepicker-nav:disabled {
+  opacity: .3;
+  cursor: default;
+}
+
+.c-datepicker-title:disabled {
+  cursor: default;
+}
+
+.c-datepicker-nav:focus-visible,
+.c-datepicker-title:focus-visible,
+.c-datepicker-cell:focus-visible,
+.c-datepicker-clear:focus-visible {
+  outline: 2px solid var(--brand);
+  outline-offset: 1px;
+}
+
+.c-datepicker-weekdays,
+.c-datepicker-row {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 2px;
+}
+
+.c-datepicker-row {
+  margin-top: 2px;
+}
+
+.c-datepicker-weekday {
+  padding: 4px 0 6px;
+  text-align: center;
+  font-size: 11.5px;
+  font-weight: 600;
+  letter-spacing: .02em;
+  color: var(--text-soft);
+}
+
+.c-datepicker-row > span {
+  display: flex;
+}
+
+.c-datepicker-cell {
+  flex: 1;
+  height: 38px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  font-family: var(--sans);
+  font-size: 14px;
+  color: var(--text);
+  cursor: pointer;
+  transition: background .12s ease, color .12s ease;
+}
+
+.c-datepicker-cell:hover:not(:disabled):not(.is-selected) {
+  background: var(--tint-teal);
+  color: var(--brand-deep);
+}
+
+.c-datepicker-cell.is-today {
+  box-shadow: inset 0 0 0 1.5px var(--brand-mid);
+  font-weight: 600;
+}
+
+.c-datepicker-cell.is-selected {
+  background: var(--brand);
+  color: #fff;
+  font-weight: 600;
+}
+
+.c-datepicker-cell:disabled {
+  opacity: .3;
+  cursor: default;
+}
+
+.c-datepicker-grid {
+  display: grid;
+  gap: 4px;
+}
+
+.c-datepicker-grid.months {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.c-datepicker-grid.months .c-datepicker-cell {
+  height: 48px;
+}
+
+.c-datepicker-grid.years {
+  grid-template-columns: repeat(4, 1fr);
+  max-height: 264px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding-right: 2px;
+}
+
+.c-datepicker-grid.years::-webkit-scrollbar {
+  width: 6px;
+}
+
+.c-datepicker-grid.years::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.15);
+  border-radius: 4px;
+}
+
+.c-datepicker-foot {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 10px;
+  padding-top: 8px;
+  border-top: 1px solid var(--border);
+}
+
+.c-datepicker-clear {
+  border: 0;
+  background: transparent;
+  padding: 6px 8px;
+  border-radius: 6px;
+  font-family: var(--sans);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--brand-mid);
+  cursor: pointer;
+}
+
+.c-datepicker-clear:hover {
+  background: var(--tint-teal);
+}
+
 /* Membership checkout (CCAvenue) */
 .ms-error {
   margin: 0 0 18px;

@@ -50,6 +50,13 @@
       "when": 1793190364539,
       "tag": "0006_event_pass_seats",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1793251027003,
+      "tag": "0007_user_date_of_birth",
+      "breakpoints": true
     }
   ]
 }
