@@ -29,7 +29,7 @@ export const BirthdaysSection: React.FC<{ birthdays: BirthdayMember[] }> = ({ bi
               <div className="bday-info">
                 <div className="name">{member.name}</div>
                 <div className="batch">{formatBatch(member.batchYear)}</div>
-                <a className="bday-wish-btn" href={wishHref(member)} style={{ textDecoration: "none" }}><svg viewBox="0 0 24 24" fill="none"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78L12 21.23l8.84-8.84a5.5 5.5 0 0 0 0-7.78Z" stroke="currentColor" strokeWidth="1.8"/></svg> Send Wishes</a>
+                <a className="bday-wish-btn" href={wishHref(member)} target="_blank" rel="noopener noreferrer" style={{ textDecoration: "none" }}><svg viewBox="0 0 24 24" fill="none"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78L12 21.23l8.84-8.84a5.5 5.5 0 0 0 0-7.78Z" stroke="currentColor" strokeWidth="1.8"/></svg> Send Wishes</a>
               </div>
             </div>
           ))}

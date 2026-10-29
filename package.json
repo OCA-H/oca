@@ -11,7 +11,8 @@
     "db:migrate": "drizzle-kit migrate",
     "db:check": "drizzle-kit check",
     "db:studio": "drizzle-kit studio",
-    "admin:create": "node scripts/create-admin.mjs"
+    "admin:create": "node scripts/create-admin.mjs",
+    "seed:birthdays": "node scripts/seed-birthdays.mjs"
   },
   "dependencies": {
     "drizzle-orm": "^0.45.4",

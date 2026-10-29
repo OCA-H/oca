@@ -21,8 +21,8 @@ export function formatBatch(batchYear: string | null): string {
   return batchYear ? `Batch '${batchYear.slice(-2)}` : 'Old Columban';
 }
 
-/** A mailto: link that opens the visitor's email app with a birthday wish ready to send. */
-export function birthdayWishMailto(email: string, name: string, senderName?: string): string {
+/** Gmail's compose screen on the web, with the member's address and a birthday wish filled in. */
+export function birthdayWishGmailUrl(email: string, name: string, senderName?: string): string {
   const firstName = name.split(' ')[0] || name;
   const subject = `Happy Birthday, ${firstName}!`;
   const body = [
@@ -33,5 +33,6 @@ export function birthdayWishMailto(email: string, name: string, senderName?: str
     'Warm wishes from a fellow Columban,',
     senderName || '',
   ].join('\n');
-  return `mailto:${email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+  const params = new URLSearchParams({ view: 'cm', fs: '1', to: email, su: subject, body });
+  return `https://mail.google.com/mail/?${params}`;
 }
