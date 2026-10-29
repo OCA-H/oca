@@ -1,5 +1,6 @@
 import "server-only";
 import nodemailer, { type Transporter } from "nodemailer";
+import type { Attachment } from "nodemailer/lib/mailer";
 import { inlineImages } from "./emailLayout";
 import { HttpError } from "./httpError";
 
@@ -15,6 +16,8 @@ export interface MailMessage {
   subject: string;
   text: string;
   html: string;
+  /** Files sent with the email, e.g. an event pass. */
+  attachments?: Attachment[];
 }
 
 const REQUIRED_SETTINGS = ["SMTP_HOST", "SMTP_PORT", "SMTP_USER", "SMTP_PASSWORD"] as const;
@@ -93,7 +96,8 @@ export class Mailer {
       if (!this.printsToTerminal) {
         throw new Error(`Email not sent to ${message.to}: ${REQUIRED_SETTINGS.join(", ")} must be set.`);
       }
-      console.info(`\n[mailer] SMTP not configured; email not sent.\nTo: ${message.to}${message.cc?.length ? `\nCc: ${message.cc.join(", ")}` : ""}\nSubject: ${message.subject}\n\n${message.text}\n`);
+      const files = message.attachments?.map((file) => file.filename).join(", ");
+      console.info(`\n[mailer] SMTP not configured; email not sent.\nTo: ${message.to}${message.cc?.length ? `\nCc: ${message.cc.join(", ")}` : ""}${files ? `\nAttachments: ${files}` : ""}\nSubject: ${message.subject}\n\n${message.text}\n`);
       return;
     }
 
@@ -101,7 +105,7 @@ export class Mailer {
       from: process.env.MAIL_FROM || process.env.SMTP_USER,
       ...message,
       // The crest and icons the HTML references by cid:, carried inside the message.
-      attachments: inlineImages(message.html),
+      attachments: [...inlineImages(message.html), ...(message.attachments ?? [])],
     });
   }
 }

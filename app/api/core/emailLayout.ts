@@ -116,12 +116,17 @@ export const iconBadge = (name: EmailIcon, tone: EmailIconTone, opts: { size: nu
 };
 
 /** The page heading block: badge, small eyebrow, heading and lead line, centred. */
-export const emailHero = (p: { badge: string; eyebrow: string; title: string; lead?: string }) => `<tr><td align="center" style="padding:36px 32px 4px;">
+export const emailHero = (p: { badge: string; eyebrow: string; title: string; lead?: string }) => `<tr><td align="center" class="oca-hero" style="padding:36px 32px 4px;">
     ${p.badge}
     <p style="margin:18px 0 6px;font-family:${SANS};font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:${C.brandMid};">${escapeHtml(p.eyebrow)}</p>
-    <h1 style="margin:0;font-family:${SERIF};font-size:26px;line-height:1.3;font-weight:700;color:${C.brandDeep};">${escapeHtml(p.title)}</h1>
+    <h1 class="oca-h1" style="margin:0;font-family:${SERIF};font-size:26px;line-height:1.3;font-weight:700;color:${C.brandDeep};">${escapeHtml(p.title)}</h1>
     ${p.lead ? `<p style="margin:10px 0 0;font-family:${SANS};font-size:15px;line-height:1.6;color:${C.textSoft};">${escapeHtml(p.lead)}</p>` : ""}
   </td></tr>`;
+
+/** The main content row under the hero; `html` is its paragraphs, panels and notes. */
+export const emailBody = (html: string) => `<tr><td class="oca-pad" style="padding:24px 32px 32px;">
+        ${html}
+      </td></tr>`;
 
 /** A body paragraph. `html` is inserted as is: escape anything it carries from the user. */
 export const emailParagraph = (html: string, opts: { soft?: boolean; margin?: string } = {}) =>
@@ -137,7 +142,7 @@ export interface EmailDetailRow {
   value: string;
 }
 
-/** A panel of label/value rows, each with its icon. */
+/** A panel of label/value rows, each with its icon. On phones the value moves under its label. */
 export const emailDetails = (rows: EmailDetailRow[]) => {
   const body = rows
     .map(({ icon, label, value }, i) => {
@@ -146,13 +151,13 @@ export const emailDetails = (rows: EmailDetailRow[]) => {
           <td width="34" valign="middle" style="width:34px;padding:12px 0;${line}">
             <table role="presentation" cellpadding="0" cellspacing="0"><tr><td align="center" valign="middle" width="26" height="26" style="width:26px;height:26px;border-radius:6px;background:${C.tintGreen};">${emailIcon(icon, "green", 16)}</td></tr></table>
           </td>
-          <td valign="middle" style="padding:12px 12px 12px 0;${line}font-family:${SANS};font-size:13.5px;color:${C.textSoft};">${escapeHtml(label)}</td>
-          <td align="right" valign="middle" style="padding:12px 0;${line}font-family:${SANS};font-size:13.5px;font-weight:600;color:${C.text};">${escapeHtml(value)}</td>
+          <td valign="middle" class="oca-dl" style="padding:12px 12px 12px 0;${line}font-family:${SANS};font-size:13.5px;color:${C.textSoft};">${escapeHtml(label)}</td>
+          <td align="right" valign="middle" class="oca-dv" style="padding:12px 0;${line}font-family:${SANS};font-size:13.5px;font-weight:600;color:${C.text};word-break:break-word;">${escapeHtml(value)}</td>
         </tr>`;
     })
     .join("");
   return `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:${C.panel};border:1px solid ${C.border};border-radius:12px;border-collapse:separate;">
-      <tr><td style="padding:4px 18px;">
+      <tr><td class="oca-panel" style="padding:4px 18px;">
         <table role="presentation" width="100%" cellpadding="0" cellspacing="0">${body}</table>
       </td></tr>
     </table>`;
@@ -200,6 +205,22 @@ const footerLine = (icon: EmailIcon, html: string) => `<tr>
   </tr>`;
 
 /**
+ * Phone layout, for clients that honour <style> media queries (Gmail, Apple Mail, Outlook apps):
+ * narrower margins, a smaller heading, and detail values stacked under their labels. Clients that
+ * ignore it, such as desktop Outlook, keep the inline styles, which already fit a 580px column.
+ */
+const MOBILE_CSS = `@media only screen and (max-width:480px){
+.oca-outer{padding:8px 0 !important}
+.oca-pad{padding-left:14px !important;padding-right:14px !important}
+.oca-hero{padding:28px 14px 4px !important}
+.oca-h1{font-size:22px !important}
+.oca-panel{padding:4px 10px !important}
+.oca-dl,.oca-dv{display:block !important;width:auto !important;text-align:left !important}
+.oca-dl{padding:12px 0 2px !important}
+.oca-dv{padding:0 0 12px !important;border-top:0 !important}
+}`;
+
+/**
  * The full email: branded header, the given body rows (<tr>s, e.g. from emailHero and a content
  * row), and the footer. `preheader` is the line inbox lists show beside the subject.
  */
@@ -213,13 +234,14 @@ export function emailLayout(p: { baseUrl: string; title: string; preheader: stri
 <meta name="color-scheme" content="light">
 <meta name="supported-color-schemes" content="light">
 <title>${escapeHtml(p.title)}</title>
+<style>${MOBILE_CSS}</style>
 </head>
 <body style="margin:0;padding:0;background:${C.bg};font-family:${SANS};color:${C.text};-webkit-text-size-adjust:100%;">
 <div style="display:none;max-height:0;overflow:hidden;opacity:0;color:transparent;">${escapeHtml(p.preheader)}&#8203;&nbsp;&#8203;&nbsp;&#8203;&nbsp;&#8203;&nbsp;</div>
-<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:${C.bg};padding:32px 12px;">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" class="oca-outer" style="background:${C.bg};padding:32px 12px;">
   <tr><td align="center">
     <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:580px;background:${C.card};border:1px solid ${C.border};border-radius:16px;overflow:hidden;border-collapse:separate;">
-      <tr><td style="background:${C.brandDeep};padding:22px 32px;">
+      <tr><td class="oca-pad" style="background:${C.brandDeep};padding:22px 32px;">
         <table role="presentation" cellpadding="0" cellspacing="0"><tr>
           <td valign="middle" style="padding-right:14px;"><img src="cid:${cid("crest")}" width="46" height="46" alt="OCA crest" style="display:block;border:0;"></td>
           <td valign="middle" style="font-family:${SERIF};">
@@ -230,7 +252,7 @@ export function emailLayout(p: { baseUrl: string; title: string; preheader: stri
       </td></tr>
       <tr><td style="height:4px;line-height:4px;font-size:0;background:${C.gold};">&nbsp;</td></tr>
       ${p.rows}
-      <tr><td style="padding:20px 32px 24px;background:${C.panel};border-top:1px solid ${C.border};">
+      <tr><td class="oca-pad" style="padding:20px 32px 24px;background:${C.panel};border-top:1px solid ${C.border};">
         ${p.footerNote ? `<p style="margin:0 0 12px;font-family:${SANS};font-size:12.5px;line-height:1.6;color:${C.textSoft};">${p.footerNote}</p>` : ""}
         <p style="margin:0 0 8px;font-family:${SERIF};font-size:13.5px;font-weight:700;color:${C.brandDeep};">${SECRETARIAT.name}</p>
         <table role="presentation" cellpadding="0" cellspacing="0">

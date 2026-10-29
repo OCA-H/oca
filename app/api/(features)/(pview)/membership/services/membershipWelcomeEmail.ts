@@ -3,6 +3,7 @@ import type { MailMessage } from "@/app/api/core/mailer";
 import {
   EMAIL_COLORS as C,
   SECRETARIAT,
+  emailBody,
   emailButton,
   emailDetails,
   emailHero,
@@ -107,7 +108,7 @@ export function membershipWelcomeEmail(params: {
       title: `Welcome to the OCA, ${application.firstName}`,
       lead: "Your membership registration has gone through.",
     })}
-      <tr><td style="padding:24px 32px 32px;">
+      ${emailBody(`
         ${emailParagraph(`Dear ${escapeHtml(fullName)},`)}
         ${emailParagraph(
           `Thank you for joining the Old Columbans Association as a ${escapeHtml(application.membershipType)}. We are delighted to welcome you back into the Columban family, and we look forward to seeing you at our gatherings.`,
@@ -123,7 +124,7 @@ export function membershipWelcomeEmail(params: {
           `Questions about your membership? Write to the Secretariat at <a href="mailto:${SECRETARIAT.email}" style="color:${C.brandMid};font-weight:600;text-decoration:none;">${SECRETARIAT.email}</a>.`
         )}
         ${emailSignOff("With warm regards")}
-      </td></tr>`,
+      `)}`,
   });
 
   const text = `Dear ${fullName},

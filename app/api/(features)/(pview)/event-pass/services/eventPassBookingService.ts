@@ -2,8 +2,10 @@ import "server-only";
 import crypto from "node:crypto";
 import { HttpError, type FieldErrors } from "@/app/api/core/httpError";
 import { CcAvenue, type CcAvenueCheckout } from "@/app/api/core/ccavenue";
+import { Mailer } from "@/app/api/core/mailer";
 import type { SessionData } from "@/app/api/core/session";
 import { UserRepository } from "@/app/api/(features)/(pview)/auth/repository/userRepository";
+import { getRegistrationCcEmails } from "@/app/api/(features)/(pview)/site/services/siteContentService";
 import { EventPassRepository } from "../repository/eventPassRepository";
 import { EventPassBookingRepository } from "../repository/eventPassBookingRepository";
 import type { EventPass } from "../schema/eventPassSchema";
@@ -12,6 +14,8 @@ import type {
   EventPassBooking,
   EventPassPaymentStatus,
 } from "../schema/eventPassBookingSchema";
+import { passCardDesign, renderPassCard } from "./eventPassCard";
+import { eventPassConfirmationEmail } from "./eventPassConfirmationEmail";
 
 /** Add-on prices used when a pass's metadata does not set its own. */
 const DEFAULT_TEACHER_PRICE = 5000;
@@ -214,9 +218,10 @@ export class EventPassBookingService {
 
   /**
    * Applies the result CCAvenue posts back. Safe to call more than once for the same order:
-   * a paid booking is never changed again, and stock is only taken on the first paid response.
+   * a paid booking is never changed again, and stock is only taken, and the pass emailed, on the
+   * first paid response.
    */
-  async handleGatewayResponse(encResp: string): Promise<EventPassBooking> {
+  async handleGatewayResponse(encResp: string, baseUrl: string): Promise<EventPassBooking> {
     const response = CcAvenue.parseResponse(encResp);
     const booking = response.order_id ? await this.bookings.findByOrderId(response.order_id) : null;
     if (!booking) throw HttpError.notFound("We could not find this pass order.");
@@ -246,8 +251,35 @@ export class EventPassBookingService {
     if (updated?.oversold) {
       console.error(`Pass order ${booking.orderId} was paid after ${booking.passLabel} sold out; follow up with the member.`);
     }
+    if (status === "paid" && updated) await this.sendPass(updated, baseUrl);
     // null means another response marked it paid first.
     return updated ?? (await this.bookings.findByOrderId(booking.orderId)) ?? booking;
+  }
+
+  /**
+   * Emails the member their pass, with their name, member ID and batch written on it, copying the
+   * addresses set under Email settings in the admin panel. A failure is logged, not thrown: the
+   * payment is already recorded, and the Secretariat can send the pass by hand.
+   */
+  private async sendPass(booking: EventPassBooking, baseUrl: string): Promise<void> {
+    try {
+      const [pass, user] = await Promise.all([
+        this.passes.findById(booking.eventPassId),
+        this.users.findById(booking.userId),
+      ]);
+      const includesSpouse = pass?.includesSpouse ?? Boolean(booking.spouseName);
+      const batch = user?.batchYear;
+      const card = await renderPassCard(passCardDesign({ passId: booking.passId, includesSpouse }), {
+        memberName: booking.fullName,
+        spouseName: booking.spouseName,
+        memberId: booking.memberId,
+        batch,
+      });
+      const cc = (await getRegistrationCcEmails()).filter((email) => email !== booking.email);
+      await Mailer.send(eventPassConfirmationEmail({ booking, card, includesSpouse, batch, cc, baseUrl }));
+    } catch (error) {
+      console.error(`Pass order ${booking.orderId}: pass email to ${booking.email} failed:`, error);
+    }
   }
 
   async getOrderSummary(orderId: string): Promise<EventPassOrderSummary> {

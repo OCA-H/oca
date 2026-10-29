@@ -61,7 +61,7 @@ const WANTED = {
   user: ["green"],
   mail: ["soft"],
   phone: ["soft"],
-  pin: ["soft"],
+  pin: ["soft", "green"],
 };
 
 const svg = (body, color) =>
