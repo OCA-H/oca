@@ -57,20 +57,6 @@ export function useMemberSignInHandler() {
     setShowPassword((prev) => !prev);
   };
 
-  const fillDemoCredentials = (type: 'member' | 'columban' | 'admin' = 'member') => {
-    if (type === 'member') {
-      setUser('member@oldcolumban.net');
-      setPassword('Columban@1994');
-    } else if (type === 'columban') {
-      setUser('columban');
-      setPassword('Columban@2005');
-    } else {
-      setUser('admin');
-      setPassword('OcaAdmin@2026');
-    }
-    setFeedback(null);
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setFeedback(null);
@@ -119,7 +105,6 @@ export function useMemberSignInHandler() {
     feedback,
     welcomeName,
     handleSubmit,
-    fillDemoCredentials,
   };
 }
 

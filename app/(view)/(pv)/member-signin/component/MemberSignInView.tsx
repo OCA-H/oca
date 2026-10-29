@@ -21,7 +21,6 @@ export const MemberSignInView: React.FC = () => {
     feedback,
     welcomeName,
     handleSubmit,
-    fillDemoCredentials,
   } = useMemberSignInHandler();
 
   // Already signed in when this page opened (e.g. Back from the members area): go on to the
@@ -134,72 +133,6 @@ export const MemberSignInView: React.FC = () => {
               <div className="si-head">
                 <h1>{memberSignInContent.main.title}</h1>
                 <p>{memberSignInContent.main.subtitle}</p>
-              </div>
-
-              <div
-                style={{
-                  background: 'rgba(212, 168, 67, 0.1)',
-                  border: '1px solid rgba(212, 168, 67, 0.35)',
-                  borderRadius: '8px',
-                  padding: '12px 14px',
-                  marginBottom: '18px',
-                  fontSize: '13px',
-                }}
-              >
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
-                  <span style={{ fontWeight: 600, color: '#1a2744' }}>Quick Demo Login:</span>
-                  <span style={{ fontSize: '11px', color: '#666' }}>Click to fill</span>
-                </div>
-                <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-                  <button
-                    type="button"
-                    onClick={() => fillDemoCredentials('member')}
-                    style={{
-                      background: '#fff',
-                      border: '1px solid #d4a843',
-                      borderRadius: '4px',
-                      padding: '4px 9px',
-                      fontSize: '12px',
-                      color: '#1a2744',
-                      cursor: 'pointer',
-                      fontWeight: 500,
-                    }}
-                  >
-                    Columban 1994 (Life Member)
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => fillDemoCredentials('columban')}
-                    style={{
-                      background: '#fff',
-                      border: '1px solid #d4a843',
-                      borderRadius: '4px',
-                      padding: '4px 9px',
-                      fontSize: '12px',
-                      color: '#1a2744',
-                      cursor: 'pointer',
-                      fontWeight: 500,
-                    }}
-                  >
-                    Columban 2005
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => fillDemoCredentials('admin')}
-                    style={{
-                      background: '#fff',
-                      border: '1px solid #d4a843',
-                      borderRadius: '4px',
-                      padding: '4px 9px',
-                      fontSize: '12px',
-                      color: '#1a2744',
-                      cursor: 'pointer',
-                      fontWeight: 500,
-                    }}
-                  >
-                    OCA Admin
-                  </button>
-                </div>
               </div>
 
               <form onSubmit={handleSubmit} aria-hidden={isHandingOff || undefined} inert={isHandingOff || undefined}>
