@@ -10,7 +10,7 @@ export interface MembershipFormData {
   title: string;
   batch: string;
   first_name: string;
-  middle_name: string;
+  last_name: string;
   /** "1985-03-24" */
   dob: string;
   email: string;
@@ -34,7 +34,7 @@ const INITIAL_FORM_DATA: MembershipFormData = {
   title: '',
   batch: '',
   first_name: '',
-  middle_name: '',
+  last_name: '',
   dob: '',
   email: '',
   password: '',
@@ -163,7 +163,7 @@ export function useMembershipHandler() {
         title: '',
         batch: '',
         first_name: '',
-        middle_name: '',
+        last_name: '',
         dob: '',
         email: '',
         password: '',
@@ -246,7 +246,7 @@ export function useMembershipHandler() {
       value: [
         formData.title,
         formData.first_name,
-        formData.middle_name,
+        formData.last_name,
       ]
         .filter(Boolean)
         .join(' '),

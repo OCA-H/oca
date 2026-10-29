@@ -89,6 +89,7 @@ export class MembershipService {
     const title = required("title", "Title");
     const batch = required("batch", "Batch");
     const firstName = required("first_name", "First name");
+    const lastName = required("last_name", "Last name");
     const dateOfBirth = required("dob", "Date of birth");
     const email = required("email", "Email").toLowerCase();
     const password = typeof payload.password === "string" ? payload.password : "";
@@ -125,8 +126,8 @@ export class MembershipService {
       title,
       batchYear: batch,
       firstName,
-      middleName: text(payload.middle_name) || null,
-      lastName: null,
+      middleName: null,
+      lastName,
       dateOfBirth,
       email,
       countryCode,
@@ -151,7 +152,7 @@ export class MembershipService {
       amount: application.amount.toFixed(2),
       redirect_url: responseUrl,
       cancel_url: responseUrl,
-      billing_name: [firstName, application.middleName].filter(Boolean).join(" "),
+      billing_name: [firstName, lastName].filter(Boolean).join(" "),
       billing_address: [addr1, application.addressLine2, application.addressLine3].filter(Boolean).join(", "),
       billing_city: city,
       billing_state: state,

@@ -213,14 +213,15 @@ export const MembershipView: React.FC<MembershipViewProps> = ({ fee }) => {
                   />
                 </div>
                 <div className="field">
-                  <label htmlFor="m-middle">Middle name</label>
+                  <label htmlFor="m-last">Last name *</label>
                   <input
-                    id="m-middle"
-                    name="middle_name"
+                    id="m-last"
+                    name="last_name"
                     type="text"
-                    autoComplete="additional-name"
-                    placeholder="Middle name"
-                    value={formData.middle_name}
+                    required
+                    autoComplete="family-name"
+                    placeholder="Last name"
+                    value={formData.last_name}
                     onChange={handleChange}
                   />
                 </div>
