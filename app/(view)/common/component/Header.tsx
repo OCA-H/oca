@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { ROUTES } from '@/app/(view)/common/helper/routes';
@@ -22,17 +22,59 @@ const NAV_MAP: Record<string, string> = {
   'partner-organization': 'membership',
 };
 
+const Chevron = () => (
+  <svg viewBox="0 0 12 8" fill="none" aria-hidden="true"><path d="M1 1l5 5 5-5" stroke="currentColor" strokeWidth="1.6" /></svg>
+);
+
+interface MobileGroupProps {
+  label: string;
+  open: boolean;
+  onToggle: () => void;
+  children: React.ReactNode;
+}
+
+// One collapsible section of the mobile drawer.
+const MobileGroup: React.FC<MobileGroupProps> = ({ label, open, onToggle, children }) => (
+  <div className={`mnav-group${open ? ' is-open' : ''}`}>
+    <button type="button" className="top" aria-expanded={open} onClick={onToggle}>
+      {label}
+      <Chevron />
+    </button>
+    <div className="mnav-items">
+      <div>{children}</div>
+    </div>
+  </div>
+);
+
 export const Header: React.FC<HeaderProps> = ({ activeRoute }) => {
   const router = useRouter();
   const { isAuthenticated, isLoading: isAuthLoading, user, signOut } = useAuth();
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const activeNav = activeRoute ? NAV_MAP[activeRoute] : undefined;
+  const [openGroup, setOpenGroup] = useState<string | null>(activeNav ?? null);
   // Only shows the link; /sv/admin and its APIs check the role themselves.
   const isAdmin = user?.role === 'admin';
 
   const handleLinkClick = (_href?: string) => {
     setMobileNavOpen(false);
   };
+
+  const toggleGroup = (key: string) => setOpenGroup((current) => (current === key ? null : key));
+
+  // While the drawer is open, the page behind it stays put and Escape closes it.
+  useEffect(() => {
+    if (!mobileNavOpen) return;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setMobileNavOpen(false);
+    };
+    window.addEventListener('keydown', onKey);
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      window.removeEventListener('keydown', onKey);
+    };
+  }, [mobileNavOpen]);
 
   return (
     <>
@@ -167,7 +209,7 @@ export const Header: React.FC<HeaderProps> = ({ activeRoute }) => {
                 </div>
               </div>
             )}
-            <button className="burger" aria-label="Open menu" onClick={() => setMobileNavOpen(true)}>
+            <button className="burger" aria-label="Open menu" aria-expanded={mobileNavOpen} aria-controls="mobileNav" onClick={() => setMobileNavOpen(true)}>
               <svg width="26" height="26" viewBox="0 0 24 24" fill="none"><path d="M3 6h18M3 12h18M3 18h18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" /></svg>
             </button>
           </div>
@@ -179,88 +221,92 @@ export const Header: React.FC<HeaderProps> = ({ activeRoute }) => {
         className={`mobile-scrim ${mobileNavOpen ? 'open' : ''}`}
         onClick={() => setMobileNavOpen(false)}
       />
-      <div className={`mobile-nav ${mobileNavOpen ? 'open' : ''}`} id="mobileNav">
+      <div
+        className={`mobile-nav ${mobileNavOpen ? 'open' : ''}`}
+        id="mobileNav"
+        role="dialog"
+        aria-modal="true"
+        aria-label="Site menu"
+        inert={!mobileNavOpen}
+      >
         <div className="mobile-nav-head">
-          <span className="brand-text" style={{ color: 'var(--navy)' }}>
-            <strong style={{ fontFamily: 'var(--serif)', fontSize: '17px' }}>Old Columbans</strong>
-          </span>
-          <button
-            onClick={() => setMobileNavOpen(false)}
-            style={{ background: 'none', border: 'none', fontSize: '22px', cursor: 'pointer', color: 'var(--navy)' }}
-            aria-label="Close menu"
-          >
-            ✕
+          <Link href={ROUTES.HOME} onClick={() => handleLinkClick(ROUTES.HOME)}>
+            <img className="mobile-nav-logo" src="/images/oca-header-logo.jpg" alt="Old Columbans Association" />
+          </Link>
+          <button type="button" className="mobile-nav-close" onClick={() => setMobileNavOpen(false)} aria-label="Close menu">
+            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" /></svg>
           </button>
         </div>
-        <Link className="top" href={ROUTES.VISION_MISSION} onClick={() => handleLinkClick(ROUTES.VISION_MISSION)}>About OCA</Link>
-        <Link className="sub" href={ROUTES.VISION_MISSION} onClick={() => handleLinkClick(ROUTES.VISION_MISSION)}>Our Mission &amp; Objectives</Link>
-        <Link className="sub" href={ROUTES.EXECUTIVE_COMMITTEE} onClick={() => handleLinkClick(ROUTES.EXECUTIVE_COMMITTEE)}>Executive Committee</Link>
-        <span className="sub sub-soon">Batch Coordinators<span className="soon-tag">Soon</span></span>
-        <span className="sub sub-soon">OCA Social Conscience<span className="soon-tag">Soon</span></span>
-        <span className="sub sub-soon">Teachers Benevolent Fund<span className="soon-tag">Soon</span></span>
-        <span className="sub sub-soon">ByLaws of OCA<span className="soon-tag">Soon</span></span>
 
-        <Link className="top" href={ROUTES.HOME_EVENTS} onClick={() => handleLinkClick(ROUTES.HOME_EVENTS)}>Events</Link>
-        <Link className="sub" href={ROUTES.ANNUAL_DINNER} onClick={() => handleLinkClick(ROUTES.ANNUAL_DINNER)}>Annual Dinner Get Together</Link>
-        <Link className="sub" href={ROUTES.ANNUAL_LUNCH} onClick={() => handleLinkClick(ROUTES.ANNUAL_LUNCH)}>Annual Lunch Get Together</Link>
-        <Link className="sub" href={ROUTES.SPORTS} onClick={() => handleLinkClick(ROUTES.SPORTS)}>OCA Sports</Link>
-        <span className="sub-head">Gallery</span>
-        <span className="sub sub2 sub-soon">School Anthem<span className="soon-tag">Soon</span></span>
-        <span className="sub sub2 sub-soon">History of the School<span className="soon-tag">Soon</span></span>
-        <span className="sub sub2 sub-soon">School Principals<span className="soon-tag">Soon</span></span>
-        <span className="sub sub2 sub-soon">School Magazine<span className="soon-tag">Soon</span></span>
-        <span className="sub sub2 sub-soon">Photographs<span className="soon-tag">Soon</span></span>
+        <nav className="mobile-nav-body" aria-label="Mobile">
+          <MobileGroup label="About OCA" open={openGroup === 'about'} onToggle={() => toggleGroup('about')}>
+            <Link className="sub" href={ROUTES.VISION_MISSION} onClick={() => handleLinkClick(ROUTES.VISION_MISSION)}>Our Mission &amp; Objectives</Link>
+            <Link className="sub" href={ROUTES.EXECUTIVE_COMMITTEE} onClick={() => handleLinkClick(ROUTES.EXECUTIVE_COMMITTEE)}>Executive Committee</Link>
+            <span className="sub sub-soon">Batch Coordinators<span className="soon-tag">Soon</span></span>
+            <span className="sub sub-soon">OCA Social Conscience<span className="soon-tag">Soon</span></span>
+            <span className="sub sub-soon">Teachers Benevolent Fund<span className="soon-tag">Soon</span></span>
+            <span className="sub sub-soon">ByLaws of OCA<span className="soon-tag">Soon</span></span>
+          </MobileGroup>
 
-        <span className="top">Directory</span>
-        <span className="sub sub-soon">Find Your Batchmates<span className="soon-tag">Soon</span></span>
-        <span className="sub sub-soon">Worldwide Chapters<span className="soon-tag">Soon</span></span>
+          <MobileGroup label="Events" open={openGroup === 'events'} onToggle={() => toggleGroup('events')}>
+            <Link className="sub" href={ROUTES.ANNUAL_DINNER} onClick={() => handleLinkClick(ROUTES.ANNUAL_DINNER)}>Annual Dinner Get Together</Link>
+            <Link className="sub" href={ROUTES.ANNUAL_LUNCH} onClick={() => handleLinkClick(ROUTES.ANNUAL_LUNCH)}>Annual Lunch Get Together</Link>
+            <Link className="sub" href={ROUTES.SPORTS} onClick={() => handleLinkClick(ROUTES.SPORTS)}>OCA Sports</Link>
+            <span className="sub-head">Gallery</span>
+            <span className="sub sub2 sub-soon">School Anthem<span className="soon-tag">Soon</span></span>
+            <span className="sub sub2 sub-soon">History of the School<span className="soon-tag">Soon</span></span>
+            <span className="sub sub2 sub-soon">School Principals<span className="soon-tag">Soon</span></span>
+            <span className="sub sub2 sub-soon">School Magazine<span className="soon-tag">Soon</span></span>
+            <span className="sub sub2 sub-soon">Photographs<span className="soon-tag">Soon</span></span>
+          </MobileGroup>
 
-        <span className="top">OCA Connect</span>
-        <span className="sub sub-soon">News Makers<span className="soon-tag">Soon</span></span>
-        <span className="sub sub-soon">Alumni Services<span className="soon-tag">Soon</span></span>
-        <span className="sub sub-soon">Careers<span className="soon-tag">Soon</span></span>
-        <span className="sub sub-soon">Networking<span className="soon-tag">Soon</span></span>
-        <span className="sub sub-soon">OCA Internships Program<span className="soon-tag">Soon</span></span>
-        <span className="sub sub-soon">Newsletters<span className="soon-tag">Soon</span></span>
-        <span className="sub sub-soon">Remembrance<span className="soon-tag">Soon</span></span>
+          <MobileGroup label="Directory" open={openGroup === 'directory'} onToggle={() => toggleGroup('directory')}>
+            <span className="sub sub-soon">Find Your Batchmates<span className="soon-tag">Soon</span></span>
+            <span className="sub sub-soon">Worldwide Chapters<span className="soon-tag">Soon</span></span>
+          </MobileGroup>
 
-        <Link className="top" href={ROUTES.MEMBERSHIP} onClick={() => handleLinkClick(ROUTES.MEMBERSHIP)}>Membership</Link>
-        {!isAuthenticated && (
-          <>
-            <Link className="sub" href={ROUTES.MEMBERSHIP} onClick={() => handleLinkClick(ROUTES.MEMBERSHIP)}>Become a Member</Link>
-            <Link className="sub" href={ROUTES.MEMBER_SIGNIN} onClick={() => handleLinkClick(ROUTES.MEMBER_SIGNIN)}>As an OCA Member</Link>
-            <span className="sub sub-soon">As a Partner Organization<span className="soon-tag">Soon</span></span>
-          </>
-        )}
+          <MobileGroup label="OCA Connect" open={openGroup === 'connect'} onToggle={() => toggleGroup('connect')}>
+            <span className="sub sub-soon">News Makers<span className="soon-tag">Soon</span></span>
+            <span className="sub sub-soon">Alumni Services<span className="soon-tag">Soon</span></span>
+            <span className="sub sub-soon">Careers<span className="soon-tag">Soon</span></span>
+            <span className="sub sub-soon">Networking<span className="soon-tag">Soon</span></span>
+            <span className="sub sub-soon">OCA Internships Program<span className="soon-tag">Soon</span></span>
+            <span className="sub sub-soon">Newsletters<span className="soon-tag">Soon</span></span>
+            <span className="sub sub-soon">Remembrance<span className="soon-tag">Soon</span></span>
+          </MobileGroup>
+
+          {isAuthenticated ? (
+            <Link className="top" href={ROUTES.MEMBERSHIP} onClick={() => handleLinkClick(ROUTES.MEMBERSHIP)}>Membership</Link>
+          ) : (
+            <MobileGroup label="Membership" open={openGroup === 'membership'} onToggle={() => toggleGroup('membership')}>
+              <Link className="sub" href={ROUTES.MEMBERSHIP} onClick={() => handleLinkClick(ROUTES.MEMBERSHIP)}>Become a Member</Link>
+              <Link className="sub" href={ROUTES.MEMBER_SIGNIN} onClick={() => handleLinkClick(ROUTES.MEMBER_SIGNIN)}>As an OCA Member</Link>
+              <span className="sub sub-soon">As a Partner Organization<span className="soon-tag">Soon</span></span>
+            </MobileGroup>
+          )}
+        </nav>
 
         <div className="cta-row">
-          <Link className="btn btn-gold" href={ROUTES.DONATION} onClick={() => handleLinkClick(ROUTES.DONATION)}>Contribute</Link>
-          {!isAuthenticated && (
-            <Link className="btn btn-primary" href={ROUTES.MEMBERSHIP} onClick={() => handleLinkClick(ROUTES.MEMBERSHIP)}>Become a Member</Link>
-          )}
-          {isAuthenticated ? (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', width: '100%', marginTop: '4px' }}>
-              <div
-                style={{
-                  padding: '8px 12px',
-                  background: 'rgba(212, 168, 67, 0.1)',
-                  borderRadius: '6px',
-                  border: '1px solid rgba(212, 168, 67, 0.3)',
-                }}
-              >
-                <div style={{ fontWeight: 600, fontSize: '13px', color: 'var(--navy)' }}>
-                  👤 {user?.fullName || 'Member'}
-                </div>
-                {user?.memberId && (
-                  <div style={{ fontSize: '11px', color: '#666' }}>ID: {user.memberId}</div>
-                )}
+          {isAuthenticated && (
+            <div className="member-card mobile-member-card">
+              <span className="member-avatar member-avatar-lg">
+                {(user?.fullName || 'M').charAt(0).toUpperCase()}
+              </span>
+              <div className="member-card-body">
+                <div className="member-card-name">{user?.fullName || 'Member'}</div>
+                {user?.memberId && <div className="member-card-id">ID: {user.memberId}</div>}
               </div>
+            </div>
+          )}
+          <Link className="btn btn-gold" href={ROUTES.DONATION} onClick={() => handleLinkClick(ROUTES.DONATION)}>Contribute</Link>
+          {isAuthenticated ? (
+            <>
               <Link className="btn btn-primary" href={ROUTES.PROFILE} onClick={() => handleLinkClick(ROUTES.PROFILE)}>My Profile</Link>
               {isAdmin && (
                 <Link className="btn btn-ghost" href={ROUTES.ADMIN} onClick={() => handleLinkClick(ROUTES.ADMIN)}>Admin Panel</Link>
               )}
               <button
-                className="btn btn-ghost"
+                className="btn btn-ghost mobile-signout"
                 type="button"
                 onClick={() => {
                   setMobileNavOpen(false);
@@ -269,13 +315,11 @@ export const Header: React.FC<HeaderProps> = ({ activeRoute }) => {
               >
                 Sign Out
               </button>
-            </div>
+            </>
           ) : (
             <>
+              <Link className="btn btn-primary" href={ROUTES.MEMBERSHIP} onClick={() => handleLinkClick(ROUTES.MEMBERSHIP)}>Become a Member</Link>
               <Link className="btn btn-ghost" href={ROUTES.MEMBER_SIGNIN} onClick={() => handleLinkClick(ROUTES.MEMBER_SIGNIN)}>Sign in as OCA Member</Link>
-              <span className="btn btn-ghost" aria-disabled="true" style={{ opacity: 0.6, cursor: 'not-allowed' }}>
-                Sign in as Partner Organization<span className="soon-tag" style={{ marginLeft: '8px' }}>Soon</span>
-              </span>
             </>
           )}
         </div>

@@ -227,7 +227,7 @@ export const HangoutSection: React.FC<{ content: HomeHangoutContent }> = ({ cont
         <div className="section-head">
           <div className="copy">
             {content.eyebrow && <span className="eyebrow">{content.eyebrow}</span>}
-            <h2 style={{ whiteSpace: "nowrap" }}>{content.title}</h2>
+            <h2>{content.title}</h2>
             {content.intro && <p style={{ color: "#AFC8B6" }}><Intro intro={content.intro} highlight={content.highlight} /></p>}
           </div>
         </div>
