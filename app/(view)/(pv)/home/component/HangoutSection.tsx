@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import type { HomeHangoutContent, HomeHangoutPhoto } from '@/app/api/(features)/(pview)/site/schema/sectionSpecs';
 import { SiteLink, toneAt } from './SiteLink';
 
@@ -15,10 +15,37 @@ const PHOTO_ICONS = [
 const MUTED_ICON = <svg viewBox="0 0 24 24" fill="none"><path d="M11 5 6 9H3v6h3l5 4V5Z" stroke="#fff" strokeWidth="1.6" strokeLinejoin="round"/><path d="M16 9l6 6M22 9l-6 6" stroke="#fff" strokeWidth="1.6" strokeLinecap="round"/></svg>;
 const UNMUTED_ICON = <svg viewBox="0 0 24 24" fill="none"><path d="M11 5 6 9H3v6h3l5 4V5Z" stroke="#fff" strokeWidth="1.6" strokeLinejoin="round"/><path d="M15.5 8.5a5 5 0 0 1 0 7M18.5 6a9 9 0 0 1 0 12" stroke="#fff" strokeWidth="1.6" strokeLinecap="round"/></svg>;
 
-/** A photo post's pictures: swipe through them, or pick one by its dot. One picture shows no dots. */
+/** How long a photo post rests on each of its pictures before sliding to the next. */
+const PHOTO_INTERVAL_MS = 2000;
+
+/**
+ * A photo post's pictures: they slide on by themselves every 2 seconds (looping back to the first),
+ * and can be swiped or picked by their dot. They hold still while hovered or off screen.
+ * One picture shows no dots and does not move.
+ */
 function PostPhotos({ images }: { images: HomeHangoutPhoto[] }) {
   const track = useRef<HTMLDivElement>(null);
   const [current, setCurrent] = useState(0);
+  const [isHovered, setIsHovered] = useState(false);
+  const [isVisible, setIsVisible] = useState(false);
+
+  useEffect(() => {
+    const el = track.current;
+    if (!el || images.length < 2) return;
+    const observer = new IntersectionObserver(([entry]) => setIsVisible(entry.isIntersecting), { threshold: 0.5 });
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [images.length]);
+
+  // Restarts whenever the picture changes, so a swipe or a dot click gets its full 2 seconds too.
+  useEffect(() => {
+    if (images.length < 2 || isHovered || !isVisible) return;
+    const timer = setTimeout(() => {
+      const el = track.current;
+      if (el) el.scrollTo({ left: ((current + 1) % images.length) * el.clientWidth, behavior: 'smooth' });
+    }, PHOTO_INTERVAL_MS);
+    return () => clearTimeout(timer);
+  }, [current, images.length, isHovered, isVisible]);
 
   const onScroll = () => {
     const el = track.current;
@@ -31,7 +58,13 @@ function PostPhotos({ images }: { images: HomeHangoutPhoto[] }) {
 
   return (
     <>
-      <div className="post-slides" ref={track} onScroll={images.length > 1 ? onScroll : undefined}>
+      <div
+        className="post-slides"
+        ref={track}
+        onScroll={images.length > 1 ? onScroll : undefined}
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
+      >
         {images.map((photo, i) => (
           <div className="post-slide" key={`${i}-${photo.image}`} aria-hidden={i !== current || undefined}>
             <img className="tile-img" src={photo.image} alt={photo.imageAlt} loading="lazy" decoding="async" />
@@ -56,18 +89,34 @@ function PostPhotos({ images }: { images: HomeHangoutPhoto[] }) {
   );
 }
 
+const PLAY_ICON = <svg viewBox="0 0 24 24" fill="none"><path d="M8 5v14l11-7L8 5Z" fill="currentColor"/></svg>;
+const PAUSE_ICON = <svg viewBox="0 0 24 24" fill="none"><path d="M7 5h3.5v14H7zM13.5 5H17v14h-3.5z" fill="currentColor"/></svg>;
+
 /**
- * A video post, drawn exactly as before uploads: the play button, mute button and length over the
- * picture. With an uploaded video, the video takes the picture's place and the buttons work.
+ * A video post: the play button, mute button and length over the picture. With an uploaded video,
+ * the button plays and pauses it (showing which it will do), a bar along the bottom shows how far
+ * it has played, and it pauses itself when scrolled out of view.
  */
 function PostVideo({ src, still, duration }: { src: string; still?: HomeHangoutPhoto; duration: string }) {
   const video = useRef<HTMLVideoElement>(null);
   const [isMuted, setIsMuted] = useState(true);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [progress, setProgress] = useState(0);
+
+  useEffect(() => {
+    const el = video.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(([entry]) => {
+      if (!entry.isIntersecting && !el.paused) el.pause();
+    }, { threshold: 0.5 });
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [src]);
 
   const togglePlay = () => {
     const el = video.current;
     if (!el) return;
-    if (el.paused) el.play().catch(() => {});
+    if (el.paused) el.play().catch(() => setIsPlaying(false));
     else el.pause();
   };
   const toggleMute = (e: React.MouseEvent) => {
@@ -80,15 +129,44 @@ function PostVideo({ src, still, duration }: { src: string; still?: HomeHangoutP
     <>
       {src ? (
         // "#t=0.1" makes browsers that show nothing before playing (iOS Safari) show the first frame.
-        <video ref={video} className="tile-img" src={`${src}#t=0.1`} preload="metadata" playsInline muted={isMuted} loop onClick={togglePlay} />
+        <video
+          ref={video}
+          className="tile-img"
+          src={`${src}#t=0.1`}
+          preload="metadata"
+          playsInline
+          muted={isMuted}
+          loop
+          onPlay={() => setIsPlaying(true)}
+          onPause={() => setIsPlaying(false)}
+          onTimeUpdate={(e) => {
+            const el = e.currentTarget;
+            if (el.duration) setProgress(el.currentTime / el.duration);
+          }}
+        />
       ) : (
         still && <img className="tile-img" src={still.image} alt={still.imageAlt} loading="lazy" decoding="async" />
       )}
-      <div className="play-btn" onClick={togglePlay}><span><svg viewBox="0 0 24 24" fill="none"><path d="M8 5v14l11-7L8 5Z" fill="currentColor"/></svg></span></div>
-      <button className="mute-btn" data-muted={isMuted} aria-label={isMuted ? 'Unmute' : 'Mute'} onClick={toggleMute}>
-        {isMuted ? MUTED_ICON : UNMUTED_ICON}
+      <button
+        type="button"
+        className={`play-btn${isPlaying ? ' is-playing' : ''}`}
+        aria-label={isPlaying ? 'Pause video' : 'Play video'}
+        onClick={togglePlay}
+        disabled={!src}
+      >
+        <span>{isPlaying ? PAUSE_ICON : PLAY_ICON}</span>
       </button>
+      {src && (
+        <button className="mute-btn" data-muted={isMuted} aria-label={isMuted ? 'Unmute' : 'Mute'} onClick={toggleMute}>
+          {isMuted ? MUTED_ICON : UNMUTED_ICON}
+        </button>
+      )}
       {duration && <span className="post-duration">{duration}</span>}
+      {src && (
+        <span className="post-progress" aria-hidden="true">
+          <span style={{ transform: `scaleX(${progress})` }} />
+        </span>
+      )}
     </>
   );
 }

@@ -73,7 +73,10 @@ export function useHomeHandler() {
       const stopAuto = () => clearInterval(timer);
       const startAuto = () => {
         stopAuto();
-        timer = setInterval(next, CAROUSEL_INTERVAL_MS);
+        // Holds still while one of its videos is playing, so it does not slide away mid-video.
+        timer = setInterval(() => {
+          if (!Array.from(track.querySelectorAll('video')).some((video) => !video.paused)) next();
+        }, CAROUSEL_INTERVAL_MS);
       };
 
       nextBtn.addEventListener('click', next);

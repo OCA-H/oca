@@ -2877,6 +2877,89 @@ footer a:focus-visible {
   outline-offset: 2px;
 }
 
+/* A video post's play / pause button: a white disc in the middle. While playing it fades out,
+   and comes back (as pause) when the card is hovered or the button has focus. */
+.post-media .play-btn {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: none;
+  background: none;
+  cursor: pointer;
+}
+
+.post-media .play-btn:disabled {
+  cursor: default;
+}
+
+.post-media .play-btn span {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, .92);
+  color: var(--navy);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, .3);
+  transition: transform .18s ease, opacity .2s ease;
+}
+
+.post-media .play-btn svg {
+  width: 20px;
+  height: 20px;
+}
+
+.post-media .play-btn:not(.is-playing) svg {
+  margin-left: 3px;
+}
+
+.post-media .play-btn:not(:disabled):hover span {
+  transform: scale(1.08);
+}
+
+.post-media .play-btn.is-playing span {
+  opacity: 0;
+}
+
+.post-media:hover .play-btn.is-playing span,
+.post-media .play-btn.is-playing:focus-visible span {
+  opacity: .9;
+}
+
+.post-media .play-btn:focus-visible {
+  outline: none;
+}
+
+.post-media .play-btn:focus-visible span {
+  outline: 3px solid var(--gold);
+  outline-offset: 3px;
+}
+
+/* How far the video has played, along the bottom of the card. */
+.post-progress {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 3;
+  height: 3px;
+  background: rgba(255, 255, 255, .25);
+  pointer-events: none;
+}
+
+.post-progress span {
+  display: block;
+  height: 100%;
+  background: var(--gold);
+  transform-origin: left;
+  transition: transform .25s linear;
+}
+
 .post-media .tile-icon {
   position: absolute;
   top: 14px;
