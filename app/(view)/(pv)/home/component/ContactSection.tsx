@@ -12,7 +12,7 @@ const FieldError: React.FC<{ message?: string }> = ({ message }) =>
 
 export const ContactSection: React.FC = () => {
   const contact = useContact();
-  const { form, setField, fieldErrors, error, sentMessage, sentTo, isSending, handleSubmit, resend, togglePreview } = useContactForm();
+  const { form, setField, fieldErrors, error, sentMessage, sentTo, isSending, handleSubmit, resend } = useContactForm();
   return (
     <section className="section tint-teal" id="contact">
       <div className="wrap">
@@ -33,11 +33,6 @@ export const ContactSection: React.FC = () => {
             </div>
           </div>
           <form className="contact-form-panel" onSubmit={handleSubmit} noValidate>
-            {process.env.NODE_ENV === 'development' && (
-              <button type="button" className="contact-preview-toggle" onClick={togglePreview}>
-                {sentMessage ? 'Show form' : 'Preview confirmation'}
-              </button>
-            )}
             {/* Laid over the form, which stays in place underneath so the panel keeps its size. */}
             <div className="contact-sent" id="contact-ok" role="status" hidden={!sentMessage}>
               <span className="contact-sent-icon" aria-hidden="true">

@@ -2133,21 +2133,6 @@ nav.primary-nav {
   overflow-wrap: anywhere;
 }
 
-/* Development only: shows the confirmation without sending anything. */
-.contact-preview-toggle {
-  position: absolute;
-  top: -12px;
-  right: 16px;
-  z-index: 2;
-  padding: 3px 10px;
-  border: 1px dashed var(--border-strong);
-  border-radius: 999px;
-  background: var(--card);
-  font: 600 11.5px/1.4 var(--sans);
-  color: var(--text-soft);
-  cursor: pointer;
-}
-
 .contact-sent .contact-sent-resend {
   margin-top: 14px;
   padding-top: 16px;
