@@ -132,10 +132,14 @@ export interface FundChanges {
   status: string;
   sortOrder: number;
   unitAmount: number | null;
+  unitLabel: string | null;
   maxUnits: number | null;
   minAmount: number | null;
   maxAmount: number | null;
 }
+
+/** A head to add: its details, and whether members give any amount or pay per unit (fixed once added). */
+export type NewFund = FundChanges & { kind: "amount" | "unit" };
 
 export const adminService = {
   getMe: async (): Promise<AdminUser> => (await adminRequest<{ data: AdminUser }>("/api/sv/admin/me")).data,
@@ -159,6 +163,9 @@ export const adminService = {
     (await adminRequest<{ data: AdminBooking[] }>("/api/sv/admin/event-pass-bookings")).data,
 
   listFunds: async (): Promise<AdminFund[]> => (await adminRequest<{ data: AdminFund[] }>("/api/sv/admin/contribution-funds")).data,
+
+  createFund: async (fund: NewFund): Promise<AdminFund> =>
+    (await adminRequest<{ data: AdminFund }>("/api/sv/admin/contribution-funds", { method: "POST", body: fund })).data,
 
   updateFund: async (id: number, changes: FundChanges): Promise<AdminFund> =>
     (await adminRequest<{ data: AdminFund }>(`/api/sv/admin/contribution-funds/${id}`, { method: "PATCH", body: changes })).data,

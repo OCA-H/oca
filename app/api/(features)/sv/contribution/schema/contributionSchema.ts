@@ -109,6 +109,7 @@ export const contributionDocuments = pgTable(
 );
 
 export type ContributionFund = typeof contributionFunds.$inferSelect;
+export type NewContributionFund = typeof contributionFunds.$inferInsert;
 export type Contribution = typeof contributions.$inferSelect;
 export type NewContribution = typeof contributions.$inferInsert;
 export type NewContributionDocument = typeof contributionDocuments.$inferInsert;

@@ -10,6 +10,7 @@ export type FundForm = {
   note: string;
   sortOrder: string;
   unitAmount: string;
+  unitLabel: string;
   maxUnits: string;
   minAmount: string;
   maxAmount: string;
@@ -20,13 +21,27 @@ export const fundToForm = (fund: AdminFund): FundForm => ({
   note: fund.note ?? '',
   sortOrder: String(fund.sortOrder),
   unitAmount: fund.unitAmount === null ? '' : String(fund.unitAmount),
+  unitLabel: fund.unitLabel ?? '',
   maxUnits: fund.maxUnits === null ? '' : String(fund.maxUnits),
   minAmount: String(fund.minAmount),
   maxAmount: String(fund.maxAmount),
 });
 
 // An empty number box goes as NaN, which the API rejects beside that field.
-const toNumber = (value: string) => (value.trim() === '' ? Number.NaN : Number(value));
+export const toNumber = (value: string) => (value.trim() === '' ? Number.NaN : Number(value));
+
+/** The form as the API takes it: only the unit fields, or only the amount fields, count. */
+export const fundChanges = (values: FundForm, status: string, perUnit: boolean): FundChanges => ({
+  label: values.label,
+  note: values.note,
+  status,
+  sortOrder: toNumber(values.sortOrder),
+  unitAmount: perUnit ? toNumber(values.unitAmount) : null,
+  unitLabel: perUnit ? values.unitLabel : null,
+  maxUnits: perUnit ? toNumber(values.maxUnits) : null,
+  minAmount: perUnit ? null : toNumber(values.minAmount),
+  maxAmount: perUnit ? null : toNumber(values.maxAmount),
+});
 
 /** What the confirm dialog is asking about. */
 export type FundAction = { kind: 'save' } | { kind: 'status'; active: boolean } | { kind: 'delete' };
@@ -86,16 +101,7 @@ export function useFundEditor(fund: AdminFund, onSaved: (fund: AdminFund) => voi
     setError(null);
   };
 
-  const changesFrom = (values: FundForm, status: string): FundChanges => ({
-    label: values.label,
-    note: values.note,
-    status,
-    sortOrder: toNumber(values.sortOrder),
-    unitAmount: perUnit ? toNumber(values.unitAmount) : null,
-    maxUnits: perUnit ? toNumber(values.maxUnits) : null,
-    minAmount: perUnit ? null : toNumber(values.minAmount),
-    maxAmount: perUnit ? null : toNumber(values.maxAmount),
-  });
+  const changesFrom = (values: FundForm, status: string): FundChanges => fundChanges(values, status, perUnit);
 
   const confirm = async () => {
     if (!action) return;

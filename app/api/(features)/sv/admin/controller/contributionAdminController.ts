@@ -43,6 +43,14 @@ export class ContributionAdminController extends BaseController {
     })
   );
 
+  /** POST /api/sv/admin/contribution-funds: adds a contribution head. */
+  createFund = withAdminAuth((request) =>
+    this.handle(async () => {
+      const fund = await contributionService.createFundFromAdmin(await this.readJson(request));
+      return this.ok({ message: "Added. The contribution form now shows this head.", data: toAdminFund(fund) }, 201);
+    })
+  );
+
   /** PATCH /api/sv/admin/contribution-funds/{id}: changes a head's wording, order or status. */
   updateFund = withAdminAuth<FundContext>((request, _admin, _session, context) =>
     this.handle(async () => {

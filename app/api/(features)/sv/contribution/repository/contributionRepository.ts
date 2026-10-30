@@ -8,6 +8,7 @@ import {
   type ContributionFund,
   type ContributionWithFund,
   type NewContribution,
+  type NewContributionFund,
   type NewContributionDocument,
 } from "../schema/contributionSchema";
 
@@ -32,7 +33,7 @@ export class ContributionRepository extends BaseRepository {
 
   async updateFund(
     id: number,
-    data: Partial<Pick<ContributionFund, "label" | "note" | "unitAmount" | "maxUnits" | "minAmount" | "maxAmount" | "status" | "sortOrder">>
+    data: Partial<Pick<ContributionFund, "label" | "note" | "unitAmount" | "unitLabel" | "maxUnits" | "minAmount" | "maxAmount" | "status" | "sortOrder">>
   ): Promise<ContributionFund | null> {
     const results = await this.db
       .update(contributionFunds)
@@ -40,6 +41,11 @@ export class ContributionRepository extends BaseRepository {
       .where(eq(contributionFunds.id, id))
       .returning();
     return results[0] ?? null;
+  }
+
+  async createFund(data: NewContributionFund): Promise<ContributionFund> {
+    const results = await this.db.insert(contributionFunds).values(data).returning();
+    return results[0];
   }
 
   async deleteFund(id: number): Promise<boolean> {

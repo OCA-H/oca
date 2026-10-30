@@ -107,6 +107,48 @@ const toFundOption = (fund: ContributionFund): ContributionFundOption => ({
   suspended: fund.status !== "active",
 });
 
+/** What the admin panel sets on a contribution head, whether adding it or editing it. */
+export type FundFields = Pick<ContributionFund, "label" | "note" | "sortOrder" | "status" | "unitAmount" | "unitLabel" | "maxUnits" | "minAmount" | "maxAmount">;
+
+/**
+ * Checks a head's details from the admin panel. A per-unit head (Sponsor a teacher) has a unit
+ * price, name and limit, and keeps the amount limits it had (`current`); any other head has
+ * amount limits and no unit.
+ */
+function readFundFields(payload: Record<string, unknown>, perUnit: boolean, current?: ContributionFund): FundFields {
+  const fields: FieldErrors = {};
+  const words = (key: string, label: string, max: number, required = false): string | null => {
+    const value = typeof payload[key] === "string" ? (payload[key] as string).trim() : "";
+    if (required && !value) fields[key] = `${label} is required.`;
+    else if (value.length > max) fields[key] = `${label} must be ${max} characters or fewer.`;
+    return value || null;
+  };
+  const whole = (key: string, label: string, min: number): number => {
+    const value = payload[key];
+    const number = typeof value === "number" ? value : Number.NaN;
+    if (!Number.isInteger(number) || number < min) fields[key] = `${label} must be a whole number, ${min} or more.`;
+    return number;
+  };
+
+  const label = words("label", "Name", 100, true);
+  const note = words("note", "Note", 100);
+  const sortOrder = whole("sortOrder", "Order on the form", 0);
+  const status = payload.status;
+  if (status !== "active" && status !== "suspended") fields.status = "Choose whether the head is active or inactive.";
+  const unitAmount = perUnit ? whole("unitAmount", "Price per unit", 1) : null;
+  const unitLabel = perUnit ? words("unitLabel", "What one unit is", 30, true) : null;
+  const maxUnits = perUnit ? whole("maxUnits", "Most units at once", 1) : null;
+  // A per-unit head never uses amount limits; a new one gets the column defaults.
+  const minAmount = perUnit ? (current?.minAmount ?? 100) : whole("minAmount", "Smallest amount", 1);
+  const maxAmount = perUnit ? (current?.maxAmount ?? 10000000) : whole("maxAmount", "Largest amount", 1);
+  if (!fields.minAmount && !fields.maxAmount && maxAmount < minAmount) {
+    fields.maxAmount = "Largest amount must be at least the smallest amount.";
+  }
+  if (Object.keys(fields).length > 0) throw HttpError.badRequest("Some details need fixing.", fields);
+
+  return { label: label!, note, sortOrder, status: status as string, unitAmount, unitLabel, maxUnits, minAmount, maxAmount };
+}
+
 export class ContributionService {
   constructor(
     private readonly repository: ContributionRepository,
@@ -121,54 +163,37 @@ export class ContributionService {
   /**
    * The admin panel's edit of a contribution head: its wording, order, whether it takes
    * contributions, the smallest and largest amount members may give, and for a per-unit fund
-   * (Sponsor a teacher) the unit price and limit instead.
+   * (Sponsor a teacher) the unit price, name and limit instead.
    */
   async updateFundFromAdmin(id: number, payload: Record<string, unknown>): Promise<ContributionFund> {
     const fund = await this.repository.findFundById(id);
     if (!fund) throw HttpError.notFound("That contribution head no longer exists.");
 
-    const fields: FieldErrors = {};
-    const text = (key: string, label: string, max: number, required = false): string | null => {
-      const value = typeof payload[key] === "string" ? (payload[key] as string).trim() : "";
-      if (required && !value) fields[key] = `${label} is required.`;
-      else if (value.length > max) fields[key] = `${label} must be ${max} characters or fewer.`;
-      return value || null;
-    };
-    const whole = (key: string, label: string, min: number): number => {
-      const value = payload[key];
-      const number = typeof value === "number" ? value : Number.NaN;
-      if (!Number.isInteger(number) || number < min) fields[key] = `${label} must be a whole number, ${min} or more.`;
-      return number;
-    };
-
-    const label = text("label", "Name", 100, true);
-    const note = text("note", "Note", 100);
-    const sortOrder = whole("sortOrder", "Order on the form", 0);
-    const status = payload.status;
-    if (status !== "active" && status !== "suspended") fields.status = "Choose whether the head is active or inactive.";
-    // Only a per-unit fund has a unit price; the others take an amount between their limits.
-    const perUnit = fund.unitAmount !== null;
-    const unitAmount = perUnit ? whole("unitAmount", "Price per unit", 1) : null;
-    const maxUnits = perUnit ? whole("maxUnits", "Most units at once", 1) : null;
-    const minAmount = perUnit ? fund.minAmount : whole("minAmount", "Smallest amount", 1);
-    const maxAmount = perUnit ? fund.maxAmount : whole("maxAmount", "Largest amount", 1);
-    if (!fields.minAmount && !fields.maxAmount && maxAmount < minAmount) {
-      fields.maxAmount = "Largest amount must be at least the smallest amount.";
-    }
-    if (Object.keys(fields).length > 0) throw HttpError.badRequest("Some details need fixing.", fields);
-
-    const updated = await this.repository.updateFund(id, {
-      label: label!,
-      note,
-      sortOrder,
-      status: status as string,
-      unitAmount,
-      maxUnits,
-      minAmount,
-      maxAmount,
-    });
+    // Whether a head is paid per unit is set when it is added, and stays.
+    const changes = readFundFields(payload, fund.unitAmount !== null, fund);
+    const updated = await this.repository.updateFund(id, changes);
     if (!updated) throw HttpError.notFound("That contribution head no longer exists.");
     return updated;
+  }
+
+  /**
+   * A new contribution head from the admin panel: the same details as an edit, plus whether
+   * members give any amount or pay per unit. Its code (what the form and payments refer to it by)
+   * is made from its name, and never changes.
+   */
+  async createFundFromAdmin(payload: Record<string, unknown>): Promise<ContributionFund> {
+    if (payload.kind !== "amount" && payload.kind !== "unit") {
+      throw HttpError.badRequest("Some details need fixing.", { kind: "Choose how members give to this head." });
+    }
+    const data = readFundFields(payload, payload.kind === "unit");
+
+    const existing = await this.repository.listFunds();
+    const taken = new Set(existing.map((fund) => fund.code));
+    const base = data.label.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 24) || "head";
+    let code = base;
+    for (let n = 2; taken.has(code); n++) code = `${base}-${n}`;
+
+    return this.repository.createFund({ ...data, code });
   }
 
   /**
