@@ -12,6 +12,7 @@ export function useContactForm() {
   const [fieldErrors, setFieldErrors] = useState<ApiFieldErrors>({});
   const [error, setError] = useState<string | null>(null);
   const [sentMessage, setSentMessage] = useState<string | null>(null);
+  const [sentTo, setSentTo] = useState('');
   const [isSending, setIsSending] = useState(false);
 
   const setField = (name: keyof ContactFormPayload, value: string) => {
@@ -26,8 +27,9 @@ export function useContactForm() {
     setFieldErrors({});
     try {
       const { message } = await submitContactInquiry(form);
+      // The details stay in the form, so "Resend" brings it back ready to send again.
       setSentMessage(message);
-      setForm(EMPTY);
+      setSentTo(form.email);
       requestAnimationFrame(() => document.getElementById('contact-ok')?.scrollIntoView({ behavior: 'smooth', block: 'center' }));
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'We could not send your message. Please try again.');
@@ -37,13 +39,13 @@ export function useContactForm() {
     }
   };
 
-  const sendAnother = (e: React.MouseEvent) => {
-    e.preventDefault();
+  /** Brings the form back, still filled in, to send the message again. */
+  const resend = () => {
     setSentMessage(null);
     requestAnimationFrame(() => document.getElementById('ct-name')?.focus());
   };
 
-  return { form, setField, fieldErrors, error, sentMessage, isSending, handleSubmit, sendAnother };
+  return { form, setField, fieldErrors, error, sentMessage, sentTo, isSending, handleSubmit, resend };
 }
 
 export default useContactForm;

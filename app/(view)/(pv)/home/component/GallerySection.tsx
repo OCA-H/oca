@@ -41,11 +41,6 @@ export const GallerySection: React.FC = () => {
                 alt={currentPhoto.cap} 
                 decoding="async" 
               />
-              <div 
-                className="tile-icon" 
-                id="stageIcon" 
-                dangerouslySetInnerHTML={{ __html: currentAlbum.icon }} 
-              />
               <div className="stage-counter" id="stageCounter">
                 {selectedPhotoIdx + 1} / {currentAlbum.photos.length}
               </div>
@@ -66,7 +61,6 @@ export const GallerySection: React.FC = () => {
           <div className="album-tabs" id="albumTabs">
             {galleryAlbums.map((album, idx) => {
               const isActive = idx === selectedAlbumIdx;
-              const secs = (album.photos.length * 3.2).toFixed(1).replace('.0', '');
               return (
                 <div
                   key={album.name}
@@ -86,7 +80,7 @@ export const GallerySection: React.FC = () => {
                     <span className="album-tab-time">{album.time}</span>
                   </div>
                   <div className="album-tab-meta">
-                    {album.photos.length} photos · {secs}s
+                    {album.photos.length} photos
                   </div>
                   <div className="album-progress">
                     <div 

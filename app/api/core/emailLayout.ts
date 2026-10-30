@@ -194,6 +194,51 @@ export const emailButton = (href: string, label: string) => `<table role="presen
 export const emailNote = (html: string) =>
   `<p style="margin:24px 0 0;padding:14px 16px;background:${C.tintGold};border-left:3px solid ${C.gold};font-family:${SANS};font-size:13.5px;line-height:1.6;color:${C.textSoft};">${html}</p>`;
 
+/** "Dr. Asha Rao" → "AR", for the sender's monogram. */
+const initialsOf = (name: string) =>
+  name
+    .replace(/^(mr|mrs|ms|miss|dr|prof|col|capt|maj|gen|lt|brig|rev|hon)\.?\s+/i, "")
+    .split(/\s+/)
+    .filter(Boolean)
+    .map((word) => word[0])
+    .slice(0, 2)
+    .join("")
+    .toUpperCase();
+
+/**
+ * A message someone wrote, laid out as a letter: who wrote it (monogram, name and a line of
+ * details), its subject, then the message itself in full-size type. Every value is escaped here,
+ * and the message keeps its line breaks.
+ */
+export const emailMessage = (p: { from: string; meta?: string; subject?: string; message: string }) => {
+  const message = escapeHtml(p.message.trim()).replace(/\r?\n/g, "<br>");
+  return `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:${C.card};border:1px solid ${C.border};border-radius:12px;border-collapse:separate;">
+      <tr><td class="oca-msg" style="padding:16px 22px;background:${C.tintGreen};border-bottom:1px solid ${C.border};border-radius:12px 12px 0 0;">
+        <table role="presentation" cellpadding="0" cellspacing="0"><tr>
+          <td valign="middle" style="padding-right:12px;">
+            <table role="presentation" cellpadding="0" cellspacing="0" style="border-collapse:separate;"><tr><td align="center" valign="middle" width="40" height="40" style="width:40px;height:40px;border-radius:40px;background:${C.brand};font-family:${SERIF};font-size:15px;font-weight:700;color:#FFFFFF;">${escapeHtml(initialsOf(p.from))}</td></tr></table>
+          </td>
+          <td valign="middle" style="font-family:${SANS};">
+            <p style="margin:0;font-size:15px;font-weight:700;line-height:1.3;color:${C.text};">${escapeHtml(p.from)}</p>
+            ${p.meta ? `<p style="margin:2px 0 0;font-size:12.5px;line-height:1.4;color:${C.textSoft};">${escapeHtml(p.meta)}</p>` : ""}
+          </td>
+        </tr></table>
+      </td></tr>
+      ${
+        p.subject
+          ? `<tr><td class="oca-msg" style="padding:20px 22px 0;font-family:${SANS};">
+        <p style="margin:0 0 4px;font-size:11.5px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:${C.brandMid};">Subject</p>
+        <p style="margin:0;font-family:${SERIF};font-size:18px;font-weight:700;line-height:1.4;color:${C.brandDeep};">${escapeHtml(p.subject)}</p>
+      </td></tr>`
+          : ""
+      }
+      <tr><td class="oca-msg" style="padding:${p.subject ? "14px" : "20px"} 22px 24px;">
+        <p style="margin:0;padding-left:16px;border-left:3px solid ${C.gold};font-family:${SANS};font-size:15.5px;line-height:1.75;color:${C.text};word-break:break-word;">${message}</p>
+        <p style="margin:16px 0 0;font-family:${SERIF};font-size:14px;font-weight:700;color:${C.brandDeep};">&mdash; ${escapeHtml(p.from)}</p>
+      </td></tr>
+    </table>`;
+};
+
 /** The sign-off: "With warm regards, / The OCA Secretariat". */
 export const emailSignOff = (closing: string, contact: ContactDetailsContent) =>
   emailParagraph(`${escapeHtml(closing)},<br><b style="font-family:${SERIF};color:${C.brandDeep};">${escapeHtml(contact.name)}</b>`, { margin: "26px 0 0" });
@@ -220,6 +265,7 @@ const MOBILE_CSS = `@media only screen and (max-width:480px){
 .oca-hero{padding:28px 14px 4px !important}
 .oca-h1{font-size:22px !important}
 .oca-panel{padding:4px 10px !important}
+.oca-msg{padding-left:14px !important;padding-right:14px !important}
 .oca-dl,.oca-dv{display:block !important;width:auto !important;text-align:left !important}
 .oca-dl{padding:12px 0 2px !important}
 .oca-dv{padding:0 0 12px !important;border-top:0 !important}

@@ -12,7 +12,7 @@ const FieldError: React.FC<{ message?: string }> = ({ message }) =>
 
 export const ContactSection: React.FC = () => {
   const contact = useContact();
-  const { form, setField, fieldErrors, error, sentMessage, isSending, handleSubmit, sendAnother } = useContactForm();
+  const { form, setField, fieldErrors, error, sentMessage, sentTo, isSending, handleSubmit, resend } = useContactForm();
   return (
     <section className="section tint-teal" id="contact">
       <div className="wrap">
@@ -33,11 +33,16 @@ export const ContactSection: React.FC = () => {
             </div>
           </div>
           <form className="contact-form-panel" onSubmit={handleSubmit} noValidate>
-            <div className="mp-ok" id="contact-ok" role="status" hidden={!sentMessage}>
-              <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>
-              <p>
-                <b>{sentMessage}</b>{' '}
-                <a href="#contact" onClick={sendAnother}>Send another message</a>
+            {/* Laid over the form, which stays in place underneath so the panel keeps its size. */}
+            <div className="contact-sent" id="contact-ok" role="status" hidden={!sentMessage}>
+              <span className="contact-sent-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none"><path d="m5 12.5 4.5 4.5L19 7.5" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" /></svg>
+              </span>
+              <h3>Message sent</h3>
+              <p>{sentMessage}</p>
+              {sentTo && <p className="contact-sent-copy">A copy is on its way to <b>{sentTo}</b>.</p>}
+              <p className="contact-sent-resend">
+                Didn&rsquo;t get the email? <button type="button" onClick={resend}>Resend</button>
               </p>
             </div>
             {error && (
@@ -45,7 +50,7 @@ export const ContactSection: React.FC = () => {
                 {error}
               </p>
             )}
-            <div hidden={Boolean(sentMessage)}>
+            <div className={sentMessage ? 'contact-form-fields is-covered' : 'contact-form-fields'} inert={Boolean(sentMessage)}>
               <div className="field-row">
                 <div className="field">
                   <label htmlFor="ct-name">Full Name *</label>

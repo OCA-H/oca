@@ -22,11 +22,15 @@ export const OfferingsSection: React.FC<{ content: HomeNoticesContent }> = ({ co
           </button>
     
           <div className="notice-cards" id="noticeCards">
-            {content.items.map((notice, i) => (
-              <article className="notice-card" key={`${i}-${notice.title}`}>
-                <div className={`notice-card-media photo-tile ${toneAt(i)}`}>
+            {/* Rendered twice so the carousel can loop without a visible jump; see useHomeHandler. */}
+            {[...content.items, ...content.items].map((notice, i) => (
+              <article
+                className="notice-card"
+                key={`${i}-${notice.title}`}
+                {...(i >= content.items.length && { 'data-clone': '', 'aria-hidden': true, inert: true })}
+              >
+                <div className={`notice-card-media photo-tile ${toneAt(i % content.items.length)}`}>
                   <img className="tile-img" src={notice.image} alt={notice.imageAlt} loading="lazy" decoding="async" />
-                  <div className="tile-icon"><svg viewBox="0 0 24 24" fill="none"><path d="M9 12h6M9 16h6M9 8h6M5 21V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16l-3-2-2 2-2-2-2 2-2-2-3 2Z" stroke="#fff" strokeWidth="1.4"/></svg></div>
                 </div>
                 <div className="notice-card-body">
                   {notice.date && <div className="notice-card-date">{notice.date}</div>}

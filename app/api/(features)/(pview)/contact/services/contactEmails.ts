@@ -8,7 +8,7 @@ import {
   emailDetails,
   emailHero,
   emailLayout,
-  emailNote,
+  emailMessage,
   emailParagraph,
   emailSignOff,
   emailSubhead,
@@ -27,9 +27,6 @@ export interface ContactInquiry {
   subject: string;
   message: string;
 }
-
-/** The message as the visitor typed it, line breaks kept. */
-const messageHtml = (message: string) => escapeHtml(message).replace(/\r?\n/g, "<br>");
 
 /** "Dr. Asha Rao" → "Asha", for a friendlier heading. */
 const firstName = (fullName: string) =>
@@ -70,8 +67,13 @@ export function contactInquiryEmail(params: {
       ${emailBody(`
         ${emailSubhead("From")}
         ${emailDetails(rows)}
-        ${emailSubhead("Message")}
-        ${emailNote(messageHtml(inquiry.message))}
+        ${emailSubhead("Their message")}
+        ${emailMessage({
+          from: inquiry.name,
+          meta: [inquiry.batch && `Batch of ${inquiry.batch}`, inquiry.email].filter(Boolean).join(" · "),
+          subject: inquiry.subject,
+          message: inquiry.message,
+        })}
         ${emailParagraph(`Reply to this email to answer ${escapeHtml(inquiry.name)} at ${escapeHtml(inquiry.email)}.`, { soft: true, margin: "22px 0 0" })}
       `)}`,
   });
@@ -128,8 +130,12 @@ export function contactAcknowledgementEmail(params: {
         ${emailParagraph(`Dear ${escapeHtml(inquiry.name)},`)}
         ${emailParagraph(escapeHtml(intro), { soft: true, margin: "0 0 4px" })}
         ${emailSubhead("Your message")}
-        ${emailDetails(rows)}
-        ${emailNote(messageHtml(inquiry.message))}
+        ${emailMessage({
+          from: inquiry.name,
+          meta: `Sent ${formatPaidOn(receivedAt)}`,
+          subject: inquiry.subject,
+          message: inquiry.message,
+        })}
         ${emailParagraph(escapeHtml(urgent), { soft: true, margin: "22px 0 0" })}
         ${emailSignOff("With warm regards", contact)}
       `)}`,

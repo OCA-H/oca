@@ -16,6 +16,9 @@ export type AppRoute =
   | 'member-signin'
   | 'partner-organization';
 
+/** How long every home page carousel rests on a card before moving on. */
+const CAROUSEL_INTERVAL_MS = 3500;
+
 export function useHomeHandler() {
   const { isAuthenticated, user, isLoading: isAuthLoading, signOut } = useAuth();
   const [activeRoute, setActiveRoute] = useState<AppRoute>('home');
@@ -39,44 +42,63 @@ export function useHomeHandler() {
 
   // Carousel initializers
   useEffect(() => {
-    function setupCarousel(trackId: string, prevSelector: string, nextSelector: string, cardSelector: string, gap: number, autoInterval: number) {
+    /**
+     * Loops a card carousel forever. Its cards are rendered twice (the copies marked data-clone),
+     * so once it has scrolled through one full set it can jump back by that much unseen.
+     */
+    function setupCarousel(trackId: string, prevSelector: string, nextSelector: string, cardSelector: string) {
       const track = document.getElementById(trackId);
       const prevBtn = document.querySelector(prevSelector);
       const nextBtn = document.querySelector(nextSelector);
-      if (!track || !prevBtn || !nextBtn) return;
+      if (!track || !prevBtn || !nextBtn) return () => {};
 
-      const step = 320;
-      let timer: any = null;
+      let timer: ReturnType<typeof setInterval> | undefined;
+
+      const firstCard = () => track.querySelector<HTMLElement>(`${cardSelector}:not([data-clone])`);
+      const loopWidth = () => {
+        const first = firstCard();
+        const firstClone = track.querySelector<HTMLElement>(`${cardSelector}[data-clone]`);
+        return first && firstClone ? firstClone.offsetLeft - first.offsetLeft : 0;
+      };
+      const step = () => (firstCard()?.offsetWidth ?? 300) + (parseFloat(getComputedStyle(track).columnGap) || 0);
 
       const next = () => {
-        track.scrollBy({ left: step, behavior: 'smooth' });
+        const loop = loopWidth();
+        if (loop > 0 && track.scrollLeft >= loop - 1) track.scrollTo({ left: track.scrollLeft - loop, behavior: 'instant' });
+        track.scrollBy({ left: step(), behavior: 'smooth' });
       };
 
       const prev = () => {
-        track.scrollBy({ left: -step, behavior: 'smooth' });
+        const loop = loopWidth();
+        if (loop > 0 && track.scrollLeft <= 1) track.scrollTo({ left: track.scrollLeft + loop, behavior: 'instant' });
+        track.scrollBy({ left: -step(), behavior: 'smooth' });
+      };
+
+      const stopAuto = () => clearInterval(timer);
+      const startAuto = () => {
+        stopAuto();
+        timer = setInterval(next, CAROUSEL_INTERVAL_MS);
       };
 
       nextBtn.addEventListener('click', next);
       prevBtn.addEventListener('click', prev);
-
-      const startAuto = () => {
-        timer = setInterval(() => {
-          if (track.scrollLeft + track.clientWidth >= track.scrollWidth - 10) {
-            track.scrollTo({ left: 0, behavior: 'smooth' });
-          } else {
-            next();
-          }
-        }, autoInterval);
-      };
-
+      track.addEventListener('mouseenter', stopAuto);
+      track.addEventListener('mouseleave', startAuto);
       startAuto();
 
-      track.addEventListener('mouseenter', () => clearInterval(timer));
-      track.addEventListener('mouseleave', startAuto);
+      return () => {
+        stopAuto();
+        nextBtn.removeEventListener('click', next);
+        prevBtn.removeEventListener('click', prev);
+        track.removeEventListener('mouseenter', stopAuto);
+        track.removeEventListener('mouseleave', startAuto);
+      };
     }
 
-    setupCarousel('noticeCards', '.notice-nav.prev', '.notice-nav.next', '.notice-card', 22, 4500);
-    setupCarousel('postCarousel', '.post-nav.prev', '.post-nav.next', '.post-card', 22, 3500);
+    const cleanups = [
+      setupCarousel('noticeCards', '.notice-nav.prev', '.notice-nav.next', '.notice-card'),
+      setupCarousel('postCarousel', '.post-nav.prev', '.post-nav.next', '.post-card'),
+    ];
 
     // Mute button handler
     const mutedIcon = '<svg viewBox="0 0 24 24" fill="none"><path d="M11 5 6 9H3v6h3l5 4V5Z" stroke="#fff" stroke-width="1.6" stroke-linejoin="round"/><path d="M16 9l6 6M22 9l-6 6" stroke="#fff" stroke-width="1.6" stroke-linecap="round"/></svg>';
@@ -106,6 +128,8 @@ export function useHomeHandler() {
         }
       });
     });
+
+    return () => cleanups.forEach((cleanup) => cleanup());
   }, [activeRoute]);
 
   // Gallery timed auto-sweep

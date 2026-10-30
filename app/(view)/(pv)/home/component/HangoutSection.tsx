@@ -24,7 +24,44 @@ function Intro({ intro, highlight }: { intro: string; highlight: string }) {
 }
 
 export const HangoutSection: React.FC<{ content: HomeHangoutContent }> = ({ content }) => {
-  let photoCount = 0;
+  // Rendered twice so the carousel can loop without a visible jump; see useHomeHandler.
+  const posts = (clone: boolean) => {
+    let photoCount = 0;
+    return content.posts.map((post, i) => (
+      <article
+        className="post-card"
+        data-type={post.type}
+        key={`${clone ? 'clone-' : ''}${i}-${post.caption}`}
+        {...(clone && { 'data-clone': '', 'aria-hidden': true, inert: true })}
+      >
+        <div className={`post-media ${toneAt(i)}`}>
+          <img className="tile-img" src={post.image} alt={post.imageAlt} loading="lazy" decoding="async" />
+          {post.type === 'video' ? (
+            <>
+              <div className="play-btn"><span><svg viewBox="0 0 24 24" fill="none"><path d="M8 5v14l11-7L8 5Z" fill="currentColor"/></svg></span></div>
+              <button className="mute-btn" data-muted="true" aria-label="Unmute"><svg viewBox="0 0 24 24" fill="none"><path d="M11 5 6 9H3v6h3l5 4V5Z" stroke="#fff" strokeWidth="1.6" strokeLinejoin="round"/><path d="M16 9l6 6M22 9l-6 6" stroke="#fff" strokeWidth="1.6" strokeLinecap="round"/></svg></button>
+              {post.duration && <span className="post-duration">{post.duration}</span>}
+            </>
+          ) : (
+            <div className="tile-icon"><svg viewBox="0 0 24 24" fill="none">{PHOTO_ICONS[photoCount++ % PHOTO_ICONS.length]}</svg></div>
+          )}
+        </div>
+        <div className="post-body">
+          {(post.name || post.batch) && (
+            <div className="post-header">
+              <div className="post-who">
+                {post.name && <div className="post-name">{post.name}</div>}
+                {post.batch && <div className="post-batch">{post.batch}</div>}
+              </div>
+            </div>
+          )}
+          <p className="post-caption-text">{post.caption}</p>
+          {post.time && <div className="post-time">{post.time}</div>}
+        </div>
+      </article>
+    ));
+  };
+
   return (
     <section className="section band-dark" id="hangout">
       <div className="wrap">
@@ -35,43 +72,17 @@ export const HangoutSection: React.FC<{ content: HomeHangoutContent }> = ({ cont
             {content.intro && <p style={{ color: "#AFC8B6" }}><Intro intro={content.intro} highlight={content.highlight} /></p>}
           </div>
         </div>
-    
+
         <div className="post-carousel-wrap">
           <button className="post-nav prev" aria-label="Previous">
             <svg viewBox="0 0 24 24" fill="none"><path d="M15 18l-6-6 6-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
           </button>
-    
+
           <div className="post-carousel" id="postCarousel">
-            {content.posts.map((post, i) => (
-              <article className="post-card" data-type={post.type} key={`${i}-${post.caption}`}>
-                <div className={`post-media ${toneAt(i)}`}>
-                  <img className="tile-img" src={post.image} alt={post.imageAlt} loading="lazy" decoding="async" />
-                  {post.type === 'video' ? (
-                    <>
-                      <div className="play-btn"><span><svg viewBox="0 0 24 24" fill="none"><path d="M8 5v14l11-7L8 5Z" fill="currentColor"/></svg></span></div>
-                      <button className="mute-btn" data-muted="true" aria-label="Unmute"><svg viewBox="0 0 24 24" fill="none"><path d="M11 5 6 9H3v6h3l5 4V5Z" stroke="#fff" strokeWidth="1.6" strokeLinejoin="round"/><path d="M16 9l6 6M22 9l-6 6" stroke="#fff" strokeWidth="1.6" strokeLinecap="round"/></svg></button>
-                      {post.duration && <span className="post-duration">{post.duration}</span>}
-                    </>
-                  ) : (
-                    <div className="tile-icon"><svg viewBox="0 0 24 24" fill="none">{PHOTO_ICONS[photoCount++ % PHOTO_ICONS.length]}</svg></div>
-                  )}
-                </div>
-                <div className="post-body">
-                  {(post.name || post.batch) && (
-                    <div className="post-header">
-                      <div className="post-who">
-                        {post.name && <div className="post-name">{post.name}</div>}
-                        {post.batch && <div className="post-batch">{post.batch}</div>}
-                      </div>
-                    </div>
-                  )}
-                  <p className="post-caption-text">{post.caption}</p>
-                  {post.time && <div className="post-time">{post.time}</div>}
-                </div>
-              </article>
-            ))}
+            {posts(false)}
+            {posts(true)}
           </div>
-    
+
           <button className="post-nav next" aria-label="Next">
             <svg viewBox="0 0 24 24" fill="none"><path d="M9 18l6-6-6-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
           </button>

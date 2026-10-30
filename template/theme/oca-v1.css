@@ -2060,11 +2060,103 @@ nav.primary-nav {
 }
 
 .contact-form-panel {
+  position: relative;
   background: var(--card);
   border: 1px solid var(--border);
   border-radius: var(--radius-m);
   padding: 32px;
   box-shadow: var(--shadow-card);
+}
+
+/* Once sent, the form keeps its place (so the panel keeps its size) and this card covers it. */
+.contact-form-fields.is-covered {
+  visibility: hidden;
+}
+
+.contact-sent {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 32px;
+  text-align: center;
+  border-radius: inherit;
+  background: linear-gradient(180deg, var(--tint-teal), var(--card) 60%);
+  animation: mpRiseIn .24s ease-out both;
+}
+
+.contact-sent[hidden] {
+  display: none;
+}
+
+.contact-sent-icon {
+  display: grid;
+  place-items: center;
+  width: 64px;
+  height: 64px;
+  margin-bottom: 6px;
+  border-radius: 50%;
+  background: var(--brand);
+  color: #fff;
+  box-shadow: 0 0 0 8px rgba(27, 158, 75, .12), var(--shadow-brand);
+}
+
+.contact-sent-icon svg {
+  width: 30px;
+  height: 30px;
+}
+
+.contact-sent h3 {
+  margin: 0;
+  font-family: var(--serif);
+  font-size: 24px;
+  color: var(--text);
+}
+
+.contact-sent p {
+  margin: 0;
+  max-width: 360px;
+  font-size: 14.5px;
+  line-height: 1.55;
+  color: var(--text-soft);
+}
+
+.contact-sent-copy b {
+  color: var(--text);
+  word-break: break-all;
+}
+
+.contact-sent .contact-sent-resend {
+  margin-top: 14px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
+  font-size: 13.5px;
+}
+
+.contact-sent-resend button {
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  font-weight: 600;
+  color: var(--brand-mid);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+
+.contact-sent-resend button:hover {
+  color: var(--brand-deep);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .contact-sent {
+    animation: none;
+  }
 }
 
 .contact-form-panel textarea {

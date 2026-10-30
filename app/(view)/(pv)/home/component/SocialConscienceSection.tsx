@@ -2,12 +2,6 @@ import React from 'react';
 import type { HomeCause, HomeSocialContent } from '@/app/api/(features)/(pview)/site/schema/sectionSpecs';
 import { SiteLink, toneAt } from './SiteLink';
 
-const CAUSE_ICONS = [
-  'M12 14l9-5-9-5-9 5 9 5Zm0 0v7m-9-7v5c0 1 4 3 9 3s9-2 9-3v-5',
-  'M4 21h16M6 21V9l6-4 6 4v12M10 21v-5h4v5',
-  'M12 21s-7-4.35-9.5-9A5.5 5.5 0 0 1 12 6a5.5 5.5 0 0 1 9.5 6C19 16.65 12 21 12 21Z',
-];
-
 /** A muted cause's badge takes its tile's colour. */
 const BADGE_COLOURS: Record<string, string> = { 'duo-navy': 'var(--navy)', 'duo-teal': 'var(--teal-dark)', 'duo-gold': 'var(--gold-dark)' };
 
@@ -19,9 +13,6 @@ function CauseCard({ cause, index }: { cause: HomeCause; index: number }) {
     <div className={`cause-card${featured ? '' : ' muted'}`}>
       <div className={`photo-tile ${tone}`}>
         <img className="tile-img" src={cause.image} alt={cause.imageAlt} loading="lazy" decoding="async" />
-        <div className="tile-icon">
-          <svg viewBox="0 0 24 24" fill="none"><path d={CAUSE_ICONS[index % CAUSE_ICONS.length]} stroke="#fff" strokeWidth="1.4"/></svg>
-        </div>
         {cause.badge && (
           <div className="tile-caption">
             {featured ? (
