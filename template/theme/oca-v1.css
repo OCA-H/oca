@@ -7067,14 +7067,38 @@ section[id^="ec-"] {
       padding: 0;
     }
 
+    /* Contribution heads come from the database, however many there are: each card is at least
+       240px wide, as many fit on a row as can, and the cards on a short last row stretch to fill it. */
     .cf-heads {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
+      display: flex;
+      flex-wrap: wrap;
       gap: 10px;
     }
 
-    .cf-heads .cf-opt:last-child {
-      grid-column: 1 / -1;
+    /* Cards on a row share its height; their content sits in the middle, so a one-line head lines
+       up with a neighbour that has a note under it. */
+    .cf-heads .cf-opt {
+      flex: 1 1 240px;
+      align-items: center;
+    }
+
+    .cf-heads .cf-opt input {
+      margin-top: 0;
+    }
+
+    /* A suspended head stays listed (with its note) but reads as unavailable. */
+    .cf-opt.is-off {
+      cursor: not-allowed;
+      background: #FAFBFA;
+      border-style: dashed;
+    }
+
+    .cf-opt.is-off:hover {
+      border-color: var(--border);
+    }
+
+    .cf-opt.is-off b {
+      color: var(--text-soft);
     }
 
     .cf-opt {
@@ -7244,14 +7268,136 @@ section[id^="ec-"] {
       border-top: 1px dashed var(--border-strong);
     }
 
-    .cf-file input[type=file] {
-      padding: 9px 10px;
-      font-size: 13px;
-      background: #fff;
-      border: 1.5px dashed var(--border-strong);
+    /* Tax documents: a compact file picker, the height of the inputs beside it. The real file input
+       is hidden (still reached by its label); the "Choose file" chip opens it. */
+    .cf-file {
+      position: relative;
+    }
+
+    .cf-file-input {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .cf-file-box {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      min-height: 44px;
+      padding: 5px 6px 5px 5px;
+      border: 1px dashed var(--border-strong);
       border-radius: var(--radius-s);
-      width: 100%;
+      background: #FAFCFB;
+      min-width: 0;
+      transition: border-color .15s ease, background .15s ease;
+    }
+
+    .cf-file-box.has-file {
+      border-style: solid;
+      border-color: var(--brand);
+      background: var(--tint-teal);
+    }
+
+    .cf-file-box.is-dragging {
+      border-color: var(--brand);
+      background: var(--tint-teal);
+    }
+
+    .cf-file-box.is-bad {
+      border-color: #B0452C;
+    }
+
+    .cf-file-chip {
+      flex-shrink: 0;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 12px;
+      border: 1px solid var(--border-strong);
+      border-radius: 100px;
+      background: #fff;
+      font: inherit;
+      font-size: 12.5px;
+      font-weight: 600;
+      color: var(--brand-mid);
+      cursor: pointer;
+      transition: background .15s ease, border-color .15s ease;
+    }
+
+    .cf-file-chip svg {
+      width: 14px;
+      height: 14px;
+    }
+
+    .cf-file-chip:hover:not(:disabled) {
+      background: var(--tint-teal);
+      border-color: var(--brand);
+    }
+
+    .cf-file-chip:focus-visible,
+    .cf-file-x:focus-visible {
+      outline: 3px solid var(--gold-accent);
+      outline-offset: 1px;
+    }
+
+    .cf-file-chip:disabled,
+    .cf-file-x:disabled {
+      opacity: .6;
+      cursor: not-allowed;
+    }
+
+    .cf-file-empty {
+      font-size: 13px;
       color: var(--text-soft);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .cf-file-name {
+      flex: 1;
+      min-width: 0;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .cf-file-name small {
+      margin-left: 6px;
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--text-soft);
+    }
+
+    .cf-file-x {
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 28px;
+      height: 28px;
+      padding: 0;
+      border: 0;
+      border-radius: 50%;
+      background: none;
+      color: var(--text-soft);
+      cursor: pointer;
+    }
+
+    .cf-file-x svg {
+      width: 15px;
+      height: 15px;
+    }
+
+    .cf-file-x:hover:not(:disabled) {
+      background: #FBEDE9;
+      color: #B0452C;
     }
 
     .cf-hint {
@@ -7383,8 +7529,8 @@ section[id^="ec-"] {
         grid-template-columns: repeat(2, 1fr);
       }
 
-      .cf-heads {
-        grid-template-columns: 1fr;
+      .cf-heads .cf-opt {
+        flex-basis: 100%;
       }
 
       .cf-row3 {

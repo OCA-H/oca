@@ -4,6 +4,7 @@ import React from 'react';
 import { CustomDropdown, PhoneInput } from '@/app/(view)/common';
 import type { DonationHandler } from '../../handler/useDonationHandler';
 import { unitOptions } from '../../helper/donation.helper';
+import { FileDrop } from './FileDrop';
 
 /** The contribution form a signed-in member fills in; funds come from the database. */
 export const ContributionForm: React.FC<{ handler: DonationHandler }> = ({ handler }) => {
@@ -51,7 +52,7 @@ export const ContributionForm: React.FC<{ handler: DonationHandler }> = ({ handl
         )}
         <div className="cf-heads">
           {funds.map((fund) => (
-            <label key={fund.code} className="cf-opt">
+            <label key={fund.code} className={`cf-opt${fund.suspended ? ' is-off' : ''}`}>
               <input
                 type="radio"
                 name="fund"
@@ -326,16 +327,14 @@ export const ContributionForm: React.FC<{ handler: DonationHandler }> = ({ handl
                   onChange={handleChange}
                 />
               </div>
-              <div className="field cf-file">
-                <label htmlFor="d-pan-file">Upload PAN card</label>
-                <input
-                  id="d-pan-file"
-                  name="pan_file"
-                  type="file"
-                  accept="image/*,.pdf"
-                  onChange={(e) => handleFileChange('panFile', e.target.files ? e.target.files[0] : null)}
-                />
-              </div>
+              <FileDrop
+                id="d-pan-file"
+                name="pan_file"
+                label="Upload PAN card"
+                file={formData.panFile}
+                onChange={(file) => handleFileChange('panFile', file)}
+                disabled={isSubmitting}
+              />
             </div>
             <div className="field-row">
               <div className="field">
@@ -349,19 +348,18 @@ export const ContributionForm: React.FC<{ handler: DonationHandler }> = ({ handl
                   onChange={handleChange}
                 />
               </div>
-              <div className="field cf-file">
-                <label htmlFor="d-adoc-file">Upload address proof</label>
-                <input
-                  id="d-adoc-file"
-                  name="address_file"
-                  type="file"
-                  accept="image/*,.pdf"
-                  onChange={(e) => handleFileChange('addressFile', e.target.files ? e.target.files[0] : null)}
-                />
-              </div>
+              <FileDrop
+                id="d-adoc-file"
+                name="address_file"
+                label="Upload address proof"
+                file={formData.addressFile}
+                onChange={(file) => handleFileChange('addressFile', file)}
+                disabled={isSubmitting}
+              />
             </div>
             <p className="cf-hint">
-              Address proof can be an Aadhaar copy, driving licence, voter ID card or passport copy.
+              Address proof can be an Aadhaar copy, driving licence, voter ID card or passport copy. Files: JPG, PNG,
+              WebP or PDF, up to 4 MB.
             </p>
           </div>
         )}
