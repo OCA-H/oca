@@ -5,7 +5,7 @@ import { HttpError } from "@/app/api/core/httpError";
 import { storage, type StoredFile } from "@/app/api/core/storage";
 import type { UploadedFile } from "@/app/api/core/fileUpload";
 import { SiteContentRepository } from "../repository/siteContentRepository";
-import { SECTION_SPECS, SITE_SECTION_KEYS, sectionSpec, type ContactDetailsContent, type EmailSettingsContent, type EventDinnerContent, type MembershipFeeContent, type EventLunchContent, type EventSportsContent, type HomeContent, type SectionSpec, type SiteSectionKey } from "../schema/sectionSpecs";
+import { SECTION_SPECS, SITE_SECTION_KEYS, sectionSpec, type ContactDetailsContent, type EmailSettingsContent, type EventDinnerContent, type MembershipFeeContent, type EventLunchContent, type EventSportsContent, type HomeCommitteeContent, type HomeContent, type SectionSpec, type SiteSectionKey } from "../schema/sectionSpecs";
 import { MEMBERSHIP_FEE_DEFAULTS, SECTION_DEFAULTS } from "./siteDefaults";
 import { splitEmails, validateSection } from "./sectionValidator";
 
@@ -79,6 +79,8 @@ async function getSectionContent(key: SiteSectionKey): Promise<Record<string, un
 export const getDinnerContent = async () => (await getSectionContent(SITE_SECTION_KEYS.eventsDinner)) as unknown as EventDinnerContent;
 export const getLunchContent = async () => (await getSectionContent(SITE_SECTION_KEYS.eventsLunch)) as unknown as EventLunchContent;
 export const getSportsContent = async () => (await getSectionContent(SITE_SECTION_KEYS.eventsSports)) as unknown as EventSportsContent;
+/** The current office bearers, as set in the admin panel (About → Executive Committee). */
+export const getCommitteeContent = async () => (await getSectionContent(SITE_SECTION_KEYS.aboutCommittee)) as unknown as HomeCommitteeContent;
 
 /** The Life Membership fee in rupees, as set in the admin panel (Membership → Membership fee). */
 export async function getMembershipFee(): Promise<number> {

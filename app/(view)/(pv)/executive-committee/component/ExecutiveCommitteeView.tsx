@@ -3,7 +3,9 @@
 import React from 'react';
 import Link from 'next/link';
 import { ROUTES } from '@/app/(view)/common/helper/routes';
+import type { HomeCommitteeContent } from '@/app/api/(features)/(pview)/site/schema/sectionSpecs';
 import { useExecutiveCommitteeHandler } from '../handler/useExecutiveCommitteeHandler';
+import { withAdminOfficeBearers } from '../helper/executiveCommittee.helper';
 import {
   ExecutiveCommitteeHero,
   CommitteeJumpNav,
@@ -12,7 +14,7 @@ import {
   ExecutiveCommitteeCTA,
 } from './subcomponents';
 
-export const ExecutiveCommitteeView: React.FC = () => {
+export const ExecutiveCommitteeView: React.FC<{ committee?: HomeCommitteeContent }> = ({ committee }) => {
   const { content, activeTermId, handleSelectTerm } = useExecutiveCommitteeHandler();
   const { breadcrumbs, hero, terms, cta } = content;
 
@@ -42,7 +44,7 @@ export const ExecutiveCommitteeView: React.FC = () => {
       {/* Committee Terms */}
       {terms.map((term) =>
         term.isCurrent ? (
-          <CurrentCommitteeSection key={term.id} term={term} />
+          <CurrentCommitteeSection key={term.id} term={withAdminOfficeBearers(term, committee)} />
         ) : (
           <PastCommitteeSection key={term.id} term={term} />
         )

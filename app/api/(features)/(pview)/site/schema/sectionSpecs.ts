@@ -463,7 +463,7 @@ export const SECTION_SPECS: SectionSpec[] = [
     key: SITE_SECTION_KEYS.aboutCommittee,
     page: "about",
     label: "Executive Committee",
-    description: "The three office bearers shown near the bottom of the home page: photo, name and role.",
+    description: "The three office bearers shown near the bottom of the home page and in the current committee on the Executive Committee page: photo, name and role.",
     href: "/#committee",
     fields: [
       { key: "eyebrow", label: "Eyebrow", type: "text", max: 60, hint: "The small line above the heading." },
