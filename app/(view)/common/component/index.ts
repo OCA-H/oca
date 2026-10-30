@@ -5,3 +5,4 @@ export * from './Lightbox';
 export * from './CustomDropdown';
 export * from './DatePicker';
 export * from './ContactProvider';
+export * from './PhoneInput';

@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { ApiError, type ApiFieldErrors } from '@/app/(view)/common/services/api.service';
+import { DEFAULT_DIAL_CODE, joinPhone, type PhoneParts } from '@/app/(view)/common/helper/phone';
 import { submitContactInquiry, type ContactFormPayload } from '../services';
 
 const EMPTY: ContactFormPayload = { name: '', email: '', batch: '', phone: '', subject: '', message: '', website: '' };
@@ -9,6 +10,8 @@ const EMPTY: ContactFormPayload = { name: '', email: '', batch: '', phone: '', s
 /** The "Get in touch" form on the home page: its fields, sending, and what came back. */
 export function useContactForm() {
   const [form, setForm] = useState<ContactFormPayload>(EMPTY);
+  // The picker's parts, so a country chosen before the number is typed is kept; the form sends them joined.
+  const [phone, setPhoneParts] = useState<PhoneParts>({ code: DEFAULT_DIAL_CODE, number: '' });
   const [fieldErrors, setFieldErrors] = useState<ApiFieldErrors>({});
   const [error, setError] = useState<string | null>(null);
   const [sentMessage, setSentMessage] = useState<string | null>(null);
@@ -18,6 +21,11 @@ export function useContactForm() {
   const setField = (name: keyof ContactFormPayload, value: string) => {
     setForm((prev) => ({ ...prev, [name]: value }));
     setFieldErrors((prev) => ({ ...prev, [name]: undefined }));
+  };
+
+  const setPhone = (parts: PhoneParts) => {
+    setPhoneParts(parts);
+    setField('phone', joinPhone(parts));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -45,7 +53,7 @@ export function useContactForm() {
     requestAnimationFrame(() => document.getElementById('ct-name')?.focus());
   };
 
-  return { form, setField, fieldErrors, error, sentMessage, sentTo, isSending, handleSubmit, resend };
+  return { form, setField, phone, setPhone, fieldErrors, error, sentMessage, sentTo, isSending, handleSubmit, resend };
 }
 
 export default useContactForm;

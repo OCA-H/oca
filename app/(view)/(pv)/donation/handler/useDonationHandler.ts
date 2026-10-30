@@ -6,6 +6,7 @@ import { formatCurrency, calculateAmount, amountError } from '../helper/donation
 import { donationService, type ContributionFund } from '../services/donation.service';
 import { ApiError, type ApiFieldErrors } from '@/app/(view)/common/services/api.service';
 import { useAuth } from '@/app/(view)/common/helper/useAuth';
+import { DEFAULT_DIAL_CODE, joinPhone, splitPhone, type PhoneParts } from '@/app/(view)/common/helper/phone';
 import { profileService, type MemberProfile } from '@/app/(view)/sv/profile/services/profile.service';
 
 export interface DonationFormData {
@@ -17,7 +18,9 @@ export interface DonationFormData {
   name: string;
   batch: string;
   email: string;
+  /** The number without its country code, which is `mobileCode` ("+91"). */
   mobile: string;
+  mobileCode: string;
   address: string;
   city: string;
   state: string;
@@ -45,7 +48,7 @@ const profileFields = (profile: MemberProfile): ProfileFields => ({
   name: profile.fullName,
   batch: profile.batchYear ?? '',
   email: profile.email,
-  mobile: profile.mobile,
+  mobile: splitPhone(profile.mobile).number,
   address: [profile.address.line1, profile.address.line2, profile.address.line3].filter(Boolean).join(', '),
   city: profile.address.city,
   state: profile.address.state,
@@ -63,6 +66,8 @@ const fillFromProfile = (prev: DonationFormData, profile: MemberProfile, overwri
   for (const [key, value] of Object.entries(profileFields(profile)) as [keyof ProfileFields, string][]) {
     if (value && (overwrite || !prev[key])) next[key] = value;
   }
+  // The code goes with the number it came with.
+  if (next.mobile !== prev.mobile) next.mobileCode = splitPhone(profile.mobile).code;
   next.email = profile.email;
   return next;
 };
@@ -77,6 +82,7 @@ const initialFormData = (profile: MemberProfile | null): DonationFormData => {
     batch: '',
     email: '',
     mobile: '',
+    mobileCode: DEFAULT_DIAL_CODE,
     address: '',
     city: '',
     state: '',
@@ -224,6 +230,10 @@ export function useDonationHandler() {
     setFormData((prev) => ({ ...prev, [field]: value }));
   }, []);
 
+  const handlePhoneChange = useCallback(({ code, number }: PhoneParts) => {
+    setFormData((prev) => ({ ...prev, mobileCode: code, mobile: number }));
+  }, []);
+
   const handleChange = useCallback((e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target;
     if (type === 'radio') {
@@ -291,7 +301,9 @@ export function useDonationHandler() {
       }
 
       const form = new FormData();
-      const { panFile, addressFile, addressDoc, ...fields } = formData;
+      const { panFile, addressFile, addressDoc, mobileCode, ...fields } = formData;
+      // An Indian number goes without +91, as it always has, for CCAvenue's billing phone.
+      fields.mobile = joinPhone({ code: mobileCode, number: fields.mobile }, { bareIndia: true });
       for (const [key, value] of Object.entries(fields)) form.append(key, String(value));
       if (formData.g80 === 'yes') {
         form.append('address_doc', addressDoc);
@@ -343,6 +355,7 @@ export function useDonationHandler() {
     handleAmountChange,
     handleUnitsChange,
     handleDropdownChange,
+    handlePhoneChange,
     handleChange,
     handleFileChange,
     openResetModal,

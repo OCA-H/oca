@@ -5,6 +5,12 @@ import React, { useState, useRef, useEffect, useId, useMemo } from 'react';
 export interface DropdownOption {
   label: string;
   value: string;
+  /** Shown before the label, in the list and on the button (a country's flag, say). */
+  icon?: React.ReactNode;
+  /** A shorter label for the button once chosen, e.g. "+91" for "India (+91)". */
+  triggerLabel?: string;
+  /** More text the search matches, beyond the label. */
+  keywords?: string;
 }
 
 export interface CustomDropdownProps {
@@ -60,7 +66,7 @@ export const CustomDropdown: React.FC<CustomDropdownProps> = ({
     if (!searchQuery.trim()) return normalizedOptions;
     const q = searchQuery.toLowerCase();
     return normalizedOptions.filter((opt) =>
-      opt.label.toLowerCase().includes(q)
+      `${opt.label} ${opt.keywords ?? ''}`.toLowerCase().includes(q)
     );
   }, [normalizedOptions, searchQuery]);
 
@@ -215,10 +221,11 @@ export const CustomDropdown: React.FC<CustomDropdownProps> = ({
         aria-label={ariaLabel || placeholder}
         disabled={disabled}
       >
+        {selectedOption?.icon && <span className="c-dropdown-icon">{selectedOption.icon}</span>}
         <span
           className={`c-dropdown-value ${!selectedOption ? 'is-placeholder' : ''}`}
         >
-          {selectedOption ? selectedOption.label : placeholder}
+          {selectedOption ? (selectedOption.triggerLabel ?? selectedOption.label) : placeholder}
         </span>
         <svg
           className="c-dropdown-chevron"
@@ -306,7 +313,10 @@ export const CustomDropdown: React.FC<CustomDropdownProps> = ({
                     onClick={() => handleSelect(opt.value)}
                     onMouseEnter={() => setHighlightedIndex(index)}
                   >
-                    <span>{opt.label}</span>
+                    <span className="c-dropdown-label">
+                      {opt.icon && <span className="c-dropdown-icon">{opt.icon}</span>}
+                      <span>{opt.label}</span>
+                    </span>
                     {isSelected && (
                       <svg
                         className="c-dropdown-check"

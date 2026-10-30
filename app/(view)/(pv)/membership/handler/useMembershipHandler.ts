@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useCallback, useEffect, useRef } from 'react';
+import type { PhoneParts } from '@/app/(view)/common/helper/phone';
 import { formatDateOfBirth } from '@/app/(view)/common/helper/common.helper';
 import { membershipService, MembershipCheckoutError } from '../services/membership.service';
 
@@ -86,6 +87,10 @@ export function useMembershipHandler() {
 
   const handleDropdownChange = useCallback((name: string, value: string) => {
     setFormData((prev) => ({ ...prev, [name]: value }));
+  }, []);
+
+  const handlePhoneChange = useCallback(({ code, number }: PhoneParts) => {
+    setFormData((prev) => ({ ...prev, country_code: code, mobile: number }));
   }, []);
 
   const togglePasswordVisibility = useCallback(() => {
@@ -284,6 +289,7 @@ export function useMembershipHandler() {
     reviewItems,
     handleChange,
     handleDropdownChange,
+    handlePhoneChange,
     togglePasswordVisibility,
     goToNextStep,
     goToPrevStep,

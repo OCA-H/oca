@@ -3,6 +3,7 @@
 import React from 'react';
 import { CustomDropdown } from '@/app/(view)/common/component/CustomDropdown';
 import { DatePicker } from '@/app/(view)/common/component/DatePicker';
+import { PhoneInput } from '@/app/(view)/common/component/PhoneInput';
 import { DATE_OF_BIRTH_PICKER } from '@/app/(view)/common/helper/common.helper';
 import { profileContent } from '../../content';
 import { useAccountForm } from '../../handler';
@@ -23,6 +24,8 @@ export const AccountPanel: React.FC<AccountPanelProps> = ({ profile, hidden, onB
   const {
     form,
     setField,
+    phone,
+    setPhone,
     setAddress,
     isLocked,
     isDirty,
@@ -68,19 +71,32 @@ export const AccountPanel: React.FC<AccountPanelProps> = ({ profile, hidden, onB
           {!locked && ' *'}
         </label>
         <div className={`mp-input${locked ? ' is-locked' : ''}`}>
-          <input
-            id={id}
-            name={key}
-            type={type}
-            required={!locked}
-            readOnly={locked}
-            aria-readonly={locked || undefined}
-            aria-describedby={locked || hint ? hintId : undefined}
-            value={form[key]}
-            onChange={(e) => setField(key, e.target.value)}
-            autoComplete={locked ? 'off' : autoComplete}
-            inputMode={key === 'mobile' ? 'tel' : undefined}
-          />
+          {key === 'mobile' ? (
+            <PhoneInput
+              id={id}
+              name={key}
+              required={!locked}
+              readOnly={locked}
+              aria-describedby={locked || hint ? hintId : undefined}
+              maxLength={15}
+              value={phone}
+              onChange={setPhone}
+              autoComplete={locked ? 'off' : autoComplete}
+            />
+          ) : (
+            <input
+              id={id}
+              name={key}
+              type={type}
+              required={!locked}
+              readOnly={locked}
+              aria-readonly={locked || undefined}
+              aria-describedby={locked || hint ? hintId : undefined}
+              value={form[key]}
+              onChange={(e) => setField(key, e.target.value)}
+              autoComplete={locked ? 'off' : autoComplete}
+            />
+          )}
           {locked && <ProfileIcon name="lock" className="mp-input-lock" />}
         </div>
         {fieldErrors[key] ? (
@@ -174,7 +190,7 @@ export const AccountPanel: React.FC<AccountPanelProps> = ({ profile, hidden, onB
         <hr className="ms-sep" />
         <div className="field-row">
           {contactInput('email', 'mpa-email', 'Email', 'email', 'email')}
-          {contactInput('mobile', 'mpa-mobile', 'Mobile', 'tel', 'tel', account.mobileHint)}
+          {contactInput('mobile', 'mpa-mobile', 'Mobile', 'tel', 'tel-national', account.mobileHint)}
         </div>
 
         <hr className="ms-sep" />

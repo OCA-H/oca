@@ -7349,16 +7349,6 @@ section[id^="ec-"] {
       font-size: 12.5px;
     }
 
-    .mb-mobile {
-      display: grid;
-      grid-template-columns: 96px minmax(0, 1fr);
-      gap: 10px;
-    }
-
-    .mb-mobile input {
-      text-align: left;
-    }
-
     .mb-check {
       display: flex;
       gap: 13px;
@@ -9414,3 +9404,70 @@ section[id^="ec-"] {
 .ad-change-values s{color:var(--text-soft);}
 .ad-change-values b{color:var(--navy);}
 .ad-dialog-error{margin:16px 0 0;}
+
+/* ---------- Phone input: country picker (flag and calling code) beside the number ---------- */
+/* The picker takes only what the flag and code need; the number gets the rest of the row. */
+.phone-input {
+  display: grid;
+  grid-template-columns: max-content minmax(0, 1fr);
+  align-items: stretch;
+  gap: 8px;
+}
+
+.phone-input > input {
+  min-width: 0;
+  text-align: left;
+}
+
+/* Matches the height and type of the number beside it, whichever form it is in. */
+.phone-country .c-dropdown-trigger {
+  height: 100%;
+  min-height: 42px;
+  min-width: 92px;
+  gap: 6px;
+  padding: 0 8px 0 10px;
+  font-size: 14px;
+}
+
+.phone-country .c-dropdown-chevron {
+  width: 14px;
+  height: 14px;
+}
+
+/* Locked, like the read-only number beside it. */
+.phone-country.is-disabled .c-dropdown-trigger {
+  background: var(--bg);
+  color: var(--text-soft);
+  border-color: var(--border);
+  cursor: not-allowed;
+}
+
+.phone-country .c-dropdown-value {
+  font-variant-numeric: tabular-nums;
+}
+
+/* The list is wider than the button, so country names fit. */
+.phone-country .c-dropdown-panel {
+  right: auto;
+  width: min(320px, calc(100vw - 32px));
+}
+
+.c-dropdown-label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.c-dropdown-icon {
+  display: inline-flex;
+  flex-shrink: 0;
+}
+
+/* .fi.phone-flag: flag-icons' own stylesheet loads after this one and sets .fi's width. */
+.fi.phone-flag {
+  width: 20px;
+  line-height: 15px;
+  border-radius: 3px;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, .08);
+}

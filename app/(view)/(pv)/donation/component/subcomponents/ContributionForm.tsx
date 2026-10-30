@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { CustomDropdown } from '@/app/(view)/common';
+import { CustomDropdown, PhoneInput } from '@/app/(view)/common';
 import type { DonationHandler } from '../../handler/useDonationHandler';
 import { unitOptions } from '../../helper/donation.helper';
 
@@ -26,6 +26,7 @@ export const ContributionForm: React.FC<{ handler: DonationHandler }> = ({ handl
     handleAmountChange,
     handleUnitsChange,
     handleDropdownChange,
+    handlePhoneChange,
     handleChange,
     handleFileChange,
     openResetModal,
@@ -206,15 +207,13 @@ export const ContributionForm: React.FC<{ handler: DonationHandler }> = ({ handl
         </div>
         <div className="field">
           <label htmlFor="d-phone">Mobile *</label>
-          <input
+          <PhoneInput
             id="d-phone"
             name="mobile"
-            type="tel"
             required
-            autoComplete="tel"
-            placeholder="+91"
-            value={formData.mobile}
-            onChange={handleChange}
+            maxLength={15}
+            value={{ code: formData.mobileCode, number: formData.mobile }}
+            onChange={handlePhoneChange}
           />
         </div>
       </div>

@@ -4,6 +4,7 @@ import React from 'react';
 import Link from 'next/link';
 import { ROUTES } from '@/app/(view)/common/helper/routes';
 import { useContact } from '@/app/(view)/common/component/ContactProvider';
+import { PhoneInput } from '@/app/(view)/common/component/PhoneInput';
 import { useContactForm } from '../handler/useContactForm';
 
 /** A field's error message from the API, under its input. */
@@ -12,7 +13,7 @@ const FieldError: React.FC<{ message?: string }> = ({ message }) =>
 
 export const ContactSection: React.FC = () => {
   const contact = useContact();
-  const { form, setField, fieldErrors, error, sentMessage, sentTo, isSending, handleSubmit, resend } = useContactForm();
+  const { form, setField, phone, setPhone, fieldErrors, error, sentMessage, sentTo, isSending, handleSubmit, resend } = useContactForm();
   return (
     <section className="section tint-teal" id="contact">
       <div className="wrap">
@@ -71,7 +72,7 @@ export const ContactSection: React.FC = () => {
                 </div>
                 <div className="field">
                   <label htmlFor="ct-phone">Phone</label>
-                  <input id="ct-phone" type="tel" autoComplete="tel" maxLength={20} placeholder="+91" value={form.phone} onChange={(e) => setField('phone', e.target.value)} aria-invalid={Boolean(fieldErrors.phone) || undefined} />
+                  <PhoneInput id="ct-phone" name="phone" maxLength={15} placeholder="Phone number" value={phone} onChange={setPhone} aria-invalid={Boolean(fieldErrors.phone) || undefined} />
                   <FieldError message={fieldErrors.phone} />
                 </div>
               </div>

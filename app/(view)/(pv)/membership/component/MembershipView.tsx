@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { ROUTES } from '@/app/(view)/common/helper/routes';
 import { useAuth } from '@/app/(view)/common/helper/useAuth';
 import { useContact } from '@/app/(view)/common/component/ContactProvider';
-import { CustomDropdown, DatePicker } from '@/app/(view)/common';
+import { CustomDropdown, DatePicker, PhoneInput } from '@/app/(view)/common';
 import { DATE_OF_BIRTH_PICKER } from '@/app/(view)/common/helper/common.helper';
 import { MEMBERSHIP_CONTENT } from '../content/membership.content';
 import { formatRupees } from '../helper/membership.helper';
@@ -32,6 +32,7 @@ export const MembershipView: React.FC<MembershipViewProps> = ({ fee }) => {
     reviewItems,
     handleChange,
     handleDropdownChange,
+    handlePhoneChange,
     togglePasswordVisibility,
     goToNextStep,
     goToPrevStep,
@@ -289,29 +290,13 @@ export const MembershipView: React.FC<MembershipViewProps> = ({ fee }) => {
                 <label htmlFor="m-mobile">
                   Mobile * <span className="mb-sub">(country code and number)</span>
                 </label>
-                <div className="mb-mobile">
-                  <input
-                    id="m-code"
-                    name="country_code"
-                    type="text"
-                    required
-                    inputMode="tel"
-                    value={formData.country_code}
-                    aria-label="Country code"
-                    autoComplete="tel-country-code"
-                    onChange={handleChange}
-                  />
-                  <input
-                    id="m-mobile"
-                    name="mobile"
-                    type="tel"
-                    required
-                    autoComplete="tel-national"
-                    placeholder="Mobile number"
-                    value={formData.mobile}
-                    onChange={handleChange}
-                  />
-                </div>
+                <PhoneInput
+                  id="m-mobile"
+                  name="mobile"
+                  required
+                  value={{ code: formData.country_code, number: formData.mobile }}
+                  onChange={handlePhoneChange}
+                />
               </div>
 
               <hr className="ms-sep" />
