@@ -1,12 +1,25 @@
 import React from 'react';
 import Link from 'next/link';
 import { ROUTES } from '@/app/(view)/common/helper/routes';
+import type { HomeTickerContent, HomeTickerItem } from '@/app/api/(features)/(pview)/site/schema/sectionSpecs';
 
-/** `birthdayCount` is how many members have their birthday today; the ticker leaves it out when none do. */
-export const HeroSection: React.FC<{ birthdayCount: number }> = ({ birthdayCount }) => {
-  const birthdayNews = birthdayCount > 0 && (
-    <span><strong>Today:</strong> {birthdayCount} {birthdayCount === 1 ? 'Columban is' : 'Columbans are'} celebrating their birthday — send your wishes</span>
-  );
+/** Where today's birthday line goes among the admin's ticker lines. */
+const BIRTHDAY_LINE_AT = 2;
+
+/**
+ * `ticker` is what admins set in the admin panel (Home page → Live ticker). `birthdayCount` is how
+ * many members have their birthday today; the ticker leaves that line out when none do.
+ */
+export const HeroSection: React.FC<{ ticker: HomeTickerContent; birthdayCount: number }> = ({ ticker, birthdayCount }) => {
+  const lines: HomeTickerItem[] = [...ticker.items];
+  if (birthdayCount > 0) {
+    lines.splice(BIRTHDAY_LINE_AT, 0, {
+      label: 'Today:',
+      text: `${birthdayCount} ${birthdayCount === 1 ? 'Columban is' : 'Columbans are'} celebrating their birthday — send your wishes`,
+    });
+  }
+  // Rendered twice so the strip can loop without a visible jump.
+  const track = [...lines, ...lines];
 
   return (
     <section className="hero" id="top">
@@ -36,17 +49,14 @@ export const HeroSection: React.FC<{ birthdayCount: number }> = ({ birthdayCount
       </div>
       <div className="hero-ticker">
         <div className="wrap">
-          <span className="tick-label">● LIVE</span>
+          <span className="tick-label">{ticker.badge}</span>
           <div style={{ overflow: "hidden", flex: "1" }}>
             <div className="ticker-track">
-              <span><strong>New notice:</strong> OCA – AGM 2025 Reminder &amp; Balance Sheet posted Nov 19, 2025</span>
-              <span><strong>Sponsorship open:</strong> Brother Oman Memorial Cricket Tournament — ₹1.50 Lacs</span>
-              {birthdayNews}
-              <span><strong>Fund update:</strong> Teachers Benevolent Fund now at 7% of goal</span>
-              <span><strong>New notice:</strong> OCA – AGM 2025 Reminder &amp; Balance Sheet posted Nov 19, 2025</span>
-              <span><strong>Sponsorship open:</strong> Brother Oman Memorial Cricket Tournament — ₹1.50 Lacs</span>
-              {birthdayNews}
-              <span><strong>Fund update:</strong> Teachers Benevolent Fund now at 7% of goal</span>
+              {track.map((line, idx) => (
+                <span key={idx} aria-hidden={idx >= lines.length || undefined}>
+                  {line.label && <strong>{line.label}</strong>} {line.text}
+                </span>
+              ))}
             </div>
           </div>
         </div>

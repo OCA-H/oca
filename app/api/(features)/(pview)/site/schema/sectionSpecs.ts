@@ -35,6 +35,8 @@ export interface ListSpec {
   min: number;
   max: number;
   fields: FieldSpec[];
+  /** Lists inside each entry, e.g. an album's photos. One level deep: these have no lists of their own. */
+  lists?: ListSpec[];
 }
 
 export interface SectionSpec {
@@ -50,11 +52,13 @@ export interface SectionSpec {
 }
 
 export const SITE_SECTION_KEYS = {
+  homeTicker: "home.ticker",
   homeEvents: "home.events",
   homeNotices: "home.notices",
   homeSpotlight: "home.spotlight",
   homeHangout: "home.hangout",
   homeSocial: "home.social",
+  homeGallery: "home.gallery",
   aboutCommittee: "about.committee",
   eventsDinner: "events.dinner",
   eventsLunch: "events.lunch",
@@ -68,10 +72,22 @@ export type SiteSectionKey = (typeof SITE_SECTION_KEYS)[keyof typeof SITE_SECTIO
 
 /** A section's saved content: plain fields, plus one array per list. */
 export type SectionValue = string | number;
-export type SectionItem = Record<string, SectionValue>;
+export type SectionItem = { [key: string]: SectionValue | SectionItem[] };
 export type SectionData = Record<string, SectionValue | SectionItem[]>;
 
 // ---------- Home page content, as the sections render it ----------
+
+export interface HomeTickerItem {
+  /** The bold start of the line, e.g. "New notice:". */
+  label: string;
+  text: string;
+}
+
+/** The scrolling "● LIVE" strip under the hero. Today's birthdays are added to it automatically. */
+export interface HomeTickerContent {
+  badge: string;
+  items: HomeTickerItem[];
+}
 
 export interface HomeEventItem {
   image: string;
@@ -159,6 +175,25 @@ export interface HomeSocialContent {
   title: string;
   intro: string;
   causes: HomeCause[];
+}
+
+export interface HomeGalleryPhoto {
+  image: string;
+  caption: string;
+}
+
+export interface HomeGalleryAlbum {
+  name: string;
+  /** When the album is from, e.g. "Nov 2025". */
+  time: string;
+  photos: HomeGalleryPhoto[];
+}
+
+export interface HomeGalleryContent {
+  eyebrow: string;
+  title: string;
+  intro: string;
+  albums: HomeGalleryAlbum[];
 }
 
 export interface HomeCommitteeMember {
@@ -258,11 +293,13 @@ export const phoneHref = (phone: string): string => `tel:${phone.trim().startsWi
 
 /** Everything the home page reads from the database. */
 export interface HomeContent {
+  ticker: HomeTickerContent;
   events: HomeEventsContent;
   notices: HomeNoticesContent;
   spotlight: HomeSpotlightContent;
   hangout: HomeHangoutContent;
   social: HomeSocialContent;
+  gallery: HomeGalleryContent;
   committee: HomeCommitteeContent;
 }
 
@@ -308,6 +345,29 @@ const eventFact = (key: string, label: string, example: string, detailExample: s
 ];
 
 export const SECTION_SPECS: SectionSpec[] = [
+  {
+    key: SITE_SECTION_KEYS.homeTicker,
+    page: "home",
+    label: "Live ticker",
+    description: "The scrolling “● LIVE” strip under the banner at the top of the home page.",
+    href: "/#top",
+    fields: [{ key: "badge", label: "Badge", type: "text", max: 20, required: true, placeholder: "● LIVE", hint: "The tag at the start of the strip." }],
+    lists: [
+      {
+        key: "items",
+        label: "Ticker lines",
+        itemLabel: "Line",
+        titleField: "text",
+        hint: "The lines scroll past one after another. When members have their birthday today, a line saying so is added after the second line automatically.",
+        min: 1,
+        max: 10,
+        fields: [
+          { key: "label", label: "Bold start", type: "text", max: 40, placeholder: "New notice:", hint: "Shown in bold before the text. Leave empty for none." },
+          { key: "text", label: "Text", type: "text", max: 200, required: true, placeholder: "OCA – AGM 2025 Reminder & Balance Sheet posted Nov 19, 2025" },
+        ],
+      },
+    ],
+  },
   {
     key: SITE_SECTION_KEYS.homeEvents,
     page: "home",
@@ -455,6 +515,43 @@ export const SECTION_SPECS: SectionSpec[] = [
           { key: "goal", label: "Goal", type: "text", max: 40, placeholder: "₹2,00,00,000" },
           { key: "ctaHref", label: "Contribute link", type: "link", hint: LINK_HINT },
           { key: "href", label: "About link", type: "link", hint: `${LINK_HINT} Leave empty to hide it.` },
+        ],
+      },
+    ],
+  },
+  {
+    key: SITE_SECTION_KEYS.homeGallery,
+    page: "home",
+    label: "Our Gallery",
+    description: "Photo albums in a slideshow that moves through each album’s photos in turn.",
+    href: "/#gallery",
+    fields: sectionHead(),
+    lists: [
+      {
+        key: "albums",
+        label: "Albums",
+        itemLabel: "Album",
+        titleField: "name",
+        hint: "Albums play in this order. Use the arrows to change it.",
+        min: 1,
+        max: 12,
+        fields: [
+          { key: "name", label: "Album name", type: "text", max: 60, required: true, placeholder: "Annual Lunch 2025" },
+          { key: "time", label: "When", type: "text", max: 30, placeholder: "Nov 2025" },
+        ],
+        lists: [
+          {
+            key: "photos",
+            label: "Photos",
+            itemLabel: "Photo",
+            titleField: "caption",
+            min: 1,
+            max: 40,
+            fields: [
+              { key: "image", label: "Photo", type: "image", required: true, hint: IMAGE_HINT },
+              { key: "caption", label: "Caption", type: "text", max: 120, required: true, hint: "Shown on the photo, and read out by screen readers." },
+            ],
+          },
         ],
       },
     ],

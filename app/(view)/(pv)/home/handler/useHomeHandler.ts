@@ -1,7 +1,6 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { galleryAlbums, GalleryAlbum } from '../content/home.content';
 import { useAuth } from '@/app/(view)/common/helper/useAuth';
 
 export type AppRoute =
@@ -22,9 +21,6 @@ const CAROUSEL_INTERVAL_MS = 3500;
 export function useHomeHandler() {
   const { isAuthenticated, user, isLoading: isAuthLoading, signOut } = useAuth();
   const [activeRoute, setActiveRoute] = useState<AppRoute>('home');
-  const [selectedAlbumIdx, setSelectedAlbumIdx] = useState(0);
-  const [selectedPhotoIdx, setSelectedPhotoIdx] = useState(0);
-  const [isHovered, setIsHovered] = useState(false);
 
   // Smooth scroll support for hash anchors on initial load if present (e.g. /#events)
   useEffect(() => {
@@ -132,38 +128,9 @@ export function useHomeHandler() {
     return () => cleanups.forEach((cleanup) => cleanup());
   }, [activeRoute]);
 
-  // Gallery timed auto-sweep
-  useEffect(() => {
-    if (isHovered) return;
-    const album = galleryAlbums[selectedAlbumIdx];
-    if (!album) return;
-
-    const timer = setInterval(() => {
-      setSelectedPhotoIdx((prev) => {
-        if (prev + 1 >= album.photos.length) {
-          setSelectedAlbumIdx((prevAlbum) => (prevAlbum + 1) % galleryAlbums.length);
-          return 0;
-        }
-        return prev + 1;
-      });
-    }, 3200);
-
-    return () => clearInterval(timer);
-  }, [selectedAlbumIdx, isHovered]);
-
-  const currentAlbum = galleryAlbums[selectedAlbumIdx];
-  const currentPhoto = currentAlbum?.photos[selectedPhotoIdx] || currentAlbum?.photos[0];
-
   return {
     activeRoute,
     setActiveRoute,
-    selectedAlbumIdx,
-    setSelectedAlbumIdx,
-    selectedPhotoIdx,
-    setSelectedPhotoIdx,
-    currentAlbum,
-    currentPhoto,
-    setIsHovered,
     isAuthenticated,
     user,
     isAuthLoading,

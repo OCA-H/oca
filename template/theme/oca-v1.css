@@ -9246,6 +9246,8 @@ section[id^="ec-"] {
 .ad-tool:disabled{opacity:.35; cursor:not-allowed;}
 .ad-item-body{padding:8px 20px 24px; border-top:1px solid var(--border); animation:mpRiseIn .2s ease-out both;}
 .ad-item-body .ad-grid{margin-top:16px;}
+/* A list inside an entry, e.g. an album's photos. */
+.ad-list--nested{margin:24px 0 0; padding-top:20px;}
 .ad-add{display:flex; align-items:center; justify-content:center; gap:8px; width:100%; margin-top:12px; padding:14px; border:1.5px dashed var(--border-strong); border-radius:var(--radius-m); background:none; font:inherit; font-size:14px; font-weight:600; color:var(--brand-mid); cursor:pointer;}
 .ad-add svg{width:18px; height:18px;}
 .ad-add:hover:not(:disabled){background:var(--tint-teal); border-color:var(--brand);}

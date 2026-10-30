@@ -41,11 +41,13 @@ export async function getHomeContent(): Promise<HomeContent> {
   cacheTag(SITE_CONTENT_TAG);
 
   const keys = {
+    ticker: SITE_SECTION_KEYS.homeTicker,
     events: SITE_SECTION_KEYS.homeEvents,
     notices: SITE_SECTION_KEYS.homeNotices,
     spotlight: SITE_SECTION_KEYS.homeSpotlight,
     hangout: SITE_SECTION_KEYS.homeHangout,
     social: SITE_SECTION_KEYS.homeSocial,
+    gallery: SITE_SECTION_KEYS.homeGallery,
     committee: SITE_SECTION_KEYS.aboutCommittee,
   } satisfies Record<keyof HomeContent, SiteSectionKey>;
 

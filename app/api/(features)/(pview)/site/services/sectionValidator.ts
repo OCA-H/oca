@@ -1,8 +1,9 @@
 import type { FieldErrors } from "@/app/api/core/httpError";
-import type { FieldSpec, SectionData, SectionItem, SectionSpec, SectionValue } from "../schema/sectionSpecs";
+import type { FieldSpec, ListSpec, SectionData, SectionItem, SectionSpec, SectionValue } from "../schema/sectionSpecs";
 
 // Checks a section save against its spec, field by field. Errors are keyed the way the admin form
-// names its inputs: "title" for a section field, "items.2.title" for a field of the third event.
+// names its inputs: "title" for a section field, "items.2.title" for a field of the third event,
+// "albums.0.photos.3.image" for a field in a list inside a list entry.
 
 const MAX_URL_LENGTH = 500;
 const EMAIL_PATTERN = /^[^\s@,]+@[^\s@,]+\.[^\s@,]+$/;
@@ -93,23 +94,31 @@ export function validateSection(spec: SectionSpec, payload: Record<string, unkno
   }
 
   for (const list of spec.lists) {
-    const raw = Array.isArray(payload[list.key]) ? (payload[list.key] as unknown[]) : [];
-    if (raw.length < list.min) {
-      errors[list.key] = `Add at least ${list.min} ${list.itemLabel.toLowerCase()}${list.min === 1 ? "" : "s"}.`;
-    }
-    if (raw.length > list.max) {
-      errors[list.key] = `There can be at most ${list.max} ${list.itemLabel.toLowerCase()}s.`;
-    }
-
-    data[list.key] = raw.slice(0, list.max).map((entry, index) => {
-      const source = entry && typeof entry === "object" && !Array.isArray(entry) ? (entry as Record<string, unknown>) : {};
-      const item: SectionItem = {};
-      for (const field of list.fields) {
-        item[field.key] = checkField(field, source[field.key], errors, `${list.key}.${index}.${field.key}`);
-      }
-      return item;
-    });
+    data[list.key] = checkList(list, payload[list.key], errors, list.key);
   }
 
   return { data, errors };
+}
+
+/** A list's entries, each with only its spec's fields and lists; `name` is the list's error key. */
+function checkList(list: ListSpec, rawList: unknown, errors: FieldErrors, name: string): SectionItem[] {
+  const raw = Array.isArray(rawList) ? rawList : [];
+  if (raw.length < list.min) {
+    errors[name] = `Add at least ${list.min} ${list.itemLabel.toLowerCase()}${list.min === 1 ? "" : "s"}.`;
+  }
+  if (raw.length > list.max) {
+    errors[name] = `There can be at most ${list.max} ${list.itemLabel.toLowerCase()}s.`;
+  }
+
+  return raw.slice(0, list.max).map((entry, index) => {
+    const source = entry && typeof entry === "object" && !Array.isArray(entry) ? (entry as Record<string, unknown>) : {};
+    const item: SectionItem = {};
+    for (const field of list.fields) {
+      item[field.key] = checkField(field, source[field.key], errors, `${name}.${index}.${field.key}`);
+    }
+    for (const sub of list.lists ?? []) {
+      item[sub.key] = checkList(sub, source[sub.key], errors, `${name}.${index}.${sub.key}`);
+    }
+    return item;
+  });
 }

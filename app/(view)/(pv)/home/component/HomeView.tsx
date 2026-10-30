@@ -35,7 +35,7 @@ export const HomeView: React.FC<{ content: HomeContent; birthdays: BirthdayMembe
 
       <main id="app">
         <div className="page is-active" id="page-home">
-          <HeroSection birthdayCount={birthdays.length} />
+          <HeroSection ticker={content.ticker} birthdayCount={birthdays.length} />
           <EventsSection content={content.events} />
           <HighlightsSection />
           <OfferingsSection content={content.notices} />
@@ -46,7 +46,7 @@ export const HomeView: React.FC<{ content: HomeContent; birthdays: BirthdayMembe
           <BenefitsSection />
           <ConnectSection />
           <MissionSection />
-          <GallerySection />
+          <GallerySection content={content.gallery} />
           <CommitteeSection content={content.committee} />
           <ContactSection />
         </div>

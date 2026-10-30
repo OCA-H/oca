@@ -4,11 +4,33 @@ import { RECORD_PANELS, type AdminPanel, type RecordPanel } from "../content";
 import type { FieldSpec, ListSpec, SectionData, SectionItem } from "../services";
 
 /** A list entry in the editor, with an id that stays with it while entries are moved around. */
-export type EditorItem = SectionItem & { _id: string };
+export type EditorItem = { _id: string; [key: string]: string | number | EditorItem[] };
 export type EditorData = Record<string, string | number | EditorItem[]>;
 
 let nextItemId = 0;
 const newItemId = () => `item-${++nextItemId}`;
+
+/** Saved entries with ids, recursively; entries keep the id they had at the same place in `before`. */
+const withIds = (items: SectionItem[], before: unknown): EditorItem[] =>
+  items.map((item, i) => {
+    const previous = Array.isArray(before) ? (before[i] as EditorItem | undefined) : undefined;
+    const entry: EditorItem = { _id: previous?._id || newItemId() };
+    for (const [key, value] of Object.entries(item)) entry[key] = Array.isArray(value) ? withIds(value, previous?.[key]) : value;
+    return entry;
+  });
+
+/** Entries as the API takes them: ids dropped, recursively. */
+const withoutIds = (items: EditorItem[]): SectionItem[] =>
+  items.map((item) =>
+    Object.fromEntries(
+      Object.entries(item)
+        .filter(([key]) => key !== "_id")
+        .map(([key, value]) => [key, Array.isArray(value) ? withoutIds(value) : value])
+    )
+  );
+
+/** "albums.0.photos" → ["albums", 0, "photos"]: list keys at even places, entry positions at odd ones. */
+const pathParts = (path: string): (string | number)[] => path.split(".").map((part, i) => (i % 2 ? Number(part) : part));
 
 export const adminHelper = {
   /** "home.events" → "/sv/admin/home/events"; the dashboard is "/sv/admin". */
@@ -93,9 +115,13 @@ export const adminHelper = {
   blankValue: (field: FieldSpec): string | number =>
     field.type === "select" ? (field.options?.[0]?.value ?? "") : field.type === "number" ? (field.min ?? 0) : "",
 
+  /** A new entry; any lists inside it start with as many blank entries as they need. */
   blankItem: (list: ListSpec): EditorItem => ({
     _id: newItemId(),
     ...Object.fromEntries(list.fields.map((field) => [field.key, adminHelper.blankValue(field)])),
+    ...Object.fromEntries(
+      (list.lists ?? []).map((sub) => [sub.key, Array.from({ length: sub.min }, () => adminHelper.blankItem(sub))])
+    ),
   }),
 
   /**
@@ -104,26 +130,61 @@ export const adminHelper = {
    */
   toEditor: (data: SectionData, previous?: EditorData): EditorData =>
     Object.fromEntries(
-      Object.entries(data).map(([key, value]) => {
-        if (!Array.isArray(value)) return [key, value];
-        const before = previous?.[key];
-        return [key, value.map((item, i) => ({ ...item, _id: (Array.isArray(before) && before[i]?._id) || newItemId() }))];
-      })
+      Object.entries(data).map(([key, value]) => [key, Array.isArray(value) ? withIds(value, previous?.[key]) : value])
     ),
 
   /** The editor's content as the API takes it: list entry ids dropped. */
   fromEditor: (form: EditorData): SectionData =>
-    Object.fromEntries(
-      Object.entries(form).map(([key, value]) => [
-        key,
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        Array.isArray(value) ? value.map(({ _id, ...item }) => item) : value,
-      ])
-    ),
+    Object.fromEntries(Object.entries(form).map(([key, value]) => [key, Array.isArray(value) ? withoutIds(value) : value])),
+
+  /** The entries of the list at `path` ("items", or "albums.0.photos" for one inside an entry). */
+  listAt: (form: EditorData, path: string): EditorItem[] => {
+    let node: unknown = form;
+    for (const part of pathParts(path)) node = (node as Record<string | number, unknown> | undefined)?.[part];
+    return Array.isArray(node) ? (node as EditorItem[]) : [];
+  },
+
+  /** The form with the list at `path` replaced by `items`, leaving the rest as it was. */
+  withListAt: (form: EditorData, path: string, items: EditorItem[]): EditorData => {
+    const [key, index, ...rest] = pathParts(path);
+    if (index === undefined) return { ...form, [key]: items };
+    const list = adminHelper.listAt(form, String(key));
+    return {
+      ...form,
+      [key]: list.map((item, i) => (i === index ? (adminHelper.withListAt(item, rest.join("."), items) as EditorItem) : item)),
+    };
+  },
+
+  /** The first image in an entry's lists, for the thumbnail of an entry that has none itself (an album). */
+  firstImage: (item: EditorItem): string => {
+    for (const value of Object.values(item)) {
+      if (!Array.isArray(value)) continue;
+      const found = value.find((entry) => typeof entry.image === "string" && entry.image);
+      if (found) return found.image as string;
+    }
+    return "";
+  },
+
+  /**
+   * The ids of the entries an API error is inside, outermost first: "albums.0.photos.3.image"
+   * names the first album and its fourth photo; "albums.0.photos" the first album only.
+   */
+  entriesOf: (form: EditorData, name: string): string[] => {
+    const parts = name.split(".");
+    const ids: string[] = [];
+    let node: EditorData = form;
+    for (let i = 0; i + 2 < parts.length; i += 2) {
+      const item = adminHelper.listAt(node, parts[i])[Number(parts[i + 1])];
+      if (!item) break;
+      ids.push(item._id);
+      node = item;
+    }
+    return ids;
+  },
 
   isDirty: (form: EditorData, saved: EditorData): boolean =>
     JSON.stringify(adminHelper.fromEditor(form)) !== JSON.stringify(adminHelper.fromEditor(saved)),
 
-  /** The name an input gets, matching the keys of the API's field errors: "title", "items.2.title". */
-  fieldName: (key: string, list?: { key: string; index: number }): string => (list ? `${list.key}.${list.index}.${key}` : key),
+  /** The name an input gets, matching the keys of the API's field errors: "title", "items.2.title", "albums.0.photos.1.image". */
+  fieldName: (key: string, list?: { path: string; index: number }): string => (list ? `${list.path}.${list.index}.${key}` : key),
 };

@@ -62,39 +62,42 @@ export function useSectionEditor(spec: SectionSpec, isActive: boolean, onSaved: 
     setFieldErrors((errors) => Object.fromEntries(Object.entries(errors).filter(([name]) => !clears(name))));
   };
 
-  const listOf = (current: EditorData, key: string) => (current[key] as EditorItem[] | undefined) ?? [];
+  // Lists are named by their path in the form: "items", or "albums.0.photos" for one inside an entry.
+  /** Changes the entries of the list at `path`. */
+  const editList = (path: string, change: (items: EditorItem[]) => EditorItem[]) => (current: EditorData) =>
+    adminHelper.withListAt(current, path, change(adminHelper.listAt(current, path)));
   /** Moving or removing entries shifts their positions, so every error inside the list goes. */
-  const inList = (list: ListSpec) => (name: string) => name === list.key || name.startsWith(`${list.key}.`);
+  const inList = (path: string) => (name: string) => name === path || name.startsWith(`${path}.`);
 
   const setField = (key: string, value: string | number) =>
     edit((current) => ({ ...current, [key]: value }), (name) => name === key);
 
-  const setItemField = (list: ListSpec, index: number, key: string, value: string | number) =>
+  const setItemField = (path: string, index: number, key: string, value: string | number) =>
     edit(
-      (current) => ({
-        ...current,
-        [list.key]: listOf(current, list.key).map((item, i) => (i === index ? { ...item, [key]: value } : item)),
-      }),
-      (name) => name === adminHelper.fieldName(key, { key: list.key, index })
+      editList(path, (items) => items.map((item, i) => (i === index ? { ...item, [key]: value } : item))),
+      (name) => name === adminHelper.fieldName(key, { path, index })
     );
 
-  const addItem = (list: ListSpec) => {
+  const addItem = (list: ListSpec, path: string) => {
     const item = adminHelper.blankItem(list);
-    edit((current) => ({ ...current, [list.key]: [...listOf(current, list.key), item] }), (name) => name === list.key);
+    edit(editList(path, (items) => [...items, item]), (name) => name === path);
     setOpenItems((open) => new Set(open).add(item._id));
   };
 
-  const removeItem = (list: ListSpec, index: number) =>
-    edit((current) => ({ ...current, [list.key]: listOf(current, list.key).filter((_, i) => i !== index) }), inList(list));
+  const removeItem = (path: string, index: number) =>
+    edit(editList(path, (items) => items.filter((_, i) => i !== index)), inList(path));
 
-  const moveItem = (list: ListSpec, index: number, by: -1 | 1) =>
-    edit((current) => {
-      const items = [...listOf(current, list.key)];
-      const target = index + by;
-      if (target < 0 || target >= items.length) return current;
-      [items[index], items[target]] = [items[target], items[index]];
-      return { ...current, [list.key]: items };
-    }, inList(list));
+  const moveItem = (path: string, index: number, by: -1 | 1) =>
+    edit(
+      editList(path, (current) => {
+        const items = [...current];
+        const target = index + by;
+        if (target < 0 || target >= items.length) return current;
+        [items[index], items[target]] = [items[target], items[index]];
+        return items;
+      }),
+      inList(path)
+    );
 
   const toggleItem = (id: string) =>
     setOpenItems((open) => {
@@ -130,12 +133,8 @@ export function useSectionEditor(spec: SectionSpec, isActive: boolean, onSaved: 
       setError(err instanceof Error ? err.message : 'We could not save your changes.');
       if (err instanceof ApiError) {
         setFieldErrors(err.fields);
-        // Opens every entry with a problem, so each message is in sight.
-        const withErrors = Object.keys(err.fields)
-          .map((name) => name.split('.'))
-          .filter((parts) => parts.length === 3)
-          .map(([listKey, index]) => listOf(form, listKey)[Number(index)]?._id)
-          .filter(Boolean) as string[];
+        // Opens every entry with a problem, and the entries around it, so each message is in sight.
+        const withErrors = Object.keys(err.fields).flatMap((name) => adminHelper.entriesOf(form, name));
         if (withErrors.length > 0) setOpenItems((open) => new Set([...open, ...withErrors]));
       }
     } finally {

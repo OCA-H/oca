@@ -1,11 +1,13 @@
 'use client';
 
 import React from 'react';
+import type { HomeGalleryContent } from '@/app/api/(features)/(pview)/site/schema/sectionSpecs';
 import { useGalleryHandler } from '../handler';
+import { galleryTone } from '../content';
 
-export const GallerySection: React.FC = () => {
+export const GallerySection: React.FC<{ content: HomeGalleryContent }> = ({ content }) => {
   const {
-    galleryAlbums,
+    albums,
     selectedAlbumIdx,
     selectedPhotoIdx,
     currentAlbum,
@@ -14,16 +16,18 @@ export const GallerySection: React.FC = () => {
     selectAlbum,
     nextPhoto,
     prevPhoto,
-  } = useGalleryHandler();
+  } = useGalleryHandler(content.albums);
+
+  if (!currentAlbum) return null;
 
   return (
     <section className="section tint-gold" id="gallery">
       <div className="wrap">
         <div className="section-head">
           <div className="copy">
-            <span className="eyebrow">Our Gallery</span>
-            <h2>Moments from the OCA community</h2>
-            <p>Browse by album — the story keeps playing, or jump straight to the one you want.</p>
+            {content.eyebrow && <span className="eyebrow">{content.eyebrow}</span>}
+            <h2>{content.title}</h2>
+            {content.intro && <p>{content.intro}</p>}
           </div>
         </div>
     
@@ -33,20 +37,22 @@ export const GallerySection: React.FC = () => {
           onMouseLeave={() => setIsHovered(false)}
         >
           <div className="media-stage">
-            <div className={`photo-tile ${currentAlbum.tone}`} id="stageTile">
-              <img 
-                className="tile-img" 
-                id="stageImg" 
-                src={currentPhoto.src} 
-                alt={currentPhoto.cap} 
-                decoding="async" 
-              />
+            <div className={`photo-tile ${galleryTone(selectedAlbumIdx)}`} id="stageTile">
+              {currentPhoto.image && (
+                <img
+                  className="tile-img"
+                  id="stageImg"
+                  src={currentPhoto.image}
+                  alt={currentPhoto.caption}
+                  decoding="async"
+                />
+              )}
               <div className="stage-counter" id="stageCounter">
                 {selectedPhotoIdx + 1} / {currentAlbum.photos.length}
               </div>
               <div className="tile-caption">
-                <div className="t" id="stageCaption">{currentPhoto.cap}</div>
-                <div className="s" id="stageSub">{currentAlbum.name} · {currentAlbum.time}</div>
+                <div className="t" id="stageCaption">{currentPhoto.caption}</div>
+                <div className="s" id="stageSub">{[currentAlbum.name, currentAlbum.time].filter(Boolean).join(' · ')}</div>
               </div>
             </div>
             {/* Siblings of the tile so clicks here don't open the lightbox. */}
@@ -59,11 +65,11 @@ export const GallerySection: React.FC = () => {
           </div>
 
           <div className="album-tabs" id="albumTabs">
-            {galleryAlbums.map((album, idx) => {
+            {albums.map((album, idx) => {
               const isActive = idx === selectedAlbumIdx;
               return (
                 <div
-                  key={album.name}
+                  key={`${idx}-${album.name}`}
                   className={`album-tab ${isActive ? 'active' : ''}`}
                   role="button"
                   tabIndex={0}
@@ -80,7 +86,7 @@ export const GallerySection: React.FC = () => {
                     <span className="album-tab-time">{album.time}</span>
                   </div>
                   <div className="album-tab-meta">
-                    {album.photos.length} photos
+                    {album.photos.length} {album.photos.length === 1 ? 'photo' : 'photos'}
                   </div>
                   <div className="album-progress">
                     <div 

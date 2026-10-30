@@ -102,7 +102,7 @@ export const SectionEditorPanel: React.FC<SectionEditorPanelProps> = ({ spec, is
             ))}
 
             {spec.lists.map((list) => (
-              <ListEditor key={list.key} list={list} items={(form[list.key] as EditorItem[] | undefined) ?? []} editor={editor} />
+              <ListEditor key={list.key} list={list} path={list.key} items={(form[list.key] as EditorItem[] | undefined) ?? []} editor={editor} />
             ))}
 
             <div className="mp-actions ad-actions">

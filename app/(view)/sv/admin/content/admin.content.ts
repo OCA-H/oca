@@ -43,11 +43,13 @@ export type AdminIconName =
   | "rupee";
 
 export const SECTION_ICONS: Record<SiteSectionKey, AdminIconName> = {
+  "home.ticker": "megaphone",
   "home.events": "calendar",
   "home.notices": "megaphone",
   "home.spotlight": "star",
   "home.hangout": "camera",
   "home.social": "heart",
+  "home.gallery": "image",
   "about.committee": "people",
   "events.dinner": "moon",
   "events.lunch": "sun",

@@ -16,6 +16,15 @@ const U = "https://www.oldcolumban.net/wp-content/uploads/";
 const NOTICE_IMAGE = U + "2016/03/OCA_Newsletter-Volume11.jpg";
 
 export const HOME_DEFAULTS: HomeContent = {
+  ticker: {
+    badge: "● LIVE",
+    items: [
+      { label: "New notice:", text: "OCA – AGM 2025 Reminder & Balance Sheet posted Nov 19, 2025" },
+      { label: "Sponsorship open:", text: "Brother Oman Memorial Cricket Tournament — ₹1.50 Lacs" },
+      { label: "Fund update:", text: "Teachers Benevolent Fund now at 7% of goal" },
+    ],
+  },
+
   events: {
     eyebrow: "On the calendar",
     title: "Upcoming Events",
@@ -147,6 +156,49 @@ export const HOME_DEFAULTS: HomeContent = {
     ],
   },
 
+  gallery: {
+    eyebrow: "Our Gallery",
+    title: "Moments from the OCA community",
+    intro: "Browse by album — the story keeps playing, or jump straight to the one you want.",
+    albums: [
+      {
+        name: "Annual Lunch 2025",
+        time: "Nov 2025",
+        photos: [
+          { caption: "Columbans of every batch", image: U + "2025/12/annual-lunch.jpg" },
+          { caption: "Old boys, reunited", image: U + "2017/10/b38eafcb-e18b-484c-b1c6-1d1782b1b92a.jpg" },
+          { caption: "Gathering at the Secretariat", image: U + "2023/02/IMG_1792.jpg" },
+          { caption: "Raising a glass to the School", image: U + "2020/03/hp2-donate-image.jpg" },
+        ],
+      },
+      {
+        name: "OCA Sports",
+        time: "2022",
+        photos: [
+          { caption: "Brother Foley Memorial, first day", image: U + "2022/10/Bro-Foley-Cricket-2022.jpg" },
+          { caption: "The sponsorship appeal", image: U + "2022/11/sponsor-new.jpg" },
+        ],
+      },
+      {
+        name: "Honours & News Makers",
+        time: "Ongoing",
+        photos: [
+          { caption: "Justice D. Y. Chandrachud, Batch of 1975", image: U + "2022/10/Chadrachud-Congrats-web.jpg" },
+          { caption: "The Association crest", image: "/images/oca-crest.png" },
+        ],
+      },
+      {
+        name: "Executive Committee",
+        time: "2023 – 25",
+        photos: [
+          { caption: "Santosh V. Kalyani, President", image: U + "2022/02/SVK-Profile-Pic-n.png" },
+          { caption: "Anurag Aggarwal, Secretary", image: U + "2022/05/Anurag-agarawal-n-1.png" },
+          { caption: "Kuwar Pranav Pratap Uppal, Treasurer", image: U + "2020/02/Pranav-Uppal.jpg" },
+        ],
+      },
+    ],
+  },
+
   committee: {
     eyebrow: "Governance",
     title: "Executive Committee, 2025 – 27",
@@ -231,11 +283,13 @@ export const CONTACT_DEFAULTS: ContactDetailsContent = {
 
 /** Each section key's defaults, as stored data. */
 export const SECTION_DEFAULTS: Record<SiteSectionKey, object> = {
+  [SITE_SECTION_KEYS.homeTicker]: HOME_DEFAULTS.ticker,
   [SITE_SECTION_KEYS.homeEvents]: HOME_DEFAULTS.events,
   [SITE_SECTION_KEYS.homeNotices]: HOME_DEFAULTS.notices,
   [SITE_SECTION_KEYS.homeSpotlight]: HOME_DEFAULTS.spotlight,
   [SITE_SECTION_KEYS.homeHangout]: HOME_DEFAULTS.hangout,
   [SITE_SECTION_KEYS.homeSocial]: HOME_DEFAULTS.social,
+  [SITE_SECTION_KEYS.homeGallery]: HOME_DEFAULTS.gallery,
   [SITE_SECTION_KEYS.aboutCommittee]: HOME_DEFAULTS.committee,
   [SITE_SECTION_KEYS.eventsDinner]: DINNER_DEFAULTS,
   [SITE_SECTION_KEYS.eventsLunch]: LUNCH_DEFAULTS,
