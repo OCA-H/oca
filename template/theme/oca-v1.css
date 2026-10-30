@@ -2125,9 +2125,27 @@ nav.primary-nav {
   color: var(--text-soft);
 }
 
+/* The address on a line of its own, so a long one never runs into the sentence. */
 .contact-sent-copy b {
+  display: block;
+  margin-top: 2px;
   color: var(--text);
-  word-break: break-all;
+  overflow-wrap: anywhere;
+}
+
+/* Development only: shows the confirmation without sending anything. */
+.contact-preview-toggle {
+  position: absolute;
+  top: -12px;
+  right: 16px;
+  z-index: 2;
+  padding: 3px 10px;
+  border: 1px dashed var(--border-strong);
+  border-radius: 999px;
+  background: var(--card);
+  font: 600 11.5px/1.4 var(--sans);
+  color: var(--text-soft);
+  cursor: pointer;
 }
 
 .contact-sent .contact-sent-resend {

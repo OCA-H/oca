@@ -45,7 +45,16 @@ export function useContactForm() {
     requestAnimationFrame(() => document.getElementById('ct-name')?.focus());
   };
 
-  return { form, setField, fieldErrors, error, sentMessage, sentTo, isSending, handleSubmit, resend };
+  /** Development only: switches the confirmation on or off without sending anything. */
+  const togglePreview = () => {
+    if (sentMessage) return resend();
+    setError(null);
+    // As contactController sends it.
+    setSentMessage('Thank you. Your message has been sent to the OCA Secretariat, and a copy is on its way to your inbox.');
+    setSentTo(form.email || 'you@example.com');
+  };
+
+  return { form, setField, fieldErrors, error, sentMessage, sentTo, isSending, handleSubmit, resend, togglePreview };
 }
 
 export default useContactForm;
