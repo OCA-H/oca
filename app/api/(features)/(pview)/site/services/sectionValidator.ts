@@ -1,5 +1,5 @@
 import type { FieldErrors } from "@/app/api/core/httpError";
-import type { FieldSpec, ListSpec, SectionData, SectionItem, SectionSpec, SectionValue } from "../schema/sectionSpecs";
+import type { FieldSpec, ListSpec, SectionData, SectionItem, SectionSpec, SectionValue, ShowWhen } from "../schema/sectionSpecs";
 
 // Checks a section save against its spec, field by field. Errors are keyed the way the admin form
 // names its inputs: "title" for a section field, "items.2.title" for a field of the third event,
@@ -7,6 +7,14 @@ import type { FieldSpec, ListSpec, SectionData, SectionItem, SectionSpec, Sectio
 
 const MAX_URL_LENGTH = 500;
 const EMAIL_PATTERN = /^[^\s@,]+@[^\s@,]+\.[^\s@,]+$/;
+/** Where uploaded section files are served (see /api/site/media). Videos must be one of these. */
+const UPLOADED_MEDIA = /^\/api\/site\/media\/[a-z0-9._/-]+$/i;
+
+/** Whether a field or list with this condition applies to an entry whose raw values are `source`. */
+const applies = (showWhen: ShowWhen | undefined, source: Record<string, unknown>) =>
+  !showWhen || (typeof source[showWhen.field] === "string" && (source[showWhen.field] as string).trim() === showWhen.equals);
+/** What a field that does not apply is saved as. */
+const blank = (spec: FieldSpec): SectionValue => (spec.type === "number" ? (spec.min ?? 0) : "");
 
 /** "a@x.com,  B@y.com, a@x.com" → ["a@x.com", "b@y.com"]: trimmed, lowercased, without repeats. */
 export const splitEmails = (value: string): string[] => [
@@ -69,6 +77,14 @@ function checkField(spec: FieldSpec, raw: unknown, errors: FieldErrors, name: st
     return joined;
   }
 
+  if (spec.type === "video") {
+    // Only files uploaded here: the upload is where the size limit (20 MB) and the file type are checked.
+    if (value.length > MAX_URL_LENGTH || !UPLOADED_MEDIA.test(value) || value.includes("..")) {
+      errors[name] = "Upload the video here; addresses of videos elsewhere are not accepted.";
+    }
+    return value;
+  }
+
   if (spec.type === "link" || spec.type === "image") {
     if (value.length > MAX_URL_LENGTH) errors[name] = `Please keep this address under ${MAX_URL_LENGTH} characters.`;
     else if (!isAllowedUrl(value, spec.type)) {
@@ -90,11 +106,11 @@ export function validateSection(spec: SectionSpec, payload: Record<string, unkno
   const data: SectionData = {};
 
   for (const field of spec.fields) {
-    data[field.key] = checkField(field, payload[field.key], errors, field.key);
+    data[field.key] = applies(field.showWhen, payload) ? checkField(field, payload[field.key], errors, field.key) : blank(field);
   }
 
   for (const list of spec.lists) {
-    data[list.key] = checkList(list, payload[list.key], errors, list.key);
+    data[list.key] = applies(list.showWhen, payload) ? checkList(list, payload[list.key], errors, list.key) : [];
   }
 
   return { data, errors };
@@ -113,11 +129,14 @@ function checkList(list: ListSpec, rawList: unknown, errors: FieldErrors, name: 
   return raw.slice(0, list.max).map((entry, index) => {
     const source = entry && typeof entry === "object" && !Array.isArray(entry) ? (entry as Record<string, unknown>) : {};
     const item: SectionItem = {};
+    // A field or list hidden by the entry's choices (a video post's photos) is saved empty and not checked.
     for (const field of list.fields) {
-      item[field.key] = checkField(field, source[field.key], errors, `${name}.${index}.${field.key}`);
+      item[field.key] = applies(field.showWhen, source)
+        ? checkField(field, source[field.key], errors, `${name}.${index}.${field.key}`)
+        : blank(field);
     }
     for (const sub of list.lists ?? []) {
-      item[sub.key] = checkList(sub, source[sub.key], errors, `${name}.${index}.${sub.key}`);
+      item[sub.key] = applies(sub.showWhen, source) ? checkList(sub, source[sub.key], errors, `${name}.${index}.${sub.key}`) : [];
     }
     return item;
   });

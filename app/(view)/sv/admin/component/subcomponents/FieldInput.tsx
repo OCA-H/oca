@@ -2,8 +2,9 @@
 
 import React from 'react';
 import { CustomDropdown } from '@/app/(view)/common/component/CustomDropdown';
-import type { FieldSpec } from '../../services';
+import type { FieldSpec, MediaKind } from '../../services';
 import { ImageField } from './ImageField';
+import { VideoField } from './VideoField';
 
 interface FieldInputProps {
   field: FieldSpec;
@@ -11,20 +12,22 @@ interface FieldInputProps {
   name: string;
   value: string | number | undefined;
   onChange: (value: string | number) => void;
-  onUpload: (file: File) => Promise<string>;
+  onUpload: (file: File, kind?: MediaKind) => Promise<string>;
+  /** Video fields: told how long a newly uploaded video runs, e.g. "2:14". */
+  onVideoLength?: (length: string) => void;
   error?: string;
   /** Spans both columns of the form grid; text areas and images always do. */
   wide?: boolean;
 }
 
 /** One field of a section, drawn from its spec. */
-export const FieldInput: React.FC<FieldInputProps> = ({ field, name, value, onChange, onUpload, error, wide: forceWide }) => {
+export const FieldInput: React.FC<FieldInputProps> = ({ field, name, value, onChange, onUpload, onVideoLength, error, wide: forceWide }) => {
   const id = `ad-${name.replace(/\./g, '-')}`;
   const hintId = `${id}-hint`;
   const text = value === undefined ? '' : String(value);
   const counts = field.max && (field.type === 'text' || field.type === 'textarea');
   const isEmail = field.type === 'email' || field.type === 'emails';
-  const wide = forceWide || field.type === 'textarea' || field.type === 'image' || field.type === 'emails';
+  const wide = forceWide || field.type === 'textarea' || field.type === 'image' || field.type === 'video' || field.type === 'emails';
   const described = error || field.hint ? hintId : undefined;
   const common = { id, name, 'aria-describedby': described, 'aria-invalid': Boolean(error) || undefined };
 
@@ -54,6 +57,11 @@ export const FieldInput: React.FC<FieldInputProps> = ({ field, name, value, onCh
       break;
     case 'image':
       input = <ImageField id={id} value={text} onChange={onChange} onUpload={onUpload} describedBy={described} invalid={Boolean(error)} />;
+      break;
+    case 'video':
+      input = (
+        <VideoField id={id} value={text} onChange={onChange} onUpload={onUpload} onLength={onVideoLength} describedBy={described} invalid={Boolean(error)} />
+      );
       break;
     default:
       input = (

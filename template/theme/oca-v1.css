@@ -2821,6 +2821,60 @@ footer a:focus-visible {
   inset: 0;
   background: linear-gradient(180deg, rgba(8, 45, 22, 0) 55%, rgba(8, 45, 22, .55) 100%);
   z-index: 1;
+  pointer-events: none;
+}
+
+/* A photo post's pictures slide inside the card; the dots show how many there are, and which is in view. */
+.post-slides {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  overscroll-behavior-x: contain;
+  scrollbar-width: none;
+}
+
+.post-slides::-webkit-scrollbar {
+  display: none;
+}
+
+.post-slide {
+  position: relative;
+  flex: 0 0 100%;
+  scroll-snap-align: start;
+}
+
+.post-dots {
+  position: absolute;
+  bottom: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.post-dot {
+  width: 7px;
+  height: 7px;
+  padding: 0;
+  border: none;
+  border-radius: 100px;
+  background: rgba(255, 255, 255, .5);
+  cursor: pointer;
+  transition: width .2s ease, background .2s ease;
+}
+
+.post-dot.is-active {
+  width: 18px;
+  background: #fff;
+}
+
+.post-dot:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 2px;
 }
 
 .post-media .tile-icon {
@@ -9199,6 +9253,7 @@ section[id^="ec-"] {
 .ad-image{display:grid; grid-template-columns:200px minmax(0, 1fr); gap:20px; align-items:start;}
 .ad-image-preview{position:relative; aspect-ratio:4 / 3; border-radius:var(--radius-m); overflow:hidden; background:var(--bg); border:1px solid var(--border);}
 .ad-image-preview img{display:block; width:100%; height:100%; object-fit:cover; animation:mpFadeIn .3s ease-out both;}
+.ad-image-preview video{display:block; width:100%; height:100%; object-fit:contain; background:#000;}
 .ad-image-empty{display:flex; flex-direction:column; align-items:center; justify-content:center; gap:8px; height:100%; padding:12px; text-align:center; font-size:12.5px; color:var(--text-soft);}
 .ad-image-empty svg{width:28px; height:28px; opacity:.7;}
 .ad-image-busy{position:absolute; inset:0; display:flex; align-items:center; justify-content:center; background:rgba(11,60,30,.38); animation:mpFadeIn .2s ease-out both;}

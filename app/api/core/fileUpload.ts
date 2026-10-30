@@ -21,9 +21,14 @@ export const FILE_KINDS = {
   png: { contentType: "image/png", extension: "png", matches: (h) => startsWith(h, [0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]) },
   webp: { contentType: "image/webp", extension: "webp", matches: (h) => startsWith(h, ascii("RIFF")) && startsWith(h, ascii("WEBP"), 8) },
   pdf: { contentType: "application/pdf", extension: "pdf", matches: (h) => startsWith(h, ascii("%PDF-")) },
+  // MP4 and QuickTime share the ISO "ftyp" box; the brand after it ("qt  ") tells them apart.
+  mp4: { contentType: "video/mp4", extension: "mp4", matches: (h) => startsWith(h, ascii("ftyp"), 4) && !startsWith(h, ascii("qt  "), 8) },
+  mov: { contentType: "video/quicktime", extension: "mov", matches: (h) => startsWith(h, ascii("ftyp"), 4) && startsWith(h, ascii("qt  "), 8) },
+  webm: { contentType: "video/webm", extension: "webm", matches: (h) => startsWith(h, [0x1a, 0x45, 0xdf, 0xa3]) },
 } satisfies Record<string, FileKind>;
 
 export const IMAGE_KINDS: FileKind[] = [FILE_KINDS.jpeg, FILE_KINDS.png, FILE_KINDS.webp];
+export const VIDEO_KINDS: FileKind[] = [FILE_KINDS.mp4, FILE_KINDS.mov, FILE_KINDS.webm];
 
 export interface UploadRules {
   /** Largest file accepted, in bytes. */

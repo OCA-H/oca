@@ -100,12 +100,12 @@ export const HOME_DEFAULTS: HomeContent = {
     intro: "Cricket, lunches and reunions — posted live by batches around the world.",
     highlight: "posted live",
     posts: [
-      { type: "video", image: U + "2025/12/annual-lunch.jpg", imageAlt: "Annual Lunch highlights", duration: "2:14", name: "R. Kapoor", batch: "Batch '88", caption: "Annual Lunch highlights reel — what a turnout this year!", time: "2 days ago" },
-      { type: "photo", image: U + "2017/10/b38eafcb-e18b-484c-b1c6-1d1782b1b92a.jpg", imageAlt: "Columbans reunited", duration: "", name: "S. Mehta", batch: "Batch '95", caption: "Brotherhood, decades on. So good to see everyone again.", time: "3 days ago" },
-      { type: "photo", image: U + "2023/02/IMG_1792.jpg", imageAlt: "At the OCA Secretariat", duration: "", name: "A. Bose", batch: "Batch '79", caption: "Batch of '85 reunion — 40 years on and still causing trouble.", time: "5 days ago" },
-      { type: "video", image: U + "2022/10/Bro-Foley-Cricket-2022.jpg", imageAlt: "Cricket at the Brother Foley Memorial", duration: "0:48", name: "V. Trivedi", batch: "Batch '02", caption: "Cricket at the nets before Sports Day kicks off.", time: "1 week ago" },
-      { type: "photo", image: U + "2022/11/sponsor-new.jpg", imageAlt: "Tournament sponsorship", duration: "", name: "H. Khanna", batch: "Batch '91", caption: "Sports Day 2024 — the tug of war never disappoints.", time: "1 week ago" },
-      { type: "photo", image: U + "2020/03/hp2-donate-image.jpg", imageAlt: "Back on campus", duration: "", name: "P. Nair", batch: "Batch '00", caption: "Back on the old campus — the quad hasn't changed a bit.", time: "2 weeks ago" },
+      { type: "video", images: [{ image: U + "2025/12/annual-lunch.jpg", imageAlt: "Annual Lunch highlights" }], video: "", duration: "2:14", name: "R. Kapoor", batch: "Batch '88", caption: "Annual Lunch highlights reel — what a turnout this year!", time: "2 days ago" },
+      { type: "photo", images: [{ image: U + "2017/10/b38eafcb-e18b-484c-b1c6-1d1782b1b92a.jpg", imageAlt: "Columbans reunited" }], video: "", duration: "", name: "S. Mehta", batch: "Batch '95", caption: "Brotherhood, decades on. So good to see everyone again.", time: "3 days ago" },
+      { type: "photo", images: [{ image: U + "2023/02/IMG_1792.jpg", imageAlt: "At the OCA Secretariat" }], video: "", duration: "", name: "A. Bose", batch: "Batch '79", caption: "Batch of '85 reunion — 40 years on and still causing trouble.", time: "5 days ago" },
+      { type: "video", images: [{ image: U + "2022/10/Bro-Foley-Cricket-2022.jpg", imageAlt: "Cricket at the Brother Foley Memorial" }], video: "", duration: "0:48", name: "V. Trivedi", batch: "Batch '02", caption: "Cricket at the nets before Sports Day kicks off.", time: "1 week ago" },
+      { type: "photo", images: [{ image: U + "2022/11/sponsor-new.jpg", imageAlt: "Tournament sponsorship" }], video: "", duration: "", name: "H. Khanna", batch: "Batch '91", caption: "Sports Day 2024 — the tug of war never disappoints.", time: "1 week ago" },
+      { type: "photo", images: [{ image: U + "2020/03/hp2-donate-image.jpg", imageAlt: "Back on campus" }], video: "", duration: "", name: "P. Nair", batch: "Batch '00", caption: "Back on the old campus — the quad hasn't changed a bit.", time: "2 weeks ago" },
     ],
   },
 

@@ -5,6 +5,7 @@ export * from './AdminSidebar';
 export * from './AdminDashboardPanel';
 export * from './FieldInput';
 export * from './ImageField';
+export * from './VideoField';
 export * from './ListEditor';
 export * from './SectionEditorPanel';
 export * from './AdminSkeleton';

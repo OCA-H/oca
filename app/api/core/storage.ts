@@ -15,6 +15,8 @@ export interface StoredFile {
   body: ReadableStream<Uint8Array>;
   contentType: string;
   size: number | null;
+  /** For a part of the file (a Range request): the Content-Range of that part, e.g. "bytes 0-1023/52000". */
+  contentRange?: string;
 }
 
 export interface UploadOptions {
@@ -119,17 +121,25 @@ export class FileStorage {
     if (!res.ok) await this.fail(`upload "${key}"`, res);
   }
 
-  /** The file at `path`, streamed, or null if there is none. */
-  async download(path: string): Promise<StoredFile | null> {
+  /**
+   * The file at `path`, streamed, or null if there is none. With `range` (a Range header, e.g.
+   * "bytes=0-"), only that part, as browsers ask for when playing a video.
+   */
+  async download(path: string, range?: string | null): Promise<StoredFile | null> {
     const key = this.key(path);
-    const res = await this.request(`/object/authenticated/${encodeURIComponent(this.bucket)}/${encodePath(key)}`);
+    const res = await this.request(`/object/authenticated/${encodeURIComponent(this.bucket)}/${encodePath(key)}`, {
+      headers: range ? { Range: range } : undefined,
+    });
     if (res.status === 400 || res.status === 404) return null;
+    if (res.status === 416) throw new HttpError(416, "That part of the file does not exist.");
     if (!res.ok || !res.body) return this.fail(`download "${key}"`, res);
     const length = res.headers.get("content-length");
+    const contentRange = res.status === 206 ? res.headers.get("content-range") : null;
     return {
       body: res.body,
       contentType: res.headers.get("content-type") || "application/octet-stream",
       size: length ? Number(length) : null,
+      ...(contentRange && { contentRange }),
     };
   }
 

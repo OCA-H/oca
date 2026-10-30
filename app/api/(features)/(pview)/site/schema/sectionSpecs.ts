@@ -3,7 +3,13 @@
 // add its spec here, its defaults in services/siteDefaults.ts, and read it where the page renders.
 // No server-only imports: the admin panel (a client component) imports this file too.
 
-export type FieldType = "text" | "textarea" | "image" | "link" | "select" | "number" | "email" | "emails";
+export type FieldType = "text" | "textarea" | "image" | "video" | "link" | "select" | "number" | "email" | "emails";
+
+/** Shows a field or list only while another field of the same entry has this value, e.g. a post's kind is "video". */
+export interface ShowWhen {
+  field: string;
+  equals: string;
+}
 
 export interface FieldSpec {
   key: string;
@@ -21,6 +27,8 @@ export interface FieldSpec {
   options?: { value: string; label: string }[];
   /** Starts a new block of the editor under this heading, for sections with many fields. */
   heading?: string;
+  /** Only shown, checked (required included) and saved while this holds; otherwise saved empty. */
+  showWhen?: ShowWhen;
 }
 
 /** A repeating group inside a section: event cards, notices, posts. */
@@ -37,6 +45,8 @@ export interface ListSpec {
   fields: FieldSpec[];
   /** Lists inside each entry, e.g. an album's photos. One level deep: these have no lists of their own. */
   lists?: ListSpec[];
+  /** For a list inside an entry: only shown, checked and saved while this holds; otherwise saved empty. */
+  showWhen?: ShowWhen;
 }
 
 export interface SectionSpec {
@@ -137,10 +147,18 @@ export interface HomeSpotlightContent {
   linkHref: string;
 }
 
-export interface HomeHangoutPost {
-  type: "photo" | "video";
+export interface HomeHangoutPhoto {
   image: string;
   imageAlt: string;
+}
+
+export interface HomeHangoutPost {
+  type: "photo" | "video";
+  /** Photo posts: one or more photos, shown as a slideshow inside the card. */
+  images: HomeHangoutPhoto[];
+  /** Video posts: the uploaded video's address. */
+  video: string;
+  /** Video posts: how long the video runs, e.g. "2:14". */
   duration: string;
   name: string;
   batch: string;
@@ -306,6 +324,7 @@ export interface HomeContent {
 // ---------- Specs ----------
 
 const IMAGE_HINT = "Upload a JPG, PNG or WebP, or paste an image address.";
+const VIDEO_HINT = "Upload an MP4, MOV or WebM video, up to 20 MB.";
 const ALT_HINT = "Describes the image for screen readers and search engines.";
 const LINK_HINT = "A page on this site (/annual-dinner) or a full address (https://…).";
 const SOCIAL_HINT = "The full address of the page (https://…). Leave empty to hide its icon in the footer.";
@@ -465,17 +484,40 @@ export const SECTION_SPECS: SectionSpec[] = [
             label: "Kind",
             type: "select",
             required: true,
+            hint: "Photos: one or more pictures. Video: a single clip.",
             options: [
-              { value: "photo", label: "Photo" },
+              { value: "photo", label: "Photos" },
               { value: "video", label: "Video" },
             ],
           },
-          { key: "duration", label: "Video length", type: "text", max: 10, placeholder: "2:14", hint: "Videos only." },
-          ...image(),
+          { key: "video", label: "Video", type: "video", required: true, hint: VIDEO_HINT, showWhen: { field: "type", equals: "video" } },
+          {
+            key: "duration",
+            label: "Video length",
+            type: "text",
+            max: 10,
+            required: true,
+            placeholder: "2:14",
+            hint: "Shown on the video, e.g. 2:14.",
+            showWhen: { field: "type", equals: "video" },
+          },
           { key: "name", label: "Posted by", type: "text", max: 80, placeholder: "R. Kapoor" },
           { key: "batch", label: "Batch", type: "text", max: 30, placeholder: "Batch '88" },
-          { key: "caption", label: "Caption", type: "textarea", max: 280, required: true },
+          { key: "caption", label: "Caption", type: "textarea", max: 280 },
           { key: "time", label: "When", type: "text", max: 40, placeholder: "2 days ago" },
+        ],
+        lists: [
+          {
+            key: "images",
+            label: "Photos",
+            itemLabel: "Photo",
+            titleField: "imageAlt",
+            hint: "Each photo up to 10 MB. With more than one, the card slides through them.",
+            min: 1,
+            max: 10,
+            showWhen: { field: "type", equals: "photo" },
+            fields: image("Photo"),
+          },
         ],
       },
     ],

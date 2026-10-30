@@ -96,20 +96,6 @@ export function useHomeHandler() {
       setupCarousel('postCarousel', '.post-nav.prev', '.post-nav.next', '.post-card'),
     ];
 
-    // Mute button handler
-    const mutedIcon = '<svg viewBox="0 0 24 24" fill="none"><path d="M11 5 6 9H3v6h3l5 4V5Z" stroke="#fff" stroke-width="1.6" stroke-linejoin="round"/><path d="M16 9l6 6M22 9l-6 6" stroke="#fff" stroke-width="1.6" stroke-linecap="round"/></svg>';
-    const unmutedIcon = '<svg viewBox="0 0 24 24" fill="none"><path d="M11 5 6 9H3v6h3l5 4V5Z" stroke="#fff" stroke-width="1.6" stroke-linejoin="round"/><path d="M15.5 8.5a5 5 0 0 1 0 7M18.5 6a9 9 0 0 1 0 12" stroke="#fff" stroke-width="1.6" stroke-linecap="round"/></svg>';
-
-    document.querySelectorAll('.mute-btn').forEach((btn: any) => {
-      btn.addEventListener('click', (e: MouseEvent) => {
-        e.stopPropagation();
-        const muted = btn.dataset.muted === 'true';
-        btn.dataset.muted = muted ? 'false' : 'true';
-        btn.innerHTML = muted ? unmutedIcon : mutedIcon;
-        btn.setAttribute('aria-label', muted ? 'Mute' : 'Unmute');
-      });
-    });
-
     // Amount chips handler
     document.querySelectorAll('.amount-row').forEach((row: any) => {
       row.addEventListener('click', (e: MouseEvent) => {

@@ -3,7 +3,10 @@ import { ROUTES } from "@/app/(view)/common/helper/routes";
 import { signOutMember } from "@/app/(view)/common/helper/useAuth";
 import type { SectionData, SiteSectionKey } from "@/app/api/(features)/(pview)/site/schema/sectionSpecs";
 
-export type { SectionData, SectionItem, SectionSpec, FieldSpec, ListSpec, SiteSectionKey } from "@/app/api/(features)/(pview)/site/schema/sectionSpecs";
+export type { SectionData, SectionItem, SectionSpec, FieldSpec, ListSpec, ShowWhen, SiteSectionKey } from "@/app/api/(features)/(pview)/site/schema/sectionSpecs";
+
+/** What a section upload is; the server holds each to its own limits (images 10 MB, videos 20 MB). */
+export type MediaKind = "image" | "video";
 
 /**
  * Calls an admin API. A 401 means the session is over: sign out and come back here after signing
@@ -174,11 +177,11 @@ export const adminService = {
     await adminRequest(`/api/sv/admin/contribution-funds/${id}`, { method: "DELETE" });
   },
 
-  /** Uploads an image for a section; the address to use for it comes back. */
-  uploadImage: async (key: SiteSectionKey, file: File): Promise<string> => {
+  /** Uploads an image or video for a section; the address to use for it comes back. */
+  uploadMedia: async (key: SiteSectionKey, file: File, kind: MediaKind = "image"): Promise<string> => {
     const form = new FormData();
     form.append("section", key);
-    form.append("image", file);
+    form.append(kind, file);
     return (await adminRequest<{ data: { url: string } }>("/api/sv/admin/media", { method: "POST", body: form })).data.url;
   },
 };

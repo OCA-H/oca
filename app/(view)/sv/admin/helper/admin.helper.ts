@@ -1,7 +1,7 @@
 import { ROUTES } from "@/app/(view)/common/helper/routes";
 import { SECTION_SPECS, sectionSpec } from "@/app/api/(features)/(pview)/site/schema/sectionSpecs";
 import { RECORD_PANELS, type AdminPanel, type RecordPanel } from "../content";
-import type { FieldSpec, ListSpec, SectionData, SectionItem } from "../services";
+import type { FieldSpec, ListSpec, SectionData, SectionItem, ShowWhen } from "../services";
 
 /** A list entry in the editor, with an id that stays with it while entries are moved around. */
 export type EditorItem = { _id: string; [key: string]: string | number | EditorItem[] };
@@ -110,6 +110,10 @@ export const adminHelper = {
       blocks[blocks.length - 1].fields.push(field);
       return blocks;
     }, []),
+
+  /** Whether a field or list with this condition shows for an entry with these values (no condition: always). */
+  shows: (showWhen: ShowWhen | undefined, values: Record<string, unknown>): boolean =>
+    !showWhen || values[showWhen.field] === showWhen.equals,
 
   /** An empty value of the field's kind: the first choice for a select, the smallest number. */
   blankValue: (field: FieldSpec): string | number =>

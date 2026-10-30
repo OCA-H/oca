@@ -26,11 +26,30 @@ export interface SectionContent {
   isDefault: boolean;
 }
 
+/**
+ * Hangout posts saved before a post could hold several photos or an uploaded video had a single
+ * `image`; it becomes the post's only photo. For a video post it is kept as a still to show
+ * until a video is uploaded (the editor hides it, and the next save drops it).
+ */
+function upgradeHangout(data: Record<string, unknown>): Record<string, unknown> {
+  if (!Array.isArray(data.posts)) return data;
+  const posts = data.posts.map((post: Record<string, unknown>) => {
+    if (Array.isArray(post.images)) return post;
+    const { image, imageAlt, ...rest } = post;
+    return {
+      ...rest,
+      video: rest.video ?? "",
+      images: typeof image === "string" && image ? [{ image, imageAlt: typeof imageAlt === "string" ? imageAlt : "" }] : [],
+    };
+  });
+  return { ...data, posts };
+}
+
 /** Saved content over the defaults, so a field added to a spec later still has a value. */
-const withDefaults = (key: SiteSectionKey, saved: Record<string, unknown> | undefined) => ({
-  ...SECTION_DEFAULTS[key],
-  ...saved,
-});
+const withDefaults = (key: SiteSectionKey, saved: Record<string, unknown> | undefined) => {
+  const data = { ...SECTION_DEFAULTS[key], ...saved };
+  return key === SITE_SECTION_KEYS.homeHangout ? upgradeHangout(data) : data;
+};
 
 /**
  * The home page's editable sections, cached until an admin saves one. Falls back to the defaults
@@ -135,28 +154,28 @@ export class SiteContentService {
   }
 
   /**
-   * Stores an image for a section under a new random name, and returns its public address.
-   * Names are never reused, so the address can be cached for good. Replaced images are kept:
+   * Stores an image or video for a section under a new random name, and returns its public address.
+   * Names are never reused, so the address can be cached for good. Replaced files are kept:
    * a page cached elsewhere may still show them for a while.
    */
-  async uploadImage(key: string, image: UploadedFile): Promise<{ url: string }> {
+  async uploadMedia(key: string, file: UploadedFile): Promise<{ url: string }> {
     const spec = this.findSpec(key);
     const folder = spec.key.replace(/\./g, "/");
-    const name = `${crypto.randomBytes(12).toString("hex")}.${image.extension}`;
-    await storage.upload(`${MEDIA_FOLDER}/${folder}/${name}`, image.bytes, {
-      contentType: image.contentType,
+    const name = `${crypto.randomBytes(12).toString("hex")}.${file.extension}`;
+    await storage.upload(`${MEDIA_FOLDER}/${folder}/${name}`, file.bytes, {
+      contentType: file.contentType,
       upsert: false,
       cacheControl: "public, max-age=31536000, immutable",
     });
     return { url: `${MEDIA_URL}/${folder}/${name}` };
   }
 
-  /** An uploaded section image, by the path after /api/site/media/, or null if there is none. */
-  async getMedia(segments: string[]): Promise<StoredFile | null> {
+  /** An uploaded section file, by the path after /api/site/media/, or null if there is none; `range` asks for part of it. */
+  async getMedia(segments: string[], range?: string | null): Promise<StoredFile | null> {
     if (segments.length < 2 || segments.length > 4 || !segments.every((s) => SAFE_SEGMENT.test(s) && !s.includes(".."))) {
       return null;
     }
-    return storage.download(`${MEDIA_FOLDER}/${segments.join("/")}`);
+    return storage.download(`${MEDIA_FOLDER}/${segments.join("/")}`, range);
   }
 
   private findSpec(key: string): SectionSpec {

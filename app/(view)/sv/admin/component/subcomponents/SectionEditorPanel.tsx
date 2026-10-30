@@ -86,14 +86,14 @@ export const SectionEditorPanel: React.FC<SectionEditorPanelProps> = ({ spec, is
               <fieldset className="ad-fieldset" key={block.heading}>
                 <legend className="ad-subhead">{block.heading}</legend>
                 <div className="ad-grid">
-                  {block.fields.map((field) => (
+                  {block.fields.filter((field) => adminHelper.shows(field.showWhen, form)).map((field) => (
                     <FieldInput
                       key={field.key}
                       field={field}
                       name={field.key}
                       value={form[field.key] as string | number | undefined}
                       onChange={(value) => editor.setField(field.key, value)}
-                      onUpload={editor.uploadImage}
+                      onUpload={editor.uploadMedia}
                       error={fieldErrors[field.key]}
                     />
                   ))}
@@ -101,7 +101,7 @@ export const SectionEditorPanel: React.FC<SectionEditorPanelProps> = ({ spec, is
               </fieldset>
             ))}
 
-            {spec.lists.map((list) => (
+            {spec.lists.filter((list) => adminHelper.shows(list.showWhen, form)).map((list) => (
               <ListEditor key={list.key} list={list} path={list.key} items={(form[list.key] as EditorItem[] | undefined) ?? []} editor={editor} />
             ))}
 

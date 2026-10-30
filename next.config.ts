@@ -18,8 +18,9 @@ const nextConfig: NextConfig = {
   cacheComponents: true,
   experimental: {
     // Requests to /api/sv pass through proxy.ts, which buffers bodies up to this size (default 10mb).
-    // Uploads are capped at 10 MB by their own rules; this leaves room for the multipart wrapping.
-    proxyClientMaxBodySize: "11mb",
+    // Uploads are capped by their own rules (images 10 MB, Hangout videos 20 MB); this leaves room
+    // for the multipart wrapping.
+    proxyClientMaxBodySize: "21mb",
   },
   partialPrefetching: true,
   turbopack: {

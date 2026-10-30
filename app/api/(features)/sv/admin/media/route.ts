@@ -1,3 +1,3 @@
 import { adminController } from "../controller";
 
-export const POST = adminController.uploadImage;
+export const POST = adminController.uploadMedia;

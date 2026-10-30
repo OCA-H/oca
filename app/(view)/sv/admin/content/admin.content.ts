@@ -204,6 +204,20 @@ export const adminContent = {
     none: "No image",
   },
 
+  video: {
+    upload: "Upload video",
+    replace: "Replace video",
+    uploading: "Uploading…",
+    types: /^video\/(mp4|quicktime|webm)$/i,
+    accept: "video/mp4,video/quicktime,video/webm",
+    // Matches the server's limit (SITE_VIDEO_RULES); checked here first to save a wasted upload.
+    maxBytes: 20 * 1024 * 1024,
+    badType: "Please choose an MP4, MOV or WebM video.",
+    tooBig: "That video is over 20 MB. Please choose a shorter or smaller one.",
+    failed: "We could not upload that video. Please try again.",
+    none: "No video yet",
+  },
+
   records: {
     loadError: "We could not load this list.",
     retry: "Try again",

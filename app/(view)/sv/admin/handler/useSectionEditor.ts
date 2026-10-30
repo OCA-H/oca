@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { ApiError, type ApiFieldErrors } from '@/app/(view)/common/services/api.service';
 import { adminHelper, type EditorData, type EditorItem } from '../helper';
-import { adminService, type ListSpec, type SectionSpec, type SectionSummary } from '../services';
+import { adminService, type ListSpec, type MediaKind, type SectionSpec, type SectionSummary } from '../services';
 
 /**
  * The editor for one section: loads it the first time its panel opens, then holds the form,
@@ -107,7 +107,7 @@ export function useSectionEditor(spec: SectionSpec, isActive: boolean, onSaved: 
       return next;
     });
 
-  const uploadImage = (file: File) => adminService.uploadImage(spec.key, file);
+  const uploadMedia = (file: File, kind?: MediaKind) => adminService.uploadMedia(spec.key, file, kind);
 
   /** Scrolls the panel's message (success or error) into view. */
   const revealMessage = () =>
@@ -168,7 +168,7 @@ export function useSectionEditor(spec: SectionSpec, isActive: boolean, onSaved: 
     removeItem,
     moveItem,
     toggleItem,
-    uploadImage,
+    uploadMedia,
     handleSubmit,
     isDiscardOpen,
     openDiscard: () => setIsDiscardOpen(true),

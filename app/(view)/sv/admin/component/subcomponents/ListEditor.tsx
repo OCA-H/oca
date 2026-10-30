@@ -25,6 +25,7 @@ export const ListEditor: React.FC<ListEditorProps> = ({ list, path, items, edito
   const { openItems, fieldErrors } = editor;
   const listError = fieldErrors[path];
   const isNested = path !== list.key;
+  const hasLength = list.fields.some((field) => field.key === 'duration');
 
   return (
     <fieldset className={`ad-fieldset ad-list${isNested ? ' ad-list--nested' : ''}`}>
@@ -78,19 +79,21 @@ export const ListEditor: React.FC<ListEditorProps> = ({ list, path, items, edito
               {isOpen && (
                 <div className="ad-item-body" id={bodyId}>
                   <div className="ad-grid">
-                    {list.fields.map((field) => (
+                    {list.fields.filter((field) => adminHelper.shows(field.showWhen, item)).map((field) => (
                       <FieldInput
                         key={field.key}
                         field={field}
                         name={`${prefix}${field.key}`}
                         value={item[field.key] as string | number | undefined}
                         onChange={(value) => editor.setItemField(path, index, field.key, value)}
-                        onUpload={editor.uploadImage}
+                        onUpload={editor.uploadMedia}
+                        // A newly uploaded video fills in the entry's length, when it has one.
+                        onVideoLength={hasLength ? (length) => editor.setItemField(path, index, 'duration', length) : undefined}
                         error={fieldErrors[`${prefix}${field.key}`]}
                       />
                     ))}
                   </div>
-                  {list.lists?.map((sub) => (
+                  {list.lists?.filter((sub) => adminHelper.shows(sub.showWhen, item)).map((sub) => (
                     <ListEditor
                       key={sub.key}
                       list={sub}

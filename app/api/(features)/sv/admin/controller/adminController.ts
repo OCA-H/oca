@@ -1,12 +1,14 @@
 import "server-only";
 import { BaseController } from "@/app/api/core/baseController";
-import { IMAGE_KINDS, readUploadedFile } from "@/app/api/core/fileUpload";
+import { IMAGE_KINDS, VIDEO_KINDS, readUploadedFile } from "@/app/api/core/fileUpload";
 import { HttpError } from "@/app/api/core/httpError";
 import { siteContentService, type SiteContentService } from "@/app/api/(features)/(pview)/site";
 import { withAdminAuth } from "../middleware/adminAuth";
 
-/** Section images: JPG, PNG or WebP, up to 10 MB (proxy.ts allows request bodies a little larger). */
+/** Section images: JPG, PNG or WebP, up to 10 MB. */
 export const SITE_IMAGE_RULES = { maxBytes: 10 * 1024 * 1024, kinds: IMAGE_KINDS, label: "image" };
+/** Section videos (OCA Hangout posts): MP4, MOV or WebM, up to 20 MB. */
+export const SITE_VIDEO_RULES = { maxBytes: 20 * 1024 * 1024, kinds: VIDEO_KINDS, label: "video" };
 
 type SectionContext = { params: Promise<{ key: string }> };
 
@@ -44,14 +46,19 @@ export class AdminController extends BaseController {
     })
   );
 
-  /** POST /api/sv/admin/media (multipart: "section", "image"): stores an image and returns its address. */
-  uploadImage = withAdminAuth((request) =>
+  /**
+   * POST /api/sv/admin/media (multipart: "section", and "image" or "video"): stores the file and
+   * returns its address. Each kind is held to its own size limit and file types.
+   */
+  uploadMedia = withAdminAuth((request) =>
     this.handle(async () => {
       const form = await this.readForm(request);
       const section = form.get("section");
-      if (typeof section !== "string" || !section) throw HttpError.badRequest("Say which section the image is for.");
-      const image = await readUploadedFile(form, "image", SITE_IMAGE_RULES);
-      return this.ok({ data: await this.content.uploadImage(section, image) }, 201);
+      if (typeof section !== "string" || !section) throw HttpError.badRequest("Say which section the file is for.");
+      const file = form.has("video")
+        ? await readUploadedFile(form, "video", SITE_VIDEO_RULES)
+        : await readUploadedFile(form, "image", SITE_IMAGE_RULES);
+      return this.ok({ data: await this.content.uploadMedia(section, file) }, 201);
     })
   );
 }
