@@ -2,7 +2,9 @@
 
 import React from 'react';
 import { CustomDropdown } from '@/app/(view)/common/component/CustomDropdown';
+import type { AdminIconName } from '../../content';
 import type { FieldSpec, MediaKind } from '../../services';
+import { AdminIcon } from './AdminIcon';
 import { ImageField } from './ImageField';
 import { VideoField } from './VideoField';
 
@@ -51,7 +53,19 @@ export const FieldInput: React.FC<FieldInputProps> = ({ field, name, value, onCh
       );
       break;
     case 'select':
-      input = (
+      input = field.segmented ? (
+        <div className="ad-segmented" role="radiogroup" id={id} aria-labelledby={`${id}-label`} aria-describedby={described}>
+          {(field.options ?? []).map((option) => {
+            const isOn = text === option.value;
+            return (
+              <button key={option.value} type="button" role="radio" aria-checked={isOn} className={`ad-seg${isOn ? ' is-on' : ''}`} onClick={() => onChange(option.value)}>
+                {option.icon && <AdminIcon name={option.icon as AdminIconName} />}
+                {option.label}
+              </button>
+            );
+          })}
+        </div>
+      ) : (
         <CustomDropdown id={id} name={name} value={text} onChange={onChange} options={field.options ?? []} ariaLabel={field.label} />
       );
       break;
@@ -80,8 +94,8 @@ export const FieldInput: React.FC<FieldInputProps> = ({ field, name, value, onCh
   }
 
   return (
-    <div className={`field ad-field${wide ? ' ad-field--wide' : ''}`}>
-      <label htmlFor={id} className="ad-label">
+    <div className={`field ad-field${wide ? ' ad-field--wide' : field.size === 'third' ? ' ad-field--third' : ''}`}>
+      <label htmlFor={id} id={`${id}-label`} className="ad-label">
         <span>
           {field.label}
           {field.required && ' *'}

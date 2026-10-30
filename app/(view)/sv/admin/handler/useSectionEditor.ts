@@ -84,6 +84,10 @@ export function useSectionEditor(spec: SectionSpec, isActive: boolean, onSaved: 
     setOpenItems((open) => new Set(open).add(item._id));
   };
 
+  /** Adds entries already holding some values (photos just uploaded), without opening them. */
+  const addItems = (list: ListSpec, path: string, values: Record<string, string | number>[]) =>
+    edit(editList(path, (items) => [...items, ...values.map((value) => ({ ...adminHelper.blankItem(list), ...value }))]), (name) => name === path);
+
   const removeItem = (path: string, index: number) =>
     edit(editList(path, (items) => items.filter((_, i) => i !== index)), inList(path));
 
@@ -165,6 +169,7 @@ export function useSectionEditor(spec: SectionSpec, isActive: boolean, onSaved: 
     setField,
     setItemField,
     addItem,
+    addItems,
     removeItem,
     moveItem,
     toggleItem,

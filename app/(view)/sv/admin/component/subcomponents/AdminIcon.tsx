@@ -58,6 +58,12 @@ const PATHS: Record<AdminIconName, React.ReactNode> = {
   down: <path d="m6 9 6 6 6-6" />,
   chevron: <path d="m9 6 6 6-6 6" />,
   upload: <path d="M12 16V4m0 0-4.5 4.5M12 4l4.5 4.5M4 16v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3" />,
+  video: (
+    <>
+      <rect x="3" y="5" width="13" height="14" rx="2.5" />
+      <path d="m16 10 5-3v10l-5-3" />
+    </>
+  ),
   image: (
     <>
       <rect x="3" y="4" width="18" height="16" rx="2.5" />

@@ -24,7 +24,12 @@ export interface FieldSpec {
   integer?: boolean;
   hint?: string;
   placeholder?: string;
-  options?: { value: string; label: string }[];
+  /** Select choices; `icon` names an admin panel icon shown beside the label when `segmented`. */
+  options?: { value: string; label: string; icon?: string }[];
+  /** Selects only: show the choices side by side as buttons, for a choice that shapes the rest of the form. */
+  segmented?: boolean;
+  /** "third": a third of the row, so three short fields sit side by side. Default: half (text areas, images: whole). */
+  size?: "third";
   /** Starts a new block of the editor under this heading, for sections with many fields. */
   heading?: string;
   /** Only shown, checked (required included) and saved while this holds; otherwise saved empty. */
@@ -47,6 +52,10 @@ export interface ListSpec {
   lists?: ListSpec[];
   /** For a list inside an entry: only shown, checked and saved while this holds; otherwise saved empty. */
   showWhen?: ShowWhen;
+  /** For a list inside an entry: drawn inside the block of fields with this heading, instead of after them all. */
+  inBlock?: string;
+  /** "grid": photo tiles, several uploaded at once, for lists of an image and short text fields. Default: folding entries. */
+  layout?: "grid";
 }
 
 export interface SectionSpec {
@@ -481,30 +490,40 @@ export const SECTION_SPECS: SectionSpec[] = [
         fields: [
           {
             key: "type",
-            label: "Kind",
+            label: "Post type",
             type: "select",
             required: true,
-            hint: "Photos: one or more pictures. Video: a single clip.",
+            segmented: true,
+            hint: "Photos: one or more pictures, shown as a slideshow in the card. Video: a single clip.",
             options: [
-              { value: "photo", label: "Photos" },
-              { value: "video", label: "Video" },
+              { value: "photo", label: "Photos", icon: "image" },
+              { value: "video", label: "Video", icon: "video" },
             ],
           },
-          { key: "video", label: "Video", type: "video", required: true, hint: VIDEO_HINT, showWhen: { field: "type", equals: "video" } },
+          {
+            key: "video",
+            label: "Video",
+            type: "video",
+            required: true,
+            heading: "Media",
+            hint: VIDEO_HINT,
+            showWhen: { field: "type", equals: "video" },
+          },
           {
             key: "duration",
             label: "Video length",
             type: "text",
             max: 10,
             required: true,
+            size: "third",
             placeholder: "2:14",
-            hint: "Shown on the video, e.g. 2:14.",
+            hint: "Filled in from the upload; shown on the video.",
             showWhen: { field: "type", equals: "video" },
           },
-          { key: "name", label: "Posted by", type: "text", max: 80, placeholder: "R. Kapoor" },
-          { key: "batch", label: "Batch", type: "text", max: 30, placeholder: "Batch '88" },
-          { key: "caption", label: "Caption", type: "textarea", max: 280 },
-          { key: "time", label: "When", type: "text", max: 40, placeholder: "2 days ago" },
+          { key: "caption", label: "Caption", type: "textarea", max: 280, heading: "Details", placeholder: "What’s happening in this post? (optional)" },
+          { key: "name", label: "Posted by", type: "text", max: 80, size: "third", placeholder: "R. Kapoor" },
+          { key: "batch", label: "Batch", type: "text", max: 30, size: "third", placeholder: "Batch '88" },
+          { key: "time", label: "When", type: "text", max: 40, size: "third", placeholder: "2 days ago" },
         ],
         lists: [
           {
@@ -512,11 +531,16 @@ export const SECTION_SPECS: SectionSpec[] = [
             label: "Photos",
             itemLabel: "Photo",
             titleField: "imageAlt",
-            hint: "Each photo up to 10 MB. With more than one, the card slides through them.",
+            hint: "JPG, PNG or WebP, up to 10 MB each. The first photo is the cover; use the arrows to reorder.",
             min: 1,
             max: 10,
             showWhen: { field: "type", equals: "photo" },
-            fields: image("Photo"),
+            inBlock: "Media",
+            layout: "grid",
+            fields: [
+              { key: "image", label: "Photo", type: "image", required: true },
+              { key: "imageAlt", label: "Description", type: "text", max: 200, hint: ALT_HINT },
+            ],
           },
         ],
       },

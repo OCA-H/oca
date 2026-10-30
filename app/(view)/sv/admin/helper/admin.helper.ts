@@ -119,12 +119,12 @@ export const adminHelper = {
   blankValue: (field: FieldSpec): string | number =>
     field.type === "select" ? (field.options?.[0]?.value ?? "") : field.type === "number" ? (field.min ?? 0) : "",
 
-  /** A new entry; any lists inside it start with as many blank entries as they need. */
+  /** A new entry; any lists inside it start with as many blank entries as they need (photo grids start empty, ready for uploads). */
   blankItem: (list: ListSpec): EditorItem => ({
     _id: newItemId(),
     ...Object.fromEntries(list.fields.map((field) => [field.key, adminHelper.blankValue(field)])),
     ...Object.fromEntries(
-      (list.lists ?? []).map((sub) => [sub.key, Array.from({ length: sub.min }, () => adminHelper.blankItem(sub))])
+      (list.lists ?? []).map((sub) => [sub.key, Array.from({ length: sub.layout === "grid" ? 0 : sub.min }, () => adminHelper.blankItem(sub))])
     ),
   }),
 

@@ -29,6 +29,7 @@ export type AdminIconName =
   | "chevron"
   | "upload"
   | "image"
+  | "video"
   | "shield"
   | "people"
   | "home"
@@ -202,6 +203,19 @@ export const adminContent = {
     tooBig: "That image is over 10 MB. Please choose a smaller one.",
     failed: "We could not upload that image. Please try again.",
     none: "No image",
+  },
+
+  photos: {
+    add: "Add photos",
+    addNote: "Choose or drop several at once",
+    uploading: (count: number) => `Uploading ${count} photo${count === 1 ? "" : "s"}…`,
+    cover: "Cover",
+    replace: "Replace photo",
+    moveEarlier: "Move earlier",
+    moveLater: "Move later",
+    empty: "No photos yet. Add at least one.",
+    tooMany: (max: number) => `Only ${max} photos fit in one post; the extra ones were left out.`,
+    skipped: (count: number, reason: string) => `${count} file${count === 1 ? " was" : "s were"} left out: ${reason}`,
   },
 
   video: {
