@@ -3,7 +3,7 @@ import crypto from "node:crypto";
 import { cacheLife, cacheTag, revalidateTag } from "next/cache";
 import { HttpError } from "@/app/api/core/httpError";
 import { storage, type StoredFile } from "@/app/api/core/storage";
-import type { UploadedFile } from "@/app/api/core/fileUpload";
+import { assertUploadSize, detectUploadKind, wrongUploadKind, type FileKind, type UploadRules } from "@/app/api/core/fileUpload";
 import { SiteContentRepository } from "../repository/siteContentRepository";
 import { SECTION_SPECS, SITE_SECTION_KEYS, sectionSpec, type ContactDetailsContent, type EmailSettingsContent, type EventDinnerContent, type MembershipFeeContent, type EventLunchContent, type EventSportsContent, type HomeCommitteeContent, type HomeContent, type SectionSpec, type SiteSectionKey } from "../schema/sectionSpecs";
 import { MEMBERSHIP_FEE_DEFAULTS, SECTION_DEFAULTS } from "./siteDefaults";
@@ -17,6 +17,8 @@ const MEDIA_FOLDER = "site";
 /** The public address that serves those files; see /api/site/media. */
 const MEDIA_URL = "/api/site/media";
 const SAFE_SEGMENT = /^[a-z0-9][a-z0-9._-]{0,99}$/i;
+/** A name startMediaUpload gives: 24 hex characters and an extension. */
+const UPLOAD_NAME = /^[0-9a-f]{24}\.[a-z0-9]{2,5}$/;
 
 export interface SectionContent {
   key: SiteSectionKey;
@@ -154,20 +156,50 @@ export class SiteContentService {
   }
 
   /**
-   * Stores an image or video for a section under a new random name, and returns its public address.
-   * Names are never reused, so the address can be cached for good. Replaced files are kept:
-   * a page cached elsewhere may still show them for a while.
+   * Starts an upload of an image or video for a section: picks a new random name for it and returns
+   * an address the browser sends the file to directly, since files this big cannot pass through
+   * our own API on Vercel. Names are never reused, so the file's address can be cached for good.
+   * Replaced files are kept: a page cached elsewhere may still show them for a while.
+   * The upload counts only once finishMediaUpload has checked it.
    */
-  async uploadMedia(key: string, file: UploadedFile): Promise<{ url: string }> {
-    const spec = this.findSpec(key);
-    const folder = spec.key.replace(/\./g, "/");
-    const name = `${crypto.randomBytes(12).toString("hex")}.${file.extension}`;
-    await storage.upload(`${MEDIA_FOLDER}/${folder}/${name}`, file.bytes, {
-      contentType: file.contentType,
-      upsert: false,
-      cacheControl: "public, max-age=31536000, immutable",
-    });
+  async startMediaUpload(key: string, kind: FileKind): Promise<{ uploadUrl: string; name: string; contentType: string }> {
+    const folder = this.mediaFolder(key);
+    const name = `${crypto.randomBytes(12).toString("hex")}.${kind.extension}`;
+    const uploadUrl = await storage.createSignedUploadUrl(`${MEDIA_FOLDER}/${folder}/${name}`);
+    return { uploadUrl, name, contentType: kind.contentType };
+  }
+
+  /**
+   * Checks a file the browser uploaded after startMediaUpload, by its real size and first bytes
+   * against `rules`, and returns its public address. A file that fails is deleted; the problem
+   * comes back as a 400 on `field`.
+   */
+  async finishMediaUpload(key: string, name: string, field: string, rules: UploadRules): Promise<{ url: string }> {
+    const folder = this.mediaFolder(key);
+    const extension = name.split(".").pop();
+    if (!UPLOAD_NAME.test(name) || !rules.kinds.some((k) => k.extension === extension)) {
+      throw HttpError.badRequest("That upload is not one we started.");
+    }
+    const path = `${MEDIA_FOLDER}/${folder}/${name}`;
+    const head = await storage.download(path, "bytes=0-15");
+    if (!head) throw HttpError.badRequest(`The ${rules.label} did not finish uploading. Please try again.`, { [field]: "Upload failed." });
+
+    const bytes = new Uint8Array(await new Response(head.body).arrayBuffer());
+    const total = head.contentRange?.match(/\/(\d+)$/)?.[1];
+    try {
+      assertUploadSize(total ? Number(total) : (head.size ?? bytes.length), field, rules);
+      // Its bytes must be the kind its name says, so it is served with the right type.
+      if (detectUploadKind(bytes, field, rules).extension !== extension) throw wrongUploadKind(field, rules);
+    } catch (error) {
+      await storage.remove([path]).catch(() => {});
+      throw error;
+    }
     return { url: `${MEDIA_URL}/${folder}/${name}` };
+  }
+
+  /** Where a section's uploads live under site/, e.g. "home/hangout" for home.hangout. */
+  private mediaFolder(key: string): string {
+    return this.findSpec(key).key.replace(/\./g, "/");
   }
 
   /** An uploaded section file, by the path after /api/site/media/, or null if there is none; `range` asks for part of it. */

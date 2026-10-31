@@ -122,6 +122,25 @@ export class FileStorage {
   }
 
   /**
+   * An address the browser can PUT one file to at `path`, without our key: for files too big to
+   * pass through our own API (Vercel takes request bodies of at most 4.5 MB). Supabase keeps it
+   * valid for two hours. Send the file as the raw body, with its Content-Type.
+   */
+  async createSignedUploadUrl(path: string, options: { upsert?: boolean } = {}): Promise<string> {
+    const key = this.key(path);
+    await this.ensureBucket();
+    const res = await this.request(`/object/upload/sign/${encodeURIComponent(this.bucket)}/${encodePath(key)}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "x-upsert": String(options.upsert ?? false) },
+      body: "{}",
+    });
+    if (!res.ok) await this.fail(`sign upload "${key}"`, res);
+    // The address comes back relative to /storage/v1, e.g. /object/upload/sign/bucket/path?token=...
+    const { url } = (await res.json()) as { url: string };
+    return `${this.config.url}/storage/v1${url}`;
+  }
+
+  /**
    * The file at `path`, streamed, or null if there is none. With `range` (a Range header, e.g.
    * "bytes=0-"), only that part, as browsers ask for when playing a video.
    */

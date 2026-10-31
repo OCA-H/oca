@@ -48,25 +48,54 @@ export interface UploadedFile {
 
 const megabytes = (bytes: number) => `${Math.round((bytes / (1024 * 1024)) * 10) / 10} MB`;
 
+const invalidUpload = (field: string, message: string) => HttpError.badRequest(message, { [field]: message });
+
+/** "Please choose a JPG, PNG or WEBP file.", as a 400 on `field`. */
+export function wrongUploadKind(field: string, rules: UploadRules) {
+  const names = rules.kinds.map((k) => k.extension.toUpperCase());
+  const allowed = names.length > 1 ? `${names.slice(0, -1).join(", ")} or ${names.at(-1)}` : names[0];
+  return invalidUpload(field, `Please choose a ${allowed} file.`);
+}
+
+/** Rejects an empty file, or one over `rules.maxBytes`, as a 400 on `field`. */
+export function assertUploadSize(size: number, field: string, rules: UploadRules) {
+  if (!(size > 0)) throw invalidUpload(field, `Please choose a ${rules.label} to upload.`);
+  if (size > rules.maxBytes) {
+    throw invalidUpload(field, `That ${rules.label} is ${megabytes(size)}. Please choose one under ${megabytes(rules.maxBytes)}.`);
+  }
+}
+
+/** The kind of file whose first bytes are `head`, or a 400 on `field` if `rules` takes no such kind. */
+export function detectUploadKind(head: Uint8Array, field: string, rules: UploadRules): FileKind {
+  const kind = rules.kinds.find((k) => k.matches(head.subarray(0, 16)));
+  if (!kind) throw wrongUploadKind(field, rules);
+  return kind;
+}
+
+/**
+ * The kind a file says it is, by the type the browser gives it or else its name's extension, for
+ * naming it before its bytes can be checked (a direct upload). Its bytes must still be checked
+ * with detectUploadKind once it arrives.
+ */
+export function claimedUploadKind(contentType: string, fileName: string, field: string, rules: UploadRules): FileKind {
+  const extension = fileName.split(".").pop()?.toLowerCase();
+  const kind =
+    rules.kinds.find((k) => k.contentType === contentType) ??
+    rules.kinds.find((k) => k.extension === extension || (k.extension === "jpg" && extension === "jpeg"));
+  if (!kind) throw wrongUploadKind(field, rules);
+  return kind;
+}
+
 /**
  * The file in form field `field`, checked against `rules`. Problems come back as a 400 on that
  * field, so the form can show them next to it.
  */
 export async function readUploadedFile(form: FormData, field: string, rules: UploadRules): Promise<UploadedFile> {
-  const invalid = (message: string) => HttpError.badRequest(message, { [field]: message });
   const file = form.get(field);
-  if (!(file instanceof File) || file.size === 0) throw invalid(`Please choose a ${rules.label} to upload.`);
-  if (file.size > rules.maxBytes) {
-    throw invalid(`That ${rules.label} is ${megabytes(file.size)}. Please choose one under ${megabytes(rules.maxBytes)}.`);
-  }
+  if (!(file instanceof File)) throw invalidUpload(field, `Please choose a ${rules.label} to upload.`);
+  assertUploadSize(file.size, field, rules);
 
   const bytes = new Uint8Array(await file.arrayBuffer());
-  const kind = rules.kinds.find((k) => k.matches(bytes.subarray(0, 16)));
-  if (!kind) {
-    const names = rules.kinds.map((k) => k.extension.toUpperCase());
-    const allowed = names.length > 1 ? `${names.slice(0, -1).join(", ")} or ${names.at(-1)}` : names[0];
-    throw invalid(`Please choose a ${allowed} file.`);
-  }
-
+  const kind = detectUploadKind(bytes, field, rules);
   return { bytes, size: file.size, contentType: kind.contentType, extension: kind.extension, originalName: file.name };
 }

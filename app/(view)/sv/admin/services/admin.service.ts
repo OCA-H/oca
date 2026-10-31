@@ -177,11 +177,26 @@ export const adminService = {
     await adminRequest(`/api/sv/admin/contribution-funds/${id}`, { method: "DELETE" });
   },
 
-  /** Uploads an image or video for a section; the address to use for it comes back. */
+  /**
+   * Uploads an image or video for a section; the address to use for it comes back. The file goes
+   * straight to storage, at an address our API hands out (Vercel turns away request bodies over
+   * 4.5 MB), and the API then checks it.
+   */
   uploadMedia: async (key: SiteSectionKey, file: File, kind: MediaKind = "image"): Promise<string> => {
-    const form = new FormData();
-    form.append("section", key);
-    form.append(kind, file);
-    return (await adminRequest<{ data: { url: string } }>("/api/sv/admin/media", { method: "POST", body: form })).data.url;
+    const { data: upload } = await adminRequest<{ data: { uploadUrl: string; name: string; contentType: string } }>(
+      "/api/sv/admin/media",
+      { method: "POST", body: { section: key, kind, fileName: file.name, contentType: file.type, size: file.size } }
+    );
+    const sent = await fetch(upload.uploadUrl, {
+      method: "PUT",
+      headers: { "Content-Type": upload.contentType, "cache-control": "public, max-age=31536000, immutable", "x-upsert": "false" },
+      body: file,
+    }).catch(() => null);
+    if (!sent?.ok) {
+      const message = `The ${kind} did not upload. Please check your connection and try again.`;
+      throw new ApiError(message, sent?.status ?? 0, { [kind]: message });
+    }
+    const body = { section: key, kind, name: upload.name };
+    return (await adminRequest<{ data: { url: string } }>("/api/sv/admin/media/confirm", { method: "POST", body })).data.url;
   },
 };

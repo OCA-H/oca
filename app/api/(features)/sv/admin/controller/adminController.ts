@@ -1,6 +1,6 @@
 import "server-only";
 import { BaseController } from "@/app/api/core/baseController";
-import { IMAGE_KINDS, VIDEO_KINDS, readUploadedFile } from "@/app/api/core/fileUpload";
+import { IMAGE_KINDS, VIDEO_KINDS, assertUploadSize, claimedUploadKind } from "@/app/api/core/fileUpload";
 import { HttpError } from "@/app/api/core/httpError";
 import { siteContentService, type SiteContentService } from "@/app/api/(features)/(pview)/site";
 import { withAdminAuth } from "../middleware/adminAuth";
@@ -47,20 +47,39 @@ export class AdminController extends BaseController {
   );
 
   /**
-   * POST /api/sv/admin/media (multipart: "section", and "image" or "video"): stores the file and
-   * returns its address. Each kind is held to its own size limit and file types.
+   * POST /api/sv/admin/media (JSON: section, kind "image" or "video", fileName, contentType, size):
+   * starts an upload. The browser then PUTs the file to the uploadUrl that comes back (straight to
+   * storage: Vercel turns away request bodies over 4.5 MB) and calls /media/confirm with the name.
    */
-  uploadMedia = withAdminAuth((request) =>
+  startMediaUpload = withAdminAuth((request) =>
     this.handle(async () => {
-      const form = await this.readForm(request);
-      const section = form.get("section");
-      if (typeof section !== "string" || !section) throw HttpError.badRequest("Say which section the file is for.");
-      const file = form.has("video")
-        ? await readUploadedFile(form, "video", SITE_VIDEO_RULES)
-        : await readUploadedFile(form, "image", SITE_IMAGE_RULES);
-      return this.ok({ data: await this.content.uploadMedia(section, file) }, 201);
+      const body = await this.readJson(request);
+      const { section, kind, rules } = this.mediaRequest(body);
+      assertUploadSize(Number(body.size), kind, rules);
+      const claimed = claimedUploadKind(String(body.contentType ?? ""), String(body.fileName ?? ""), kind, rules);
+      return this.ok({ data: await this.content.startMediaUpload(section, claimed) }, 201);
     })
   );
+
+  /**
+   * POST /api/sv/admin/media/confirm (JSON: section, kind, name): checks the uploaded file's size
+   * and type, as for any upload, and returns its address. Each kind has its own limit and types.
+   */
+  confirmMediaUpload = withAdminAuth((request) =>
+    this.handle(async () => {
+      const body = await this.readJson(request);
+      const { section, kind, rules } = this.mediaRequest(body);
+      if (typeof body.name !== "string") throw HttpError.badRequest("Say which upload to confirm.");
+      return this.ok({ data: await this.content.finishMediaUpload(section, body.name, kind, rules) });
+    })
+  );
+
+  private mediaRequest(body: Record<string, unknown>) {
+    const { section, kind } = body;
+    if (typeof section !== "string" || !section) throw HttpError.badRequest("Say which section the file is for.");
+    if (kind !== "image" && kind !== "video") throw HttpError.badRequest('The kind of file must be "image" or "video".');
+    return { section, kind, rules: kind === "video" ? SITE_VIDEO_RULES : SITE_IMAGE_RULES };
+  }
 }
 
 export const adminController = new AdminController(siteContentService);
