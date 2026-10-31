@@ -1,10 +1,11 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { ROUTES } from '@/app/(view)/common/helper/routes';
 import { useAuth } from '@/app/(view)/common/helper/useAuth';
+import { rememberHeaderAuthWidth } from '@/app/(view)/common/helper/headerAuthWidth';
 
 interface HeaderProps {
   activeRoute?: string;
@@ -54,6 +55,23 @@ export const Header: React.FC<HeaderProps> = ({ activeRoute }) => {
   const [openGroup, setOpenGroup] = useState<string | null>(activeNav ?? null);
   // Only shows the link; /sv/admin and its APIs check the role themselves.
   const isAdmin = user?.role === 'admin';
+  // The buttons fade in only when they arrive after the placeholder (a page load). On a later page,
+  // where the answer is already known, they are simply there.
+  const [revealAuth] = useState(isAuthLoading);
+  const authRow = useRef<HTMLDivElement>(null);
+
+  // Remembers the row's final width, so the next page load's placeholder starts at that size.
+  useEffect(() => {
+    const row = authRow.current;
+    if (isAuthLoading || !row) return;
+    let isCurrent = true;
+    document.fonts.ready.then(() => {
+      if (isCurrent) rememberHeaderAuthWidth(row);
+    });
+    return () => {
+      isCurrent = false;
+    };
+  }, [isAuthLoading, isAuthenticated, user?.fullName]);
 
   const handleLinkClick = (_href?: string) => {
     setMobileNavOpen(false);
@@ -155,74 +173,78 @@ export const Header: React.FC<HeaderProps> = ({ activeRoute }) => {
           </nav>
 
           <div className="header-actions">
-            <Link className="btn btn-gold btn-sm" href={ROUTES.DONATION} onClick={() => handleLinkClick(ROUTES.DONATION)}>Contribute</Link>
             {/*
-              The sign-in area always takes the width of its widest state (Become a Member + Sign In,
-              drawn invisibly underneath), so the menu never shifts when the auth check answers.
-              Until it does, those two buttons show as shimmering placeholders of exactly their size.
+              Contribute and the sign-in area. While the sign-in check runs, the area keeps the width
+              the visitor's header last had (remembered in this browser, see headerAuthWidth), or on a
+              first visit the width of the widest state (Contribute + Become a Member + Sign In, drawn
+              invisibly underneath), and one shimmering placeholder fills the room the buttons will
+              take. When the check answers, the placeholder fades out as the buttons fade in, so
+              nothing blinks and the menu beside it does not move.
             */}
-            <div className="hdr-auth" aria-busy={isAuthLoading}>
+            <div className={`hdr-auth${revealAuth ? ' hdr-auth--reveal' : ''}`} aria-busy={isAuthLoading}>
               <div className="hdr-auth-sizer" aria-hidden="true">
+                <span className="btn btn-gold btn-sm">Contribute</span>
                 <span className="btn btn-primary btn-sm">Become a Member</span>
                 <span className="icon-btn">Sign In <svg viewBox="0 0 12 8" fill="none"><path d="M1 1l5 5 5-5" stroke="currentColor" strokeWidth="1.6" /></svg></span>
               </div>
-              {isAuthLoading ? (
-                <div className="hdr-auth-state" aria-hidden="true">
-                  <span className="btn btn-primary btn-sm hdr-skel">Become a Member</span>
-                  <span className="icon-btn hdr-skel">Sign In <svg viewBox="0 0 12 8" fill="none"><path d="M1 1l5 5 5-5" stroke="currentColor" strokeWidth="1.6" /></svg></span>
-                </div>
-              ) : isAuthenticated ? (
-                <div className="hdr-auth-state">
-                  <div className="nav-item signin-item member-profile-item">
-                    <button type="button" className="icon-btn member-profile-btn" aria-haspopup="true">
-                      <span className="member-avatar">
-                        {(user?.fullName || 'M').charAt(0).toUpperCase()}
-                      </span>
-                      <span className="member-name">
-                        {user?.fullName?.split(' ')[0] || 'Member'}
-                      </span>
-                      <svg viewBox="0 0 12 8" fill="none">
-                        <path d="M1 1l5 5 5-5" stroke="currentColor" strokeWidth="1.6" />
-                      </svg>
-                    </button>
-                    <div className="dropdown dropdown-right member-dropdown">
-                      <div className="member-card">
-                        <span className="member-avatar member-avatar-lg">
-                          {(user?.fullName || 'M').charAt(0).toUpperCase()}
-                        </span>
-                        <div className="member-card-body">
-                          <div className="member-card-name">{user?.fullName || 'Columban Member'}</div>
-                          {user?.memberId && <div className="member-card-id">ID: {user.memberId}</div>}
-                          {user?.membershipType && <span className="member-card-badge">{user.membershipType}</span>}
+              <div className="hdr-auth-row" ref={authRow}>
+                <Link className="btn btn-gold btn-sm" href={ROUTES.DONATION} onClick={() => handleLinkClick(ROUTES.DONATION)}>Contribute</Link>
+                <div className="hdr-auth-slot">
+                  <span className="hdr-skel hdr-auth-skel" aria-hidden="true" />
+                  {isAuthLoading ? null : isAuthenticated ? (
+                    <div className="hdr-auth-state">
+                      <div className="nav-item signin-item member-profile-item">
+                        <button type="button" className="icon-btn member-profile-btn" aria-haspopup="true">
+                          <span className="member-avatar">
+                            {(user?.fullName || 'M').charAt(0).toUpperCase()}
+                          </span>
+                          <span className="member-name">
+                            {user?.fullName?.split(' ')[0] || 'Member'}
+                          </span>
+                          <svg viewBox="0 0 12 8" fill="none">
+                            <path d="M1 1l5 5 5-5" stroke="currentColor" strokeWidth="1.6" />
+                          </svg>
+                        </button>
+                        <div className="dropdown dropdown-right member-dropdown">
+                          <div className="member-card">
+                            <span className="member-avatar member-avatar-lg">
+                              {(user?.fullName || 'M').charAt(0).toUpperCase()}
+                            </span>
+                            <div className="member-card-body">
+                              <div className="member-card-name">{user?.fullName || 'Columban Member'}</div>
+                              {user?.memberId && <div className="member-card-id">ID: {user.memberId}</div>}
+                              {user?.membershipType && <span className="member-card-badge">{user.membershipType}</span>}
+                            </div>
+                          </div>
+                          <Link href={ROUTES.PROFILE} onClick={() => handleLinkClick(ROUTES.PROFILE)}>My Profile</Link>
+                          {isAdmin && <Link href={ROUTES.ADMIN} onClick={() => handleLinkClick(ROUTES.ADMIN)}>Admin Panel</Link>}
+                          <button type="button" className="member-signout" onClick={() => { signOut(); }}>
+                            Sign Out
+                          </button>
                         </div>
                       </div>
-                      <Link href={ROUTES.PROFILE} onClick={() => handleLinkClick(ROUTES.PROFILE)}>My Profile</Link>
-                      {isAdmin && <Link href={ROUTES.ADMIN} onClick={() => handleLinkClick(ROUTES.ADMIN)}>Admin Panel</Link>}
-                      <button type="button" className="member-signout" onClick={() => { signOut(); }}>
-                        Sign Out
-                      </button>
                     </div>
-                  </div>
-                </div>
-              ) : (
-                <div className="hdr-auth-state">
-                  <Link className="btn btn-primary btn-sm hdr-auth-in" href={ROUTES.MEMBERSHIP} onClick={() => handleLinkClick(ROUTES.MEMBERSHIP)}>Become a Member</Link>
-                  <div className="nav-item signin-item">
-                    <button
-                      className="icon-btn"
-                      type="button"
-                      aria-haspopup="true"
-                      aria-label="Sign In options"
-                    >
-                      Sign In <svg viewBox="0 0 12 8" fill="none"><path d="M1 1l5 5 5-5" stroke="currentColor" strokeWidth="1.6" /></svg>
-                    </button>
-                    <div className="dropdown dropdown-right">
-                      <Link href={ROUTES.MEMBER_SIGNIN} onClick={() => handleLinkClick(ROUTES.MEMBER_SIGNIN)}>As an OCA Member</Link>
-                      <div className="dropdown-soon"><span>As a Partner Organization</span><span className="soon-tag">Coming soon</span></div>
+                  ) : (
+                    <div className="hdr-auth-state">
+                      <Link className="btn btn-primary btn-sm" href={ROUTES.MEMBERSHIP} onClick={() => handleLinkClick(ROUTES.MEMBERSHIP)}>Become a Member</Link>
+                      <div className="nav-item signin-item">
+                        <button
+                          className="icon-btn"
+                          type="button"
+                          aria-haspopup="true"
+                          aria-label="Sign In options"
+                        >
+                          Sign In <svg viewBox="0 0 12 8" fill="none"><path d="M1 1l5 5 5-5" stroke="currentColor" strokeWidth="1.6" /></svg>
+                        </button>
+                        <div className="dropdown dropdown-right">
+                          <Link href={ROUTES.MEMBER_SIGNIN} onClick={() => handleLinkClick(ROUTES.MEMBER_SIGNIN)}>As an OCA Member</Link>
+                          <div className="dropdown-soon"><span>As a Partner Organization</span><span className="soon-tag">Coming soon</span></div>
+                        </div>
+                      </div>
                     </div>
-                  </div>
+                  )}
                 </div>
-              )}
+              </div>
             </div>
             <button className="burger" aria-label="Open menu" aria-expanded={mobileNavOpen} aria-controls="mobileNav" onClick={() => setMobileNavOpen(true)}>
               <svg width="26" height="26" viewBox="0 0 24 24" fill="none"><path d="M3 6h18M3 12h18M3 18h18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" /></svg>

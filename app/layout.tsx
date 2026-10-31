@@ -3,6 +3,7 @@ import { SpeedInsights } from "@vercel/speed-insights/next";
 import { Raleway, Inter } from "next/font/google";
 import "./globals.css";
 import { ContactProvider } from "@/app/(view)/common/component/ContactProvider";
+import { HEADER_AUTH_WIDTH_SCRIPT } from "@/app/(view)/common/helper/headerAuthWidth";
 import { getContactDetails } from "@/app/api/(features)/(pview)/site/services/siteContentService";
 
 const raleway = Raleway({
@@ -32,8 +33,11 @@ export default async function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en-US" className={`${raleway.variable} ${inter.variable}`}>
+    // suppressHydrationWarning: the script below sets attributes on <html> before React loads.
+    <html lang="en-US" className={`${raleway.variable} ${inter.variable}`} suppressHydrationWarning>
       <head>
+        {/* Sizes the header's sign-in area before the first paint, so it does not jump (see headerAuthWidth). */}
+        <script dangerouslySetInnerHTML={{ __html: HEADER_AUTH_WIDTH_SCRIPT }} />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
         <link
