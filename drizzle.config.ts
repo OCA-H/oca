@@ -29,7 +29,14 @@ export default defineConfig({
   schema: "./app/api/db/schema.ts",
   out: "./app/api/db/migrations",
   // Left empty when settings are missing, so `db:generate` (which needs no database) still runs.
-  dbCredentials: { url: missingDatabaseSettings().length > 0 ? "" : buildDatabaseUrl() },
+  // DB_MIGRATION_PORT points migrations at Supabase's session pooler (5432) while the app uses the
+  // transaction pooler (6543); session mode suits DDL and long-running migrations.
+  dbCredentials: {
+    url:
+      missingDatabaseSettings().length > 0
+        ? ""
+        : buildDatabaseUrl({ ...process.env, DB_PORT: process.env.DB_MIGRATION_PORT || process.env.DB_PORT }),
+  },
   strict: true,
   verbose: true,
 });
