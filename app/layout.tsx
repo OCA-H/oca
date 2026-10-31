@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 import { Raleway, Inter } from "next/font/google";
 import "./globals.css";
 import { ContactProvider } from "@/app/(view)/common/component/ContactProvider";
@@ -42,6 +43,8 @@ export default async function RootLayout({
       </head>
       <body>
         <ContactProvider contact={await getContactDetails()}>{children}</ContactProvider>
+        {/* Real-visitor page speed, reported to the Vercel dashboard (Speed Insights). */}
+        <SpeedInsights />
       </body>
     </html>
   );

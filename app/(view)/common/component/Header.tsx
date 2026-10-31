@@ -156,59 +156,74 @@ export const Header: React.FC<HeaderProps> = ({ activeRoute }) => {
 
           <div className="header-actions">
             <Link className="btn btn-gold btn-sm" href={ROUTES.DONATION} onClick={() => handleLinkClick(ROUTES.DONATION)}>Contribute</Link>
-            {!isAuthLoading && !isAuthenticated && (
-              <Link className="btn btn-primary btn-sm hdr-auth-in" href={ROUTES.MEMBERSHIP} onClick={() => handleLinkClick(ROUTES.MEMBERSHIP)}>Become a Member</Link>
-            )}
-            {/* Until the first check answers, hold the space instead of guessing "signed out". */}
-            {isAuthLoading ? (
-              <span className="mp-skel hdr-auth-skel" aria-hidden="true" />
-            ) : isAuthenticated ? (
-              <div className="nav-item signin-item member-profile-item">
-                <button type="button" className="icon-btn member-profile-btn" aria-haspopup="true">
-                  <span className="member-avatar">
-                    {(user?.fullName || 'M').charAt(0).toUpperCase()}
-                  </span>
-                  <span className="member-name">
-                    {user?.fullName?.split(' ')[0] || 'Member'}
-                  </span>
-                  <svg viewBox="0 0 12 8" fill="none">
-                    <path d="M1 1l5 5 5-5" stroke="currentColor" strokeWidth="1.6" />
-                  </svg>
-                </button>
-                <div className="dropdown dropdown-right member-dropdown">
-                  <div className="member-card">
-                    <span className="member-avatar member-avatar-lg">
-                      {(user?.fullName || 'M').charAt(0).toUpperCase()}
-                    </span>
-                    <div className="member-card-body">
-                      <div className="member-card-name">{user?.fullName || 'Columban Member'}</div>
-                      {user?.memberId && <div className="member-card-id">ID: {user.memberId}</div>}
-                      {user?.membershipType && <span className="member-card-badge">{user.membershipType}</span>}
+            {/*
+              The sign-in area always takes the width of its widest state (Become a Member + Sign In,
+              drawn invisibly underneath), so the menu never shifts when the auth check answers.
+              Until it does, those two buttons show as shimmering placeholders of exactly their size.
+            */}
+            <div className="hdr-auth" aria-busy={isAuthLoading}>
+              <div className="hdr-auth-sizer" aria-hidden="true">
+                <span className="btn btn-primary btn-sm">Become a Member</span>
+                <span className="icon-btn">Sign In <svg viewBox="0 0 12 8" fill="none"><path d="M1 1l5 5 5-5" stroke="currentColor" strokeWidth="1.6" /></svg></span>
+              </div>
+              {isAuthLoading ? (
+                <div className="hdr-auth-state" aria-hidden="true">
+                  <span className="btn btn-primary btn-sm hdr-skel">Become a Member</span>
+                  <span className="icon-btn hdr-skel">Sign In <svg viewBox="0 0 12 8" fill="none"><path d="M1 1l5 5 5-5" stroke="currentColor" strokeWidth="1.6" /></svg></span>
+                </div>
+              ) : isAuthenticated ? (
+                <div className="hdr-auth-state">
+                  <div className="nav-item signin-item member-profile-item">
+                    <button type="button" className="icon-btn member-profile-btn" aria-haspopup="true">
+                      <span className="member-avatar">
+                        {(user?.fullName || 'M').charAt(0).toUpperCase()}
+                      </span>
+                      <span className="member-name">
+                        {user?.fullName?.split(' ')[0] || 'Member'}
+                      </span>
+                      <svg viewBox="0 0 12 8" fill="none">
+                        <path d="M1 1l5 5 5-5" stroke="currentColor" strokeWidth="1.6" />
+                      </svg>
+                    </button>
+                    <div className="dropdown dropdown-right member-dropdown">
+                      <div className="member-card">
+                        <span className="member-avatar member-avatar-lg">
+                          {(user?.fullName || 'M').charAt(0).toUpperCase()}
+                        </span>
+                        <div className="member-card-body">
+                          <div className="member-card-name">{user?.fullName || 'Columban Member'}</div>
+                          {user?.memberId && <div className="member-card-id">ID: {user.memberId}</div>}
+                          {user?.membershipType && <span className="member-card-badge">{user.membershipType}</span>}
+                        </div>
+                      </div>
+                      <Link href={ROUTES.PROFILE} onClick={() => handleLinkClick(ROUTES.PROFILE)}>My Profile</Link>
+                      {isAdmin && <Link href={ROUTES.ADMIN} onClick={() => handleLinkClick(ROUTES.ADMIN)}>Admin Panel</Link>}
+                      <button type="button" className="member-signout" onClick={() => { signOut(); }}>
+                        Sign Out
+                      </button>
                     </div>
                   </div>
-                  <Link href={ROUTES.PROFILE} onClick={() => handleLinkClick(ROUTES.PROFILE)}>My Profile</Link>
-                  {isAdmin && <Link href={ROUTES.ADMIN} onClick={() => handleLinkClick(ROUTES.ADMIN)}>Admin Panel</Link>}
-                  <button type="button" className="member-signout" onClick={() => { signOut(); }}>
-                    Sign Out
-                  </button>
                 </div>
-              </div>
-            ) : (
-              <div className="nav-item signin-item">
-                <button
-                  className="icon-btn"
-                  type="button"
-                  aria-haspopup="true"
-                  aria-label="Sign In options"
-                >
-                  Sign In <svg viewBox="0 0 12 8" fill="none"><path d="M1 1l5 5 5-5" stroke="currentColor" strokeWidth="1.6" /></svg>
-                </button>
-                <div className="dropdown dropdown-right">
-                  <Link href={ROUTES.MEMBER_SIGNIN} onClick={() => handleLinkClick(ROUTES.MEMBER_SIGNIN)}>As an OCA Member</Link>
-                  <div className="dropdown-soon"><span>As a Partner Organization</span><span className="soon-tag">Coming soon</span></div>
+              ) : (
+                <div className="hdr-auth-state">
+                  <Link className="btn btn-primary btn-sm hdr-auth-in" href={ROUTES.MEMBERSHIP} onClick={() => handleLinkClick(ROUTES.MEMBERSHIP)}>Become a Member</Link>
+                  <div className="nav-item signin-item">
+                    <button
+                      className="icon-btn"
+                      type="button"
+                      aria-haspopup="true"
+                      aria-label="Sign In options"
+                    >
+                      Sign In <svg viewBox="0 0 12 8" fill="none"><path d="M1 1l5 5 5-5" stroke="currentColor" strokeWidth="1.6" /></svg>
+                    </button>
+                    <div className="dropdown dropdown-right">
+                      <Link href={ROUTES.MEMBER_SIGNIN} onClick={() => handleLinkClick(ROUTES.MEMBER_SIGNIN)}>As an OCA Member</Link>
+                      <div className="dropdown-soon"><span>As a Partner Organization</span><span className="soon-tag">Coming soon</span></div>
+                    </div>
+                  </div>
                 </div>
-              </div>
-            )}
+              )}
+            </div>
             <button className="burger" aria-label="Open menu" aria-expanded={mobileNavOpen} aria-controls="mobileNav" onClick={() => setMobileNavOpen(true)}>
               <svg width="26" height="26" viewBox="0 0 24 24" fill="none"><path d="M3 6h18M3 12h18M3 18h18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" /></svg>
             </button>

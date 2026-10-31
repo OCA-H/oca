@@ -9273,11 +9273,19 @@ section[id^="ec-"] {
 .mp-loading{animation:mpFadeIn .3s ease-out both;}
 
 /* header: a neutral placeholder while the signed-in state is still being checked */
-.hdr-auth-skel{display:inline-block; width:112px; height:36px; border-radius:100px; vertical-align:middle;}
+/* Header sign-in area: every state sits in one grid cell over an invisible copy of the widest
+   (signed-out) state, so the area keeps one width and the menu beside it never moves. */
+.hdr-auth{display:grid; align-items:center; justify-items:end; gap:inherit;}
+.hdr-auth > *{grid-area:1 / 1;}
+.hdr-auth-sizer, .hdr-auth-state{display:flex; align-items:center; gap:inherit;}
+.hdr-auth-sizer{visibility:hidden; pointer-events:none;}
+/* Placeholder: the real button, same font and padding, drawn as a shimmering pill */
+.hdr-skel{color:transparent !important; border-color:transparent !important; background:linear-gradient(90deg, var(--tint-navy) 25%, #F4F8F5 50%, var(--tint-navy) 75%) !important; background-size:200% 100% !important; animation:ps-shimmer 1.4s ease-in-out infinite; pointer-events:none; box-shadow:none !important;}
+.hdr-skel svg{visibility:hidden;}
 .header-actions .member-profile-item, .header-actions .signin-item, .header-actions .hdr-auth-in{animation:mpFadeIn .25s ease-out both;}
 
 @media (prefers-reduced-motion: reduce){
-  .si-handoff, .si-handoff > *, .mp-loading, .header-actions .member-profile-item, .header-actions .signin-item, .header-actions .hdr-auth-in{animation:none;}
+  .si-handoff, .si-handoff > *, .mp-loading, .header-actions .member-profile-item, .header-actions .signin-item, .header-actions .hdr-auth-in, .hdr-skel{animation:none;}
   .si-handoff-bar::after{animation:none; width:100%;}
   .si-main > *:not(.si-handoff){transition:none;}
 }
@@ -9721,10 +9729,7 @@ section[id^="ec-"] {
 @media (max-width:1080px) {
 
   nav.primary-nav,
-  .header-actions .signin-item,
-  .header-actions .member-profile-item,
-  .header-actions .hdr-auth-in,
-  .header-actions .hdr-auth-skel {
+  .header-actions .hdr-auth {
     display: none;
   }
 

@@ -17,6 +17,7 @@
     "legacy:import": "node scripts/legacy-import/index.mjs"
   },
   "dependencies": {
+    "@vercel/speed-insights": "^2.0.0",
     "drizzle-orm": "^0.45.4",
     "flag-icons": "7.5.0",
     "libphonenumber-js": "1.13.14",
