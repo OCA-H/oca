@@ -18,6 +18,8 @@ export type LockedField = "email" | "mobile";
 export interface MemberProfile {
   id: number;
   memberId: string;
+  /** The old site's User ID, also accepted at sign-in; null for members who never had one. */
+  username: string | null;
   fullName: string;
   title: string;
   firstName: string;

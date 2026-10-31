@@ -1,5 +1,5 @@
 /** Which identifier the member typed at sign-in. */
-export type SignInMethod = "memberId" | "email" | "mobile";
+export type SignInMethod = "memberId" | "username" | "email" | "mobile";
 
 export interface SessionUser {
   id: number;

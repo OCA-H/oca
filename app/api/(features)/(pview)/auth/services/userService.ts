@@ -31,6 +31,7 @@ export function toSafeUser(user: User): SafeUser {
 export function signInMethodFor(user: User, identifier: string): SignInMethod {
   const clean = identifier.trim();
   if (user.email && clean.toLowerCase() === user.email.toLowerCase()) return "email";
+  if (user.username && clean.toLowerCase() === user.username) return "username";
   if (user.mobile && clean === user.mobile) return "mobile";
   return "memberId";
 }
@@ -62,7 +63,7 @@ export class UserService {
   async signIn(identifier: string, pass: string): Promise<{ user: SafeUser; token: string }> {
     const trimmedId = identifier?.trim();
     if (!trimmedId) {
-      throw HttpError.badRequest("Please enter your Member ID, Email ID, or Mobile number.");
+      throw HttpError.badRequest("Please enter your Member ID, User ID, Email ID, or Mobile number.");
     }
     if (!pass) {
       throw HttpError.badRequest("Please enter your password.");
@@ -75,7 +76,7 @@ export class UserService {
 
     const user = await this.repository.findByIdentifier(trimmedId);
     if (!user) {
-      throw HttpError.unauthorized("Invalid Member ID/Email/Mobile or Password.");
+      throw HttpError.unauthorized("Invalid Member ID/User ID/Email/Mobile or Password.");
     }
 
     if (user.status === "pending") {
@@ -87,7 +88,7 @@ export class UserService {
 
     const isValid = verifyPassword(pass, user.passwordHash, user.passwordSalt);
     if (!isValid) {
-      throw HttpError.unauthorized("Invalid Member ID/Email/Mobile or Password.");
+      throw HttpError.unauthorized("Invalid Member ID/User ID/Email/Mobile or Password.");
     }
 
     // Update last login timestamp asynchronously

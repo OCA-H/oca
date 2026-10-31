@@ -11,6 +11,8 @@ export const users = pgTable(
     memberId: varchar("member_id", { length: 50 }).notNull(),
     // Optional: members imported from the old site may have none; they sign in with member ID or mobile.
     email: varchar("email", { length: 255 }),
+    // The User ID members signed in with on the old site, lowercased; another way to sign in. Optional.
+    username: varchar("username", { length: 100 }),
     mobile: varchar("mobile", { length: 30 }),
     fullName: varchar("full_name", { length: 150 }).notNull(),
     passwordHash: text("password_hash").notNull(),
@@ -30,6 +32,7 @@ export const users = pgTable(
   (table) => [
     uniqueIndex("users_member_id_unique").on(table.memberId),
     uniqueIndex("users_email_unique").on(table.email),
+    uniqueIndex("users_username_unique").on(table.username),
     index("users_mobile_idx").on(table.mobile),
     index("users_batch_year_idx").on(table.batchYear),
   ]

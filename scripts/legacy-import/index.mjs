@@ -135,6 +135,7 @@ for (const r of [...old.ocamembers_info].sort((a, b) => a.ID - b.ID)) {
     legacyId: r.ID,
     source,
     ocaId: clean.text(r.oca_id),
+    username: clean.text(r.UserId).toLowerCase(),
     email,
     mobile: phone?.mobile ?? null,
     fullName: [name.title, name.firstName, name.middleName, name.lastName].filter(Boolean).join(" ").slice(0, 150),
@@ -211,8 +212,27 @@ resolveDuplicates("mobile", (m) => m.mobile, (loser, winner) => {
   loser.mobile = null;
 });
 
+// User IDs (users.username): the old login name, lowercased. Left out when it is an email (members
+// sign in with that already) or would match someone else's member ID, email or mobile at sign-in.
+resolveDuplicates("username", (m) => m.username, (loser, winner) => {
+  issue("members-username-not-kept", loser.source, `User ID also used by ${winner.memberId} (${winner.fullName})`, "imported without User ID", { username: loser.username, memberId: loser.memberId, name: loser.fullName, keptBy: winner.memberId });
+  loser.username = "";
+});
+const otherIdentifiers = new Map();
+for (const m of members) for (const value of [m.memberId.toLowerCase(), m.email, m.mobile]) if (value) otherIdentifiers.set(value, m);
 for (const m of members) {
-  const contact = { memberId: m.memberId, name: m.fullName, batch: m.batchYear, mobile: m.mobile, username: m.metadata.legacy.username };
+  if (!m.username) continue;
+  const owner = otherIdentifiers.get(m.username);
+  let problem = null;
+  if (m.username.includes("@")) problem = m.username === m.email ? null : "User ID is an email address that is not the member's email";
+  else if (/\s/.test(m.username) || m.username.length > 100) problem = "User ID has spaces or is longer than 100 characters";
+  else if (owner && owner !== m) problem = `User ID matches the member ID, email or mobile of ${owner.memberId} (${owner.fullName})`;
+  if (problem) issue("members-username-not-kept", m.source, problem, "imported without User ID", { username: m.username, memberId: m.memberId, name: m.fullName });
+  if (problem || m.username.includes("@")) m.username = "";
+}
+
+for (const m of members) {
+  const contact = { memberId: m.memberId, username: m.username || null, name: m.fullName, batch: m.batchYear, mobile: m.mobile };
   if (!m.email) issue("members-missing-email", m.source, "No usable email: cannot receive password resets or receipts", "imported without email", contact);
   if (m.mustReset) {
     issue("members-password-reset-needed", m.source, "Old password was a guessable default (or empty), so it is not carried over",
@@ -220,7 +240,7 @@ for (const m of members) {
   }
   if (m.metadata.legacy.photoUrl) record("archive", "profile-photos-to-copy", { memberId: m.memberId, url: m.metadata.legacy.photoUrl });
   record("clean", "users", {
-    member_id: m.memberId, email: m.email, mobile: m.mobile, country_code: m.metadata.countryCode, full_name: m.fullName,
+    member_id: m.memberId, username: m.username || null, email: m.email, mobile: m.mobile, country_code: m.metadata.countryCode, full_name: m.fullName,
     batch_year: m.batchYear, date_of_birth: m.dateOfBirth, membership_type: m.membershipType, status: "active",
     password: m.mustReset ? "reset required" : "kept (hashed on import)", legacy_id: m.legacyId,
   });
@@ -517,10 +537,12 @@ async function apply() {
     }
 
     // Members already in the app (signed up on the new site) keep their account; old payments attach to it.
-    const { rows: existing } = await client.query("SELECT id, member_id, email, metadata->'legacy'->>'id' AS legacy_id FROM users");
+    const { rows: existing } = await client.query("SELECT id, member_id, email, username, metadata->'legacy'->>'id' AS legacy_id FROM users");
     const existingByLegacy = new Map(existing.filter((u) => u.legacy_id).map((u) => [Number(u.legacy_id), u.id]));
     const existingByMemberId = new Map(existing.map((u) => [u.member_id, u.id]));
     const existingByEmail = new Map(existing.map((u) => [u.email?.toLowerCase(), u.id]));
+    // A User ID already taken by an account made on the new site stays with that account.
+    const takenUsernames = new Map(existing.filter((u) => u.username).map((u) => [u.username, u.id]));
     const conflicts = [];
     const fresh = [];
     for (const m of toImport) {
@@ -545,7 +567,7 @@ async function apply() {
         const secret = m.mustReset ? crypto.randomBytes(32).toString("hex") : m.password;
         const hash = (await scrypt(secret, salt, 64)).toString("hex");
         return {
-          member_id: m.memberId, email: m.email, mobile: m.mobile, full_name: m.fullName, password_hash: hash, password_salt: salt,
+          member_id: m.memberId, username: m.username && !takenUsernames.has(m.username) ? m.username : null, email: m.email, mobile: m.mobile, full_name: m.fullName, password_hash: hash, password_salt: salt,
           role: "member", batch_year: m.batchYear, date_of_birth: m.dateOfBirth, membership_type: m.membershipType, status: "active", metadata: m.metadata,
         };
       }))));
@@ -553,9 +575,19 @@ async function apply() {
 
     await client.query("BEGIN");
     const inserted = await insertRows(client, "users", userRows, {
-      member_id: "varchar", email: "varchar", mobile: "varchar", full_name: "varchar", password_hash: "text", password_salt: "varchar", role: "varchar",
+      member_id: "varchar", username: "varchar", email: "varchar", mobile: "varchar", full_name: "varchar", password_hash: "text", password_salt: "varchar", role: "varchar",
       batch_year: "varchar", date_of_birth: "date", membership_type: "varchar", status: "varchar", metadata: "jsonb",
     }, "ON CONFLICT DO NOTHING");
+    // Members imported before User IDs existed get theirs now, unless someone has taken it since.
+    const usernames = toImport.filter((m) => m.username).map((m) => ({ legacy_id: String(m.legacyId), username: m.username }));
+    const { rowCount: usernamesAdded } = await client.query(
+      `UPDATE users SET username = x.username, updated_at = now()
+       FROM jsonb_to_recordset($1::jsonb) AS x(legacy_id text, username varchar)
+       WHERE users.metadata->'legacy'->>'id' = x.legacy_id AND users.username IS NULL
+         AND NOT EXISTS (SELECT 1 FROM users taken WHERE taken.username = x.username)`,
+      [JSON.stringify(usernames)]
+    );
+    if (usernamesAdded) console.log(`  Added User IDs to ${usernamesAdded} members imported earlier.`);
     const { rows: imported } = await client.query("SELECT id, metadata->'legacy'->>'id' AS legacy_id FROM users WHERE metadata ? 'legacy'");
     for (const u of imported) if (byLegacyId.has(Number(u.legacy_id))) byLegacyId.get(Number(u.legacy_id)).userId ??= u.id;
     const userIdOf = (m) => m.userId ?? null;
@@ -601,7 +633,7 @@ async function apply() {
         user_id: userIdOf(m), paid_at: p.paidAt, welcome_email_sent_at: p.paidAt ?? new Date(),
       };
     });
-    await insertRows(client, "membership_applications", membershipRows, {
+    const membershipAdded = await insertRows(client, "membership_applications", membershipRows, {
       order_id: "varchar", membership_type: "varchar", title: "varchar", batch_year: "varchar", first_name: "varchar", middle_name: "varchar", last_name: "varchar",
       date_of_birth: "date", email: "varchar", country_code: "varchar", mobile: "varchar", password_hash: "varchar", password_salt: "varchar",
       address_line1: "varchar", address_line2: "varchar", address_line3: "varchar", city: "varchar", state: "varchar", zip: "varchar", country: "varchar",
@@ -614,7 +646,7 @@ async function apply() {
       pincode: c.pincode.slice(0, 20), country: c.country.slice(0, 100), wants_80g: Boolean(c.pan), pan: c.pan, address_doc_number: c.addressDocNumber,
       status: "paid", gateway_status: "Legacy", gateway_message: "Imported from the old site", gateway_response: c.gateway, paid_at: c.paidAt, thank_you_email_sent_at: c.paidAt ?? new Date(),
     }));
-    await insertRows(client, "contributions", contributionRows, {
+    const contributionsAdded = await insertRows(client, "contributions", contributionRows, {
       order_id: "varchar", user_id: "int", fund_id: "int", amount: "int", donor_name: "varchar", batch: "varchar", email: "varchar", mobile: "varchar", address: "varchar",
       city: "varchar", state: "varchar", pincode: "varchar", country: "varchar", wants_80g: "boolean", pan: "varchar", address_doc_number: "varchar", status: "varchar",
       gateway_status: "varchar", gateway_message: "varchar", gateway_response: "jsonb", paid_at: "timestamptz", thank_you_email_sent_at: "timestamptz",
@@ -626,7 +658,7 @@ async function apply() {
       teachers: b.teachers, children_under12: b.childrenUnder12, children_above12: b.childrenAbove12, line_items: b.lineItems, amount: b.amount, status: "paid",
       gateway_status: "Legacy", gateway_message: "Imported from the old site", gateway_response: b.gateway, paid_at: b.paidAt,
     }));
-    await insertRows(client, "event_pass_bookings", bookingRows, {
+    const bookingsAdded = await insertRows(client, "event_pass_bookings", bookingRows, {
       order_id: "varchar", event_name: "varchar", event_pass_id: "int", pass_id: "varchar", pass_label: "varchar", user_id: "int", member_id: "varchar", full_name: "varchar",
       email: "varchar", mobile: "varchar", spouse_name: "varchar", teachers: "int", children_under12: "int", children_above12: "int", line_items: "jsonb", amount: "int",
       status: "varchar", gateway_status: "varchar", gateway_message: "varchar", gateway_response: "jsonb", paid_at: "timestamptz",
@@ -634,7 +666,8 @@ async function apply() {
 
     await client.query(args.rollback ? "ROLLBACK" : "COMMIT");
     if (skipped.length) writeFileSync(join(args.out, "issues", "apply-skipped-payments.csv"), toCsv(skipped));
-    console.log(`\n✓ ${args.rollback ? "Test run, rolled back (nothing kept):" : "Imported"} ${inserted} members, ${membershipRows.length} membership payments, ${contributionRows.length} contributions, ${bookingRows.length} pass bookings` +
+    console.log(`\n✓ ${args.rollback ? "Test run, rolled back (nothing kept):" : "Imported"} ${inserted} new members, ${membershipAdded} membership payments, ${contributionsAdded} contributions, ${bookingsAdded} pass bookings` +
+      (inserted + membershipAdded + contributionsAdded + bookingsAdded === 0 ? " (everything was already imported)" : "") +
       (skipped.length ? ` (${skipped.length} payments skipped because their member was left out: issues/apply-skipped-payments.csv)` : "") + ".\n");
   } catch (error) {
     await client.query("ROLLBACK").catch(() => {});

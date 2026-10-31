@@ -25,6 +25,7 @@ export const DashboardPanel: React.FC<DashboardPanelProps> = ({ profile, hidden,
           <>
             <span className="mp-mini">{profile.membershipType}</span>
             <span className="mp-id">{profile.memberId}</span>
+            {profile.username && <span className="mp-mini">User ID: {profile.username}</span>}
           </>
         );
       default:

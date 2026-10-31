@@ -67,7 +67,7 @@ const normalizeMobile = (value: string) => value.replace(/[\s\-().]/g, "");
 function lockedFieldsFor(method: SignInMethod | undefined): LockedField[] {
   if (method === "email") return ["email"];
   if (method === "mobile") return ["mobile"];
-  if (method === "memberId") return [];
+  if (method === "memberId" || method === "username") return [];
   return ["email", "mobile"];
 }
 
@@ -97,6 +97,7 @@ function toProfile(user: User, signInMethod: SignInMethod | undefined): MemberPr
   return {
     id: user.id,
     memberId: user.memberId,
+    username: user.username,
     fullName: user.fullName,
     ...nameParts(user),
     email: user.email ?? "",

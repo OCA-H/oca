@@ -15,7 +15,7 @@ export function useForgotPasswordHandler() {
     setError(null);
 
     if (!memberSignInHelper.validateUser(identifier)) {
-      setError('Please enter your Member ID, Email ID, or Mobile number.');
+      setError('Please enter your Member ID, User ID, Email ID, or Mobile number.');
       return;
     }
 

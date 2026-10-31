@@ -35,8 +35,8 @@ export const memberSignInContent = {
   main: {
     title: 'OCA Member Login',
     subtitle: 'OCA Member exclusive area',
-    userLabel: 'Member ID / Email ID / Mobile',
-    userPlaceholder: 'Your member ID, email or mobile number',
+    userLabel: 'Member ID / User ID / Email ID / Mobile',
+    userPlaceholder: 'Your member ID, user ID, email or mobile number',
     passwordLabel: 'Password',
     passwordPlaceholder: 'Your password',
     forgotPasswordText: 'Forgot Password?',
@@ -57,7 +57,7 @@ export const forgotPasswordContent = {
     eyebrow: 'Account recovery',
     title: 'Back into your account in three steps',
     steps: [
-      { title: 'Tell us who you are', desc: 'Your email, member ID or the mobile number on your account.' },
+      { title: 'Tell us who you are', desc: 'Your member ID, user ID, email or the mobile number on your account.' },
       { title: 'Check your inbox', desc: 'We email a secure link to the address on your account.' },
       { title: 'Choose a new password', desc: 'The link works once and expires in 30 minutes.' },
     ],
@@ -68,8 +68,8 @@ export const forgotPasswordContent = {
   form: {
     title: 'Forgot your password?',
     subtitle: 'Enter the details you signed up with and we will email you a link to reset it.',
-    label: 'Member ID / Email ID / Mobile',
-    placeholder: 'Your email, member ID or mobile number',
+    label: 'Member ID / User ID / Email ID / Mobile',
+    placeholder: 'Your member ID, user ID, email or mobile number',
     submitText: 'Email me a reset link',
     submittingText: 'Sending…',
     backText: '← Back to sign in',

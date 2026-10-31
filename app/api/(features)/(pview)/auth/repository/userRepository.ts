@@ -98,8 +98,8 @@ export class UserRepository extends BaseRepository {
   }
 
   /**
-   * Finds user by member ID, email, or mobile number.
-   * Matches the member sign-in requirement: "Member ID / Email ID / Mobile".
+   * Finds user by member ID, User ID (username), email, or mobile number.
+   * Matches the member sign-in requirement: "Member ID / User ID / Email ID / Mobile".
    */
   async findByIdentifier(identifier: string): Promise<User | null> {
     const clean = identifier.trim();
@@ -112,6 +112,7 @@ export class UserRepository extends BaseRepository {
         or(
           eq(users.memberId, clean),
           eq(users.memberId, cleanLower),
+          eq(users.username, cleanLower),
           eq(users.email, cleanLower),
           eq(users.mobile, clean)
         )
@@ -147,6 +148,7 @@ export class UserRepository extends BaseRepository {
       .values({
         ...data,
         email: data.email?.toLowerCase().trim() || null,
+        username: data.username?.toLowerCase().trim() || null,
         memberId: data.memberId.trim(),
       })
       .returning();
