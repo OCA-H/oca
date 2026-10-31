@@ -40,7 +40,9 @@ const ALL_FIELDS = FIELD_GROUPS.flatMap((group) => group.fields);
 const rupees = (value: string) => adminHelper.formatRupees(Number(value));
 
 // The pass form has no images.
-const noUpload = () => Promise.reject(new Error('No uploads here.'));
+const noUpload = (): string => {
+  throw new Error('No uploads here.');
+};
 
 const PassItem: React.FC<{ pass: AdminEventPass; onSaved: (pass: AdminEventPass) => void }> = ({ pass, onSaved }) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -102,7 +104,7 @@ const PassItem: React.FC<{ pass: AdminEventPass; onSaved: (pass: AdminEventPass)
                       name={`pass-${pass.id}-${field.key}`}
                       value={editor.form[field.key as keyof typeof editor.form]}
                       onChange={(value) => editor.setField(field.key as keyof typeof editor.form, String(value))}
-                      onUpload={noUpload}
+                      onChoose={noUpload}
                       error={editor.fieldErrors[field.key]}
                     />
                   ))}

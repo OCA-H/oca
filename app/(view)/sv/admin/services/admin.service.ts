@@ -199,4 +199,9 @@ export const adminService = {
     const body = { section: key, kind, name: upload.name };
     return (await adminRequest<{ data: { url: string } }>("/api/sv/admin/media/confirm", { method: "POST", body })).data.url;
   },
+
+  /** Deletes files uploaded for a save that then failed. The server keeps any a saved section uses. */
+  discardMedia: async (key: SiteSectionKey, urls: string[]): Promise<void> => {
+    await adminRequest("/api/sv/admin/media", { method: "DELETE", body: { section: key, urls } });
+  },
 };

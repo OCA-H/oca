@@ -93,7 +93,7 @@ export const SectionEditorPanel: React.FC<SectionEditorPanelProps> = ({ spec, is
                       name={field.key}
                       value={form[field.key] as string | number | undefined}
                       onChange={(value) => editor.setField(field.key, value)}
-                      onUpload={editor.uploadMedia}
+                      onChoose={editor.chooseMedia}
                       error={fieldErrors[field.key]}
                     />
                   ))}
@@ -108,7 +108,7 @@ export const SectionEditorPanel: React.FC<SectionEditorPanelProps> = ({ spec, is
             <div className="mp-actions ad-actions">
               <button className={`btn btn-primary mp-save${editor.isSaving ? ' is-saving' : ''}`} type="submit" disabled={editor.isSaving || !editor.isDirty}>
                 <span className="mp-spinner" aria-hidden="true" />
-                <span>{editor.isSaving ? text.saving : text.save}</span>
+                <span>{editor.isUploading ? text.uploading : editor.isSaving ? text.saving : text.save}</span>
               </button>
               <button className="cf-reset" type="button" onClick={editor.openDiscard} disabled={editor.isSaving || !editor.isDirty}>
                 {text.discard}

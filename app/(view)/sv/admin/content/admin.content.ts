@@ -189,26 +189,25 @@ export const adminContent = {
     loadError: "We could not load this section.",
     retry: "Try again",
     unsaved: "Unsaved changes",
+    uploading: "Uploading files…",
   },
 
   image: {
     upload: "Upload image",
     replace: "Replace image",
-    uploading: "Uploading…",
+    pending: "New image: uploads when you save",
     types: /^image\/(png|jpe?g|webp)$/i,
     accept: "image/png,image/jpeg,image/webp",
-    // Matches the server's limit (SITE_IMAGE_RULES); checked here first to save a wasted upload.
+    // Matches the server's limit (SITE_IMAGE_RULES); checked when chosen, not first at save.
     maxBytes: 10 * 1024 * 1024,
     badType: "Please choose a JPG, PNG or WebP image.",
     tooBig: "That image is over 10 MB. Please choose a smaller one.",
-    failed: "We could not upload that image. Please try again.",
     none: "No image",
   },
 
   photos: {
     add: "Add photos",
     addNote: "Choose or drop several at once",
-    uploading: (count: number) => `Uploading ${count} photo${count === 1 ? "" : "s"}…`,
     cover: "Cover",
     replace: "Replace photo",
     moveEarlier: "Move earlier",
@@ -221,14 +220,13 @@ export const adminContent = {
   video: {
     upload: "Upload video",
     replace: "Replace video",
-    uploading: "Uploading…",
+    pending: "New video: uploads when you save.",
     types: /^video\/(mp4|quicktime|webm)$/i,
     accept: "video/mp4,video/quicktime,video/webm",
-    // Matches the server's limit (SITE_VIDEO_RULES); checked here first to save a wasted upload.
+    // Matches the server's limit (SITE_VIDEO_RULES); checked when chosen, not first at save.
     maxBytes: 20 * 1024 * 1024,
     badType: "Please choose an MP4, MOV or WebM video.",
     tooBig: "That video is over 20 MB. Please choose a shorter or smaller one.",
-    failed: "We could not upload that video. Please try again.",
     none: "No video yet",
   },
 

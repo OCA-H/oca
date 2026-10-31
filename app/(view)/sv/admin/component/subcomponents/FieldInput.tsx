@@ -14,8 +14,9 @@ interface FieldInputProps {
   name: string;
   value: string | number | undefined;
   onChange: (value: string | number) => void;
-  onUpload: (file: File, kind?: MediaKind) => Promise<string>;
-  /** Video fields: told how long a newly uploaded video runs, e.g. "2:14". */
+  /** Image and video fields: holds a chosen file until the section is saved; the address to show it by comes back. */
+  onChoose: (file: File, kind?: MediaKind) => string;
+  /** Video fields: told how long a newly chosen video runs, e.g. "2:14". */
   onVideoLength?: (length: string) => void;
   error?: string;
   /** Spans both columns of the form grid; text areas and images always do. */
@@ -23,7 +24,7 @@ interface FieldInputProps {
 }
 
 /** One field of a section, drawn from its spec. */
-export const FieldInput: React.FC<FieldInputProps> = ({ field, name, value, onChange, onUpload, onVideoLength, error, wide: forceWide }) => {
+export const FieldInput: React.FC<FieldInputProps> = ({ field, name, value, onChange, onChoose, onVideoLength, error, wide: forceWide }) => {
   const id = `ad-${name.replace(/\./g, '-')}`;
   const hintId = `${id}-hint`;
   const text = value === undefined ? '' : String(value);
@@ -70,11 +71,11 @@ export const FieldInput: React.FC<FieldInputProps> = ({ field, name, value, onCh
       );
       break;
     case 'image':
-      input = <ImageField id={id} value={text} onChange={onChange} onUpload={onUpload} describedBy={described} invalid={Boolean(error)} />;
+      input = <ImageField id={id} value={text} onChange={onChange} onChoose={onChoose} describedBy={described} invalid={Boolean(error)} />;
       break;
     case 'video':
       input = (
-        <VideoField id={id} value={text} onChange={onChange} onUpload={onUpload} onLength={onVideoLength} describedBy={described} invalid={Boolean(error)} />
+        <VideoField id={id} value={text} onChange={onChange} onChoose={onChoose} onLength={onVideoLength} describedBy={described} invalid={Boolean(error)} />
       );
       break;
     default:

@@ -19,6 +19,23 @@ const MEDIA_URL = "/api/site/media";
 const SAFE_SEGMENT = /^[a-z0-9][a-z0-9._-]{0,99}$/i;
 /** A name startMediaUpload gives: 24 hex characters and an extension. */
 const UPLOAD_NAME = /^[0-9a-f]{24}\.[a-z0-9]{2,5}$/;
+/**
+ * How long an upload no save uses is kept before a save may delete it: longer than an upload can
+ * take (its signed address lasts two hours), so a save never deletes another admin's upload in progress.
+ */
+const UNSAVED_UPLOAD_GRACE_MS = 3 * 60 * 60 * 1000;
+
+/** The uploaded files `data` uses, as paths under site/ ("home/hangout/<name>"), found at any depth. */
+function mediaPaths(data: unknown, found = new Set<string>()): Set<string> {
+  if (typeof data === "string") {
+    if (data.startsWith(`${MEDIA_URL}/`)) found.add(data.slice(MEDIA_URL.length + 1));
+  } else if (Array.isArray(data)) {
+    for (const value of data) mediaPaths(value, found);
+  } else if (data && typeof data === "object") {
+    for (const value of Object.values(data)) mediaPaths(value, found);
+  }
+  return found;
+}
 
 export interface SectionContent {
   key: SiteSectionKey;
@@ -149,9 +166,12 @@ export class SiteContentService {
     const { data, errors } = validateSection(spec, payload);
     if (Object.keys(errors).length > 0) throw HttpError.badRequest("Some details need fixing.", errors);
 
+    const previous = await this.repository.findByKey(spec.key);
     const row = await this.repository.save(spec.key, data, userId);
     // expire: 0, so the next visit gets the new content instead of one more stale copy.
     revalidateTag(SITE_CONTENT_TAG, { expire: 0 });
+    // The save stands even if storage cannot be tidied now; the next save tries again.
+    await this.pruneMedia(spec.key, previous?.data).catch((error) => console.error(`Could not prune media for "${spec.key}":`, error));
     return { key: spec.key, data: row.data, updatedAt: row.updatedAt.toISOString(), isDefault: false };
   }
 
@@ -159,8 +179,8 @@ export class SiteContentService {
    * Starts an upload of an image or video for a section: picks a new random name for it and returns
    * an address the browser sends the file to directly, since files this big cannot pass through
    * our own API on Vercel. Names are never reused, so the file's address can be cached for good.
-   * Replaced files are kept: a page cached elsewhere may still show them for a while.
-   * The upload counts only once finishMediaUpload has checked it.
+   * The upload counts only once finishMediaUpload has checked it, and stays only once a save
+   * uses it: saving deletes the section's files nothing uses any more (see pruneMedia).
    */
   async startMediaUpload(key: string, kind: FileKind): Promise<{ uploadUrl: string; name: string; contentType: string }> {
     const folder = this.mediaFolder(key);
@@ -195,6 +215,46 @@ export class SiteContentService {
       throw error;
     }
     return { url: `${MEDIA_URL}/${folder}/${name}` };
+  }
+
+  /**
+   * Deletes files uploaded for a save that then failed, so they are not left behind. Only files of
+   * this section's that no saved section uses are deleted; anything else in `urls` is ignored.
+   */
+  async discardMedia(key: string, urls: string[]): Promise<void> {
+    const folder = this.mediaFolder(key);
+    const names = urls.flatMap((url) => {
+      const name = url.startsWith(`${MEDIA_URL}/${folder}/`) ? url.slice(`${MEDIA_URL}/${folder}/`.length) : "";
+      return UPLOAD_NAME.test(name) ? [`${folder}/${name}`] : [];
+    });
+    if (names.length === 0) return;
+    const used = await this.usedMedia();
+    await storage.remove(names.filter((name) => !used.has(name)).map((name) => `${MEDIA_FOLDER}/${name}`));
+  }
+
+  /**
+   * After a save, deletes the section's uploaded files that no saved section uses any more: the
+   * ones its previous content used (replaced or removed) at once, and any others (uploads never
+   * saved, e.g. a tab closed mid-save) once they are old enough that no upload can still be
+   * waiting for its save.
+   */
+  private async pruneMedia(key: string, previous: Record<string, unknown> | undefined): Promise<void> {
+    const folder = this.mediaFolder(key);
+    const used = await this.usedMedia();
+    const replaced = previous ? mediaPaths(previous) : new Set<string>();
+    const cutoff = Date.now() - UNSAVED_UPLOAD_GRACE_MS;
+    const unused = (await storage.listFiles(`${MEDIA_FOLDER}/${folder}`)).filter(({ name, createdAt }) => {
+      const path = `${folder}/${name}`;
+      if (!UPLOAD_NAME.test(name) || used.has(path)) return false;
+      return replaced.has(path) || (createdAt !== null && createdAt.getTime() < cutoff);
+    });
+    await storage.remove(unused.map(({ name }) => `${MEDIA_FOLDER}/${folder}/${name}`));
+  }
+
+  /** Every uploaded file any saved section uses, as "home/hangout/<name>". Across sections, in case one links another's file. */
+  private async usedMedia(): Promise<Set<string>> {
+    const rows = await this.repository.findByKeys(SECTION_SPECS.map((spec) => spec.key));
+    return new Set(rows.flatMap((row) => [...mediaPaths(row.data)]));
   }
 
   /** Where a section's uploads live under site/, e.g. "home/hangout" for home.hangout. */

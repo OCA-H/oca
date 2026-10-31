@@ -164,6 +164,11 @@ export class FileStorage {
 
   /** Names of the files directly inside `folder` (no trailing slash). */
   async list(folder: string): Promise<string[]> {
+    return (await this.listFiles(folder)).map((file) => file.name);
+  }
+
+  /** The files directly inside `folder` (no trailing slash), with when each was stored. */
+  async listFiles(folder: string): Promise<{ name: string; createdAt: Date | null }[]> {
     const key = this.key(folder);
     await this.ensureBucket();
     const res = await this.request(`/object/list/${encodeURIComponent(this.bucket)}`, {
@@ -172,9 +177,11 @@ export class FileStorage {
       body: JSON.stringify({ prefix: `${key}/`, limit: 1000, offset: 0 }),
     });
     if (!res.ok) await this.fail(`list "${key}"`, res);
-    const items = (await res.json()) as Array<{ name: string; id: string | null }>;
+    const items = (await res.json()) as Array<{ name: string; id: string | null; created_at?: string | null }>;
     // Sub-folders come back with a null id.
-    return items.filter((item) => item.id !== null).map((item) => item.name);
+    return items
+      .filter((item) => item.id !== null)
+      .map((item) => ({ name: item.name, createdAt: item.created_at ? new Date(item.created_at) : null }));
   }
 
   /** Deletes the files at these paths; missing ones are ignored. */

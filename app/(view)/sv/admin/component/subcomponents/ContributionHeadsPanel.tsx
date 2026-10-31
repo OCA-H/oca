@@ -38,7 +38,9 @@ const AMOUNT_FIELDS: FormField[] = [
 const rupees = (value: string) => adminHelper.formatRupees(Number(value));
 
 // The form has no images.
-const noUpload = () => Promise.reject(new Error('No uploads here.'));
+const noUpload = (): string => {
+  throw new Error('No uploads here.');
+};
 
 interface FundItemProps {
   fund: AdminFund;
@@ -66,7 +68,7 @@ const FundItem: React.FC<FundItemProps> = ({ fund, onSaved, onDeleted }) => {
       name={`fund-${fund.id}-${field.key}`}
       value={editor.form[field.key as keyof typeof editor.form]}
       onChange={(value) => editor.setField(field.key as keyof typeof editor.form, String(value))}
-      onUpload={noUpload}
+      onChoose={noUpload}
       error={editor.fieldErrors[field.key]}
     />
   );
@@ -223,7 +225,7 @@ const NewFundItem: React.FC<{ editor: NewFundEditor }> = ({ editor }) => {
                     name={`newfund-${field.key}`}
                     value={form[field.key as keyof typeof form]}
                     onChange={(value) => editor.setField(field.key as keyof typeof form, String(value))}
-                    onUpload={noUpload}
+                    onChoose={noUpload}
                     error={editor.fieldErrors[field.key]}
                   />
                 ))}

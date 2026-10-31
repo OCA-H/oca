@@ -106,8 +106,8 @@ export const ListEditor: React.FC<ListEditorProps> = ({ list, path, items, edito
                                 name={`${prefix}${field.key}`}
                                 value={item[field.key] as string | number | undefined}
                                 onChange={(value) => editor.setItemField(path, index, field.key, value)}
-                                onUpload={editor.uploadMedia}
-                                // A newly uploaded video fills in the entry's length, when it has one.
+                                onChoose={editor.chooseMedia}
+                                // A newly chosen video fills in the entry's length, when it has one.
                                 onVideoLength={hasLength ? (length) => editor.setItemField(path, index, 'duration', length) : undefined}
                                 error={fieldErrors[`${prefix}${field.key}`]}
                               />

@@ -74,6 +74,20 @@ export class AdminController extends BaseController {
     })
   );
 
+  /**
+   * DELETE /api/sv/admin/media (JSON: section, urls): deletes files uploaded for a save that then
+   * failed. Files any saved section uses are kept.
+   */
+  discardMedia = withAdminAuth((request) =>
+    this.handle(async () => {
+      const { section, urls } = await this.readJson(request);
+      if (typeof section !== "string" || !section) throw HttpError.badRequest("Say which section the files are for.");
+      if (!Array.isArray(urls) || urls.length > 100) throw HttpError.badRequest("Say which files to delete.");
+      await this.content.discardMedia(section, urls.filter((url): url is string => typeof url === "string"));
+      return this.ok({});
+    })
+  );
+
   private mediaRequest(body: Record<string, unknown>) {
     const { section, kind } = body;
     if (typeof section !== "string" || !section) throw HttpError.badRequest("Say which section the file is for.");

@@ -9,8 +9,9 @@ interface VideoFieldProps {
   id: string;
   value: string;
   onChange: (value: string) => void;
-  onUpload: (file: File, kind?: MediaKind) => Promise<string>;
-  /** Told how long a newly uploaded video runs, e.g. "2:14", so its length can be filled in. */
+  /** Holds the chosen file until the section is saved; the address to show it by comes back. */
+  onChoose: (file: File, kind?: MediaKind) => string;
+  /** Told how long a newly chosen video runs, e.g. "2:14", so its length can be filled in. */
   onLength?: (length: string) => void;
   describedBy?: string;
   invalid?: boolean;
@@ -42,15 +43,15 @@ const readLength = (file: File) =>
 
 /**
  * A preview of the video and an upload button. Videos can only be uploaded, not linked, so the
- * server can hold every one to its size limit.
+ * server can hold every one to its size limit. A chosen video is only previewed here; it is
+ * uploaded when the section is saved.
  */
-export const VideoField: React.FC<VideoFieldProps> = ({ id, value, onChange, onUpload, onLength, describedBy, invalid }) => {
+export const VideoField: React.FC<VideoFieldProps> = ({ id, value, onChange, onChoose, onLength, describedBy, invalid }) => {
   const { video } = adminContent;
   const fileInput = useRef<HTMLInputElement>(null);
-  const [isUploading, setIsUploading] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
 
-  const handleFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFile = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     e.target.value = '';
     if (!file) return;
@@ -58,32 +59,19 @@ export const VideoField: React.FC<VideoFieldProps> = ({ id, value, onChange, onU
     if (file.size > video.maxBytes) return setMessage(video.tooBig);
 
     setMessage(null);
-    setIsUploading(true);
-    try {
-      const [url, length] = await Promise.all([onUpload(file, 'video'), readLength(file)]);
-      onChange(url);
-      if (length) onLength?.(length);
-    } catch (err) {
-      setMessage(err instanceof Error ? err.message : video.failed);
-    } finally {
-      setIsUploading(false);
-    }
+    onChange(onChoose(file, 'video'));
+    readLength(file).then((length) => length && onLength?.(length));
   };
 
   return (
     <div className={`ad-image${invalid ? ' is-invalid' : ''}`}>
-      <div className={`ad-image-preview${isUploading ? ' is-uploading' : ''}`} aria-busy={isUploading}>
+      <div className="ad-image-preview">
         {value ? (
           <video key={value} src={value} controls preload="metadata" playsInline />
         ) : (
           <span className="ad-image-empty">
             <AdminIcon name="upload" />
             {video.none}
-          </span>
-        )}
-        {isUploading && (
-          <span className="ad-image-busy" aria-hidden="true">
-            <span className="mp-photo-spin" />
           </span>
         )}
       </div>
@@ -93,12 +81,12 @@ export const VideoField: React.FC<VideoFieldProps> = ({ id, value, onChange, onU
           className="mp-photo-btn ad-image-btn"
           type="button"
           onClick={() => fileInput.current?.click()}
-          disabled={isUploading}
           aria-describedby={describedBy}
         >
           <AdminIcon name="upload" />
-          {isUploading ? video.uploading : value ? video.replace : video.upload}
+          {value ? video.replace : video.upload}
         </button>
+        {value.startsWith('blob:') && <p className="mp-hint">{video.pending}</p>}
         <input ref={fileInput} type="file" accept={video.accept} hidden onChange={handleFile} />
         {message && (
           <p className="mp-hint mp-hint--bad" role="alert">

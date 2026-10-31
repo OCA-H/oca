@@ -18,6 +18,7 @@ interface PhotoGridEditorProps {
 /**
  * A list of photos as a grid of tiles: add several at once (or drop them on the add tile), reorder,
  * replace or remove each, and fill in its short text fields under it. The first photo is the cover.
+ * Chosen photos are only previewed here; they are uploaded when the section is saved.
  */
 export const PhotoGridEditor: React.FC<PhotoGridEditorProps> = ({ list, path, items, editor }) => {
   const { image: imageText, photos: text, editor: editorText } = adminContent;
@@ -27,15 +28,13 @@ export const PhotoGridEditor: React.FC<PhotoGridEditorProps> = ({ list, path, it
   const addInput = useRef<HTMLInputElement>(null);
   const replaceInput = useRef<HTMLInputElement>(null);
   const replacing = useRef<number | null>(null);
-  const [uploading, setUploading] = useState(0);
-  const [replacingIndex, setReplacingIndex] = useState<number | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const [isDragging, setIsDragging] = useState(false);
 
   const room = list.max - items.length;
   const listError = fieldErrors[path];
 
-  /** Splits files into ones to upload and a note about any left out (wrong type, too big). */
+  /** Splits files into ones to keep and a note about any left out (wrong type, too big). */
   const screen = (files: File[]) => {
     const wrongType = files.filter((file) => !imageText.types.test(file.type));
     const tooBig = files.filter((file) => imageText.types.test(file.type) && file.size > imageText.maxBytes);
@@ -46,40 +45,22 @@ export const PhotoGridEditor: React.FC<PhotoGridEditorProps> = ({ list, path, it
     return { ok: files.filter((file) => !wrongType.includes(file) && !tooBig.includes(file)), notes };
   };
 
-  const addFiles = async (picked: File[]) => {
-    if (picked.length === 0 || uploading > 0) return;
+  const addFiles = (picked: File[]) => {
+    if (picked.length === 0) return;
     const { ok, notes } = screen(picked);
     if (ok.length > room) notes.push(text.tooMany(list.max));
     const files = ok.slice(0, Math.max(room, 0));
     setMessage(notes.length > 0 ? notes.join(' ') : null);
     if (files.length === 0) return;
-
-    setUploading(files.length);
-    // Uploaded side by side; the photos keep the order they were chosen in.
-    const results = await Promise.allSettled(files.map((file) => editor.uploadMedia(file)));
-    setUploading(0);
-    const urls = results.flatMap((result) => (result.status === 'fulfilled' ? [result.value] : []));
-    if (urls.length > 0) editor.addItems(list, path, urls.map((url) => ({ [imageKey]: url })));
-    const failed = results.find((result): result is PromiseRejectedResult => result.status === 'rejected');
-    if (failed) {
-      const reason = failed.reason instanceof Error ? failed.reason.message : imageText.failed;
-      setMessage([...notes, text.skipped(results.length - urls.length, reason)].join(' '));
-    }
+    editor.addItems(list, path, files.map((file) => ({ [imageKey]: editor.chooseMedia(file) })));
   };
 
-  const replaceFile = async (file: File | undefined, index: number) => {
+  const replaceFile = (file: File | undefined, index: number) => {
     if (!file) return;
     const { ok, notes } = screen([file]);
     if (ok.length === 0) return setMessage(notes.join(' '));
     setMessage(null);
-    setReplacingIndex(index);
-    try {
-      editor.setItemField(path, index, imageKey, await editor.uploadMedia(file));
-    } catch (err) {
-      setMessage(err instanceof Error ? err.message : imageText.failed);
-    } finally {
-      setReplacingIndex(null);
-    }
+    editor.setItemField(path, index, imageKey, editor.chooseMedia(file));
   };
 
   const onDrop = (e: React.DragEvent) => {
@@ -120,7 +101,6 @@ export const PhotoGridEditor: React.FC<PhotoGridEditorProps> = ({ list, path, it
                   type="button"
                   className="ad-photo-replace"
                   aria-label={`${text.replace}: ${label}`}
-                  disabled={replacingIndex !== null}
                   onClick={() => {
                     replacing.current = index;
                     replaceInput.current?.click();
@@ -140,11 +120,6 @@ export const PhotoGridEditor: React.FC<PhotoGridEditorProps> = ({ list, path, it
                     <AdminIcon name="trash" />
                   </button>
                 </div>
-                {replacingIndex === index && (
-                  <span className="ad-image-busy" aria-hidden="true">
-                    <span className="mp-photo-spin" />
-                  </span>
-                )}
               </div>
               {imageError && <p className="mp-hint mp-hint--bad">{imageError}</p>}
               {textFields.map((field) => {
@@ -171,23 +146,12 @@ export const PhotoGridEditor: React.FC<PhotoGridEditorProps> = ({ list, path, it
           );
         })}
 
-        {Array.from({ length: uploading }, (_, i) => (
-          <li key={`uploading-${i}`} className="ad-photo" aria-hidden="true">
-            <div className="ad-photo-media">
-              <span className="ad-image-busy">
-                <span className="mp-photo-spin" />
-              </span>
-            </div>
-          </li>
-        ))}
-
-        {room > uploading && (
+        {room > 0 && (
           <li className="ad-photo">
             <button
               type="button"
               className={`ad-photo-add${isDragging ? ' is-dragging' : ''}`}
               onClick={() => addInput.current?.click()}
-              disabled={uploading > 0}
               onDragOver={(e) => {
                 e.preventDefault();
                 setIsDragging(true);
@@ -195,14 +159,14 @@ export const PhotoGridEditor: React.FC<PhotoGridEditorProps> = ({ list, path, it
               onDragLeave={() => setIsDragging(false)}
               onDrop={onDrop}
             >
-              <AdminIcon name={uploading > 0 ? 'upload' : 'plus'} />
-              {uploading > 0 ? text.uploading(uploading) : text.add}
+              <AdminIcon name="plus" />
+              {text.add}
               <small>{text.addNote}</small>
             </button>
           </li>
         )}
       </ol>
-      {items.length === 0 && uploading === 0 && !listError && <p className="mp-hint">{text.empty}</p>}
+      {items.length === 0 && !listError && <p className="mp-hint">{text.empty}</p>}
 
       <input
         ref={addInput}
