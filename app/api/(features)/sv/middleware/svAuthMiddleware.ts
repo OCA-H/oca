@@ -1,4 +1,5 @@
 import "server-only";
+import { unstable_rethrow } from "next/navigation";
 import { HttpError } from "@/app/api/core/httpError";
 import {
   verifySessionToken,
@@ -100,6 +101,7 @@ export function withSvAuth<TContext = unknown>(
       const session = await verifySvAuth(request, options);
       return await handler(request, session, context);
     } catch (error) {
+      unstable_rethrow(error);
       if (error instanceof HttpError) {
         return Response.json(
           { ok: false, error: error.message, ...(error.fields && { fields: error.fields }) },
@@ -127,6 +129,7 @@ export async function svMiddleware(
     const session = await verifySvAuth(request, options);
     return await next(session);
   } catch (error) {
+    unstable_rethrow(error);
     if (error instanceof HttpError) {
       return Response.json(
         { ok: false, error: error.message, ...(error.fields && { fields: error.fields }) },

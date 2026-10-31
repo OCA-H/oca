@@ -1,4 +1,5 @@
 import "server-only";
+import { unstable_rethrow } from "next/navigation";
 import { HttpError, type FieldErrors } from "./httpError";
 
 // Responses use the same result shape: { ok: true, ... } or
@@ -10,6 +11,7 @@ export abstract class BaseController {
     try {
       return await action();
     } catch (error) {
+      unstable_rethrow(error);
       if (error instanceof HttpError) return this.fail(error.status, error.message, error.fields);
       console.error(error);
       return this.fail(500, "Something went wrong on our side. Please try again in a minute.");
