@@ -8,7 +8,9 @@ import { birthdayWishGmailUrl } from '../helper';
 export function useBirthdaysHandler() {
   const { user } = useAuth();
 
-  const wishHref = (member: BirthdayMember): string => birthdayWishGmailUrl(member.email, member.name, user?.fullName);
+  // Null for members with no email on file: there is nowhere to send a wish.
+  const wishHref = (member: BirthdayMember): string | null =>
+    member.email ? birthdayWishGmailUrl(member.email, member.name, user?.fullName) : null;
 
   return { wishHref };
 }

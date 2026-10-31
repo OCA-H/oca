@@ -4,7 +4,7 @@ export type SignInMethod = "memberId" | "email" | "mobile";
 export interface SessionUser {
   id: number;
   memberId: string;
-  email: string;
+  email: string | null;
   fullName: string;
   role: string;
   batchYear?: string | null;

@@ -115,7 +115,7 @@ export async function proxy(request: NextRequest) {
   for (const name of ["x-user-id", "x-user-email", "x-user-role", "x-user-name"]) requestHeaders.delete(name);
   if (session) {
     requestHeaders.set("x-user-id", String(session.user.id));
-    requestHeaders.set("x-user-email", session.user.email);
+    if (session.user.email) requestHeaders.set("x-user-email", session.user.email);
     requestHeaders.set("x-user-role", session.user.role);
     requestHeaders.set("x-user-name", encodeURIComponent(session.user.fullName));
   }

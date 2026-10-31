@@ -137,6 +137,7 @@ export const profileContent = {
       email: "You signed in with this email, so it can’t be changed here. Write to the Secretariat if it needs correcting.",
       mobile: "You signed in with this number, so it can’t be changed here. Write to the Secretariat if it needs correcting.",
     },
+    emailHint: "Optional, but needed for receipts and password reset links.",
     mobileHint: "Choose your country, then enter the number without its country code.",
     dobHint: "So batchmates can wish you on the day.",
     titles: MEMBERSHIP_CONTENT.titles,

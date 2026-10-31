@@ -62,7 +62,7 @@ export function useMemberSignInHandler() {
     setFeedback(null);
 
     if (!memberSignInHelper.validateUser(user)) {
-      setFeedback({ type: 'error', text: 'Please enter your User ID, Email ID, or Mobile number.' });
+      setFeedback({ type: 'error', text: 'Please enter your Member ID, Email ID, or Mobile number.' });
       return;
     }
 

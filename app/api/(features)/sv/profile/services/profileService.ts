@@ -99,7 +99,7 @@ function toProfile(user: User, signInMethod: SignInMethod | undefined): MemberPr
     memberId: user.memberId,
     fullName: user.fullName,
     ...nameParts(user),
-    email: user.email,
+    email: user.email ?? "",
     mobile: user.mobile ?? "",
     batchYear: user.batchYear,
     dateOfBirth: user.dateOfBirth,
@@ -170,7 +170,7 @@ export class ProfileService {
       firstName: text(payload.firstName),
       middleName: text(payload.middleName),
       lastName: text(payload.lastName),
-      email: locked.includes("email") ? user.email : text(payload.email).toLowerCase(),
+      email: locked.includes("email") ? (user.email ?? "") : text(payload.email).toLowerCase(),
       mobile: locked.includes("mobile") ? (user.mobile ?? "") : normalizeMobile(text(payload.mobile)),
       batchYear: text(payload.batchYear),
       dateOfBirth: text(payload.dateOfBirth),
@@ -193,7 +193,8 @@ export class ProfileService {
     }
     if (!TITLES.includes(data.title) && data.title) fields.title = "Choose a title from the list.";
     if (!data.firstName) fields.firstName = "First name is required.";
-    if (!EMAIL_PATTERN.test(data.email)) fields.email = "Enter a valid email address.";
+    // Optional, as some members from the old site have none; once given it must be valid.
+    if (data.email && !EMAIL_PATTERN.test(data.email)) fields.email = "Enter a valid email address.";
     if (!data.mobile) fields.mobile = "Mobile is required.";
     else if (!locked.includes("mobile") && !MOBILE_PATTERN.test(data.mobile)) {
       fields.mobile = "Enter a valid mobile number, with the country code if outside India.";
@@ -235,7 +236,7 @@ export class ProfileService {
     try {
       const updated = await this.users.update(userId, {
         fullName: fullName.slice(0, 150),
-        email: data.email,
+        email: data.email || null,
         mobile: data.mobile,
         batchYear: data.batchYear || null,
         dateOfBirth: data.dateOfBirth || null,
@@ -314,7 +315,8 @@ export class ProfileService {
     if (Object.keys(fields).length > 0) throw HttpError.badRequest("Some details need fixing.", fields);
 
     const user = await this.findUser(userId);
-    const from = `${user.fullName} (${user.memberId}${user.batchYear ? `, Batch of ${user.batchYear}` : ""}) <${user.email}>`;
+    const reach = user.email ? `<${user.email}>` : user.mobile ? `mobile ${user.mobile}` : "no email or mobile on file";
+    const from = `${user.fullName} (${user.memberId}${user.batchYear ? `, Batch of ${user.batchYear}` : ""}) ${reach}`;
     const body = `Suggestion from ${from}\n\nSubject: ${subject}\n\n${message}`;
     const escape = (value: string) =>
       value.replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]!);

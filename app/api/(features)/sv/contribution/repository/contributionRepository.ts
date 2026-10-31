@@ -1,5 +1,5 @@
 import "server-only";
-import { and, asc, count, eq, isNull, sum } from "drizzle-orm";
+import { and, asc, count, countDistinct, eq, isNull, sum } from "drizzle-orm";
 import { BaseRepository } from "@/app/api/core/baseRepository";
 import {
   contributionDocuments,
@@ -7,6 +7,7 @@ import {
   contributions,
   type ContributionFund,
   type ContributionWithFund,
+  type FundProgress,
   type NewContribution,
   type NewContributionFund,
   type NewContributionDocument,
@@ -68,6 +69,22 @@ export class ContributionRepository extends BaseRepository {
       // Postgres returns sums as text.
       return { fundId: row.fundId, contributions: row.n, paid: p?.n ?? 0, raised: Number(p?.raised ?? 0) };
     });
+  }
+
+  /** Paid money and distinct paying members per fund, for the home page's progress bars. Funds with none are left out. */
+  async paidTotalsByFund(): Promise<FundProgress[]> {
+    const rows = await this.db
+      .select({
+        code: contributionFunds.code,
+        label: contributionFunds.label,
+        raised: sum(contributions.amount),
+        donors: countDistinct(contributions.userId),
+      })
+      .from(contributionFunds)
+      .innerJoin(contributions, and(eq(contributions.fundId, contributionFunds.id), eq(contributions.status, "paid")))
+      .groupBy(contributionFunds.id);
+    // Postgres returns sums as text.
+    return rows.map((row) => ({ ...row, raised: Number(row.raised ?? 0) }));
   }
 
   async findFundByCode(code: string): Promise<ContributionFund | null> {

@@ -37,7 +37,7 @@ export class UserController extends BaseController {
       const password = ((body.pass as string) || (body.password as string) || "").trim();
 
       if (!userIdentifier) {
-        throw HttpError.badRequest("Please enter your User ID, Email ID, or Mobile number.");
+        throw HttpError.badRequest("Please enter your Member ID, Email ID, or Mobile number.");
       }
       if (!password) {
         throw HttpError.badRequest("Please enter your password.");
@@ -121,8 +121,8 @@ export class UserController extends BaseController {
       const body = await this.readJson(request);
       const identifier = typeof body.identifier === "string" ? body.identifier.trim() : "";
       if (!identifier) {
-        throw HttpError.badRequest("Please enter your Email ID, User ID, or Mobile number.", {
-          identifier: "Please enter your Email ID, User ID, or Mobile number.",
+        throw HttpError.badRequest("Please enter your Member ID, Email ID, or Mobile number.", {
+          identifier: "Please enter your Member ID, Email ID, or Mobile number.",
         });
       }
 

@@ -190,6 +190,11 @@ export interface HomeCause {
   badge: string;
   title: string;
   desc: string;
+  /** Code of the fund whose paid contributions fill the bar; empty matches the fund labelled like the title. */
+  fund: string;
+  /** Rupees given outside the website (cheques, transfers), added to the online total. */
+  offlineRaised: number;
+  /** Typed-in figures, shown only when no fund matches. */
   progress: number;
   raised: string;
   goal: string;
@@ -576,9 +581,25 @@ export const SECTION_SPECS: SectionSpec[] = [
           ...image(),
           { key: "title", label: "Title", type: "text", max: 120, required: true },
           { key: "desc", label: "Note", type: "textarea", max: 300, hint: "Shown on muted causes." },
-          { key: "progress", label: "Progress (%)", type: "number", min: 0, max: 100, hint: "Featured causes only." },
-          { key: "raised", label: "Raised", type: "text", max: 40, placeholder: "₹15,68,928" },
+          {
+            key: "fund",
+            label: "Fund code",
+            type: "text",
+            max: 30,
+            placeholder: "tbf",
+            hint: "Featured causes only. The bar adds up paid contributions to this fund (Contribution heads). Leave empty to use the fund named like the title.",
+          },
+          {
+            key: "offlineRaised",
+            label: "Raised offline (₹)",
+            type: "number",
+            min: 0,
+            integer: true,
+            hint: "Cheques and bank transfers not paid on the website; added to the online total.",
+          },
           { key: "goal", label: "Goal", type: "text", max: 40, placeholder: "₹2,00,00,000" },
+          { key: "progress", label: "Progress (%)", type: "number", min: 0, max: 100, hint: "Only used when no fund matches." },
+          { key: "raised", label: "Raised", type: "text", max: 40, placeholder: "₹15,68,928", hint: "Only used when no fund matches." },
           { key: "ctaHref", label: "Contribute link", type: "link", hint: LINK_HINT },
           { key: "href", label: "About link", type: "link", hint: `${LINK_HINT} Leave empty to hide it.` },
         ],

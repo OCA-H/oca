@@ -30,7 +30,7 @@ export function toSafeUser(user: User): SafeUser {
 /** Works out which of the member's identifiers matched what they typed at sign-in. */
 export function signInMethodFor(user: User, identifier: string): SignInMethod {
   const clean = identifier.trim();
-  if (clean.toLowerCase() === user.email.toLowerCase()) return "email";
+  if (user.email && clean.toLowerCase() === user.email.toLowerCase()) return "email";
   if (user.mobile && clean === user.mobile) return "mobile";
   return "memberId";
 }
@@ -62,7 +62,7 @@ export class UserService {
   async signIn(identifier: string, pass: string): Promise<{ user: SafeUser; token: string }> {
     const trimmedId = identifier?.trim();
     if (!trimmedId) {
-      throw HttpError.badRequest("Please enter your User ID, Email ID, or Mobile number.");
+      throw HttpError.badRequest("Please enter your Member ID, Email ID, or Mobile number.");
     }
     if (!pass) {
       throw HttpError.badRequest("Please enter your password.");
@@ -75,7 +75,7 @@ export class UserService {
 
     const user = await this.repository.findByIdentifier(trimmedId);
     if (!user) {
-      throw HttpError.unauthorized("Invalid User ID/Email/Mobile or Password.");
+      throw HttpError.unauthorized("Invalid Member ID/Email/Mobile or Password.");
     }
 
     if (user.status === "pending") {
@@ -87,7 +87,7 @@ export class UserService {
 
     const isValid = verifyPassword(pass, user.passwordHash, user.passwordSalt);
     if (!isValid) {
-      throw HttpError.unauthorized("Invalid User ID/Email/Mobile or Password.");
+      throw HttpError.unauthorized("Invalid Member ID/Email/Mobile or Password.");
     }
 
     // Update last login timestamp asynchronously
@@ -113,11 +113,12 @@ export class UserService {
   /**
    * Emails a one-time reset link to the account matching the email, member ID or mobile.
    * Does nothing, silently, for unknown or inactive accounts, so callers can always answer the
-   * same way and the form cannot be used to discover who is a member.
+   * same way and the form cannot be used to discover who is a member. Members with no email on
+   * file (some imported from the old site) cannot get a link; the Secretariat resets those.
    */
   async requestPasswordReset(identifier: string, baseUrl: string): Promise<void> {
     const user = await this.repository.findByIdentifier(identifier);
-    if (!user || user.status !== "active") return;
+    if (!user || user.status !== "active" || !user.email) return;
 
     const latest = await this.resets.findLatestForUser(user.id);
     if (latest && Date.now() - latest.createdAt.getTime() < RESET_EMAIL_COOLDOWN_SECONDS * 1000) return;

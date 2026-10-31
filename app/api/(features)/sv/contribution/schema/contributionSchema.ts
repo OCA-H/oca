@@ -119,3 +119,13 @@ export type ContributionDocumentKind = "pan_card" | "address_proof";
 
 /** A contribution with the fund it went to, as the service and the email need it. */
 export type ContributionWithFund = Contribution & { fund: ContributionFund };
+
+/** One fund's paid total, as the home page's progress bars show it. */
+export interface FundProgress {
+  code: string;
+  label: string;
+  /** Whole rupees from paid contributions. */
+  raised: number;
+  /** Members who paid at least once. */
+  donors: number;
+}

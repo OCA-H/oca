@@ -99,7 +99,7 @@ export class UserRepository extends BaseRepository {
 
   /**
    * Finds user by member ID, email, or mobile number.
-   * Matches the member sign-in requirement: "User ID / Email ID / Mobile".
+   * Matches the member sign-in requirement: "Member ID / Email ID / Mobile".
    */
   async findByIdentifier(identifier: string): Promise<User | null> {
     const clean = identifier.trim();
@@ -146,7 +146,7 @@ export class UserRepository extends BaseRepository {
       .insert(users)
       .values({
         ...data,
-        email: data.email.toLowerCase().trim(),
+        email: data.email?.toLowerCase().trim() || null,
         memberId: data.memberId.trim(),
       })
       .returning();

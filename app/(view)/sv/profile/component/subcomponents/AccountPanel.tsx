@@ -68,7 +68,7 @@ export const AccountPanel: React.FC<AccountPanelProps> = ({ profile, hidden, onB
       <div className="field">
         <label htmlFor={id}>
           {label}
-          {!locked && ' *'}
+          {!locked && key === 'mobile' && ' *'}
         </label>
         <div className={`mp-input${locked ? ' is-locked' : ''}`}>
           {key === 'mobile' ? (
@@ -88,7 +88,6 @@ export const AccountPanel: React.FC<AccountPanelProps> = ({ profile, hidden, onB
               id={id}
               name={key}
               type={type}
-              required={!locked}
               readOnly={locked}
               aria-readonly={locked || undefined}
               aria-describedby={locked || hint ? hintId : undefined}
@@ -189,7 +188,7 @@ export const AccountPanel: React.FC<AccountPanelProps> = ({ profile, hidden, onB
 
         <hr className="ms-sep" />
         <div className="field-row">
-          {contactInput('email', 'mpa-email', 'Email', 'email', 'email')}
+          {contactInput('email', 'mpa-email', 'Email', 'email', 'email', account.emailHint)}
           {contactInput('mobile', 'mpa-mobile', 'Mobile', 'tel', 'tel-national', account.mobileHint)}
         </div>
 

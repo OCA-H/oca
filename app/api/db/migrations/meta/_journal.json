@@ -78,6 +78,13 @@
       "when": 1793292265733,
       "tag": "0010_contribution_amount_limits",
       "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1793429798068,
+      "tag": "0011_users_email_optional",
+      "breakpoints": true
     }
   ]
 }

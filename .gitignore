@@ -42,3 +42,6 @@ next-env.d.ts
 
 # local-only scripts and their output (e.g. scripts/local/test-pass-email.mjs)
 /scripts/local/
+
+# WordPress export (database dump, uploads) for the migration. Holds members' personal data.
+/.migration/

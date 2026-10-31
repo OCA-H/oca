@@ -216,7 +216,7 @@ export const MemberPortalView: React.FC = () => {
               <div style={{ marginBottom: '24px' }}>
                 <div style={{ fontSize: '20px', fontWeight: 700, letterSpacing: '0.5px' }}>{profile.fullName}</div>
                 <div style={{ fontSize: '13px', color: 'rgba(255,255,255,0.7)', marginTop: '4px' }}>
-                  {profile.email} · {profile.mobile || 'Registered Columban'}
+                  {[profile.email, profile.mobile].filter(Boolean).join(' · ') || 'Registered Columban'}
                 </div>
               </div>
 

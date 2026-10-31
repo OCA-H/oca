@@ -9,7 +9,8 @@ export const users = pgTable(
   {
     id: serial("id").primaryKey(),
     memberId: varchar("member_id", { length: 50 }).notNull(),
-    email: varchar("email", { length: 255 }).notNull(),
+    // Optional: members imported from the old site may have none; they sign in with member ID or mobile.
+    email: varchar("email", { length: 255 }),
     mobile: varchar("mobile", { length: 30 }),
     fullName: varchar("full_name", { length: 150 }).notNull(),
     passwordHash: text("password_hash").notNull(),

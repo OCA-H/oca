@@ -35,8 +35,8 @@ export const memberSignInContent = {
   main: {
     title: 'OCA Member Login',
     subtitle: 'OCA Member exclusive area',
-    userLabel: 'User ID / Email ID / Mobile',
-    userPlaceholder: 'Your user ID, email or mobile number',
+    userLabel: 'Member ID / Email ID / Mobile',
+    userPlaceholder: 'Your member ID, email or mobile number',
     passwordLabel: 'Password',
     passwordPlaceholder: 'Your password',
     forgotPasswordText: 'Forgot Password?',
@@ -68,7 +68,7 @@ export const forgotPasswordContent = {
   form: {
     title: 'Forgot your password?',
     subtitle: 'Enter the details you signed up with and we will email you a link to reset it.',
-    label: 'Email ID / User ID / Mobile',
+    label: 'Member ID / Email ID / Mobile',
     placeholder: 'Your email, member ID or mobile number',
     submitText: 'Email me a reset link',
     submittingText: 'Sending…',

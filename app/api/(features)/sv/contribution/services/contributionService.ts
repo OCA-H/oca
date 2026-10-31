@@ -1,5 +1,6 @@
 import "server-only";
 import crypto from "node:crypto";
+import { revalidateTag } from "next/cache";
 import { HttpError, type FieldErrors } from "@/app/api/core/httpError";
 import { CcAvenue, type CcAvenueCheckout } from "@/app/api/core/ccavenue";
 import { FILE_KINDS, readUploadedFile, type UploadRules, type UploadedFile } from "@/app/api/core/fileUpload";
@@ -17,6 +18,7 @@ import type {
   NewContributionDocument,
 } from "../schema/contributionSchema";
 import { contributionThankYouEmail } from "./contributionThankYouEmail";
+import { FUND_PROGRESS_TAG } from "./fundProgress";
 
 const PAYMENT_METHODS = ["upi", "card", "netbanking"];
 
@@ -219,6 +221,8 @@ export class ContributionService {
   async checkout(session: SessionData, form: FormData, baseUrl: string): Promise<ContributionCheckout> {
     const user = await this.users.findById(session.user.id);
     if (!user || user.status !== "active") throw HttpError.unauthorized("Please sign in again to contribute.");
+    if (!user.email) throw HttpError.badRequest("Please add your email address in My Account first, so we can send your receipt.");
+    const accountEmail = user.email;
 
     const fields: FieldErrors = {};
     const required = (key: string, label: string) => {
@@ -251,7 +255,7 @@ export class ContributionService {
     const name = required("name", "Name");
     // Always the signed-in member's account email, whatever the form sends: the receipt and
     // thank-you go to the member who gave, and the form cannot redirect them elsewhere.
-    const email = user.email.toLowerCase();
+    const email = accountEmail.toLowerCase();
     const mobile = required("mobile", "Mobile").replace(/[\s-]/g, "");
     const address = required("address", "Address");
     const city = required("city", "City");
@@ -369,7 +373,11 @@ export class ContributionService {
     const updated = await this.repository.findByOrderId(contribution.orderId);
     if (!updated) throw HttpError.notFound("We could not find this contribution.");
 
-    if (status === "paid") await this.sendThankYou(updated, baseUrl);
+    if (status === "paid") {
+      // The home page's progress bars count paid contributions; expire: 0 shows this one on the next visit.
+      revalidateTag(FUND_PROGRESS_TAG, { expire: 0 });
+      await this.sendThankYou(updated, baseUrl);
+    }
     return updated;
   }
 

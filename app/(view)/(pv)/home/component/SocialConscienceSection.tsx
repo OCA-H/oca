@@ -1,14 +1,18 @@
 import React from 'react';
 import type { HomeCause, HomeSocialContent } from '@/app/api/(features)/(pview)/site/schema/sectionSpecs';
+import type { FundProgress } from '@/app/api/(features)/sv/contribution/schema/contributionSchema';
+import { causeFigures } from '../helper';
 import { SiteLink, toneAt } from './SiteLink';
 
 /** A muted cause's badge takes its tile's colour. */
 const BADGE_COLOURS: Record<string, string> = { 'duo-navy': 'var(--navy)', 'duo-teal': 'var(--teal-dark)', 'duo-gold': 'var(--gold-dark)' };
 
-function CauseCard({ cause, index }: { cause: HomeCause; index: number }) {
+function CauseCard({ cause, index, funds }: { cause: HomeCause; index: number; funds: FundProgress[] }) {
   const tone = toneAt(index, 2);
   const featured = cause.status === 'featured';
-  const progress = Math.max(0, Math.min(100, Number(cause.progress) || 0));
+  const { progress, raised, goal, donors } = causeFigures(cause, funds);
+  // Offline gifts have no donor count, so the count is labelled as online when they are added in.
+  const donorNote = donors ? ` · ${donors} ${Number(cause.offlineRaised) > 0 ? 'online ' : ''}${donors === 1 ? 'donor' : 'donors'}` : '';
   return (
     <div className={`cause-card${featured ? '' : ' muted'}`}>
       <div className={`photo-tile ${tone}`}>
@@ -29,11 +33,10 @@ function CauseCard({ cause, index }: { cause: HomeCause; index: number }) {
           <>
             <div className="progress-track"><div className="progress-fill" style={{ width: `${progress}%` }}></div></div>
             <div className="fund-meta">
-              <span>{progress}% Donated</span>
-              {(cause.raised || cause.goal) && <span><strong>{cause.raised}</strong>{cause.goal && ` / ${cause.goal}`}</span>}
+              <span>{progress}% Donated{donorNote}</span>
+              {(raised || goal) && <span><strong>{raised}</strong>{goal && ` / ${goal}`}</span>}
             </div>
             {cause.ctaHref && <SiteLink className="btn btn-primary btn-sm" style={{ marginTop: "16px", width: "100%" }} href={cause.ctaHref}>Contribute</SiteLink>}
-            {cause.href && <SiteLink href={cause.href} style={{ display: "block", textAlign: "center", marginTop: "12px", fontSize: "13.5px", fontWeight: 600, color: "var(--brand-mid)" }}>About the fund &rarr;</SiteLink>}
           </>
         ) : (
           cause.desc && <p style={{ fontSize: "13px", color: "var(--text-soft)" }}>{cause.desc}</p>
@@ -43,7 +46,8 @@ function CauseCard({ cause, index }: { cause: HomeCause; index: number }) {
   );
 }
 
-export const SocialConscienceSection: React.FC<{ content: HomeSocialContent }> = ({ content }) => {
+/** `funds` are the paid totals that fill the featured causes' progress bars (see causeFigures). */
+export const SocialConscienceSection: React.FC<{ content: HomeSocialContent; funds: FundProgress[] }> = ({ content, funds }) => {
   return (
     <section className="section" id="give" style={{ background: "#fff", borderTop: "1px solid var(--border)", borderBottom: "1px solid var(--border)" }}>
       <div className="wrap">
@@ -55,7 +59,7 @@ export const SocialConscienceSection: React.FC<{ content: HomeSocialContent }> =
     
         <div className="cause-grid">
           {content.causes.map((cause, i) => (
-            <CauseCard cause={cause} index={i} key={`${i}-${cause.title}`} />
+            <CauseCard cause={cause} index={i} funds={funds} key={`${i}-${cause.title}`} />
           ))}
         </div>
     

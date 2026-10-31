@@ -126,6 +126,8 @@ export class EventPassBookingService {
 
     const user = await this.users.findById(session.user.id);
     if (!user || user.status !== "active") throw HttpError.unauthorized("Please sign in again to buy a pass.");
+    if (!user.email) throw HttpError.badRequest("Please add your email address in My Account first, so we can send you the pass.");
+    const email = user.email;
 
     const range = batchRange(pass.batchEligibility);
     if (range) {
@@ -182,7 +184,7 @@ export class EventPassBookingService {
       userId: user.id,
       memberId: user.memberId,
       fullName: user.fullName,
-      email: user.email,
+      email,
       mobile: user.mobile,
       spouseName: spouseName || null,
       teachers,
@@ -201,7 +203,7 @@ export class EventPassBookingService {
       redirect_url: responseUrl,
       cancel_url: responseUrl,
       billing_name: user.fullName,
-      billing_email: user.email,
+      billing_email: email,
       billing_tel: user.mobile ?? "",
       billing_address: [address.line1, address.line2, address.line3].filter(Boolean).join(", "),
       billing_city: address.city ?? "",

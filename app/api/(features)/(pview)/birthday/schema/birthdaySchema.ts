@@ -4,6 +4,6 @@ export interface BirthdayMember {
   /** "Rohan Kapoor": the name without its title. */
   name: string;
   batchYear: string | null;
-  /** Where "Send Wishes" writes to; anyone visiting the home page can send one. */
-  email: string;
+  /** Where "Send Wishes" writes to; anyone visiting the home page can send one. Null hides the button. */
+  email: string | null;
 }

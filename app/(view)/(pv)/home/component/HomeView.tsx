@@ -3,6 +3,7 @@
 import React from 'react';
 import type { HomeContent } from '@/app/api/(features)/(pview)/site/schema/sectionSpecs';
 import type { BirthdayMember } from '@/app/api/(features)/(pview)/birthday/schema';
+import type { FundProgress } from '@/app/api/(features)/sv/contribution/schema/contributionSchema';
 import { Header, Footer, Lightbox } from '@/app/(view)/common';
 import { useHomeHandler } from '../handler/useHomeHandler';
 import {
@@ -23,10 +24,10 @@ import {
 } from '.';
 
 /**
- * `content` is what admins edit in the admin panel, and `birthdays` the members whose date of
- * birth is today; see app/(view)/(pv)/page.tsx.
+ * `content` is what admins edit in the admin panel, `birthdays` the members whose date of
+ * birth is today, and `funds` the paid totals per fund; see app/(view)/(pv)/page.tsx.
  */
-export const HomeView: React.FC<{ content: HomeContent; birthdays: BirthdayMember[] }> = ({ content, birthdays }) => {
+export const HomeView: React.FC<{ content: HomeContent; birthdays: BirthdayMember[]; funds: FundProgress[] }> = ({ content, birthdays, funds }) => {
   useHomeHandler();
 
   return (
@@ -42,7 +43,7 @@ export const HomeView: React.FC<{ content: HomeContent; birthdays: BirthdayMembe
           <NoticeBoardSection content={content.spotlight} />
           <HangoutSection content={content.hangout} />
           <BirthdaysSection birthdays={birthdays} />
-          <SocialConscienceSection content={content.social} />
+          <SocialConscienceSection content={content.social} funds={funds} />
           <BenefitsSection />
           <ConnectSection />
           <MissionSection />
