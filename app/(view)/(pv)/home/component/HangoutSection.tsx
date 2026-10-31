@@ -21,9 +21,9 @@ const PHOTO_INTERVAL_MS = 2000;
 /**
  * A photo post's pictures: they slide on by themselves every 2 seconds (looping back to the first),
  * and can be swiped or picked by their dot. They hold still while hovered or off screen.
- * One picture shows no dots and does not move.
+ * One picture shows no dots and does not move. A clone's dots stay out of the tab order.
  */
-function PostPhotos({ images }: { images: HomeHangoutPhoto[] }) {
+function PostPhotos({ images, clone }: { images: HomeHangoutPhoto[]; clone: boolean }) {
   const track = useRef<HTMLDivElement>(null);
   const [current, setCurrent] = useState(0);
   const [isHovered, setIsHovered] = useState(false);
@@ -81,6 +81,7 @@ function PostPhotos({ images }: { images: HomeHangoutPhoto[] }) {
               aria-label={`Photo ${i + 1} of ${images.length}`}
               aria-current={i === current || undefined}
               onClick={() => goTo(i)}
+              tabIndex={clone ? -1 : undefined}
             />
           ))}
         </div>
@@ -95,9 +96,9 @@ const PAUSE_ICON = <svg viewBox="0 0 24 24" fill="none"><path d="M7 5h3.5v14H7zM
 /**
  * A video post: the play button, mute button and length over the picture. With an uploaded video,
  * the button plays and pauses it (showing which it will do), a bar along the bottom shows how far
- * it has played, and it pauses itself when scrolled out of view.
+ * it has played, and it pauses itself when scrolled out of view. A clone's buttons stay out of the tab order.
  */
-function PostVideo({ src, still, duration }: { src: string; still?: HomeHangoutPhoto; duration: string }) {
+function PostVideo({ src, still, duration, clone }: { src: string; still?: HomeHangoutPhoto; duration: string; clone: boolean }) {
   const video = useRef<HTMLVideoElement>(null);
   const [isMuted, setIsMuted] = useState(true);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -153,11 +154,12 @@ function PostVideo({ src, still, duration }: { src: string; still?: HomeHangoutP
         aria-label={isPlaying ? 'Pause video' : 'Play video'}
         onClick={togglePlay}
         disabled={!src}
+        tabIndex={clone ? -1 : undefined}
       >
         <span>{isPlaying ? PAUSE_ICON : PLAY_ICON}</span>
       </button>
       {src && (
-        <button className="mute-btn" data-muted={isMuted} aria-label={isMuted ? 'Unmute' : 'Mute'} onClick={toggleMute}>
+        <button className="mute-btn" data-muted={isMuted} aria-label={isMuted ? 'Unmute' : 'Mute'} onClick={toggleMute} tabIndex={clone ? -1 : undefined}>
           {isMuted ? MUTED_ICON : UNMUTED_ICON}
         </button>
       )}
@@ -186,6 +188,8 @@ function Intro({ intro, highlight }: { intro: string; highlight: string }) {
 
 export const HangoutSection: React.FC<{ content: HomeHangoutContent }> = ({ content }) => {
   // Rendered twice so the carousel can loop without a visible jump; see useHomeHandler.
+  // The copies are hidden from screen readers but not inert: after one loop they are the cards on
+  // screen, so they must still take clicks (an inert copy's play button does nothing).
   const posts = (clone: boolean) => {
     let photoCount = 0;
     return content.posts.map((post, i) => (
@@ -193,14 +197,14 @@ export const HangoutSection: React.FC<{ content: HomeHangoutContent }> = ({ cont
         className="post-card"
         data-type={post.type}
         key={`${clone ? 'clone-' : ''}${i}`}
-        {...(clone && { 'data-clone': '', 'aria-hidden': true, inert: true })}
+        {...(clone && { 'data-clone': '', 'aria-hidden': true })}
       >
         <div className={`post-media ${toneAt(i)}`}>
           {post.type === 'video' ? (
-            <PostVideo src={post.video} still={post.images[0]} duration={post.duration} />
+            <PostVideo src={post.video} still={post.images[0]} duration={post.duration} clone={clone} />
           ) : (
             <>
-              <PostPhotos images={post.images} />
+              <PostPhotos images={post.images} clone={clone} />
               <div className="tile-icon"><svg viewBox="0 0 24 24" fill="none">{PHOTO_ICONS[photoCount++ % PHOTO_ICONS.length]}</svg></div>
             </>
           )}

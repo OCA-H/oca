@@ -22,12 +22,13 @@ export const OfferingsSection: React.FC<{ content: HomeNoticesContent }> = ({ co
           </button>
     
           <div className="notice-cards" id="noticeCards">
-            {/* Rendered twice so the carousel can loop without a visible jump; see useHomeHandler. */}
+            {/* Rendered twice so the carousel can loop without a visible jump; see useHomeHandler.
+                The copies are not inert: after one loop they are the cards on screen and must take clicks. */}
             {[...content.items, ...content.items].map((notice, i) => (
               <article
                 className="notice-card"
                 key={`${i}-${notice.title}`}
-                {...(i >= content.items.length && { 'data-clone': '', 'aria-hidden': true, inert: true })}
+                {...(i >= content.items.length && { 'data-clone': '', 'aria-hidden': true })}
               >
                 <div className={`notice-card-media photo-tile ${toneAt(i % content.items.length)}`}>
                   <img className="tile-img" src={notice.image} alt={notice.imageAlt} loading="lazy" decoding="async" />
@@ -35,7 +36,7 @@ export const OfferingsSection: React.FC<{ content: HomeNoticesContent }> = ({ co
                 <div className="notice-card-body">
                   {notice.date && <div className="notice-card-date">{notice.date}</div>}
                   <h4 className="notice-card-title">{notice.title}</h4>
-                  {notice.href && <SiteLink className="qa-link" href={notice.href}>Read more →</SiteLink>}
+                  {notice.href && <SiteLink className="qa-link" href={notice.href} tabIndex={i >= content.items.length ? -1 : undefined}>Read more →</SiteLink>}
                 </div>
               </article>
             ))}
