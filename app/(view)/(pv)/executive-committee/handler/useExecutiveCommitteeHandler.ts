@@ -4,23 +4,22 @@ import { useState, useEffect, useCallback, useMemo } from 'react';
 import { executiveCommitteeContent, CommitteeTerm } from '../content/executiveCommittee.content';
 import { DropdownOption } from '@/app/(view)/common';
 
-export function useExecutiveCommitteeHandler() {
-  const [activeTermId, setActiveTermId] = useState<string>('ec-2025-27');
+export function useExecutiveCommitteeHandler(terms: CommitteeTerm[]) {
+  const [activeTermId, setActiveTermId] = useState<string>(terms[0]?.id ?? '');
 
   // Sync active term with hash
   useEffect(() => {
     const handleHash = () => {
-      const hash = window.location.hash;
-      const match = hash.match(/ec-\d{4}-\d{2}/);
-      if (match && match[0]) {
-        setActiveTermId(match[0]);
+      const id = window.location.hash.slice(1);
+      if (terms.some((term) => term.id === id)) {
+        setActiveTermId(id);
       }
     };
 
     handleHash();
     window.addEventListener('hashchange', handleHash);
     return () => window.removeEventListener('hashchange', handleHash);
-  }, []);
+  }, [terms]);
 
   // Smooth scroll to a specific committee term
   const scrollToTerm = useCallback((termId: string) => {
@@ -43,11 +42,11 @@ export function useExecutiveCommitteeHandler() {
 
   // Dropdown options formatted for CustomDropdown
   const termDropdownOptions: DropdownOption[] = useMemo(() => {
-    return executiveCommitteeContent.terms.map((term: CommitteeTerm) => ({
+    return terms.map((term: CommitteeTerm) => ({
       label: term.isCurrent ? `${term.jumpLabel} (Current)` : term.jumpLabel,
       value: term.id,
     }));
-  }, []);
+  }, [terms]);
 
   return {
     content: executiveCommitteeContent,

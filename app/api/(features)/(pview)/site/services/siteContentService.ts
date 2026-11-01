@@ -5,7 +5,7 @@ import { HttpError } from "@/app/api/core/httpError";
 import { storage, type StoredFile } from "@/app/api/core/storage";
 import { assertUploadSize, detectUploadKind, wrongUploadKind, type FileKind, type UploadRules } from "@/app/api/core/fileUpload";
 import { SiteContentRepository } from "../repository/siteContentRepository";
-import { SECTION_SPECS, SITE_SECTION_KEYS, sectionSpec, type ContactDetailsContent, type EmailSettingsContent, type EventDinnerContent, type MembershipFeeContent, type EventLunchContent, type EventSportsContent, type HomeCommitteeContent, type HomeContent, type SectionSpec, type SiteSectionKey } from "../schema/sectionSpecs";
+import { SECTION_SPECS, SITE_SECTION_KEYS, sectionSpec, type CommitteeContent, type ContactDetailsContent, type EmailSettingsContent, type EventDinnerContent, type MembershipFeeContent, type EventLunchContent, type EventSportsContent, type HomeContent, type SectionSpec, type SiteSectionKey } from "../schema/sectionSpecs";
 import { MEMBERSHIP_FEE_DEFAULTS, SECTION_DEFAULTS } from "./siteDefaults";
 import { splitEmails, validateSection } from "./sectionValidator";
 
@@ -64,10 +64,43 @@ function upgradeHangout(data: Record<string, unknown>): Record<string, unknown> 
   return { ...data, posts };
 }
 
+/**
+ * The committee saved before it held every term had only the current office bearers, as `members`
+ * (photo, name, role, initials). They become the current term's office bearers, keeping the batch,
+ * email and profession of the default bearer of the same name; their photos stay where they are,
+ * since the section and its storage folder are the same. The next save drops `members`.
+ */
+function upgradeCommittee(data: Record<string, unknown>, saved: Record<string, unknown> | undefined): Record<string, unknown> {
+  const { members, ...rest } = data;
+  if (!saved || "terms" in saved || !Array.isArray(members) || members.length === 0) return rest;
+  const [current, ...previous] = (rest.terms as CommitteeContent["terms"]) ?? [];
+  if (!current) return rest;
+  const text = (value: unknown) => (typeof value === "string" ? value : "");
+  const officeBearers = members.map((member: Record<string, unknown>) => {
+    const name = text(member.name);
+    const known = current.officeBearers.find((b) => b.name.trim().toLowerCase() === name.trim().toLowerCase());
+    return {
+      roleSub: "",
+      batch: "",
+      profession: "",
+      email: "",
+      ...known,
+      image: text(member.image),
+      imageAlt: text(member.imageAlt),
+      initials: text(member.initials),
+      name,
+      role: text(member.role).toUpperCase(),
+    };
+  });
+  return { ...rest, terms: [{ ...current, officeBearers }, ...previous] };
+}
+
 /** Saved content over the defaults, so a field added to a spec later still has a value. */
 const withDefaults = (key: SiteSectionKey, saved: Record<string, unknown> | undefined) => {
   const data = { ...SECTION_DEFAULTS[key], ...saved };
-  return key === SITE_SECTION_KEYS.homeHangout ? upgradeHangout(data) : data;
+  if (key === SITE_SECTION_KEYS.homeHangout) return upgradeHangout(data);
+  if (key === SITE_SECTION_KEYS.aboutCommittee) return upgradeCommittee(data, saved);
+  return data;
 };
 
 /**
@@ -119,8 +152,8 @@ async function getSectionContent(key: SiteSectionKey): Promise<Record<string, un
 export const getDinnerContent = async () => (await getSectionContent(SITE_SECTION_KEYS.eventsDinner)) as unknown as EventDinnerContent;
 export const getLunchContent = async () => (await getSectionContent(SITE_SECTION_KEYS.eventsLunch)) as unknown as EventLunchContent;
 export const getSportsContent = async () => (await getSectionContent(SITE_SECTION_KEYS.eventsSports)) as unknown as EventSportsContent;
-/** The current office bearers, as set in the admin panel (About → Executive Committee). */
-export const getCommitteeContent = async () => (await getSectionContent(SITE_SECTION_KEYS.aboutCommittee)) as unknown as HomeCommitteeContent;
+/** Every committee term, the current one first, as set in the admin panel (About → Executive Committee). */
+export const getCommitteeContent = async () => (await getSectionContent(SITE_SECTION_KEYS.aboutCommittee)) as unknown as CommitteeContent;
 
 /** The Life Membership fee in rupees, as set in the admin panel (Membership → Membership fee). */
 export async function getMembershipFee(): Promise<number> {

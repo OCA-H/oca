@@ -140,15 +140,6 @@ export const adminContent = {
       items: panels.map((panel) => ({ label: RECORD_PANELS[panel].label, icon: RECORD_PANELS[panel].icon, panel })),
     })),
     {
-      // Pages whose content is still written into the code; they become editable one by one.
-      group: "Other pages",
-      icon: "layers",
-      collapsible: true,
-      items: [
-        { label: "Executive Committee", icon: "page", soon: true },
-      ],
-    },
-    {
       group: "Account",
       items: [
         { label: "My Profile", icon: "user", href: ROUTES.PROFILE },

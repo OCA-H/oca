@@ -1,11 +1,11 @@
 'use client';
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import Link from 'next/link';
 import { ROUTES } from '@/app/(view)/common/helper/routes';
-import type { HomeCommitteeContent } from '@/app/api/(features)/(pview)/site/schema/sectionSpecs';
+import type { CommitteeContent } from '@/app/api/(features)/(pview)/site/schema/sectionSpecs';
 import { useExecutiveCommitteeHandler } from '../handler/useExecutiveCommitteeHandler';
-import { withAdminOfficeBearers } from '../helper/executiveCommittee.helper';
+import { toCommitteeTerms } from '../helper/executiveCommittee.helper';
 import {
   ExecutiveCommitteeHero,
   CommitteeJumpNav,
@@ -14,9 +14,10 @@ import {
   ExecutiveCommitteeCTA,
 } from './subcomponents';
 
-export const ExecutiveCommitteeView: React.FC<{ committee?: HomeCommitteeContent }> = ({ committee }) => {
-  const { content, activeTermId, handleSelectTerm } = useExecutiveCommitteeHandler();
-  const { breadcrumbs, hero, terms, cta } = content;
+export const ExecutiveCommitteeView: React.FC<{ committee: CommitteeContent }> = ({ committee }) => {
+  const terms = useMemo(() => toCommitteeTerms(committee), [committee]);
+  const { content, activeTermId, handleSelectTerm } = useExecutiveCommitteeHandler(terms);
+  const { breadcrumbs, hero, cta } = content;
 
   return (
     <>
@@ -45,7 +46,7 @@ export const ExecutiveCommitteeView: React.FC<{ committee?: HomeCommitteeContent
       {terms.map((term, idx) => {
         const tinted = { ...term, tintClass: term.tintClass ?? (idx % 2 === 1 ? 'tint-teal' : '') };
         return term.isCurrent ? (
-          <CurrentCommitteeSection key={term.id} term={withAdminOfficeBearers(tinted, committee)} />
+          <CurrentCommitteeSection key={term.id} term={tinted} />
         ) : (
           <PastCommitteeSection key={term.id} term={tinted} />
         );

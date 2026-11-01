@@ -1,17 +1,9 @@
-import { executiveCommitteeContent, CommitteeTerm } from '../content/executiveCommittee.content';
+import { executiveCommitteeContent } from '../content/executiveCommittee.content';
 
+// The committee terms themselves come from the admin panel: see getCommitteeContent.
 export const executiveCommitteeService = {
   getContent() {
     return executiveCommitteeContent;
-  },
-  getTerms(): CommitteeTerm[] {
-    return executiveCommitteeContent.terms;
-  },
-  getCurrentTerm(): CommitteeTerm | undefined {
-    return executiveCommitteeContent.terms.find((t) => t.isCurrent);
-  },
-  getTermById(id: string): CommitteeTerm | undefined {
-    return executiveCommitteeContent.terms.find((t) => t.id === id);
   },
 };
 

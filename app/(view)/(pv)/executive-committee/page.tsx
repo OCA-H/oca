@@ -7,7 +7,7 @@ export const metadata = {
   description: 'Executive Committee and leadership of the Old Columbans Association.',
 };
 
-// The current office bearers are edited in the admin panel (About → Executive Committee).
+// Every term is edited in the admin panel (About → Executive Committee).
 export default async function ExecutiveCommitteePage() {
   const committee = await getCommitteeContent();
   return (

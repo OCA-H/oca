@@ -228,18 +228,42 @@ export interface HomeGalleryContent {
   albums: HomeGalleryAlbum[];
 }
 
-export interface HomeCommitteeMember {
+// ---------- Executive Committee ----------
+
+export interface CommitteeTermBearer {
   image: string;
   imageAlt: string;
+  /** Shown while the photo loads, or instead of it; left empty, they come from the name. */
+  initials: string;
   name: string;
   role: string;
-  initials: string;
+  /** A note under the role, e.g. "(till July 2020)". */
+  roleSub: string;
+  batch: string;
+  profession: string;
+  email: string;
 }
 
-export interface HomeCommitteeContent {
+export type CommitteeTermMember = Omit<CommitteeTermBearer, "image" | "imageAlt" | "initials">;
+
+export interface CommitteeTermItem {
+  /** "2025 – 2027": the jump link, and the heading unless `title` is set. */
+  period: string;
+  title: string;
+  eyebrow: string;
+  pill: string;
+  officeBearers: CommitteeTermBearer[];
+  members: CommitteeTermMember[];
+}
+
+/**
+ * Every committee term, the current one first: the Executive Committee page shows them all, and the
+ * home page the current term's office bearers under its own eyebrow and heading.
+ */
+export interface CommitteeContent {
   eyebrow: string;
   title: string;
-  members: HomeCommitteeMember[];
+  terms: CommitteeTermItem[];
 }
 
 // ---------- Event pages ----------
@@ -332,7 +356,7 @@ export interface HomeContent {
   hangout: HomeHangoutContent;
   social: HomeSocialContent;
   gallery: HomeGalleryContent;
-  committee: HomeCommitteeContent;
+  committee: CommitteeContent;
 }
 
 // ---------- Specs ----------
@@ -647,28 +671,66 @@ export const SECTION_SPECS: SectionSpec[] = [
     key: SITE_SECTION_KEYS.aboutCommittee,
     page: "about",
     label: "Executive Committee",
-    description: "The three office bearers shown near the bottom of the home page and in the current committee on the Executive Committee page: photo, name and role.",
-    href: "/#committee",
+    description: "Every committee term with its office bearers and members & patron, shown on the Executive Committee page. The current term’s office bearers also appear near the bottom of the home page.",
+    href: "/executive-committee",
     fields: [
-      { key: "eyebrow", label: "Eyebrow", type: "text", max: 60, hint: "The small line above the heading." },
-      { key: "title", label: "Heading", type: "text", max: 120, required: true, placeholder: "Executive Committee, 2025 – 27" },
+      { key: "eyebrow", label: "Eyebrow", type: "text", max: 60, heading: "Home page", hint: "The small line above the heading." },
+      { key: "title", label: "Heading", type: "text", max: 120, required: true, placeholder: "Executive Committee, 2025 – 27", hint: "Above the current office bearers on the home page." },
     ],
     lists: [
       {
-        key: "members",
-        label: "Office bearers",
-        itemLabel: "Member",
-        titleField: "name",
-        hint: "The section shows exactly three members. Use the arrows to change their order.",
-        min: 3,
-        max: 3,
+        key: "terms",
+        label: "Terms",
+        itemLabel: "Term",
+        titleField: "period",
+        hint: "The first term is the current committee, on both pages; the rest follow as previous committees, in this order.",
+        min: 1,
+        max: 20,
         fields: [
-          // Optional: a bearer without a photo shows their initials instead.
-          { key: "image", label: "Photo", type: "image", hint: IMAGE_HINT },
-          { key: "imageAlt", label: "Image description", type: "text", max: 200, hint: ALT_HINT },
-          { key: "name", label: "Name", type: "text", max: 100, required: true },
-          { key: "role", label: "Role", type: "text", max: 60, required: true, placeholder: "President" },
-          { key: "initials", label: "Initials", type: "text", max: 4, placeholder: "SVK", hint: "Shown while the photo loads. Left empty, they come from the name." },
+          { key: "period", label: "Term", type: "text", max: 30, required: true, placeholder: "2025 – 2027", hint: "Used in the jump links at the top of the page." },
+          { key: "title", label: "Heading", type: "text", max: 120, placeholder: "Executive Committee of 2025 – 2027", hint: "Left empty, it is “Executive Committee of” and the term." },
+          { key: "eyebrow", label: "Eyebrow", type: "text", max: 60, placeholder: "Current committee", hint: "Left empty: “Current committee” for the first term, “Previous committee” for the rest." },
+          { key: "pill", label: "Badge", type: "text", max: 30, placeholder: "Current term", hint: "Left empty, the first term shows “Current term” and the rest none." },
+        ],
+        lists: [
+          {
+            key: "officeBearers",
+            label: "Office bearers",
+            itemLabel: "Office bearer",
+            titleField: "name",
+            hint: "Shown as cards for the current term (here and on the home page) and as a table for previous ones. Use the arrows to change the order.",
+            min: 0,
+            max: 6,
+            fields: [
+              // Optional: a bearer without a photo shows their initials instead.
+              { key: "image", label: "Photo", type: "image", hint: `${IMAGE_HINT} Shown for the current term.` },
+              { key: "imageAlt", label: "Image description", type: "text", max: 200, hint: ALT_HINT },
+              { key: "initials", label: "Initials", type: "text", max: 4, placeholder: "SVK", hint: "Shown while the photo loads, or without one. Left empty, they come from the name." },
+              { key: "name", label: "Name", type: "text", max: 100, required: true },
+              { key: "batch", label: "Batch", type: "text", max: 60, placeholder: "Batch of 1983", hint: "Shown as typed, e.g. “Batch of 1983” or “Patron of the Association”." },
+              { key: "role", label: "Role", type: "text", max: 60, required: true, placeholder: "PRESIDENT" },
+              { key: "roleSub", label: "Role note", type: "text", max: 60, placeholder: "(till July 2020)", hint: "Optional, shown under the role." },
+              { key: "profession", label: "Profession", type: "text", max: 60, placeholder: "Business" },
+              { key: "email", label: "Email", type: "email", max: 200, hint: "Leave empty to show a dash." },
+            ],
+          },
+          {
+            key: "members",
+            label: "Members & Patron",
+            itemLabel: "Member",
+            titleField: "name",
+            hint: "Shown as a table under the office bearers. Use the arrows to change the order.",
+            min: 0,
+            max: 40,
+            fields: [
+              { key: "name", label: "Name", type: "text", max: 100, required: true },
+              { key: "batch", label: "Batch", type: "text", max: 60, placeholder: "Batch of 1983", hint: "Shown as typed, e.g. “Batch of 1983” or “Patron of the Association”." },
+              { key: "role", label: "Role", type: "text", max: 60, required: true, placeholder: "EC MEMBER" },
+              { key: "roleSub", label: "Role note", type: "text", max: 60, placeholder: "(till July 2020)", hint: "Optional, shown under the role." },
+              { key: "profession", label: "Profession", type: "text", max: 60, placeholder: "Business" },
+              { key: "email", label: "Email", type: "email", max: 200, hint: "Leave empty to show a dash." },
+            ],
+          },
         ],
       },
     ],
