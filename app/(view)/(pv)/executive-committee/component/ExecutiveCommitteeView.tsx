@@ -41,14 +41,15 @@ export const ExecutiveCommitteeView: React.FC<{ committee?: HomeCommitteeContent
         onSelectTerm={handleSelectTerm}
       />
 
-      {/* Committee Terms */}
-      {terms.map((term) =>
-        term.isCurrent ? (
-          <CurrentCommitteeSection key={term.id} term={withAdminOfficeBearers(term, committee)} />
+      {/* Committee Terms — alternate plain / tinted backgrounds */}
+      {terms.map((term, idx) => {
+        const tinted = { ...term, tintClass: term.tintClass ?? (idx % 2 === 1 ? 'tint-teal' : '') };
+        return term.isCurrent ? (
+          <CurrentCommitteeSection key={term.id} term={withAdminOfficeBearers(tinted, committee)} />
         ) : (
-          <PastCommitteeSection key={term.id} term={term} />
-        )
-      )}
+          <PastCommitteeSection key={term.id} term={tinted} />
+        );
+      })}
 
       {/* CTA Band */}
       <ExecutiveCommitteeCTA cta={cta} />
