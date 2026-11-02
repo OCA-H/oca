@@ -5,14 +5,16 @@ import opentype from "opentype.js";
 import sharp from "sharp";
 import { themeColors } from "@/template/theme/colors";
 
-// Writes the member's details onto the Annual Dinner pass artwork in public/images/passes, giving
+// Writes the member's details onto the event's pass artwork in public/images/passes, giving
 // the digital pass that is emailed after payment. The artwork is 1024×1536; each field below is
 // placed on the blank line printed beside or under its label. The text is set in Playfair Display
 // Bold (bundled in ../assets) and drawn as SVG paths, so the server needs no fonts installed and
 // every machine renders the same pass. Long names are shrunk to fit their line, and a detail we
-// do not have (no spouse name, no batch on record) is written as "NA".
+// do not have (no spouse name, no batch on record) is written as "NA". On the golf cards each label
+// has a full-width line of its own under it, so the detail is written on that line, starting at
+// the label's left edge.
 
-export type PassCardDesign = "golden" | "donor" | "donor-couple";
+export type PassCardDesign = "golden" | "donor" | "donor-couple" | "golf-single" | "golf-couple";
 
 export interface PassCardDetails {
   memberName: string;
@@ -70,10 +72,31 @@ const DESIGNS: Record<PassCardDesign, { file: string; fields: Partial<Record<Pas
       batch: { x: 730, baseline: 924, maxWidth: 170, size: 24 },
     },
   },
+  "golf-single": {
+    file: "OCA_Annual_Golf_Single_Pass_2026.png",
+    fields: {
+      memberName: { x: 62, baseline: 695, maxWidth: 900, size: 30 },
+      memberId: { x: 62, baseline: 814, maxWidth: 900, size: 30 },
+      batch: { x: 62, baseline: 934, maxWidth: 900, size: 30 },
+    },
+  },
+  "golf-couple": {
+    file: "OCA_Annual_Golf_Couple_Pass_2026.png",
+    fields: {
+      memberName: { x: 62, baseline: 682, maxWidth: 900, size: 28 },
+      spouseName: { x: 62, baseline: 783, maxWidth: 900, size: 28 },
+      memberId: { x: 62, baseline: 883, maxWidth: 900, size: 28 },
+      batch: { x: 62, baseline: 975, maxWidth: 900, size: 28 },
+    },
+  },
 };
 
-/** The Golden Pass has its own card; every other pass is a Donor Pass, for one or for a couple. */
-export const passCardDesign = (pass: { passId: string; includesSpouse: boolean }): PassCardDesign => {
+/**
+ * A golf pass has the golf card, for one or for a couple. At the dinner the Golden Pass has its own
+ * card, and every other pass is a Donor Pass, for one or for a couple.
+ */
+export const passCardDesign = (pass: { eventName: string; passId: string; includesSpouse: boolean }): PassCardDesign => {
+  if (pass.eventName === "golf-tournament") return pass.includesSpouse ? "golf-couple" : "golf-single";
   if (pass.passId === "golden") return "golden";
   return pass.includesSpouse ? "donor-couple" : "donor";
 };

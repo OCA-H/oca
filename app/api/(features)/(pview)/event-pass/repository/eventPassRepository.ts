@@ -1,10 +1,12 @@
 import "server-only";
-import { and, asc, eq } from "drizzle-orm";
+import { and, asc, eq, like, or } from "drizzle-orm";
 import { BaseRepository } from "@/app/api/core/baseRepository";
 import { eventPasses, type EventPass, type NewEventPass } from "../schema/eventPassSchema";
 
 export interface EventPassFilter {
   eventName?: string;
+  /** The event and its past years: "annual-dinner" also matches "annual-dinner-2024". */
+  event?: string;
   status?: string;
   tierGroup?: string;
 }
@@ -154,12 +156,70 @@ export const DEFAULT_ANNUAL_DINNER_PASSES: NewEventPass[] = [
   },
 ];
 
+/**
+ * The OCA Golf Tournament: Single or Couple. Every golf pass also covers the Annual Dinner the same
+ * day, so it has no add-ons of its own.
+ */
+export const DEFAULT_GOLF_TOURNAMENT_PASSES: NewEventPass[] = [
+  {
+    eventName: "golf-tournament",
+    passId: "single",
+    tierGroup: "golf",
+    tierTitle: "OCA Golf Tournament",
+    title: "Single",
+    label: "OCA Golf Tournament · Single",
+    description: "Golf tournament pass for one, with entry to the OCA Annual Dinner",
+    batchEligibility: "18 Dec · 11:30 am onwards",
+    price: 10000,
+    currency: "INR",
+    totalQuantity: 100,
+    availableQuantity: 100,
+    includesSpouse: false,
+    allowsChildren: false,
+    allowsTeacherSponsorship: false,
+    status: "active",
+    statusNote: "Just you",
+    displayOrder: 1,
+    metadata: { includesDinner: true },
+  },
+  {
+    eventName: "golf-tournament",
+    passId: "couple",
+    tierGroup: "golf",
+    tierTitle: "OCA Golf Tournament",
+    title: "Couple",
+    label: "OCA Golf Tournament · Couple",
+    description: "Golf tournament pass for a member and spouse, with entry to the OCA Annual Dinner",
+    batchEligibility: "18 Dec · 11:30 am onwards",
+    price: 12500,
+    currency: "INR",
+    totalQuantity: 50,
+    availableQuantity: 50,
+    includesSpouse: true,
+    allowsChildren: false,
+    allowsTeacherSponsorship: false,
+    status: "active",
+    statusNote: "You and your spouse",
+    displayOrder: 2,
+    metadata: { includesDinner: true },
+  },
+];
+
+/** The passes each event starts with, added the first time its passes are asked for. */
+export const DEFAULT_EVENT_PASSES: Record<string, NewEventPass[]> = {
+  "annual-dinner": DEFAULT_ANNUAL_DINNER_PASSES,
+  "golf-tournament": DEFAULT_GOLF_TOURNAMENT_PASSES,
+};
+
 export class EventPassRepository extends BaseRepository {
   async findAll(filter?: EventPassFilter): Promise<EventPass[]> {
     const conditions = [];
 
     if (filter?.eventName) {
       conditions.push(eq(eventPasses.eventName, filter.eventName));
+    }
+    if (filter?.event) {
+      conditions.push(or(eq(eventPasses.eventName, filter.event), like(eventPasses.eventName, `${filter.event}-%`)));
     }
     if (filter?.status) {
       conditions.push(eq(eventPasses.status, filter.status));
@@ -231,17 +291,16 @@ export class EventPassRepository extends BaseRepository {
     return results.length > 0;
   }
 
-  async seedDefaultAnnualDinnerPasses(): Promise<EventPass[]> {
-    const existing = await this.findAll({ eventName: "annual-dinner" });
-    if (existing.length > 0) {
+  /** Adds an event's default passes when it has none yet; returns its passes either way. */
+  async seedDefaultPasses(eventName: string): Promise<EventPass[]> {
+    const defaults = DEFAULT_EVENT_PASSES[eventName];
+    const existing = await this.findAll({ eventName });
+    if (existing.length > 0 || !defaults) {
       return existing;
     }
 
-    const inserted = await this.db
-      .insert(eventPasses)
-      .values(DEFAULT_ANNUAL_DINNER_PASSES)
-      .returning();
-
-    return inserted;
+    // Two first visits at once may both get here; the unique (event, pass) index lets only one in.
+    await this.db.insert(eventPasses).values(defaults).onConflictDoNothing();
+    return this.findAll({ eventName });
   }
 }

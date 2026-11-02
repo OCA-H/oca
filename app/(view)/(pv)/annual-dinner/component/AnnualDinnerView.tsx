@@ -3,6 +3,7 @@
 import React from 'react';
 import type { EventDinnerContent } from '@/app/api/(features)/(pview)/site/schema/sectionSpecs';
 import { useAnnualDinnerHandler } from '../handler/useAnnualDinnerHandler';
+import type { DinnerGlanceGroup, DinnerGlanceTier } from '../helper/annualDinner.helper';
 import {
   AnnualDinnerHero,
   AnnualDinnerAbout,
@@ -11,7 +12,13 @@ import {
   AnnualDinnerCTA,
 } from './subcomponents';
 
-export const AnnualDinnerView: React.FC<{ content: EventDinnerContent }> = ({ content }) => {
+interface AnnualDinnerViewProps {
+  content: EventDinnerContent;
+  /** "Passes at a glance", from the passes as priced in the admin panel. */
+  glance: Record<DinnerGlanceGroup, DinnerGlanceTier>;
+}
+
+export const AnnualDinnerView: React.FC<AnnualDinnerViewProps> = ({ content, glance }) => {
   const handler = useAnnualDinnerHandler();
 
   const scrollToAnchor = (id: string) => (e: React.MouseEvent<HTMLAnchorElement>) => {
@@ -27,7 +34,7 @@ export const AnnualDinnerView: React.FC<{ content: EventDinnerContent }> = ({ co
       <AnnualDinnerHero content={content} onScrollToAnchor={scrollToAnchor} />
 
       {/* About the Dinner & Passes at a Glance */}
-      <AnnualDinnerAbout onScrollToAnchor={scrollToAnchor} />
+      <AnnualDinnerAbout glance={glance} onScrollToAnchor={scrollToAnchor} />
 
       {/* Choose Your Pass (Driven by DB API data, with dummy background when unauthenticated) */}
       <ChoosePassSection

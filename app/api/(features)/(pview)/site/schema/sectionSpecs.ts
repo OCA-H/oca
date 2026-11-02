@@ -80,6 +80,7 @@ export const SITE_SECTION_KEYS = {
   homeGallery: "home.gallery",
   aboutCommittee: "about.committee",
   eventsDinner: "events.dinner",
+  eventsGolf: "events.golf",
   eventsLunch: "events.lunch",
   eventsSports: "events.sports",
   membershipFee: "membership.fee",
@@ -283,6 +284,19 @@ export interface EventDinnerContent extends EventHero {
   dateDetail: string;
   venue: string;
   venueDetail: string;
+  priceFact: string;
+  priceDetail: string;
+  passesEyebrow: string;
+  passesTitle: string;
+  passesIntro: string;
+}
+
+/** /golf-tournament: banner, key facts and the "Choose your pass" heading. Pass prices are not here. */
+export interface EventGolfContent extends EventHero {
+  date: string;
+  dateDetail: string;
+  time: string;
+  timeDetail: string;
   priceFact: string;
   priceDetail: string;
   passesEyebrow: string;
@@ -745,9 +759,27 @@ export const SECTION_SPECS: SectionSpec[] = [
       ...eventHero("Poster"),
       ...eventFact("date", "Date", "18 December", "Friday, 2026"),
       ...eventFact("venue", "Venue", "Qutub Golf Course", "New Delhi"),
-      { key: "priceFact", label: "Price box", type: "text", max: 40, placeholder: "₹2,500", hint: "Only the text in the box. Pass prices themselves are set with the passes." },
+      { key: "priceFact", label: "Price box", type: "text", max: 40, placeholder: "₹2,500", hint: "Only the text in the box. Pass prices, and the \"at a glance\" box, follow the passes (Passes in the menu)." },
       { key: "priceDetail", label: "Price box detail", type: "text", max: 80, placeholder: "Passes from — limited numbers" },
       { key: "passesEyebrow", label: "Eyebrow", type: "text", max: 60, heading: "Choose your pass", placeholder: "Passes" },
+      { key: "passesTitle", label: "Heading", type: "text", max: 120, required: true, placeholder: "Choose your pass" },
+      { key: "passesIntro", label: "Intro", type: "textarea", max: 400 },
+    ],
+    lists: [],
+  },
+  {
+    key: SITE_SECTION_KEYS.eventsGolf,
+    page: "events",
+    label: "Golf Tournament",
+    description: "The Golf Tournament page: banner, date and time, and the “Choose your pass” heading.",
+    href: "/golf-tournament",
+    fields: [
+      ...eventHero("Poster"),
+      ...eventFact("date", "Date", "18 December", "Friday, 2026"),
+      ...eventFact("time", "Time", "11:30 am", "Onwards"),
+      { key: "priceFact", label: "Price box", type: "text", max: 40, placeholder: "₹10,000", hint: "Only the text in the box. Pass prices, and the \"at a glance\" box, follow the passes (Passes in the menu)." },
+      { key: "priceDetail", label: "Price box detail", type: "text", max: 80, placeholder: "Single · Couple ₹12,500" },
+      { key: "passesEyebrow", label: "Eyebrow", type: "text", max: 60, heading: "Choose your pass", placeholder: "Pass" },
       { key: "passesTitle", label: "Heading", type: "text", max: 120, required: true, placeholder: "Choose your pass" },
       { key: "passesIntro", label: "Intro", type: "textarea", max: 400 },
     ],
@@ -818,7 +850,7 @@ export const SECTION_SPECS: SectionSpec[] = [
         type: "emails",
         max: 1000,
         placeholder: "ocacentre@gmail.com, secretary@example.com",
-        hint: "Copied on every email the website sends: membership welcomes, Annual Dinner passes, contribution thank-yous and Suggestion Box messages. “Get in touch” messages go only to the email under Contact details. Password reset emails are never copied, as their link lets anyone set the member's password. Separate addresses with commas; leave empty to copy no one.",
+        hint: "Copied on every email the website sends: membership welcomes, Annual Dinner and Golf Tournament passes, contribution thank-yous and Suggestion Box messages. “Get in touch” messages go only to the email under Contact details. Password reset emails are never copied, as their link lets anyone set the member's password. Separate addresses with commas; leave empty to copy no one.",
       },
     ],
     lists: [],

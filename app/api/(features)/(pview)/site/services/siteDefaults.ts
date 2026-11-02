@@ -4,6 +4,7 @@ import {
   type EmailSettingsContent,
   type MembershipFeeContent,
   type EventDinnerContent,
+  type EventGolfContent,
   type EventLunchContent,
   type EventSportsContent,
   type HomeContent,
@@ -328,6 +329,24 @@ export const DINNER_DEFAULTS: EventDinnerContent = {
   passesIntro: "Passes are limited — the numbers show how many are left. Once the Early Bird passes are gone, Regular passes open.",
 };
 
+export const GOLF_DEFAULTS: EventGolfContent = {
+  eyebrow: "Save the date",
+  title: "OCA Golf Tournament",
+  lead: "Tee off from 11:30 am on 18 December, then stay for the OCA Annual Dinner. One pass covers both.",
+  image: "/images/golf-tournament-poster.jpg",
+  imageAlt:
+    "Save the date: OCA Annual Golf Tournament, 18th December 2026, 11 AM onwards, Qutub Golf Course. A poster with the Old Columbans Association crest, a line drawing of the St. Columba’s School building, and a golf green at sunset with a flag, a ball and the Qutub Minar in the distance.",
+  date: "18 December",
+  dateDetail: "Friday, 2026",
+  time: "11:30 am",
+  timeDetail: "Onwards",
+  priceFact: "₹10,000",
+  priceDetail: "Single · Couple ₹12,500",
+  passesEyebrow: "Pass",
+  passesTitle: "Choose your pass",
+  passesIntro: "One pass, two options. Every pass includes complimentary entry to the OCA Annual Dinner.",
+};
+
 export const LUNCH_DEFAULTS: EventLunchContent = {
   eyebrow: "OCA Flagship Event",
   title: "Annual Lunch Get Together",
@@ -392,6 +411,7 @@ export const SECTION_DEFAULTS: Record<SiteSectionKey, object> = {
   [SITE_SECTION_KEYS.homeGallery]: HOME_DEFAULTS.gallery,
   [SITE_SECTION_KEYS.aboutCommittee]: HOME_DEFAULTS.committee,
   [SITE_SECTION_KEYS.eventsDinner]: DINNER_DEFAULTS,
+  [SITE_SECTION_KEYS.eventsGolf]: GOLF_DEFAULTS,
   [SITE_SECTION_KEYS.eventsLunch]: LUNCH_DEFAULTS,
   [SITE_SECTION_KEYS.eventsSports]: SPORTS_DEFAULTS,
   [SITE_SECTION_KEYS.membershipFee]: MEMBERSHIP_FEE_DEFAULTS,

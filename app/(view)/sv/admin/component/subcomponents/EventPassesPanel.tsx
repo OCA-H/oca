@@ -1,8 +1,7 @@
 'use client';
 
-import React, { useState } from 'react';
-import { ROUTES } from '@/app/(view)/common/helper/routes';
-import { adminContent, type AdminPanel } from '../../content';
+import React, { useCallback, useState } from 'react';
+import { adminContent, type AdminPanel, type PassEvent } from '../../content';
 import { useRecordList, usePassEditor } from '../../handler';
 import { adminHelper } from '../../helper';
 import { adminService, type AdminEventPass, type FieldSpec } from '../../services';
@@ -20,7 +19,7 @@ const FIELD_GROUPS: { title: string; lead: string; fields: FormField[] }[] = [
     ...text.groups.booking,
     fields: [
       { key: 'status', label: text.fields.status, type: 'select', options: text.statusOptions },
-      { key: 'price', label: text.fields.price, type: 'number', min: 0 },
+      { key: 'price', label: text.fields.price, type: 'number', min: 0, hint: text.hints.price },
       { key: 'totalQuantity', label: text.fields.totalQuantity, type: 'number', min: 0 },
       { key: 'availableQuantity', label: text.fields.availableQuantity, type: 'number', min: 0, hint: text.hints.availableQuantity },
     ],
@@ -44,7 +43,7 @@ const noUpload = (): string => {
   throw new Error('No uploads here.');
 };
 
-const PassItem: React.FC<{ pass: AdminEventPass; onSaved: (pass: AdminEventPass) => void }> = ({ pass, onSaved }) => {
+const PassItem: React.FC<{ pass: AdminEventPass; page: string; onSaved: (pass: AdminEventPass) => void }> = ({ pass, page, onSaved }) => {
   const [isOpen, setIsOpen] = useState(false);
   const editor = usePassEditor(pass, onSaved);
   const bodyId = `ad-pass-${pass.id}`;
@@ -114,7 +113,7 @@ const PassItem: React.FC<{ pass: AdminEventPass; onSaved: (pass: AdminEventPass)
             <div className="ad-message">
               <div className="mp-ok" role="status" hidden={!editor.isSaved}>
                 <AdminIcon name="check" />
-                <p>{text.saved}</p>
+                <p>{text.saved(page)}</p>
               </div>
               {editor.error && !editor.isConfirming && (
                 <p className="ms-error" role="alert">
@@ -138,7 +137,7 @@ const PassItem: React.FC<{ pass: AdminEventPass; onSaved: (pass: AdminEventPass)
       {editor.isConfirming && (
         <AdminConfirmDialog
           title={text.confirm.title(pass.label)}
-          body={text.confirm.body}
+          body={text.confirm.body(page)}
           changes={adminHelper.formChanges(ALL_FIELDS, editor.saved, editor.form, { price: rupees })}
           confirmLabel={text.confirm.yes}
           busyLabel={text.confirm.busy}
@@ -153,13 +152,15 @@ const PassItem: React.FC<{ pass: AdminEventPass; onSaved: (pass: AdminEventPass)
 };
 
 interface EventPassesPanelProps {
+  passEvent: PassEvent;
   isActive: boolean;
   onBack: (panel: AdminPanel) => void;
 }
 
-/** Every Annual Dinner pass: open its card to change the price, seats, or whether it can be booked. */
-export const EventPassesPanel: React.FC<EventPassesPanelProps> = ({ isActive, onBack }) => {
-  const { items: passes, setItems, error, isLoading, reload } = useRecordList(adminService.listPasses, isActive);
+/** Every pass of one event: open its card to change the price, seats, or whether it can be booked. */
+export const EventPassesPanel: React.FC<EventPassesPanelProps> = ({ passEvent, isActive, onBack }) => {
+  const load = useCallback(() => adminService.listPasses(passEvent.event), [passEvent.event]);
+  const { items: passes, setItems, error, isLoading, reload } = useRecordList(load, isActive);
 
   const replace = (saved: AdminEventPass) => setItems((list) => list && list.map((pass) => (pass.id === saved.id ? saved : pass)));
 
@@ -169,7 +170,7 @@ export const EventPassesPanel: React.FC<EventPassesPanelProps> = ({ isActive, on
 
   return (
     <RecordPanelFrame
-      panel="passes"
+      panel={passEvent.passes}
       isActive={isActive}
       onBack={onBack}
       isLoading={isLoading}
@@ -177,7 +178,7 @@ export const EventPassesPanel: React.FC<EventPassesPanelProps> = ({ isActive, on
       error={error}
       onReload={reload}
       action={
-        <a className="mp-photo-btn ad-view" href={ROUTES.ANNUAL_DINNER} target="_blank" rel="noopener noreferrer">
+        <a className="mp-photo-btn ad-view" href={passEvent.href} target="_blank" rel="noopener noreferrer">
           {text.viewOnSite}
           <AdminIcon name="ext" />
         </a>
@@ -204,7 +205,7 @@ export const EventPassesPanel: React.FC<EventPassesPanelProps> = ({ isActive, on
           ) : (
             <ul className="ad-items">
               {passes.map((pass) => (
-                <PassItem key={pass.id} pass={pass} onSaved={replace} />
+                <PassItem key={pass.id} pass={pass} page={passEvent.page} onSaved={replace} />
               ))}
             </ul>
           )}

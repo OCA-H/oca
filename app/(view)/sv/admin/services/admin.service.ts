@@ -44,7 +44,7 @@ export interface SectionContent extends SectionSummary {
   data: SectionData;
 }
 
-/** An Annual Dinner pass, with how many were paid for and the money they took. */
+/** An event's pass (Annual Dinner, Golf Tournament), with how many were paid for and the money they took. */
 export interface AdminEventPass {
   id: number;
   eventName: string;
@@ -156,14 +156,16 @@ export const adminService = {
   saveSection: async (key: SiteSectionKey, data: SectionData): Promise<SectionContent> =>
     (await adminRequest<{ data: SectionContent }>(`/api/sv/admin/content/${encodeURIComponent(key)}`, { method: "PUT", body: data })).data,
 
-  listPasses: async (): Promise<AdminEventPass[]> =>
-    (await adminRequest<{ data: AdminEventPass[] }>("/api/sv/admin/event-passes")).data,
+  /** One event's passes, e.g. "golf-tournament". */
+  listPasses: async (event: string): Promise<AdminEventPass[]> =>
+    (await adminRequest<{ data: AdminEventPass[] }>(`/api/sv/admin/event-passes?event=${encodeURIComponent(event)}`)).data,
 
   updatePass: async (id: number, changes: EventPassChanges): Promise<AdminEventPass> =>
     (await adminRequest<{ data: AdminEventPass }>(`/api/sv/admin/event-passes/${id}`, { method: "PATCH", body: changes })).data,
 
-  listBookings: async (): Promise<AdminBooking[]> =>
-    (await adminRequest<{ data: AdminBooking[] }>("/api/sv/admin/event-pass-bookings")).data,
+  /** One event's bookings, newest first. */
+  listBookings: async (event: string): Promise<AdminBooking[]> =>
+    (await adminRequest<{ data: AdminBooking[] }>(`/api/sv/admin/event-pass-bookings?event=${encodeURIComponent(event)}`)).data,
 
   listFunds: async (): Promise<AdminFund[]> => (await adminRequest<{ data: AdminFund[] }>("/api/sv/admin/contribution-funds")).data,
 

@@ -21,13 +21,7 @@ import {
 } from "@/app/api/core/emailLayout";
 import type { EventPassBooking } from "../schema/eventPassBookingSchema";
 import { PASS_CARD_MISSING } from "./eventPassCard";
-
-/** What the printed pass says; keep in step with the artwork in public/images/passes. */
-const EVENT = {
-  name: "OCA Annual Dinner",
-  date: "Friday, 18 December 2026",
-  venue: "Qutub Golf Course, New Delhi",
-} as const;
+import { eventPassEvent } from "./eventPassEvents";
 
 /** CCAvenue sends the literal "null" for fields it has no value for. */
 const gatewayValue = (value: string | null) => (value && value !== "null" ? value : null);
@@ -53,10 +47,13 @@ export function eventPassConfirmationEmail(params: {
   contact: ContactDetailsContent;
 }): MailMessage {
   const { booking, card, includesSpouse, batch, cc, baseUrl, contact } = params;
+  // What the printed pass says; keep it in step with the artwork in public/images/passes.
+  const event = eventPassEvent(booking.eventName);
   const amount = formatRupees(booking.amount);
   const paymentMode = gatewayValue(booking.paymentMode);
   const trackingId = gatewayValue(booking.trackingId);
-  const cardFile = `OCA-Annual-Dinner-Pass-${booking.orderId}.jpg`;
+  const cardFile = `${event.cardFile}-${booking.orderId}.jpg`;
+  const includes = event.includes ? ` ${event.includes}` : "";
 
   const eventRows: EmailDetailRow[] = [
     { icon: "star", label: "Pass", value: booking.passLabel },
@@ -66,8 +63,8 @@ export function eventPassConfirmationEmail(params: {
   eventRows.push(
     { icon: "idcard", label: "Membership no.", value: booking.memberId },
     { icon: "cap", label: "Batch", value: batch || PASS_CARD_MISSING },
-    { icon: "calendar", label: "Date", value: EVENT.date },
-    { icon: "pin", label: "Venue", value: EVENT.venue }
+    { icon: "calendar", label: "Date", value: event.date },
+    { icon: "pin", label: "Venue", value: event.venue }
   );
 
   const paymentRows: EmailDetailRow[] = [
@@ -90,19 +87,19 @@ export function eventPassConfirmationEmail(params: {
   const html = emailLayout({
     baseUrl,
     contact,
-    title: `Your ${EVENT.name} pass`,
-    preheader: `Your ${booking.passLabel} pass for ${EVENT.date} is attached.`,
+    title: `Your ${event.name} pass`,
+    preheader: `Your ${booking.passLabel} pass for ${event.date} is attached.`,
     footerNote: "Please keep this email as the acknowledgement of your pass payment.",
     rows: `${emailHero({
       badge: iconBadge("check", "white", { size: 64, bg: C.brand, ring: C.gold }),
       eyebrow: "Pass confirmed",
-      title: `See you at the dinner, ${firstName(booking.fullName)}`,
-      lead: `Your ${EVENT.name} pass is attached to this email.`,
+      title: `${event.greeting}, ${firstName(booking.fullName)}`,
+      lead: `Your ${event.name} pass is attached to this email.`,
     })}
       ${emailBody(`
         ${emailParagraph(`Dear ${escapeHtml(booking.fullName)},`)}
         ${emailParagraph(
-          `Thank you for booking the ${escapeHtml(booking.passLabel)} for the ${EVENT.name}. Your digital pass, with your name on it, is attached as <b>${escapeHtml(cardFile)}</b>. Please show it on your phone, or bring a printout, at the entrance.`,
+          `Thank you for booking the ${escapeHtml(booking.passLabel)} for the ${event.name}. Your digital pass, with your name on it, is attached as <b>${escapeHtml(cardFile)}</b>. Please show it on your phone, or bring a printout, at the entrance.${escapeHtml(includes)}`,
           { soft: true, margin: "0 0 4px" }
         )}
         ${emailSubhead("Your pass")}
@@ -116,7 +113,7 @@ export function eventPassConfirmationEmail(params: {
 
   const text = `Dear ${booking.fullName},
 
-Thank you for booking the ${booking.passLabel} for the ${EVENT.name}. Your digital pass is attached as ${cardFile}. Please show it on your phone, or bring a printout, at the entrance.
+Thank you for booking the ${booking.passLabel} for the ${event.name}. Your digital pass is attached as ${cardFile}. Please show it on your phone, or bring a printout, at the entrance.${includes}
 
 YOUR PASS
 ${eventRows.map(({ label, value }) => `${label}: ${value}`).join("\n")}
@@ -134,7 +131,7 @@ ${contactSignature(contact)}`;
   return {
     to: booking.email,
     ...(cc.length > 0 && { cc }),
-    subject: `Your ${EVENT.name} pass – ${booking.passLabel}`,
+    subject: `Your ${event.name} pass – ${booking.passLabel}`,
     text,
     html,
     attachments: [{ filename: cardFile, content: card, contentType: "image/jpeg" }],

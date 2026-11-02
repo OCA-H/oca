@@ -24,6 +24,7 @@ const LB_SELECTORS = [
   '#page-news-makers .nm-photo',
   '#page-remembrance .mem-photo',
   '#page-annual-dinner .dn-poster',
+  '#page-golf-tournament .dn-poster',
   '.dn-poster',
   '.photo-tile',
   '.media-stage .photo-tile',

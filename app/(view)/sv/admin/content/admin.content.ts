@@ -2,7 +2,7 @@ import { ROUTES } from "@/app/(view)/common/helper/routes";
 import { SECTION_SPECS, type SectionSpec, type SiteSectionKey } from "@/app/api/(features)/(pview)/site/schema/sectionSpecs";
 
 /** Panels that show records from the database rather than editing a section of the site. */
-export type RecordPanel = "passes" | "bookings" | "funds";
+export type RecordPanel = "passes" | "bookings" | "golf-passes" | "golf-bookings" | "funds";
 
 /** The open panel: the dashboard, the editor for one section (its key, e.g. "home.events"), or a record panel. */
 export type AdminPanel = "dashboard" | SiteSectionKey | RecordPanel;
@@ -38,6 +38,7 @@ export type AdminIconName =
   | "moon"
   | "sun"
   | "trophy"
+  | "flag"
   | "ticket"
   | "mail"
   | "phone"
@@ -53,6 +54,7 @@ export const SECTION_ICONS: Record<SiteSectionKey, AdminIconName> = {
   "home.gallery": "image",
   "about.committee": "people",
   "events.dinner": "moon",
+  "events.golf": "flag",
   "events.lunch": "sun",
   "events.sports": "trophy",
   "membership.fee": "rupee",
@@ -64,14 +66,26 @@ export const SECTION_ICONS: Record<SiteSectionKey, AdminIconName> = {
 export const RECORD_PANELS: Record<RecordPanel, { group: string; label: string; description: string; icon: AdminIconName }> = {
   passes: {
     group: "Passes",
-    label: "Passes & seats",
+    label: "Dinner passes & seats",
     description: "Prices, seats left and which Annual Dinner passes are open for booking.",
     icon: "ticket",
   },
   bookings: {
     group: "Passes",
-    label: "Pass bookings",
+    label: "Dinner bookings",
     description: "Every Annual Dinner pass booking, with the member's details and payment.",
+    icon: "people",
+  },
+  "golf-passes": {
+    group: "Passes",
+    label: "Golf passes & seats",
+    description: "Prices, seats left and whether the Golf Tournament's Single and Couple passes are open for booking.",
+    icon: "flag",
+  },
+  "golf-bookings": {
+    group: "Passes",
+    label: "Golf bookings",
+    description: "Every Golf Tournament pass booking, with the member's details and payment.",
     icon: "people",
   },
   funds: {
@@ -84,9 +98,17 @@ export const RECORD_PANELS: Record<RecordPanel, { group: string; label: string; 
 
 /** The record panels' menu groups, in order, with their panels. */
 export const RECORD_GROUPS: { group: string; icon: AdminIconName; panels: RecordPanel[] }[] = [
-  { group: "Passes", icon: "ticket", panels: ["passes", "bookings"] },
+  { group: "Passes", icon: "ticket", panels: ["passes", "bookings", "golf-passes", "golf-bookings"] },
   { group: "Contributions", icon: "heart", panels: ["funds"] },
 ];
+
+/** The events whose passes the admin panel manages: each has a passes panel and a bookings panel. */
+export const PASS_EVENTS = [
+  { event: "annual-dinner", page: "Annual Dinner", href: ROUTES.ANNUAL_DINNER, passes: "passes", bookings: "bookings" },
+  { event: "golf-tournament", page: "Golf Tournament", href: ROUTES.GOLF_TOURNAMENT, passes: "golf-passes", bookings: "golf-bookings" },
+] as const satisfies readonly { event: string; page: string; href: string; passes: RecordPanel; bookings: RecordPanel }[];
+
+export type PassEvent = (typeof PASS_EVENTS)[number];
 
 /** A menu entry swaps the panel in place, leaves the admin panel, or is not ready yet. */
 export interface AdminNavItem {
@@ -239,11 +261,11 @@ export const adminContent = {
     soldOut: "Sold out",
     groups: {
       booking: { title: "Booking & seats", lead: "What members pay, and how many can still book." },
-      card: { title: "Shown on the pass card", lead: "How this pass reads on the Annual Dinner page." },
+      card: { title: "Shown on the pass card", lead: "How this pass reads on its event page." },
     },
     confirm: {
       title: (label: string) => `Save changes to ${label}?`,
-      body: "The Annual Dinner page shows these straight away.",
+      body: (page: string) => `The ${page} page shows these straight away.`,
       yes: "Save changes",
       busy: "Saving…",
     },
@@ -264,13 +286,14 @@ export const adminContent = {
       description: "Description",
     },
     hints: {
+      price: "Charged at checkout, and shown on the pass card and in the page's \"at a glance\" box.",
       availableQuantity: "Goes down by one with every paid booking.",
       statusNote: "Shown on the pass card. A note such as \"42 left\" keeps counting down by itself.",
     },
     save: "Save pass",
     saving: "Saving…",
     reset: "Undo changes",
-    saved: "Saved. The Annual Dinner page now shows your changes.",
+    saved: (page: string) => `Saved. The ${page} page now shows your changes.`,
   },
 
   bookings: {

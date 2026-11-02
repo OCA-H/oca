@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { SECTION_SPECS } from '@/app/api/(features)/(pview)/site/schema/sectionSpecs';
+import { PASS_EVENTS } from '../content';
 import { useAdminHandler } from '../handler';
 import {
   AdminDashboardPanel,
@@ -37,8 +38,12 @@ export const AdminView: React.FC = () => {
             {SECTION_SPECS.map((spec) => (
               <SectionEditorPanel key={spec.key} spec={spec} isActive={panel === spec.key} onBack={back} onSaved={markSaved} />
             ))}
-            <EventPassesPanel isActive={panel === 'passes'} onBack={back} />
-            <EventBookingsPanel isActive={panel === 'bookings'} onBack={back} />
+            {PASS_EVENTS.map((passEvent) => (
+              <React.Fragment key={passEvent.event}>
+                <EventPassesPanel passEvent={passEvent} isActive={panel === passEvent.passes} onBack={back} />
+                <EventBookingsPanel passEvent={passEvent} isActive={panel === passEvent.bookings} onBack={back} />
+              </React.Fragment>
+            ))}
             <ContributionHeadsPanel isActive={panel === 'funds'} onBack={back} />
           </main>
         </div>

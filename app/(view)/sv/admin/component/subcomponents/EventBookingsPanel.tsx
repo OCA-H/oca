@@ -1,7 +1,7 @@
 'use client';
 
-import React, { useState } from 'react';
-import { adminContent, type AdminPanel } from '../../content';
+import React, { useCallback, useState } from 'react';
+import { adminContent, type AdminPanel, type PassEvent } from '../../content';
 import { useRecordList } from '../../handler';
 import { adminHelper } from '../../helper';
 import { adminService, type AdminBooking } from '../../services';
@@ -16,13 +16,15 @@ const matches = (booking: AdminBooking, query: string) =>
     .some((value) => value.toLowerCase().includes(query));
 
 interface EventBookingsPanelProps {
+  passEvent: PassEvent;
   isActive: boolean;
   onBack: (panel: AdminPanel) => void;
 }
 
-/** Every pass booking, newest first, filtered by payment status and a search. */
-export const EventBookingsPanel: React.FC<EventBookingsPanelProps> = ({ isActive, onBack }) => {
-  const { items: bookings, error, isLoading, reload } = useRecordList(adminService.listBookings, isActive);
+/** Every pass booking for one event, newest first, filtered by payment status and a search. */
+export const EventBookingsPanel: React.FC<EventBookingsPanelProps> = ({ passEvent, isActive, onBack }) => {
+  const load = useCallback(() => adminService.listBookings(passEvent.event), [passEvent.event]);
+  const { items: bookings, error, isLoading, reload } = useRecordList(load, isActive);
   const [status, setStatus] = useState('');
   const [query, setQuery] = useState('');
 
@@ -33,7 +35,7 @@ export const EventBookingsPanel: React.FC<EventBookingsPanelProps> = ({ isActive
 
   return (
     <RecordPanelFrame
-      panel="bookings"
+      panel={passEvent.bookings}
       isActive={isActive}
       onBack={onBack}
       isLoading={isLoading}

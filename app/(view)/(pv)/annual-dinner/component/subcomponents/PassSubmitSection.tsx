@@ -13,6 +13,9 @@ interface PassSubmitSectionProps {
   isSubmitting: boolean;
   error: string | null;
   onReset: () => void;
+  /** Shown above the member's details, e.g. what else the pass covers. */
+  notice?: React.ReactNode;
+  emptyText?: string;
 }
 
 export const PassSubmitSection: React.FC<PassSubmitSectionProps> = ({
@@ -23,10 +26,13 @@ export const PassSubmitSection: React.FC<PassSubmitSectionProps> = ({
   isSubmitting,
   error,
   onReset,
+  notice,
+  emptyText = 'Choose a pass above to see your total.',
 }) => {
   const contact = useContact();
   return (
     <div className="cf-submit">
+      {notice}
       {user && (
         <div className="dn-member-card">
           <div className="dn-member-avatar" aria-hidden="true">
@@ -56,12 +62,16 @@ export const PassSubmitSection: React.FC<PassSubmitSectionProps> = ({
       <div className="dn-summary" aria-live="polite">
         <div className="dn-lines" id="dn-lines">
           {summaryLines.length === 0 ? (
-            <p className="dn-empty">Choose a pass above to see your total.</p>
+            <p className="dn-empty">{emptyText}</p>
           ) : (
             summaryLines.map((line, idx) => (
               <div className="dn-line" key={idx}>
                 <span>{line.label}</span>
-                <b>&#8377;{line.amount.toLocaleString('en-IN')}</b>
+                {line.included ? (
+                  <b style={{ color: 'var(--brand-mid)' }}>Included</b>
+                ) : (
+                  <b>&#8377;{line.amount.toLocaleString('en-IN')}</b>
+                )}
               </div>
             ))
           )}

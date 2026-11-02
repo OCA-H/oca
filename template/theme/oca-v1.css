@@ -5525,6 +5525,134 @@ section[id] {
   }
 }
 
+/* ---------- OCA Golf Tournament (built from the Annual Dinner components) ---------- */
+#page-golf-tournament .dn-passes-wrap {
+  max-width: 980px;
+}
+
+.gf-form {
+  max-width: 980px;
+}
+
+.gf-form .dn-tiers {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 26px;
+  position: relative;
+}
+
+/* the "+" that joins the golf pass to the dinner it includes */
+.gf-form .dn-tiers::after {
+  content: "+";
+  position: absolute;
+  left: 50%;
+  top: 46px;
+  z-index: 4;
+  width: 44px;
+  height: 44px;
+  margin: -22px 0 0 -22px;
+  border-radius: 50%;
+  background: #fff;
+  border: 2px solid var(--gold);
+  color: var(--gold-dark);
+  font: 800 28px/40px var(--sans);
+  text-align: center;
+  box-shadow: 0 6px 16px rgba(201, 162, 39, .3);
+}
+
+.gf-form .dn-pass {
+  padding: 20px 22px;
+}
+
+.gf-form .dn-price {
+  font-size: 22px;
+}
+
+/* the dinner card is information, not a choice: no hover/selected state */
+.dn-tier.is-included {
+  cursor: default;
+}
+
+.dn-tier.is-included .dn-locked {
+  background: linear-gradient(180deg, #FFFDF3, #FBF3D6);
+  border-top-color: rgba(201, 162, 39, .5);
+  color: var(--text-soft);
+}
+
+.dn-tier.is-included .dn-locked b {
+  font-size: 17px;
+}
+
+.dn-tier.is-included .dn-locked p {
+  font-size: 14px;
+}
+
+.dn-tier.is-included .dn-locked-tag {
+  background: rgba(11, 60, 30, .1);
+  color: #0B3C1E;
+}
+
+.dn-tier.is-included .dn-locked-tag svg {
+  width: 14px;
+  height: 14px;
+}
+
+.gf-note {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  margin: 0 0 16px;
+  padding: 16px 20px;
+  border-radius: var(--radius-m);
+  background: #FFFBEA;
+  border: 1px solid rgba(201, 162, 39, .42);
+}
+
+.gf-note-ico {
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #F2D060, #C9A227);
+  color: #0B3C1E;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.gf-note-ico svg {
+  width: 19px;
+  height: 19px;
+}
+
+.gf-note p {
+  margin: 0;
+  font-size: 14.5px;
+  line-height: 1.6;
+  color: var(--text);
+}
+
+.gf-note b {
+  color: var(--gold-dark);
+}
+
+@media (min-width:981px) {
+  #page-golf-tournament .cta-band h2.one-line {
+    max-width: none;
+    white-space: nowrap;
+  }
+}
+
+@media (max-width:760px) {
+  .gf-form .dn-tiers {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .gf-form .dn-tiers::after {
+    display: none;
+  }
+}
+
 /* ---------- merged page: executive-committee ---------- */
 section[id^="ec-"] {
   scroll-margin-top: 80px;

@@ -4,7 +4,22 @@ import React from 'react';
 import Link from 'next/link';
 import { ROUTES } from '@/app/(view)/common/helper/routes';
 
-export const PassLockOverlay: React.FC = () => {
+const DINNER_PERKS = ['Early bird tier pricing', 'Spouse & family add-on passes', 'Sponsor revered Columban teachers'];
+
+interface PassLockOverlayProps {
+  /** Who the passes are for, under the heading. */
+  description?: string;
+  /** Where sign-in brings the member back to. */
+  redirect?: string;
+  perks?: string[];
+}
+
+/** Over the blurred pass form while signed out. Defaults to the Annual Dinner's wording. */
+export const PassLockOverlay: React.FC<PassLockOverlayProps> = ({
+  description = 'Become a member or sign in to buy the pass. Passes for the OCA Annual Dinner are reserved exclusively for Old Columbans and their guests.',
+  redirect = ROUTES.ANNUAL_DINNER_PASSES,
+  perks = DINNER_PERKS,
+}) => {
   return (
     <div className="dn-passes-lock-overlay" aria-live="polite">
       <div className="dn-passes-lock-card">
@@ -17,13 +32,10 @@ export const PassLockOverlay: React.FC = () => {
         </div>
         <span className="dn-passes-lock-badge">Members Only</span>
         <h3 className="dn-passes-lock-title">Choose your pass</h3>
-        <p className="dn-passes-lock-desc">
-          Become a member or sign in to buy the pass. Passes for the OCA Annual Dinner are reserved exclusively for Old
-          Columbans and their guests.
-        </p>
+        <p className="dn-passes-lock-desc">{description}</p>
         <div className="dn-passes-lock-actions">
           <Link
-            href={`${ROUTES.MEMBER_SIGNIN}?redirect=${encodeURIComponent(ROUTES.ANNUAL_DINNER_PASSES)}`}
+            href={`${ROUTES.MEMBER_SIGNIN}?redirect=${encodeURIComponent(redirect)}`}
             className="btn btn-primary"
           >
             Sign in to buy pass
@@ -33,24 +45,14 @@ export const PassLockOverlay: React.FC = () => {
           </Link>
         </div>
         <div className="dn-passes-lock-perks">
-          <span>
-            <svg viewBox="0 0 24 24" fill="none" width="16" height="16">
-              <path d="M20 6L9 17l-5-5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-            Early bird tier pricing
-          </span>
-          <span>
-            <svg viewBox="0 0 24 24" fill="none" width="16" height="16">
-              <path d="M20 6L9 17l-5-5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-            Spouse &amp; family add-on passes
-          </span>
-          <span>
-            <svg viewBox="0 0 24 24" fill="none" width="16" height="16">
-              <path d="M20 6L9 17l-5-5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-            Sponsor revered Columban teachers
-          </span>
+          {perks.map((perk) => (
+            <span key={perk}>
+              <svg viewBox="0 0 24 24" fill="none" width="16" height="16">
+                <path d="M20 6L9 17l-5-5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+              {perk}
+            </span>
+          ))}
         </div>
       </div>
     </div>

@@ -7,8 +7,7 @@ import { EventPassService } from "../services/eventPassService";
 import { EventPassBookingService } from "../services/eventPassBookingService";
 import { EventPassRepository } from "../repository/eventPassRepository";
 import { EventPassBookingRepository } from "../repository/eventPassBookingRepository";
-
-const PAYMENT_STATUS_PATH = "/annual-dinner/payment-status";
+import { paymentStatusPath } from "../services/eventPassEvents";
 
 /** Prices are charged from event_passes, so only admins may change them. */
 const requireAdmin = (request: Request) =>
@@ -107,21 +106,30 @@ export class EventPassBookingController extends BaseController {
   /**
    * POST /api/event-pass/payment/response
    * CCAvenue's redirect_url and cancel_url. The browser arrives here from the gateway, so this
-   * always redirects to the payment status page instead of returning JSON.
+   * always redirects to the payment status page of the order's event instead of returning JSON.
    */
   async paymentResponse(request: Request): Promise<Response> {
-    const statusUrl = new URL(PAYMENT_STATUS_PATH, this.baseUrl(request));
     let form: FormData | null = null;
+    let orderId: string | null = null;
+    let eventName: string | null = null;
+    let failed = false;
     try {
       form = await this.readForm(request);
       const booking = await this.service.handleGatewayResponse(String(form.get("encResp") ?? ""), this.baseUrl(request));
-      statusUrl.searchParams.set("order", booking.orderId);
+      orderId = booking.orderId;
+      eventName = booking.eventName;
     } catch (error) {
       console.error("CCAvenue pass response failed:", error);
+      failed = true;
       const orderNo = form?.get("orderNo");
-      if (typeof orderNo === "string" && orderNo) statusUrl.searchParams.set("order", orderNo);
-      statusUrl.searchParams.set("error", "1");
+      if (typeof orderNo === "string" && orderNo) {
+        orderId = orderNo;
+        eventName = await this.service.eventNameOf(orderNo).catch(() => null);
+      }
     }
+    const statusUrl = new URL(paymentStatusPath(eventName), this.baseUrl(request));
+    if (orderId) statusUrl.searchParams.set("order", orderId);
+    if (failed) statusUrl.searchParams.set("error", "1");
     return Response.redirect(statusUrl, 303);
   }
 

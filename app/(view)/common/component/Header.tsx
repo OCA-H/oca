@@ -18,6 +18,7 @@ const NAV_MAP: Record<string, string> = {
   'donation': 'membership',
   'annual-lunch': 'events',
   'annual-dinner': 'events',
+  'golf-tournament': 'events',
   'sports': 'events',
   'member-signin': 'membership',
   'partner-organization': 'membership',
@@ -126,6 +127,7 @@ export const Header: React.FC<HeaderProps> = ({ activeRoute }) => {
               <span className={`nav-link ${activeNav === 'events' ? 'active' : ''}`} data-nav="events">Events <svg viewBox="0 0 12 8" fill="none"><path d="M1 1l5 5 5-5" stroke="currentColor" strokeWidth="1.6" /></svg></span>
               <div className="dropdown">
                 <Link href={ROUTES.ANNUAL_DINNER} onClick={() => handleLinkClick(ROUTES.ANNUAL_DINNER)}>OCA – Annual Dinner Get Together</Link>
+                <Link href={ROUTES.GOLF_TOURNAMENT} onClick={() => handleLinkClick(ROUTES.GOLF_TOURNAMENT)}>OCA Golf Tournament</Link>
                 <Link href={ROUTES.ANNUAL_LUNCH} onClick={() => handleLinkClick(ROUTES.ANNUAL_LUNCH)}>OCA – Annual Lunch Get Together</Link>
                 <Link href={ROUTES.SPORTS} onClick={() => handleLinkClick(ROUTES.SPORTS)}>OCA Sports</Link>
                 <div className="has-flyout">
@@ -287,6 +289,7 @@ export const Header: React.FC<HeaderProps> = ({ activeRoute }) => {
 
           <MobileGroup label="Events" open={openGroup === 'events'} onToggle={() => toggleGroup('events')}>
             <Link className="sub" href={ROUTES.ANNUAL_DINNER} onClick={() => handleLinkClick(ROUTES.ANNUAL_DINNER)}>Annual Dinner Get Together</Link>
+            <Link className="sub" href={ROUTES.GOLF_TOURNAMENT} onClick={() => handleLinkClick(ROUTES.GOLF_TOURNAMENT)}>OCA Golf Tournament</Link>
             <Link className="sub" href={ROUTES.ANNUAL_LUNCH} onClick={() => handleLinkClick(ROUTES.ANNUAL_LUNCH)}>Annual Lunch Get Together</Link>
             <Link className="sub" href={ROUTES.SPORTS} onClick={() => handleLinkClick(ROUTES.SPORTS)}>OCA Sports</Link>
             <span className="sub-head">Gallery</span>

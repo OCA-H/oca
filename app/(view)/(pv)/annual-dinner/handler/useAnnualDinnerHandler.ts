@@ -8,6 +8,8 @@ import { useAuth, type AuthUser } from '@/app/(view)/common/helper/useAuth';
 export interface SummaryLine {
   label: string;
   amount: number;
+  /** Comes with the pass at no charge: shows "Included" instead of an amount. */
+  included?: boolean;
 }
 
 export function useAnnualDinnerHandler() {

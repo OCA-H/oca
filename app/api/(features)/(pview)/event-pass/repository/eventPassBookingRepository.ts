@@ -1,5 +1,5 @@
 import "server-only";
-import { and, count, desc, eq, gt, ne, sql, sum } from "drizzle-orm";
+import { and, count, desc, eq, gt, like, ne, or, sql, sum } from "drizzle-orm";
 import { BaseRepository } from "@/app/api/core/baseRepository";
 import { eventPasses } from "../schema/eventPassSchema";
 import {
@@ -18,10 +18,16 @@ export interface PassSales {
 }
 
 export class EventPassBookingRepository extends BaseRepository {
-  /** Newest first, optionally only one event's or one status's. */
-  async findAll(filter?: { eventName?: string; status?: string }): Promise<EventPassBooking[]> {
+  /**
+   * Newest first, optionally only one event's or one status's. `event` also takes in the event's
+   * past years: "annual-dinner" matches "annual-dinner-2024".
+   */
+  async findAll(filter?: { eventName?: string; event?: string; status?: string }): Promise<EventPassBooking[]> {
     const conditions = [];
     if (filter?.eventName) conditions.push(eq(eventPassBookings.eventName, filter.eventName));
+    if (filter?.event) {
+      conditions.push(or(eq(eventPassBookings.eventName, filter.event), like(eventPassBookings.eventName, `${filter.event}-%`)));
+    }
     if (filter?.status) conditions.push(eq(eventPassBookings.status, filter.status));
     return this.db
       .select()

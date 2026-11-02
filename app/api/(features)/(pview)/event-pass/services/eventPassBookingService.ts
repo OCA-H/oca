@@ -271,7 +271,7 @@ export class EventPassBookingService {
       ]);
       const includesSpouse = pass?.includesSpouse ?? Boolean(booking.spouseName);
       const batch = user?.batchYear;
-      const card = await renderPassCard(passCardDesign({ passId: booking.passId, includesSpouse }), {
+      const card = await renderPassCard(passCardDesign({ eventName: booking.eventName, passId: booking.passId, includesSpouse }), {
         memberName: booking.fullName,
         spouseName: booking.spouseName,
         memberId: booking.memberId,
@@ -283,6 +283,11 @@ export class EventPassBookingService {
     } catch (error) {
       console.error(`Pass order ${booking.orderId}: pass email to ${booking.email} failed:`, error);
     }
+  }
+
+  /** The event an order is for, or null when there is no such order. */
+  async eventNameOf(orderId: string): Promise<string | null> {
+    return (await this.bookings.findByOrderId(orderId.trim()))?.eventName ?? null;
   }
 
   async getOrderSummary(orderId: string): Promise<EventPassOrderSummary> {

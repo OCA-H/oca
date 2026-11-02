@@ -2,12 +2,19 @@
 
 import React from 'react';
 import { ROUTES } from '@/app/(view)/common/helper/routes';
+import type { DinnerGlanceGroup, DinnerGlanceTier } from '../../helper/annualDinner.helper';
+
+/** A tier's price, muted while it is not open. */
+const GlancePrice: React.FC<{ tier: DinnerGlanceTier }> = ({ tier }) =>
+  tier.isOpen ? <em>{tier.price}</em> : <em className="dn-muted">{tier.price}</em>;
 
 interface AnnualDinnerAboutProps {
+  /** Each tier's detail and price, as set in the admin panel (Passes → Dinner passes & seats). */
+  glance: Record<DinnerGlanceGroup, DinnerGlanceTier>;
   onScrollToAnchor: (id: string) => (e: React.MouseEvent<HTMLAnchorElement>) => void;
 }
 
-export const AnnualDinnerAbout: React.FC<AnnualDinnerAboutProps> = ({ onScrollToAnchor }) => {
+export const AnnualDinnerAbout: React.FC<AnnualDinnerAboutProps> = ({ glance, onScrollToAnchor }) => {
   return (
     <section className="content-section">
       <div className="wrap split-2">
@@ -45,9 +52,9 @@ export const AnnualDinnerAbout: React.FC<AnnualDinnerAboutProps> = ({ onScrollTo
               </span>
               <span className="dn-g-t">
                 <b>Younger Batches</b>
-                <small>Batch 2015&ndash;25 only</small>
+                <small>{glance.younger.detail}</small>
               </span>
-              <em>from &#8377;2,500</em>
+              <GlancePrice tier={glance.younger} />
             </li>
             <li className="tier-eb">
               <span className="dn-g-ico">
@@ -63,9 +70,9 @@ export const AnnualDinnerAbout: React.FC<AnnualDinnerAboutProps> = ({ onScrollTo
               </span>
               <span className="dn-g-t">
                 <b>Early Bird</b>
-                <small>All batches</small>
+                <small>{glance.early.detail}</small>
               </span>
-              <em>from &#8377;3,500</em>
+              <GlancePrice tier={glance.early} />
             </li>
             <li className="tier-reg">
               <span className="dn-g-ico">
@@ -82,9 +89,9 @@ export const AnnualDinnerAbout: React.FC<AnnualDinnerAboutProps> = ({ onScrollTo
               </span>
               <span className="dn-g-t">
                 <b>Regular</b>
-                <small>All batches &middot; opens after Early Bird</small>
+                <small>{glance.regular.detail}</small>
               </span>
-              <em className="dn-muted">Opens later</em>
+              <GlancePrice tier={glance.regular} />
             </li>
             <li className="tier-gold">
               <span className="dn-g-ico">
@@ -99,9 +106,9 @@ export const AnnualDinnerAbout: React.FC<AnnualDinnerAboutProps> = ({ onScrollTo
               </span>
               <span className="dn-g-t">
                 <b>Golden Pass</b>
-                <small>All batches &middot; with spouse</small>
+                <small>{glance.golden.detail}</small>
               </span>
-              <em>&#8377;15,000</em>
+              <GlancePrice tier={glance.golden} />
             </li>
           </ul>
           <a className="btn btn-primary" href={ROUTES.ANNUAL_DINNER_PASSES} onClick={onScrollToAnchor('passes')}>

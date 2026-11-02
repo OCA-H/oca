@@ -10,6 +10,8 @@ export * as donation from './donation';
 export { DonationView } from './donation';
 export * as annualDinner from './annual-dinner';
 export { AnnualDinnerView } from './annual-dinner';
+export * as golfTournament from './golf-tournament';
+export { GolfTournamentView } from './golf-tournament';
 export * as sports from './sports';
 export { SportsView } from './sports';
 export * as annualLunch from './annual-lunch';

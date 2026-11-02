@@ -5,7 +5,7 @@ import { HttpError } from "@/app/api/core/httpError";
 import { storage, type StoredFile } from "@/app/api/core/storage";
 import { assertUploadSize, detectUploadKind, wrongUploadKind, type FileKind, type UploadRules } from "@/app/api/core/fileUpload";
 import { SiteContentRepository } from "../repository/siteContentRepository";
-import { SECTION_SPECS, SITE_SECTION_KEYS, sectionSpec, type CommitteeContent, type ContactDetailsContent, type EmailSettingsContent, type EventDinnerContent, type MembershipFeeContent, type EventLunchContent, type EventSportsContent, type HomeContent, type SectionSpec, type SiteSectionKey } from "../schema/sectionSpecs";
+import { SECTION_SPECS, SITE_SECTION_KEYS, sectionSpec, type CommitteeContent, type ContactDetailsContent, type EmailSettingsContent, type EventDinnerContent, type EventGolfContent, type MembershipFeeContent, type EventLunchContent, type EventSportsContent, type HomeContent, type SectionSpec, type SiteSectionKey } from "../schema/sectionSpecs";
 import { MEMBERSHIP_FEE_DEFAULTS, SECTION_DEFAULTS } from "./siteDefaults";
 import { splitEmails, validateSection } from "./sectionValidator";
 
@@ -150,6 +150,7 @@ async function getSectionContent(key: SiteSectionKey): Promise<Record<string, un
 }
 
 export const getDinnerContent = async () => (await getSectionContent(SITE_SECTION_KEYS.eventsDinner)) as unknown as EventDinnerContent;
+export const getGolfContent = async () => (await getSectionContent(SITE_SECTION_KEYS.eventsGolf)) as unknown as EventGolfContent;
 export const getLunchContent = async () => (await getSectionContent(SITE_SECTION_KEYS.eventsLunch)) as unknown as EventLunchContent;
 export const getSportsContent = async () => (await getSectionContent(SITE_SECTION_KEYS.eventsSports)) as unknown as EventSportsContent;
 /** Every committee term, the current one first, as set in the admin panel (About → Executive Committee). */

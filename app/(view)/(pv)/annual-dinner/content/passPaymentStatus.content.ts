@@ -1,6 +1,32 @@
 import { ROUTES } from '@/app/(view)/common/helper/routes';
 
+interface PassPaymentStateCopy {
+  tone: 'success' | 'danger' | 'neutral' | 'warning';
+  badge: string;
+  /** "{name}" is replaced with the member's first name. */
+  title: string;
+  lead: string;
+  receiptStatus: string;
+  nextTitle: string;
+  nextSteps: readonly { title: string; desc: string }[];
+  primary: { label: string; href: string };
+  secondary: { label: string; href: string };
+}
+
+/** The payment status page's wording for one event's passes. */
+export interface PassPaymentStatusContent {
+  /** The event, for the breadcrumb. */
+  event: { label: string; href: string };
+  loading: string;
+  receiptTitle: string;
+  totalLabel: { paid: string; other: string };
+  printLabel: string;
+  help: { title: string; desc: string };
+  states: Record<'paid' | 'failed' | 'cancelled' | 'pending' | 'unknown', PassPaymentStateCopy>;
+}
+
 export const PASS_PAYMENT_STATUS_CONTENT = {
+  event: { label: 'Annual Dinner', href: ROUTES.ANNUAL_DINNER },
   loading: 'Confirming your payment with CCAvenue…',
   receiptTitle: 'Annual Dinner pass',
   totalLabel: { paid: 'Amount paid', other: 'Amount due' },
@@ -83,4 +109,4 @@ export const PASS_PAYMENT_STATUS_CONTENT = {
       secondary: { label: 'Back to home', href: ROUTES.HOME },
     },
   },
-} as const;
+} as const satisfies PassPaymentStatusContent;

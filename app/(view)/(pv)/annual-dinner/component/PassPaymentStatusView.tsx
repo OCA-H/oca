@@ -5,17 +5,19 @@ import Link from 'next/link';
 import { ROUTES } from '@/app/(view)/common/helper/routes';
 import { useContact } from '@/app/(view)/common/component/ContactProvider';
 import { PaymentStatusIcon } from '@/app/(view)/(pv)/membership/component/subcomponents/PaymentStatusIcon';
-import { PASS_PAYMENT_STATUS_CONTENT } from '../content/passPaymentStatus.content';
+import { PASS_PAYMENT_STATUS_CONTENT, type PassPaymentStatusContent } from '../content/passPaymentStatus.content';
 import { formatRupees } from '../helper/annualDinner.helper';
 import { usePassPaymentStatusHandler } from '../handler/usePassPaymentStatusHandler';
 
-export const PassPaymentStatusView: React.FC = () => {
+/** The result of a pass payment. Defaults to the Annual Dinner's wording; other events pass their own. */
+export const PassPaymentStatusView: React.FC<{ content?: PassPaymentStatusContent }> = ({
+  content = PASS_PAYMENT_STATUS_CONTENT,
+}) => {
   const { orderId, order, loading, state, isPaid, receiptRows, refresh, printReceipt } =
     usePassPaymentStatusHandler();
-  const content = PASS_PAYMENT_STATUS_CONTENT;
   const copy = content.states[state];
   const contact = useContact();
-  const helpSubject = `Annual Dinner pass${order?.orderId ?? orderId ? ` – ${order?.orderId ?? orderId}` : ''}`;
+  const helpSubject = `${content.receiptTitle}${order?.orderId ?? orderId ? ` – ${order?.orderId ?? orderId}` : ''}`;
 
   return (
     <>
@@ -24,7 +26,7 @@ export const PassPaymentStatusView: React.FC = () => {
         <div className="wrap">
           <Link href={ROUTES.HOME}>Home</Link>
           <span className="sep">/</span>
-          <Link href={ROUTES.ANNUAL_DINNER}>Annual Dinner</Link>
+          <Link href={content.event.href}>{content.event.label}</Link>
           <span className="sep">/</span>
           <span>Payment status</span>
         </div>

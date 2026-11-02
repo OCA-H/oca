@@ -1,18 +1,19 @@
 import "server-only";
 import { HttpError, type FieldErrors } from "@/app/api/core/httpError";
-import { EventPassRepository, type EventPassFilter } from "../repository/eventPassRepository";
+import { DEFAULT_EVENT_PASSES, EventPassRepository, type EventPassFilter } from "../repository/eventPassRepository";
 import type { EventPass, NewEventPass } from "../schema/eventPassSchema";
+import { refreshPassPrices } from "./passPrices";
 
 export class EventPassService {
   constructor(private readonly repository: EventPassRepository) {}
 
   async list(filter?: EventPassFilter): Promise<EventPass[]> {
-    // If requesting annual-dinner (or all) and no records exist yet, auto-seed defaults so the UI is ready
-    if (!filter?.eventName || filter.eventName === "annual-dinner") {
-      const existing = await this.repository.findAll({ eventName: "annual-dinner" });
-      if (existing.length === 0) {
-        await this.repository.seedDefaultAnnualDinnerPasses();
-      }
+    // An event with built-in passes (or every event, when none is named) gets them the first time
+    // they are asked for, so its page is ready before an admin has set anything up.
+    const requested = filter?.eventName ?? filter?.event;
+    const events = requested ? [requested] : Object.keys(DEFAULT_EVENT_PASSES);
+    for (const eventName of events) {
+      if (DEFAULT_EVENT_PASSES[eventName]) await this.repository.seedDefaultPasses(eventName);
     }
 
     return await this.repository.findAll(filter);
@@ -94,7 +95,9 @@ export class EventPassService {
       metadata: payload.metadata && typeof payload.metadata === "object" ? (payload.metadata as Record<string, unknown>) : null,
     };
 
-    return await this.repository.create(newPassData);
+    const created = await this.repository.create(newPassData);
+    refreshPassPrices();
+    return created;
   }
 
   async update(id: number, payload: Record<string, unknown>): Promise<EventPass> {
@@ -129,6 +132,7 @@ export class EventPassService {
 
     const updated = await this.repository.update(id, updateData);
     if (!updated) throw HttpError.notFound(`Could not update pass with id ${id}.`);
+    refreshPassPrices();
     return updated;
   }
 
@@ -181,6 +185,8 @@ export class EventPassService {
       status: status as string,
     });
     if (!updated) throw HttpError.notFound("That pass no longer exists.");
+    // The event page's "at a glance" box shows the new price on the next visit.
+    refreshPassPrices();
     return updated;
   }
 
@@ -188,12 +194,10 @@ export class EventPassService {
     const existing = await this.repository.findById(id);
     if (!existing) throw HttpError.notFound(`Pass with id ${id} not found.`);
     await this.repository.delete(id);
+    refreshPassPrices();
   }
 
   async seed(eventName?: string): Promise<EventPass[]> {
-    if (!eventName || eventName === "annual-dinner") {
-      return await this.repository.seedDefaultAnnualDinnerPasses();
-    }
-    return [];
+    return await this.repository.seedDefaultPasses(eventName || "annual-dinner");
   }
 }

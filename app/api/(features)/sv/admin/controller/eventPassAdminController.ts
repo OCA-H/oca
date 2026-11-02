@@ -5,9 +5,17 @@ import { eventPassRepository, eventPassService } from "@/app/api/(features)/(pvi
 import { EventPassBookingRepository } from "@/app/api/(features)/(pview)/event-pass/repository/eventPassBookingRepository";
 import type { EventPass } from "@/app/api/(features)/(pview)/event-pass/schema/eventPassSchema";
 import type { EventPassBooking } from "@/app/api/(features)/(pview)/event-pass/schema/eventPassBookingSchema";
+import { eventPassEvent, isEventPassEventName } from "@/app/api/(features)/(pview)/event-pass/services/eventPassEvents";
 import { withAdminAuth } from "../middleware/adminAuth";
 
 const BOOKING_STATUSES = ["pending", "paid", "failed", "cancelled"];
+
+/** ?event=golf-tournament: one event's passes or bookings (with its past years); every event when left out. */
+const eventFilter = (request: Request): string | undefined => {
+  const event = new URL(request.url).searchParams.get("event") || undefined;
+  if (event && !isEventPassEventName(event)) throw HttpError.badRequest("Unknown event.");
+  return event;
+};
 
 type PassContext = { params: Promise<{ id: string }> };
 
@@ -65,10 +73,15 @@ export class EventPassAdminController extends BaseController {
     super();
   }
 
-  /** GET /api/sv/admin/event-passes: every pass, with seats and sales. */
-  listPasses = withAdminAuth(() =>
+  /** GET /api/sv/admin/event-passes?event=golf-tournament: the event's passes, with seats and sales. */
+  listPasses = withAdminAuth((request) =>
     this.handle(async () => {
-      const [passes, sales] = await Promise.all([eventPassRepository.findAll(), this.bookings.paidSalesByPass()]);
+      const event = eventFilter(request);
+      // Through the service, so an event's built-in passes are there even before its page is visited.
+      const [passes, sales] = await Promise.all([
+        event ? eventPassService.list({ event }) : eventPassRepository.findAll(),
+        this.bookings.paidSalesByPass(),
+      ]);
       return this.ok({ data: passes.map((pass) => toAdminPass(pass, sales.find((s) => s.eventPassId === pass.id))) });
     })
   );
@@ -80,16 +93,17 @@ export class EventPassAdminController extends BaseController {
       if (!Number.isInteger(id) || id <= 0) throw HttpError.badRequest("Invalid pass id.");
       const pass = await eventPassService.updateFromAdmin(id, await this.readJson(request));
       const sales = (await this.bookings.paidSalesByPass()).find((s) => s.eventPassId === pass.id);
-      return this.ok({ message: "Saved. The Annual Dinner page now shows your changes.", data: toAdminPass(pass, sales) });
+      return this.ok({ message: `Saved. The ${eventPassEvent(pass.eventName).name} page now shows your changes.`, data: toAdminPass(pass, sales) });
     })
   );
 
-  /** GET /api/sv/admin/event-pass-bookings?status=paid: bookings, newest first. */
+  /** GET /api/sv/admin/event-pass-bookings?event=golf-tournament&status=paid: bookings, newest first. */
   listBookings = withAdminAuth((request) =>
     this.handle(async () => {
+      const event = eventFilter(request);
       const status = new URL(request.url).searchParams.get("status") || undefined;
       if (status && !BOOKING_STATUSES.includes(status)) throw HttpError.badRequest("Unknown booking status.");
-      const bookings = await this.bookings.findAll({ status });
+      const bookings = await this.bookings.findAll({ event, status });
       return this.ok({ data: bookings.map(toAdminBooking) });
     })
   );
