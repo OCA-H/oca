@@ -1,5 +1,5 @@
 import "server-only";
-import { and, desc, eq, isNull } from "drizzle-orm";
+import { and, desc, eq, gte, isNull, ne, or } from "drizzle-orm";
 import { BaseRepository } from "@/app/api/core/baseRepository";
 import {
   membershipApplications,
@@ -47,6 +47,44 @@ export class MembershipRepository extends BaseRepository {
       .returning();
 
     return results[0] ?? null;
+  }
+
+  /**
+   * Records a payment result on an application not yet paid. Returns null when it is already paid,
+   * so the redirect and the payment check settling the same order cannot both act on it.
+   */
+  async updateUnlessPaid(id: number, data: Partial<NewMembershipApplication>): Promise<MembershipApplication | null> {
+    const results = await this.db
+      .update(membershipApplications)
+      .set({ ...data, updatedAt: new Date() })
+      .where(and(eq(membershipApplications.id, id), ne(membershipApplications.status, "paid")))
+      .returning();
+
+    return results[0] ?? null;
+  }
+
+  /**
+   * Applications the payment check looks at: every pending one, unpaid ones created since `since.unpaid`
+   * (CCAvenue can still turn them paid), and ones paid since `since.paid`
+   * still missing their account or welcome email.
+   */
+  async findUnsettled(since: { unpaid: Date; paid: Date }, limit: number): Promise<MembershipApplication[]> {
+    return this.db
+      .select()
+      .from(membershipApplications)
+      .where(
+        or(
+          eq(membershipApplications.status, "pending"),
+          and(ne(membershipApplications.status, "paid"), gte(membershipApplications.createdAt, since.unpaid)),
+          and(
+            eq(membershipApplications.status, "paid"),
+            gte(membershipApplications.paidAt, since.paid),
+            or(isNull(membershipApplications.userId), isNull(membershipApplications.welcomeEmailSentAt))
+          )
+        )
+      )
+      .orderBy(desc(membershipApplications.createdAt))
+      .limit(limit);
   }
 
   /**

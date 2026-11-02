@@ -137,9 +137,9 @@ export class EventPassBookingController extends BaseController {
    * GET /api/event-pass/orders/[orderId]
    * Payment result shown on the status page.
    */
-  async getOrder(_request: Request, orderId: string): Promise<Response> {
+  async getOrder(request: Request, orderId: string): Promise<Response> {
     return this.handle(async () => {
-      const order = await this.service.getOrderSummary(orderId);
+      const order = await this.service.getOrderSummary(orderId, this.baseUrl(request));
       return this.ok({ data: order });
     });
   }

@@ -1,4 +1,9 @@
 import { membershipController } from "../../controller";
+import { paymentCheckController } from "@/app/api/(features)/(pview)/payments/controller";
 
 // CCAvenue posts both successful and cancelled payments here.
-export const POST = (request: Request) => membershipController.paymentResponse(request);
+// Every payment visit also settles, in the background, orders whose browser never came back.
+export const POST = (request: Request) => {
+  paymentCheckController.checkSoon(request);
+  return membershipController.paymentResponse(request);
+};

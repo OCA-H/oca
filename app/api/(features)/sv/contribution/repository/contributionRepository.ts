@@ -1,5 +1,5 @@
 import "server-only";
-import { and, asc, count, countDistinct, eq, isNull, sum } from "drizzle-orm";
+import { and, asc, count, countDistinct, desc, eq, gte, isNull, ne, or, sum } from "drizzle-orm";
 import { BaseRepository } from "@/app/api/core/baseRepository";
 import {
   contributionDocuments,
@@ -125,6 +125,43 @@ export class ContributionRepository extends BaseRepository {
       .update(contributions)
       .set({ ...data, updatedAt: new Date() })
       .where(eq(contributions.id, id));
+  }
+
+  /**
+   * Records a payment result on a contribution not yet paid. Returns false when it is already paid,
+   * so the redirect and the payment check settling the same order cannot both act on it.
+   */
+  async updateUnlessPaid(id: number, data: Partial<NewContribution>): Promise<boolean> {
+    const results = await this.db
+      .update(contributions)
+      .set({ ...data, updatedAt: new Date() })
+      .where(and(eq(contributions.id, id), ne(contributions.status, "paid")))
+      .returning({ id: contributions.id });
+
+    return results.length > 0;
+  }
+
+  /**
+   * Contributions the payment check looks at: every pending one, unpaid ones created since
+   * `since.unpaid` (CCAvenue can still turn them paid), and ones paid since `since.paid` whose
+   * thank-you email never went.
+   */
+  async findUnsettled(since: { unpaid: Date; paid: Date }, limit: number): Promise<ContributionWithFund[]> {
+    const results = await this.db
+      .select({ contribution: contributions, fund: contributionFunds })
+      .from(contributions)
+      .innerJoin(contributionFunds, eq(contributionFunds.id, contributions.fundId))
+      .where(
+        or(
+          eq(contributions.status, "pending"),
+          and(ne(contributions.status, "paid"), gte(contributions.createdAt, since.unpaid)),
+          and(eq(contributions.status, "paid"), gte(contributions.paidAt, since.paid), isNull(contributions.thankYouEmailSentAt))
+        )
+      )
+      .orderBy(desc(contributions.createdAt))
+      .limit(limit);
+
+    return results.map((row) => ({ ...row.contribution, fund: row.fund }));
   }
 
   /**

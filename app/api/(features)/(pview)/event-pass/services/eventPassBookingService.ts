@@ -1,7 +1,8 @@
 import "server-only";
 import crypto from "node:crypto";
 import { HttpError, type FieldErrors } from "@/app/api/core/httpError";
-import { CcAvenue, type CcAvenueCheckout } from "@/app/api/core/ccavenue";
+import { CcAvenue, type CcAvenueCheckout, type GatewayResult } from "@/app/api/core/ccavenue";
+import { isRecheckable, settle } from "@/app/api/core/paymentReconciliation";
 import { Mailer } from "@/app/api/core/mailer";
 import type { SessionData } from "@/app/api/core/session";
 import { UserRepository } from "@/app/api/(features)/(pview)/auth/repository/userRepository";
@@ -64,12 +65,6 @@ const gatewayValue = (value: string | null) => (value && value !== "null" ? valu
 /** CCAvenue allows up to 30 alphanumeric characters. */
 const newOrderId = () =>
   `OCAP${Date.now().toString(36)}${crypto.randomBytes(5).toString("hex")}`.toUpperCase();
-
-const toPaymentStatus = (orderStatus: string | undefined): EventPassPaymentStatus => {
-  if (orderStatus === "Success") return "paid";
-  if (orderStatus === "Aborted") return "cancelled";
-  return "failed";
-};
 
 const metaPrice = (pass: EventPass, key: string, fallback: number) => {
   const value = pass.metadata?.[key];
@@ -218,32 +213,58 @@ export class EventPassBookingService {
     return { ...checkout, orderId: booking.orderId };
   }
 
-  /**
-   * Applies the result CCAvenue posts back. Safe to call more than once for the same order:
-   * a paid booking is never changed again, and stock is only taken, and the pass emailed, on the
-   * first paid response.
-   */
+  /** Applies the result CCAvenue posts back to redirect_url. */
   async handleGatewayResponse(encResp: string, baseUrl: string): Promise<EventPassBooking> {
-    const response = CcAvenue.parseResponse(encResp);
-    const booking = response.order_id ? await this.bookings.findByOrderId(response.order_id) : null;
-    if (!booking) throw HttpError.notFound("We could not find this pass order.");
-    if (booking.status === "paid") return booking;
+    return this.applyResult(CcAvenue.parseResult(encResp), baseUrl);
+  }
 
-    let status = toPaymentStatus(response.order_status);
-    let message = response.failure_message || response.status_message || null;
-    if (status === "paid" && Number(response.amount) !== booking.amount) {
-      console.error(`Pass order ${booking.orderId}: paid ${response.amount}, expected ${booking.amount}.`);
+  /**
+   * Settles a booking from CCAvenue's Order Status API, for a member whose browser never came back
+   * from the gateway, and resends a paid booking's pass if its email failed. Returns the booking as
+   * it now stands.
+   */
+  async reconcile(booking: EventPassBooking, baseUrl: string): Promise<EventPassBooking> {
+    if (booking.status === "paid") {
+      await this.sendPass(booking, baseUrl);
+      return booking;
+    }
+    const result = settle(booking, await CcAvenue.fetchStatus(booking.orderId));
+    return result ? this.applyResult(result, baseUrl) : booking;
+  }
+
+  /** Bookings for the payment check (see EventPassBookingRepository.findUnsettled). */
+  findUnsettled(since: { unpaid: Date; paid: Date }, limit: number): Promise<EventPassBooking[]> {
+    return this.bookings.findUnsettled(since, limit);
+  }
+
+  /**
+   * Applies a payment result, from the redirect or the Order Status API. Safe to call more than once
+   * for the same order, from both at the same moment: a paid booking is never changed again, and
+   * stock is only taken, and the pass emailed, once.
+   */
+  private async applyResult(result: GatewayResult, baseUrl: string): Promise<EventPassBooking> {
+    const booking = result.orderId ? await this.bookings.findByOrderId(result.orderId) : null;
+    if (!booking) throw HttpError.notFound("We could not find this pass order.");
+    if (booking.status === "paid") {
+      await this.sendPass(booking, baseUrl);
+      return booking;
+    }
+
+    let status = result.outcome;
+    let message = result.message;
+    if (status === "paid" && result.amount !== booking.amount) {
+      console.error(`Pass order ${booking.orderId}: paid ${result.amount}, expected ${booking.amount}.`);
       status = "failed";
       message = "The amount paid did not match the pass total.";
     }
 
     const gateway = {
-      trackingId: response.tracking_id || null,
-      bankRefNo: response.bank_ref_no || null,
-      paymentMode: response.payment_mode || null,
-      gatewayStatus: response.order_status || null,
+      trackingId: result.trackingId,
+      bankRefNo: result.bankRefNo,
+      paymentMode: result.paymentMode,
+      gatewayStatus: result.gatewayStatus?.slice(0, 30) ?? null,
       gatewayMessage: message?.slice(0, 255) ?? null,
-      gatewayResponse: response,
+      gatewayResponse: result.raw,
     };
 
     const updated =
@@ -261,9 +282,11 @@ export class EventPassBookingService {
   /**
    * Emails the member their pass, with their name, member ID and batch written on it, copying the
    * addresses set under Email settings in the admin panel. A failure is logged, not thrown: the
-   * payment is already recorded, and the Secretariat can send the pass by hand.
+   * payment is already recorded, and the payment check retries the email.
    */
   private async sendPass(booking: EventPassBooking, baseUrl: string): Promise<void> {
+    if (booking.passEmailSentAt) return;
+    if (!(await this.bookings.claimPassEmail(booking.id))) return;
     try {
       const [pass, user] = await Promise.all([
         this.passes.findById(booking.eventPassId),
@@ -282,6 +305,7 @@ export class EventPassBookingService {
       await Mailer.send(eventPassConfirmationEmail({ booking, card, includesSpouse, batch, cc, baseUrl, contact }));
     } catch (error) {
       console.error(`Pass order ${booking.orderId}: pass email to ${booking.email} failed:`, error);
+      await this.bookings.releasePassEmail(booking.id).catch(() => {});
     }
   }
 
@@ -290,9 +314,19 @@ export class EventPassBookingService {
     return (await this.bookings.findByOrderId(orderId.trim()))?.eventName ?? null;
   }
 
-  async getOrderSummary(orderId: string): Promise<EventPassOrderSummary> {
-    const booking = await this.bookings.findByOrderId(orderId.trim());
+  /**
+   * The order as the status page shows it. An unpaid order is checked with CCAvenue first, so a
+   * member whose payment went through without the redirect, or whose bank answered late, sees it paid.
+   */
+  async getOrderSummary(orderId: string, baseUrl: string): Promise<EventPassOrderSummary> {
+    let booking = await this.bookings.findByOrderId(orderId.trim());
     if (!booking) throw HttpError.notFound("We could not find this pass order.");
+    if (isRecheckable(booking)) {
+      booking = await this.reconcile(booking, baseUrl).catch((error) => {
+        console.error(`Pass order ${orderId}: CCAvenue status check failed:`, error);
+        return booking!;
+      });
+    }
 
     return {
       orderId: booking.orderId,

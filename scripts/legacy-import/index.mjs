@@ -656,12 +656,12 @@ async function apply() {
       order_id: b.orderId, event_name: b.pass.eventName, event_pass_id: passId.get(`${b.pass.eventName}|${b.pass.passId}`), pass_id: b.pass.passId, pass_label: b.pass.label,
       user_id: userIdOf(b.member), member_id: b.member.memberId, full_name: b.fullName.slice(0, 150), email: b.email.slice(0, 255), mobile: b.mobile, spouse_name: b.spouseName,
       teachers: b.teachers, children_under12: b.childrenUnder12, children_above12: b.childrenAbove12, line_items: b.lineItems, amount: b.amount, status: "paid",
-      gateway_status: "Legacy", gateway_message: "Imported from the old site", gateway_response: b.gateway, paid_at: b.paidAt,
+      gateway_status: "Legacy", gateway_message: "Imported from the old site", gateway_response: b.gateway, paid_at: b.paidAt, pass_email_sent_at: b.paidAt ?? new Date(),
     }));
     const bookingsAdded = await insertRows(client, "event_pass_bookings", bookingRows, {
       order_id: "varchar", event_name: "varchar", event_pass_id: "int", pass_id: "varchar", pass_label: "varchar", user_id: "int", member_id: "varchar", full_name: "varchar",
       email: "varchar", mobile: "varchar", spouse_name: "varchar", teachers: "int", children_under12: "int", children_above12: "int", line_items: "jsonb", amount: "int",
-      status: "varchar", gateway_status: "varchar", gateway_message: "varchar", gateway_response: "jsonb", paid_at: "timestamptz",
+      status: "varchar", gateway_status: "varchar", gateway_message: "varchar", gateway_response: "jsonb", paid_at: "timestamptz", pass_email_sent_at: "timestamptz",
     }, "ON CONFLICT (order_id) DO NOTHING");
 
     await client.query(args.rollback ? "ROLLBACK" : "COMMIT");

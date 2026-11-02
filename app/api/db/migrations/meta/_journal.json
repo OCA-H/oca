@@ -92,6 +92,13 @@
       "when": 1793431039789,
       "tag": "0012_users_username",
       "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "7",
+      "when": 1793606315008,
+      "tag": "0013_event_pass_email",
+      "breakpoints": true
     }
   ]
 }

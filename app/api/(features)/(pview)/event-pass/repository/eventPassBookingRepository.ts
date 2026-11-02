@@ -1,5 +1,5 @@
 import "server-only";
-import { and, count, desc, eq, gt, like, ne, or, sql, sum } from "drizzle-orm";
+import { and, count, desc, eq, gt, gte, isNull, like, ne, or, sql, sum } from "drizzle-orm";
 import { BaseRepository } from "@/app/api/core/baseRepository";
 import { eventPasses } from "../schema/eventPassSchema";
 import {
@@ -56,6 +56,25 @@ export class EventPassBookingRepository extends BaseRepository {
       .limit(1);
 
     return results[0] ?? null;
+  }
+
+  /**
+   * Bookings the payment check looks at: every pending one, unpaid ones created since `since.unpaid`
+   * (CCAvenue can still turn them paid), and ones paid since `since.paid` whose pass was never emailed.
+   */
+  async findUnsettled(since: { unpaid: Date; paid: Date }, limit: number): Promise<EventPassBooking[]> {
+    return this.db
+      .select()
+      .from(eventPassBookings)
+      .where(
+        or(
+          eq(eventPassBookings.status, "pending"),
+          and(ne(eventPassBookings.status, "paid"), gte(eventPassBookings.createdAt, since.unpaid)),
+          and(eq(eventPassBookings.status, "paid"), gte(eventPassBookings.paidAt, since.paid), isNull(eventPassBookings.passEmailSentAt))
+        )
+      )
+      .orderBy(desc(eventPassBookings.createdAt))
+      .limit(limit);
   }
 
   async create(data: NewEventPassBooking): Promise<EventPassBooking> {
@@ -117,5 +136,24 @@ export class EventPassBookingRepository extends BaseRepository {
         .returning();
       return flagged;
     });
+  }
+
+  /**
+   * Marks the pass email as sent, only if it was not already. Returns false when another request got
+   * there first, so the redirect and the payment check settling the same order send one email.
+   */
+  async claimPassEmail(id: number): Promise<boolean> {
+    const results = await this.db
+      .update(eventPassBookings)
+      .set({ passEmailSentAt: new Date() })
+      .where(and(eq(eventPassBookings.id, id), isNull(eventPassBookings.passEmailSentAt)))
+      .returning({ id: eventPassBookings.id });
+
+    return results.length > 0;
+  }
+
+  /** Undoes claimPassEmail when the email could not be sent, so the payment check retries it. */
+  async releasePassEmail(id: number): Promise<void> {
+    await this.db.update(eventPassBookings).set({ passEmailSentAt: null }).where(eq(eventPassBookings.id, id));
   }
 }

@@ -2,7 +2,8 @@ import "server-only";
 import crypto from "node:crypto";
 import { revalidateTag } from "next/cache";
 import { HttpError, type FieldErrors } from "@/app/api/core/httpError";
-import { CcAvenue, type CcAvenueCheckout } from "@/app/api/core/ccavenue";
+import { CcAvenue, type CcAvenueCheckout, type GatewayResult } from "@/app/api/core/ccavenue";
+import { settle } from "@/app/api/core/paymentReconciliation";
 import { FILE_KINDS, readUploadedFile, type UploadRules, type UploadedFile } from "@/app/api/core/fileUpload";
 import { Mailer } from "@/app/api/core/mailer";
 import { getContactDetails, getRegistrationCcEmails } from "@/app/api/(features)/(pview)/site/services/siteContentService";
@@ -90,12 +91,6 @@ const hasFile = (form: FormData, field: string) => {
 /** CCAvenue allows up to 30 alphanumeric characters. */
 const newOrderId = () =>
   `OCAC${Date.now().toString(36)}${crypto.randomBytes(5).toString("hex")}`.toUpperCase();
-
-const toPaymentStatus = (orderStatus: string | undefined): ContributionPaymentStatus => {
-  if (orderStatus === "Success") return "paid";
-  if (orderStatus === "Aborted") return "cancelled";
-  return "failed";
-};
 
 const toFundOption = (fund: ContributionFund): ContributionFundOption => ({
   code: fund.code,
@@ -339,41 +334,65 @@ export class ContributionService {
     return { ...checkout, orderId };
   }
 
-  /**
-   * Applies the result CCAvenue posts back. Safe to call more than once for the same order:
-   * a paid contribution is never changed again, and the thank-you email goes out once.
-   */
+  /** Applies the result CCAvenue posts back to redirect_url. */
   async handleGatewayResponse(encResp: string, baseUrl: string): Promise<ContributionWithFund> {
-    const response = CcAvenue.parseResponse(encResp);
-    const contribution = response.order_id ? await this.repository.findByOrderId(response.order_id) : null;
+    return this.applyResult(CcAvenue.parseResult(encResp), baseUrl);
+  }
+
+  /**
+   * Settles a contribution from CCAvenue's Order Status API, for a member whose browser never came
+   * back from the gateway, and resends a paid one's thank-you if its email failed. Returns the
+   * contribution as it now stands.
+   */
+  async reconcile(contribution: ContributionWithFund, baseUrl: string): Promise<ContributionWithFund> {
+    if (contribution.status === "paid") {
+      await this.sendThankYou(contribution, baseUrl);
+      return contribution;
+    }
+    const result = settle(contribution, await CcAvenue.fetchStatus(contribution.orderId));
+    return result ? this.applyResult(result, baseUrl) : contribution;
+  }
+
+  /** Contributions for the payment check (see ContributionRepository.findUnsettled). */
+  findUnsettled(since: { unpaid: Date; paid: Date }, limit: number): Promise<ContributionWithFund[]> {
+    return this.repository.findUnsettled(since, limit);
+  }
+
+  /**
+   * Applies a payment result, from the redirect or the Order Status API. Safe to call more than once
+   * for the same order, from both at the same moment: a paid contribution is never changed again,
+   * and the thank-you email goes out once.
+   */
+  private async applyResult(result: GatewayResult, baseUrl: string): Promise<ContributionWithFund> {
+    const contribution = result.orderId ? await this.repository.findByOrderId(result.orderId) : null;
     if (!contribution) throw HttpError.notFound("We could not find this contribution.");
     if (contribution.status === "paid") {
       await this.sendThankYou(contribution, baseUrl);
       return contribution;
     }
 
-    let status = toPaymentStatus(response.order_status);
-    let message = response.failure_message || response.status_message || null;
-    if (status === "paid" && Number(response.amount) !== contribution.amount) {
-      console.error(`Contribution ${contribution.orderId}: paid ${response.amount}, expected ${contribution.amount}.`);
+    let status = result.outcome;
+    let message = result.message;
+    if (status === "paid" && result.amount !== contribution.amount) {
+      console.error(`Contribution ${contribution.orderId}: paid ${result.amount}, expected ${contribution.amount}.`);
       status = "failed";
       message = "The amount paid did not match the contribution.";
     }
 
-    await this.repository.update(contribution.id, {
+    const changed = await this.repository.updateUnlessPaid(contribution.id, {
       status,
-      trackingId: response.tracking_id || null,
-      bankRefNo: response.bank_ref_no || null,
-      paymentMode: response.payment_mode || null,
-      gatewayStatus: response.order_status || null,
+      trackingId: result.trackingId,
+      bankRefNo: result.bankRefNo,
+      paymentMode: result.paymentMode,
+      gatewayStatus: result.gatewayStatus?.slice(0, 30) ?? null,
       gatewayMessage: message?.slice(0, 255) ?? null,
-      gatewayResponse: response,
+      gatewayResponse: result.raw,
       ...(status === "paid" && { paidAt: new Date() }),
     });
     const updated = await this.repository.findByOrderId(contribution.orderId);
     if (!updated) throw HttpError.notFound("We could not find this contribution.");
 
-    if (status === "paid") {
+    if (changed && status === "paid") {
       // The home page's progress bars count paid contributions; expire: 0 shows this one on the next visit.
       revalidateTag(FUND_PROGRESS_TAG, { expire: 0 });
       await this.sendThankYou(updated, baseUrl);
@@ -409,7 +428,7 @@ export class ContributionService {
   /**
    * Emails the member their thank-you and payment acknowledgement, copying the addresses set under
    * Email settings in the admin panel. A failure is logged, not thrown:
-   * the payment is already recorded, and the next response from CCAvenue for the order retries it.
+   * the payment is already recorded, and the payment check retries it.
    */
   private async sendThankYou(contribution: ContributionWithFund, baseUrl: string): Promise<void> {
     if (contribution.thankYouEmailSentAt) return;

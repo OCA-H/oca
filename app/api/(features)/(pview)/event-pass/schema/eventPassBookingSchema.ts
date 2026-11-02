@@ -41,6 +41,8 @@ export const eventPassBookings = pgTable(
     /** True when the booking was paid after the last pass had already gone; the Secretariat must follow up. */
     oversold: boolean("oversold").notNull().default(false),
     paidAt: timestamp("paid_at", { withTimezone: true }),
+    /** Set once the pass is emailed; a paid booking without it is retried by the payment check. */
+    passEmailSentAt: timestamp("pass_email_sent_at", { withTimezone: true }),
     createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
     updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
   },

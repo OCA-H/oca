@@ -1,3 +1,8 @@
 import { membershipController } from "../controller";
+import { paymentCheckController } from "@/app/api/(features)/(pview)/payments/controller";
 
-export const POST = (request: Request) => membershipController.checkout(request);
+// Every payment visit also settles, in the background, orders whose browser never came back.
+export const POST = (request: Request) => {
+  paymentCheckController.checkSoon(request);
+  return membershipController.checkout(request);
+};
