@@ -4,7 +4,7 @@ import { HttpError, type FieldErrors } from "@/app/api/core/httpError";
 import { hashPassword } from "@/app/api/core/auth";
 import { isUniqueViolation } from "@/app/api/core/baseRepository";
 import { CcAvenue, type CcAvenueCheckout, type GatewayResult } from "@/app/api/core/ccavenue";
-import { isRecheckable, settle } from "@/app/api/core/paymentReconciliation";
+import { isRecheckable, manualPayment, settle } from "@/app/api/core/paymentReconciliation";
 import { dateOfBirthError } from "@/app/api/core/dateOfBirth";
 import { Mailer } from "@/app/api/core/mailer";
 import { UserRepository } from "@/app/api/(features)/(pview)/auth/repository/userRepository";
@@ -180,6 +180,18 @@ export class MembershipService {
   /** Applications for the payment check (see MembershipRepository.findUnsettled). */
   findUnsettled(since: { unpaid: Date; paid: Date }, limit: number): Promise<MembershipApplication[]> {
     return this.repository.findUnsettled(since, limit);
+  }
+
+  /**
+   * Marks an unpaid order paid on an admin's word, after they found the payment in the CCAvenue
+   * dashboard: for when the Order Status API cannot be reached. Goes through the same steps as a
+   * payment from CCAvenue, so the member gets the same email.
+   */
+  async confirmManually(orderId: string, reference: string, confirmedBy: { id: number; name: string }, baseUrl: string): Promise<MembershipApplication> {
+    const application = await this.repository.findByOrderId(orderId.trim());
+    if (!application) throw HttpError.notFound("We could not find this membership order.");
+    if (application.status === "paid") throw HttpError.conflict("This membership is already paid.");
+    return this.applyResult(manualPayment(application, reference, confirmedBy), baseUrl);
   }
 
   /**

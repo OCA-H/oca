@@ -10892,3 +10892,9 @@ section[id^="ec-"] {
     grid-template-columns: 92px 1fr;
   }
 }
+
+/* records: confirming a payment by hand */
+.ad-pay-btn{margin-top:8px; padding:5px 12px; font-size:12.5px;}
+.ad-pay-btn svg{width:14px; height:14px;}
+.ad-confirm-ref{margin:18px 0 0;}
+.ad-confirm-ref input{width:100%;}

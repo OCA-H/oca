@@ -2,7 +2,7 @@ import { ROUTES } from "@/app/(view)/common/helper/routes";
 import { SECTION_SPECS, type SectionSpec, type SiteSectionKey } from "@/app/api/(features)/(pview)/site/schema/sectionSpecs";
 
 /** Panels that show records from the database rather than editing a section of the site. */
-export type RecordPanel = "passes" | "bookings" | "golf-passes" | "golf-bookings" | "funds";
+export type RecordPanel = "passes" | "bookings" | "golf-passes" | "golf-bookings" | "memberships" | "funds" | "contributions";
 
 /** The open panel: the dashboard, the editor for one section (its key, e.g. "home.events"), or a record panel. */
 export type AdminPanel = "dashboard" | SiteSectionKey | RecordPanel;
@@ -88,18 +88,31 @@ export const RECORD_PANELS: Record<RecordPanel, { group: string; label: string; 
     description: "Every Golf Tournament pass booking, with the member's details and payment.",
     icon: "people",
   },
+  memberships: {
+    group: "Members",
+    label: "Memberships",
+    description: "Every membership application and its payment. Confirm a payment here when CCAvenue took it but it still shows pending.",
+    icon: "people",
+  },
   funds: {
     group: "Contributions",
     label: "Contribution heads",
     description: "What members can contribute to: add a head, change the wording, turn a head on or off, or delete it.",
     icon: "heart",
   },
+  contributions: {
+    group: "Contributions",
+    label: "Contributions",
+    description: "Every contribution and its payment. Confirm a payment here when CCAvenue took it but it still shows pending.",
+    icon: "rupee",
+  },
 };
 
 /** The record panels' menu groups, in order, with their panels. */
 export const RECORD_GROUPS: { group: string; icon: AdminIconName; panels: RecordPanel[] }[] = [
   { group: "Passes", icon: "ticket", panels: ["passes", "bookings", "golf-passes", "golf-bookings"] },
-  { group: "Contributions", icon: "heart", panels: ["funds"] },
+  { group: "Members", icon: "people", panels: ["memberships"] },
+  { group: "Contributions", icon: "heart", panels: ["funds", "contributions"] },
 ];
 
 /** The events whose passes the admin panel manages: each has a passes panel and a bookings panel. */
@@ -297,13 +310,6 @@ export const adminContent = {
   },
 
   bookings: {
-    filters: [
-      { value: "", label: "All" },
-      { value: "paid", label: "Paid" },
-      { value: "pending", label: "Pending" },
-      { value: "failed", label: "Failed" },
-      { value: "cancelled", label: "Cancelled" },
-    ],
     search: "Search name, member ID, email or order",
     stats: { paid: "Paid bookings", revenue: "Taken in payments", oversold: "Paid after sell-out" },
     booked: "Booked",
@@ -321,6 +327,58 @@ export const adminContent = {
       return shown === total ? `${total} ${noun}` : `${shown} of ${total} ${noun}`;
     },
     none: "No bookings match.",
+  },
+
+  /** Shared by the bookings, memberships and contributions lists. */
+  payments: {
+    filters: [
+      { value: "", label: "All" },
+      { value: "paid", label: "Paid" },
+      { value: "pending", label: "Pending" },
+      { value: "failed", label: "Failed" },
+      { value: "cancelled", label: "Cancelled" },
+    ],
+    confirm: "Confirm payment",
+    emailSent: "Email sent",
+    emailPending: "Email not sent yet: retried automatically",
+    reference: (ref: string) => `Ref ${ref}`,
+    dialog: {
+      title: "Confirm this payment?",
+      body: (name: string, amount: string, orderId: string) =>
+        `Only confirm after you have found order ${orderId} for ${amount} in the CCAvenue dashboard (Orders) with the status Shipped or Successful. ${name} will be marked paid and sent their email straight away.`,
+      referenceLabel: "CCAvenue reference number",
+      referenceHint: "The \"CCAvenue Ref. #\" shown beside this order in the dashboard, e.g. 114955902641.",
+      confirm: "Confirm and send email",
+      busy: "Confirming…",
+    },
+  },
+
+  memberships: {
+    search: "Search name, batch, email, mobile or order",
+    stats: { paid: "Paid memberships", revenue: "Taken in fees", pending: "Awaiting payment" },
+    applied: "Applied",
+    paidOn: "Paid",
+    batch: (batch: string) => (batch ? `Batch ${batch}` : "No batch given"),
+    noAccount: "Paid, but the member's account is not made yet: retried automatically.",
+    shown: (shown: number, total: number) => {
+      const noun = total === 1 ? "application" : "applications";
+      return shown === total ? `${total} ${noun}` : `${shown} of ${total} ${noun}`;
+    },
+    none: "No applications match.",
+  },
+
+  contributions: {
+    search: "Search donor, email, mobile, head or order",
+    stats: { paid: "Paid contributions", revenue: "Raised", pending: "Awaiting payment" },
+    given: "Made",
+    paidOn: "Paid",
+    units: (units: number, unit: string | null) => `${units} ${unit ?? "unit"}${units === 1 ? "" : "s"}`,
+    wants80g: "80G receipt requested",
+    shown: (shown: number, total: number) => {
+      const noun = total === 1 ? "contribution" : "contributions";
+      return shown === total ? `${total} ${noun}` : `${shown} of ${total} ${noun}`;
+    },
+    none: "No contributions match.",
   },
 
   funds: {

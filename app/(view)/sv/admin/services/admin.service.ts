@@ -104,7 +104,66 @@ export interface AdminBooking {
   trackingId: string | null;
   gatewayMessage: string | null;
   paidAt: string | null;
+  /** Whether the pass has been emailed. */
+  emailSent: boolean;
   createdAt: string;
+}
+
+export type PaymentStatus = BookingStatus;
+
+/** A membership application and its payment. */
+export interface AdminMembership {
+  id: number;
+  orderId: string;
+  membershipType: string;
+  fullName: string;
+  batchYear: string;
+  email: string;
+  mobile: string;
+  city: string;
+  country: string;
+  amount: number;
+  currency: string;
+  status: PaymentStatus;
+  paymentMode: string | null;
+  trackingId: string | null;
+  gatewayMessage: string | null;
+  /** Whether the member's account exists; made when the payment is confirmed. */
+  hasAccount: boolean;
+  paidAt: string | null;
+  /** Whether the welcome email has gone. */
+  emailSent: boolean;
+  createdAt: string;
+}
+
+/** A contribution and its payment. */
+export interface AdminContribution {
+  id: number;
+  orderId: string;
+  fundLabel: string;
+  units: number | null;
+  unitLabel: string | null;
+  donorName: string;
+  batch: string | null;
+  email: string;
+  mobile: string;
+  wants80g: boolean;
+  amount: number;
+  currency: string;
+  status: PaymentStatus;
+  paymentMode: string | null;
+  trackingId: string | null;
+  gatewayMessage: string | null;
+  paidAt: string | null;
+  /** Whether the thank-you email has gone. */
+  emailSent: boolean;
+  createdAt: string;
+}
+
+/** What a manual confirmation returns: the record as it now stands, and what happened to its email. */
+export interface Confirmed<T> {
+  data: T;
+  message: string;
 }
 
 /** A contribution head (fund), with what has been given to it. */
@@ -166,6 +225,29 @@ export const adminService = {
   /** One event's bookings, newest first. */
   listBookings: async (event: string): Promise<AdminBooking[]> =>
     (await adminRequest<{ data: AdminBooking[] }>(`/api/sv/admin/event-pass-bookings?event=${encodeURIComponent(event)}`)).data,
+
+  /**
+   * Marks an unpaid booking paid after the admin found the payment in the CCAvenue dashboard;
+   * the member is emailed their pass.
+   */
+  confirmBooking: (orderId: string, reference: string): Promise<Confirmed<AdminBooking>> =>
+    adminRequest(`/api/sv/admin/event-pass-bookings/${encodeURIComponent(orderId)}/confirm`, { method: "POST", body: { reference } }),
+
+  /** Every membership application, newest first. */
+  listMemberships: async (): Promise<AdminMembership[]> =>
+    (await adminRequest<{ data: AdminMembership[] }>("/api/sv/admin/memberships")).data,
+
+  /** Marks an unpaid application paid; the member's account is made and the welcome email sent. */
+  confirmMembership: (orderId: string, reference: string): Promise<Confirmed<AdminMembership>> =>
+    adminRequest(`/api/sv/admin/memberships/${encodeURIComponent(orderId)}/confirm`, { method: "POST", body: { reference } }),
+
+  /** Every contribution, newest first. */
+  listContributions: async (): Promise<AdminContribution[]> =>
+    (await adminRequest<{ data: AdminContribution[] }>("/api/sv/admin/contributions")).data,
+
+  /** Marks an unpaid contribution paid; the thank-you email is sent. */
+  confirmContribution: (orderId: string, reference: string): Promise<Confirmed<AdminContribution>> =>
+    adminRequest(`/api/sv/admin/contributions/${encodeURIComponent(orderId)}/confirm`, { method: "POST", body: { reference } }),
 
   listFunds: async (): Promise<AdminFund[]> => (await adminRequest<{ data: AdminFund[] }>("/api/sv/admin/contribution-funds")).data,
 

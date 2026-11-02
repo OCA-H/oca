@@ -22,6 +22,8 @@ interface AdminConfirmDialogProps {
   danger?: boolean;
   /** Shown inside the dialog when the action failed, so it can be tried again. */
   error?: string | null;
+  /** Anything the admin must fill in first, shown above the error. */
+  children?: React.ReactNode;
   onCancel: () => void;
   onConfirm: () => void;
 }
@@ -36,19 +38,22 @@ export const AdminConfirmDialog: React.FC<AdminConfirmDialogProps> = ({
   isBusy,
   danger,
   error,
+  children,
   onCancel,
   onConfirm,
 }) => {
   const confirmRef = useRef<HTMLButtonElement>(null);
+  // A dialog with something to fill in puts focus there instead (autoFocus on its first field).
+  const hasFields = Boolean(children);
 
   useEffect(() => {
-    confirmRef.current?.focus();
+    if (!hasFields) confirmRef.current?.focus();
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape' && !isBusy) onCancel();
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [isBusy, onCancel]);
+  }, [hasFields, isBusy, onCancel]);
 
   // Into <body>: the panels animate with a transform, which would hold a fixed overlay inside them.
   return createPortal(
@@ -70,6 +75,7 @@ export const AdminConfirmDialog: React.FC<AdminConfirmDialogProps> = ({
             ))}
           </ul>
         )}
+        {children}
         {error && (
           <p className="ms-error ad-dialog-error" role="alert">
             {error}

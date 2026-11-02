@@ -2,12 +2,15 @@
 
 import React, { useCallback, useState } from 'react';
 import { adminContent, type AdminPanel, type PassEvent } from '../../content';
-import { useRecordList } from '../../handler';
+import { useConfirmPayment, useRecordList } from '../../handler';
 import { adminHelper } from '../../helper';
 import { adminService, type AdminBooking } from '../../services';
+import { ConfirmPaymentDialog, PaymentNotice } from './ConfirmPaymentDialog';
+import { AdminIcon } from './AdminIcon';
 import { RecordPanelFrame } from './RecordPanelFrame';
 
 const text = adminContent.bookings;
+const pay = adminContent.payments;
 
 const STATUS_TONE: Record<string, string> = { paid: 'ok', pending: 'warn', failed: 'bad', cancelled: 'muted' };
 
@@ -24,7 +27,12 @@ interface EventBookingsPanelProps {
 /** Every pass booking for one event, newest first, filtered by payment status and a search. */
 export const EventBookingsPanel: React.FC<EventBookingsPanelProps> = ({ passEvent, isActive, onBack }) => {
   const load = useCallback(() => adminService.listBookings(passEvent.event), [passEvent.event]);
-  const { items: bookings, error, isLoading, reload } = useRecordList(load, isActive);
+  const { items: bookings, setItems, error, isLoading, reload } = useRecordList(load, isActive);
+  const replace = useCallback(
+    (updated: AdminBooking) => setItems((list) => list?.map((b) => (b.orderId === updated.orderId ? updated : b)) ?? null),
+    [setItems]
+  );
+  const confirmation = useConfirmPayment(adminService.confirmBooking, replace);
   const [status, setStatus] = useState('');
   const [query, setQuery] = useState('');
 
@@ -59,10 +67,11 @@ export const EventBookingsPanel: React.FC<EventBookingsPanelProps> = ({ passEven
           </div>
         </dl>
 
+        <PaymentNotice notice={confirmation.notice} />
         <input className="ad-search" type="search" value={query} onChange={(e) => setQuery(e.target.value)} placeholder={text.search} aria-label={text.search} />
         <div className="ad-toolbar">
           <div className="ad-pills" role="group" aria-label="Payment status">
-            {text.filters.map((filter) => (
+            {pay.filters.map((filter) => (
               <button
                 key={filter.value}
                 type="button"
@@ -99,6 +108,12 @@ export const EventBookingsPanel: React.FC<EventBookingsPanelProps> = ({ passEven
                 <div className="ad-booking-pay">
                   <b>{adminHelper.formatRupees(b.amount)}</b>
                   <span className={`ad-badge ad-badge--${STATUS_TONE[b.status] ?? 'muted'}`}>{b.status}</span>
+                  {b.status !== 'paid' && (
+                    <button className="mp-photo-btn ad-pay-btn" type="button" onClick={() => confirmation.open(b)}>
+                      <AdminIcon name="check" />
+                      {pay.confirm}
+                    </button>
+                  )}
                 </div>
                 <p className="ad-booking-foot">
                   <span className="ad-mono">{b.orderId}</span>
@@ -111,7 +126,9 @@ export const EventBookingsPanel: React.FC<EventBookingsPanelProps> = ({ passEven
                       {b.paymentMode && ` · ${b.paymentMode}`}
                     </span>
                   )}
-                  {b.status !== 'paid' && b.gatewayMessage && <span>{b.gatewayMessage}</span>}
+                  {adminHelper.gatewayValue(b.trackingId) && <span>{pay.reference(b.trackingId!)}</span>}
+                  {b.status === 'paid' && <span className={b.emailSent ? undefined : 'ad-cell-bad'}>{b.emailSent ? pay.emailSent : pay.emailPending}</span>}
+                  {b.status !== 'paid' && adminHelper.gatewayValue(b.gatewayMessage) && <span>{b.gatewayMessage}</span>}
                   {b.oversold && <span className="ad-cell-bad">{text.oversold}</span>}
                 </p>
               </li>
@@ -119,6 +136,7 @@ export const EventBookingsPanel: React.FC<EventBookingsPanelProps> = ({ passEven
           </ul>
         )}
       </div>
+      <ConfirmPaymentDialog confirmation={confirmation} name={confirmation.target?.fullName ?? ''} />
     </RecordPanelFrame>
   );
 };

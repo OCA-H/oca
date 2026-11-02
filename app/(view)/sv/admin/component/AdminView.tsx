@@ -11,8 +11,10 @@ import {
   AdminSidebar,
   AdminSkeleton,
   ContributionHeadsPanel,
+  ContributionsPanel,
   EventBookingsPanel,
   EventPassesPanel,
+  MembershipsPanel,
   SectionEditorPanel,
 } from './subcomponents';
 
@@ -44,7 +46,9 @@ export const AdminView: React.FC = () => {
                 <EventBookingsPanel passEvent={passEvent} isActive={panel === passEvent.bookings} onBack={back} />
               </React.Fragment>
             ))}
+            <MembershipsPanel isActive={panel === 'memberships'} onBack={back} />
             <ContributionHeadsPanel isActive={panel === 'funds'} onBack={back} />
+            <ContributionsPanel isActive={panel === 'contributions'} onBack={back} />
           </main>
         </div>
       </section>

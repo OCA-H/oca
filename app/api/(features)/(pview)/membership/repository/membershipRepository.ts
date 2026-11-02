@@ -7,7 +7,20 @@ import {
   type NewMembershipApplication,
 } from "../schema/membershipSchema";
 
+/** The admin panel shows at most this many applications at once, newest first. */
+const ADMIN_LIST_LIMIT = 2000;
+
 export class MembershipRepository extends BaseRepository {
+  /** Newest first, optionally only one payment status's. */
+  async findAll(filter?: { status?: string }): Promise<MembershipApplication[]> {
+    return this.db
+      .select()
+      .from(membershipApplications)
+      .where(filter?.status ? eq(membershipApplications.status, filter.status) : undefined)
+      .orderBy(desc(membershipApplications.createdAt), desc(membershipApplications.id))
+      .limit(ADMIN_LIST_LIMIT);
+  }
+
   async findByOrderId(orderId: string): Promise<MembershipApplication | null> {
     const results = await this.db
       .select()

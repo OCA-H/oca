@@ -1,7 +1,8 @@
 import "server-only";
 import { BaseController } from "@/app/api/core/baseController";
 import { HttpError } from "@/app/api/core/httpError";
-import { eventPassRepository, eventPassService } from "@/app/api/(features)/(pview)/event-pass/controller";
+import { eventPassBookingService, eventPassRepository, eventPassService } from "@/app/api/(features)/(pview)/event-pass/controller";
+import { readManualReference } from "@/app/api/core/paymentReconciliation";
 import { EventPassBookingRepository } from "@/app/api/(features)/(pview)/event-pass/repository/eventPassBookingRepository";
 import type { EventPass } from "@/app/api/(features)/(pview)/event-pass/schema/eventPassSchema";
 import type { EventPassBooking } from "@/app/api/(features)/(pview)/event-pass/schema/eventPassBookingSchema";
@@ -18,6 +19,7 @@ const eventFilter = (request: Request): string | undefined => {
 };
 
 type PassContext = { params: Promise<{ id: string }> };
+type OrderContext = { params: Promise<{ orderId: string }> };
 
 /** A pass as the admin panel shows it: its details, plus how many were paid for and what they took. */
 const toAdminPass = (pass: EventPass, sales?: { paid: number; revenue: number }) => ({
@@ -64,6 +66,8 @@ const toAdminBooking = (booking: EventPassBooking) => ({
   trackingId: booking.trackingId,
   gatewayMessage: booking.gatewayMessage,
   paidAt: booking.paidAt?.toISOString() ?? null,
+  /** Whether the pass has been emailed; a paid booking without it is retried by the payment check. */
+  emailSent: Boolean(booking.passEmailSentAt),
   createdAt: booking.createdAt.toISOString(),
 });
 
@@ -105,6 +109,23 @@ export class EventPassAdminController extends BaseController {
       if (status && !BOOKING_STATUSES.includes(status)) throw HttpError.badRequest("Unknown booking status.");
       const bookings = await this.bookings.findAll({ event, status });
       return this.ok({ data: bookings.map(toAdminBooking) });
+    })
+  );
+
+  /**
+   * POST /api/sv/admin/event-pass-bookings/{orderId}/confirm { reference }: marks an unpaid booking
+   * paid after the admin found the payment in the CCAvenue dashboard, and emails the member their pass.
+   */
+  confirmBooking = withAdminAuth<OrderContext>((request, admin, _session, context) =>
+    this.handle(async () => {
+      const { orderId } = await context.params;
+      const reference = readManualReference(await this.readJson(request));
+      const confirmed = await eventPassBookingService.confirmManually(orderId, reference, { id: admin.id, name: admin.fullName }, this.baseUrl(request));
+      const booking = (await this.bookings.findByOrderId(confirmed.orderId)) ?? confirmed;
+      const message = booking.passEmailSentAt
+        ? `Payment confirmed. ${booking.fullName}'s pass has been emailed to ${booking.email}.`
+        : `Payment confirmed, but the pass email to ${booking.email} did not go. It is retried automatically.`;
+      return this.ok({ message, data: toAdminBooking(booking) });
     })
   );
 }

@@ -21,7 +21,23 @@ export interface FundTotals {
   raised: number;
 }
 
+/** The admin panel shows at most this many contributions at once, newest first. */
+const ADMIN_LIST_LIMIT = 2000;
+
 export class ContributionRepository extends BaseRepository {
+  /** Newest first, with their funds, optionally only one payment status's. */
+  async findAll(filter?: { status?: string }): Promise<ContributionWithFund[]> {
+    const results = await this.db
+      .select({ contribution: contributions, fund: contributionFunds })
+      .from(contributions)
+      .innerJoin(contributionFunds, eq(contributionFunds.id, contributions.fundId))
+      .where(filter?.status ? eq(contributions.status, filter.status) : undefined)
+      .orderBy(desc(contributions.createdAt), desc(contributions.id))
+      .limit(ADMIN_LIST_LIMIT);
+
+    return results.map((row) => ({ ...row.contribution, fund: row.fund }));
+  }
+
   /** Every fund, in the order the form lists them. */
   async listFunds(): Promise<ContributionFund[]> {
     return this.db.select().from(contributionFunds).orderBy(asc(contributionFunds.sortOrder), asc(contributionFunds.id));

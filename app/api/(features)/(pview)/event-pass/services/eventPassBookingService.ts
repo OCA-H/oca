@@ -2,7 +2,7 @@ import "server-only";
 import crypto from "node:crypto";
 import { HttpError, type FieldErrors } from "@/app/api/core/httpError";
 import { CcAvenue, type CcAvenueCheckout, type GatewayResult } from "@/app/api/core/ccavenue";
-import { isRecheckable, settle } from "@/app/api/core/paymentReconciliation";
+import { isRecheckable, manualPayment, settle } from "@/app/api/core/paymentReconciliation";
 import { Mailer } from "@/app/api/core/mailer";
 import type { SessionData } from "@/app/api/core/session";
 import { UserRepository } from "@/app/api/(features)/(pview)/auth/repository/userRepository";
@@ -235,6 +235,18 @@ export class EventPassBookingService {
   /** Bookings for the payment check (see EventPassBookingRepository.findUnsettled). */
   findUnsettled(since: { unpaid: Date; paid: Date }, limit: number): Promise<EventPassBooking[]> {
     return this.bookings.findUnsettled(since, limit);
+  }
+
+  /**
+   * Marks an unpaid order paid on an admin's word, after they found the payment in the CCAvenue
+   * dashboard: for when the Order Status API cannot be reached. Goes through the same steps as a
+   * payment from CCAvenue, so the member gets the same email.
+   */
+  async confirmManually(orderId: string, reference: string, confirmedBy: { id: number; name: string }, baseUrl: string): Promise<EventPassBooking> {
+    const booking = await this.bookings.findByOrderId(orderId.trim());
+    if (!booking) throw HttpError.notFound("We could not find this pass order.");
+    if (booking.status === "paid") throw HttpError.conflict("This booking is already paid.");
+    return this.applyResult(manualPayment(booking, reference, confirmedBy), baseUrl);
   }
 
   /**

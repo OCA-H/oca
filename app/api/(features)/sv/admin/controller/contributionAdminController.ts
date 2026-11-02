@@ -3,10 +3,37 @@ import { BaseController } from "@/app/api/core/baseController";
 import { HttpError } from "@/app/api/core/httpError";
 import { contributionRepository, contributionService } from "@/app/api/(features)/sv/contribution/controller/contributionController";
 import type { FundTotals } from "@/app/api/(features)/sv/contribution/repository/contributionRepository";
-import type { ContributionFund } from "@/app/api/(features)/sv/contribution/schema/contributionSchema";
+import type { ContributionFund, ContributionWithFund } from "@/app/api/(features)/sv/contribution/schema/contributionSchema";
+import { readManualReference } from "@/app/api/core/paymentReconciliation";
 import { withAdminAuth } from "../middleware/adminAuth";
 
 type FundContext = { params: Promise<{ id: string }> };
+type OrderContext = { params: Promise<{ orderId: string }> };
+
+const PAYMENT_STATUSES = ["pending", "paid", "failed", "cancelled"];
+
+/** A contribution as the admin panel lists it. Leaves out the PAN, documents and raw gateway response. */
+const toAdminContribution = (contribution: ContributionWithFund) => ({
+  id: contribution.id,
+  orderId: contribution.orderId,
+  fundLabel: contribution.fund.label,
+  units: contribution.units,
+  unitLabel: contribution.fund.unitLabel,
+  donorName: contribution.donorName,
+  batch: contribution.batch,
+  email: contribution.email,
+  mobile: contribution.mobile,
+  wants80g: contribution.wants80g,
+  amount: contribution.amount,
+  currency: contribution.currency,
+  status: contribution.status,
+  paymentMode: contribution.paymentMode,
+  trackingId: contribution.trackingId,
+  gatewayMessage: contribution.gatewayMessage,
+  paidAt: contribution.paidAt?.toISOString() ?? null,
+  emailSent: Boolean(contribution.thankYouEmailSentAt),
+  createdAt: contribution.createdAt.toISOString(),
+});
 
 /** A contribution head as the admin panel shows it, with what has been given to it. */
 const toAdminFund = (fund: ContributionFund, totals?: FundTotals) => ({
@@ -40,6 +67,34 @@ export class ContributionAdminController extends BaseController {
     this.handle(async () => {
       const [funds, totals] = await Promise.all([contributionRepository.listFunds(), contributionRepository.totalsByFund()]);
       return this.ok({ data: funds.map((fund) => toAdminFund(fund, totals.find((t) => t.fundId === fund.id))) });
+    })
+  );
+
+  /** GET /api/sv/admin/contributions?status=pending: contributions, newest first. */
+  listContributions = withAdminAuth((request) =>
+    this.handle(async () => {
+      const status = new URL(request.url).searchParams.get("status") || undefined;
+      if (status && !PAYMENT_STATUSES.includes(status)) throw HttpError.badRequest("Unknown payment status.");
+      const contributions = await contributionRepository.findAll({ status });
+      return this.ok({ data: contributions.map(toAdminContribution) });
+    })
+  );
+
+  /**
+   * POST /api/sv/admin/contributions/{orderId}/confirm { reference }: marks an unpaid contribution
+   * paid after the admin found the payment in the CCAvenue dashboard, and sends the thank-you email.
+   */
+  confirmContribution = withAdminAuth<OrderContext>((request, admin, _session, context) =>
+    this.handle(async () => {
+      const { orderId } = await context.params;
+      const reference = readManualReference(await this.readJson(request));
+      const applied = await contributionService.confirmManually(orderId, reference, { id: admin.id, name: admin.fullName }, this.baseUrl(request));
+      // Read again: the thank-you email is recorded after the payment.
+      const confirmed = (await contributionRepository.findByOrderId(applied.orderId)) ?? applied;
+      const message = confirmed.thankYouEmailSentAt
+        ? `Payment confirmed. The thank-you email has been sent to ${confirmed.email}.`
+        : `Payment confirmed, but the thank-you email to ${confirmed.email} did not go. It is retried automatically.`;
+      return this.ok({ message, data: toAdminContribution(confirmed) });
     })
   );
 

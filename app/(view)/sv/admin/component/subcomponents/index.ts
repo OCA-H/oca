@@ -17,3 +17,6 @@ export * from './EventBookingsPanel';
 export * from './AdminSwitch';
 export * from './ContributionHeadsPanel';
 export * from './AdminConfirmDialog';
+export * from './ConfirmPaymentDialog';
+export * from './MembershipsPanel';
+export * from './ContributionsPanel';

@@ -77,6 +77,9 @@ export const adminHelper = {
         return { label: field.label, from: show(before[field.key] ?? ""), to: show(after[field.key] ?? "") };
       }),
 
+  /** A value from CCAvenue, or null for the literal "null" it sends for fields it has no value for. */
+  gatewayValue: (value: string | null): string | null => (value && value !== "null" ? value : null),
+
   /** "₹1,25,000". */
   formatRupees: (amount: number): string => `₹${amount.toLocaleString("en-IN")}`,
 

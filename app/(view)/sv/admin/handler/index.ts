@@ -5,3 +5,4 @@ export * from "./usePassEditor";
 export * from "./useFundEditor";
 export * from "./useNewFund";
 export { useAdminHandler as default } from "./useAdminHandler";
+export * from "./useConfirmPayment";

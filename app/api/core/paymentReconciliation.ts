@@ -1,5 +1,6 @@
 import "server-only";
 import type { GatewayResult } from "./ccavenue";
+import { HttpError } from "./httpError";
 
 // Checking unsettled orders with CCAvenue's Order Status API. The browser's trip back to
 // redirect_url is the fast path, but it never arrives when the member closes the tab, pays in a
@@ -58,5 +59,45 @@ function notCompleted(orderId: string, result: GatewayResult | null): GatewayRes
     gatewayStatus: result?.gatewayStatus ?? "Not found",
     message: NOT_COMPLETED,
     raw: result?.raw ?? {},
+  };
+}
+
+/** CCAvenue reference numbers are digits; letters are allowed for a bank or UPI reference. */
+const REFERENCE_PATTERN = /^[A-Za-z0-9-]{4,50}$/;
+
+/**
+ * The reference an admin gives when confirming a payment by hand: the CCAvenue reference number
+ * (or bank reference) of the payment they found in the CCAvenue dashboard.
+ */
+export function readManualReference(body: Record<string, unknown>): string {
+  const reference = typeof body.reference === "string" ? body.reference.trim() : "";
+  if (!REFERENCE_PATTERN.test(reference)) {
+    throw HttpError.badRequest("Enter the CCAvenue reference number of this payment.", {
+      reference: "Enter the CCAvenue reference number (4 to 50 letters or digits) shown for this order in the CCAvenue dashboard.",
+    });
+  }
+  return reference;
+}
+
+/**
+ * A payment an admin confirmed after finding it in the CCAvenue dashboard, as a GatewayResult, so
+ * it is applied by the same code as the gateway's own: the order is marked paid and its email sent.
+ */
+export function manualPayment(order: { orderId: string; amount: number }, reference: string, confirmedBy: { id: number; name: string }): GatewayResult {
+  return {
+    orderId: order.orderId,
+    outcome: "paid",
+    amount: order.amount,
+    trackingId: reference,
+    bankRefNo: null,
+    paymentMode: null,
+    gatewayStatus: "Confirmed by admin",
+    message: `Confirmed by ${confirmedBy.name} in the admin panel.`,
+    raw: {
+      confirmed_by: confirmedBy.name,
+      confirmed_by_id: String(confirmedBy.id),
+      reference_no: reference,
+      confirmed_at: new Date().toISOString(),
+    },
   };
 }

@@ -3,7 +3,7 @@ import crypto from "node:crypto";
 import { revalidateTag } from "next/cache";
 import { HttpError, type FieldErrors } from "@/app/api/core/httpError";
 import { CcAvenue, type CcAvenueCheckout, type GatewayResult } from "@/app/api/core/ccavenue";
-import { settle } from "@/app/api/core/paymentReconciliation";
+import { manualPayment, settle } from "@/app/api/core/paymentReconciliation";
 import { FILE_KINDS, readUploadedFile, type UploadRules, type UploadedFile } from "@/app/api/core/fileUpload";
 import { Mailer } from "@/app/api/core/mailer";
 import { getContactDetails, getRegistrationCcEmails } from "@/app/api/(features)/(pview)/site/services/siteContentService";
@@ -356,6 +356,18 @@ export class ContributionService {
   /** Contributions for the payment check (see ContributionRepository.findUnsettled). */
   findUnsettled(since: { unpaid: Date; paid: Date }, limit: number): Promise<ContributionWithFund[]> {
     return this.repository.findUnsettled(since, limit);
+  }
+
+  /**
+   * Marks an unpaid order paid on an admin's word, after they found the payment in the CCAvenue
+   * dashboard: for when the Order Status API cannot be reached. Goes through the same steps as a
+   * payment from CCAvenue, so the member gets the same email.
+   */
+  async confirmManually(orderId: string, reference: string, confirmedBy: { id: number; name: string }, baseUrl: string): Promise<ContributionWithFund> {
+    const contribution = await this.repository.findByOrderId(orderId.trim());
+    if (!contribution) throw HttpError.notFound("We could not find this contribution.");
+    if (contribution.status === "paid") throw HttpError.conflict("This contribution is already paid.");
+    return this.applyResult(manualPayment(contribution, reference, confirmedBy), baseUrl);
   }
 
   /**
