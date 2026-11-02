@@ -1,11 +1,12 @@
 'use client';
 
-import React, { useCallback, useState } from 'react';
+import React from 'react';
 import { adminContent, type AdminPanel } from '../../content';
-import { useConfirmPayment, useRecordList } from '../../handler';
+import { useConfirmPayment, usePagedList } from '../../handler';
 import { adminHelper } from '../../helper';
-import { adminService, type AdminContribution } from '../../services';
+import { adminService } from '../../services';
 import { AdminIcon } from './AdminIcon';
+import { AdminPager } from './AdminPager';
 import { ConfirmPaymentDialog, PaymentNotice } from './ConfirmPaymentDialog';
 import { RecordPanelFrame } from './RecordPanelFrame';
 
@@ -14,29 +15,20 @@ const pay = adminContent.payments;
 
 const STATUS_TONE: Record<string, string> = { paid: 'ok', pending: 'warn', failed: 'bad', cancelled: 'muted' };
 
-const matches = (c: AdminContribution, query: string) =>
-  [c.donorName, c.email, c.mobile, c.fundLabel, c.orderId, c.batch ?? ''].some((value) => value.toLowerCase().includes(query));
-
 interface ContributionsPanelProps {
   isActive: boolean;
   onBack: (panel: AdminPanel) => void;
 }
 
-/** Every contribution, newest first, filtered by payment status and a search. */
+/** Contributions, a page at a time, newest first, filtered by payment status and a search. */
 export const ContributionsPanel: React.FC<ContributionsPanelProps> = ({ isActive, onBack }) => {
-  const { items: contributions, setItems, error, isLoading, reload } = useRecordList(adminService.listContributions, isActive);
-  const replace = useCallback(
-    (updated: AdminContribution) => setItems((list) => list?.map((c) => (c.orderId === updated.orderId ? updated : c)) ?? null),
-    [setItems]
-  );
-  const confirmation = useConfirmPayment(adminService.confirmContribution, replace);
-  const [status, setStatus] = useState('');
-  const [query, setQuery] = useState('');
+  const { list, error, isLoading, setPage, status, setStatus, search, setSearch, reload } = usePagedList(adminService.listContributions, isActive);
+  // A confirmed payment moves between the status counts (and may leave a Pending list), so fetch the page again.
+  const confirmation = useConfirmPayment(adminService.confirmContribution, reload);
 
-  const all = contributions ?? [];
-  const paid = all.filter((c) => c.status === 'paid');
-  const q = query.trim().toLowerCase();
-  const shown = all.filter((c) => (!status || c.status === status) && (!q || matches(c, q)));
+  const shown = list?.data ?? [];
+  const summary = list?.summary;
+  const from = list ? (list.page - 1) * list.pageSize + 1 : 0;
 
   return (
     <RecordPanelFrame
@@ -44,7 +36,7 @@ export const ContributionsPanel: React.FC<ContributionsPanelProps> = ({ isActive
       isActive={isActive}
       onBack={onBack}
       isLoading={isLoading}
-      hasLoaded={contributions !== null}
+      hasLoaded={list !== null}
       error={error}
       onReload={reload}
     >
@@ -52,20 +44,20 @@ export const ContributionsPanel: React.FC<ContributionsPanelProps> = ({ isActive
         <dl className="ad-stats">
           <div className="ad-stat">
             <dt>{text.stats.paid}</dt>
-            <dd>{paid.length}</dd>
+            <dd>{summary?.counts.paid ?? 0}</dd>
           </div>
           <div className="ad-stat">
             <dt>{text.stats.revenue}</dt>
-            <dd>{adminHelper.formatRupees(paid.reduce((total, c) => total + c.amount, 0))}</dd>
+            <dd>{adminHelper.formatRupees(summary?.paidAmount ?? 0)}</dd>
           </div>
           <div className="ad-stat">
             <dt>{text.stats.pending}</dt>
-            <dd>{all.filter((c) => c.status === 'pending').length}</dd>
+            <dd>{summary?.counts.pending ?? 0}</dd>
           </div>
         </dl>
 
         <PaymentNotice notice={confirmation.notice} />
-        <input className="ad-search" type="search" value={query} onChange={(e) => setQuery(e.target.value)} placeholder={text.search} aria-label={text.search} />
+        <input className="ad-search" type="search" value={search} onChange={(e) => setSearch(e.target.value)} placeholder={text.search} aria-label={text.search} />
         <div className="ad-toolbar">
           <div className="ad-pills" role="group" aria-label="Payment status">
             {pay.filters.map((filter) => (
@@ -77,19 +69,19 @@ export const ContributionsPanel: React.FC<ContributionsPanelProps> = ({ isActive
                 onClick={() => setStatus(filter.value)}
               >
                 {filter.label}
-                <span className="ad-pill-n">{filter.value ? all.filter((c) => c.status === filter.value).length : all.length}</span>
+                <span className="ad-pill-n">{filter.value ? (summary?.counts[filter.value as keyof typeof summary.counts] ?? 0) : (summary?.all ?? 0)}</span>
               </button>
             ))}
           </div>
           <p className="ad-tally" aria-live="polite">
-            {text.shown(shown.length, all.length)}
+            {list && list.total > 0 && text.shown(from, from + shown.length - 1, list.total)}
           </p>
         </div>
 
         {shown.length === 0 ? (
-          <p className="ad-empty">{all.length === 0 ? adminContent.records.empty : text.none}</p>
+          <p className="ad-empty">{summary?.all === 0 ? adminContent.records.empty : text.none}</p>
         ) : (
-          <ul className="ad-bookings">
+          <ul className={`ad-bookings${isLoading ? ' is-loading' : ''}`} aria-busy={isLoading}>
             {shown.map((c) => (
               <li key={c.id} className="ad-booking">
                 <div className="ad-booking-who">
@@ -131,6 +123,7 @@ export const ContributionsPanel: React.FC<ContributionsPanelProps> = ({ isActive
             ))}
           </ul>
         )}
+        {list && <AdminPager page={list.page} pageSize={list.pageSize} total={list.total} isLoading={isLoading} onPage={setPage} />}
       </div>
       <ConfirmPaymentDialog confirmation={confirmation} name={confirmation.target?.donorName ?? ''} />
     </RecordPanelFrame>

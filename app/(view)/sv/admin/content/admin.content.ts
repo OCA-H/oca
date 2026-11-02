@@ -322,9 +322,9 @@ export const adminContent = {
         b.childrenAbove12 > 0 && `${b.childrenAbove12} over 12`,
       ].filter(Boolean).join(" · ") || "Member only",
     oversold: "Paid after the last pass went: follow up with the member.",
-    shown: (shown: number, total: number) => {
+    shown: (from: number, to: number, total: number) => {
       const noun = total === 1 ? "booking" : "bookings";
-      return shown === total ? `${total} ${noun}` : `${shown} of ${total} ${noun}`;
+      return total <= to - from + 1 ? `${total} ${noun}` : `${from}–${to} of ${total} ${noun}`;
     },
     none: "No bookings match.",
   },
@@ -360,9 +360,9 @@ export const adminContent = {
     paidOn: "Paid",
     batch: (batch: string) => (batch ? `Batch ${batch}` : "No batch given"),
     noAccount: "Paid, but the member's account is not made yet: retried automatically.",
-    shown: (shown: number, total: number) => {
+    shown: (from: number, to: number, total: number) => {
       const noun = total === 1 ? "application" : "applications";
-      return shown === total ? `${total} ${noun}` : `${shown} of ${total} ${noun}`;
+      return total <= to - from + 1 ? `${total} ${noun}` : `${from}–${to} of ${total} ${noun}`;
     },
     none: "No applications match.",
   },
@@ -374,9 +374,9 @@ export const adminContent = {
     paidOn: "Paid",
     units: (units: number, unit: string | null) => `${units} ${unit ?? "unit"}${units === 1 ? "" : "s"}`,
     wants80g: "80G receipt requested",
-    shown: (shown: number, total: number) => {
+    shown: (from: number, to: number, total: number) => {
       const noun = total === 1 ? "contribution" : "contributions";
-      return shown === total ? `${total} ${noun}` : `${shown} of ${total} ${noun}`;
+      return total <= to - from + 1 ? `${total} ${noun}` : `${from}–${to} of ${total} ${noun}`;
     },
     none: "No contributions match.",
   },

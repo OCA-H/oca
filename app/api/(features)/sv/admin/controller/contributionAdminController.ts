@@ -5,12 +5,11 @@ import { contributionRepository, contributionService } from "@/app/api/(features
 import type { FundTotals } from "@/app/api/(features)/sv/contribution/repository/contributionRepository";
 import type { ContributionFund, ContributionWithFund } from "@/app/api/(features)/sv/contribution/schema/contributionSchema";
 import { readManualReference } from "@/app/api/core/paymentReconciliation";
+import { readPageRequest } from "@/app/api/core/pagination";
 import { withAdminAuth } from "../middleware/adminAuth";
 
 type FundContext = { params: Promise<{ id: string }> };
 type OrderContext = { params: Promise<{ orderId: string }> };
-
-const PAYMENT_STATUSES = ["pending", "paid", "failed", "cancelled"];
 
 /** A contribution as the admin panel lists it. Leaves out the PAN, documents and raw gateway response. */
 const toAdminContribution = (contribution: ContributionWithFund) => ({
@@ -70,13 +69,15 @@ export class ContributionAdminController extends BaseController {
     })
   );
 
-  /** GET /api/sv/admin/contributions?status=pending: contributions, newest first. */
+  /**
+   * GET /api/sv/admin/contributions?status=pending&q=raj&page=2: one page of contributions, newest
+   * first, with the totals by payment status.
+   */
   listContributions = withAdminAuth((request) =>
     this.handle(async () => {
-      const status = new URL(request.url).searchParams.get("status") || undefined;
-      if (status && !PAYMENT_STATUSES.includes(status)) throw HttpError.badRequest("Unknown payment status.");
-      const contributions = await contributionRepository.findAll({ status });
-      return this.ok({ data: contributions.map(toAdminContribution) });
+      const page = readPageRequest(request);
+      const [{ rows, total }, summary] = await Promise.all([contributionRepository.findPage(page), contributionRepository.summary()]);
+      return this.ok({ data: rows.map(toAdminContribution), page: page.page, pageSize: page.pageSize, total, summary });
     })
   );
 

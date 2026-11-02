@@ -1,5 +1,6 @@
 import "server-only";
-import { and, asc, count, countDistinct, desc, eq, gte, isNull, ne, or, sum } from "drizzle-orm";
+import { and, asc, count, countDistinct, desc, eq, gte, ilike, isNull, ne, or, sum, type SQL } from "drizzle-orm";
+import { containsPattern, toPaymentSummary, type PageRequest, type PaymentSummary } from "@/app/api/core/pagination";
 import { BaseRepository } from "@/app/api/core/baseRepository";
 import {
   contributionDocuments,
@@ -21,21 +22,49 @@ export interface FundTotals {
   raised: number;
 }
 
-/** The admin panel shows at most this many contributions at once, newest first. */
-const ADMIN_LIST_LIMIT = 2000;
+/** A contribution whose donor, batch, email, mobile, head or order number contains the query. */
+const searching = (query?: string): SQL | undefined => {
+  if (!query) return undefined;
+  const pattern = containsPattern(query);
+  return or(
+    ilike(contributions.donorName, pattern),
+    ilike(contributions.batch, pattern),
+    ilike(contributions.email, pattern),
+    ilike(contributions.mobile, pattern),
+    ilike(contributions.orderId, pattern),
+    ilike(contributionFunds.label, pattern)
+  );
+};
 
 export class ContributionRepository extends BaseRepository {
-  /** Newest first, with their funds, optionally only one payment status's. */
-  async findAll(filter?: { status?: string }): Promise<ContributionWithFund[]> {
-    const results = await this.db
-      .select({ contribution: contributions, fund: contributionFunds })
-      .from(contributions)
-      .innerJoin(contributionFunds, eq(contributionFunds.id, contributions.fundId))
-      .where(filter?.status ? eq(contributions.status, filter.status) : undefined)
-      .orderBy(desc(contributions.createdAt), desc(contributions.id))
-      .limit(ADMIN_LIST_LIMIT);
+  /** One page of contributions with their heads, newest first, filtered by status and search; with how many match. */
+  async findPage(request: PageRequest): Promise<{ rows: ContributionWithFund[]; total: number }> {
+    const where = and(request.status ? eq(contributions.status, request.status) : undefined, searching(request.query));
+    const [rows, [{ total }]] = await Promise.all([
+      this.db
+        .select({ contribution: contributions, fund: contributionFunds })
+        .from(contributions)
+        .innerJoin(contributionFunds, eq(contributionFunds.id, contributions.fundId))
+        .where(where)
+        .orderBy(desc(contributions.createdAt), desc(contributions.id))
+        .limit(request.pageSize)
+        .offset(request.offset),
+      this.db
+        .select({ total: count() })
+        .from(contributions)
+        .innerJoin(contributionFunds, eq(contributionFunds.id, contributions.fundId))
+        .where(where),
+    ]);
+    return { rows: rows.map((row) => ({ ...row.contribution, fund: row.fund })), total };
+  }
 
-    return results.map((row) => ({ ...row.contribution, fund: row.fund }));
+  /** Contributions counted by payment status, with the money raised. */
+  async summary(): Promise<PaymentSummary> {
+    const rows = await this.db
+      .select({ status: contributions.status, count: count(), amount: sum(contributions.amount) })
+      .from(contributions)
+      .groupBy(contributions.status);
+    return toPaymentSummary(rows);
   }
 
   /** Every fund, in the order the form lists them. */

@@ -3,13 +3,12 @@ import { BaseController } from "@/app/api/core/baseController";
 import { HttpError } from "@/app/api/core/httpError";
 import { eventPassBookingService, eventPassRepository, eventPassService } from "@/app/api/(features)/(pview)/event-pass/controller";
 import { readManualReference } from "@/app/api/core/paymentReconciliation";
+import { readPageRequest } from "@/app/api/core/pagination";
 import { EventPassBookingRepository } from "@/app/api/(features)/(pview)/event-pass/repository/eventPassBookingRepository";
 import type { EventPass } from "@/app/api/(features)/(pview)/event-pass/schema/eventPassSchema";
 import type { EventPassBooking } from "@/app/api/(features)/(pview)/event-pass/schema/eventPassBookingSchema";
 import { eventPassEvent, isEventPassEventName } from "@/app/api/(features)/(pview)/event-pass/services/eventPassEvents";
 import { withAdminAuth } from "../middleware/adminAuth";
-
-const BOOKING_STATUSES = ["pending", "paid", "failed", "cancelled"];
 
 /** ?event=golf-tournament: one event's passes or bookings (with its past years); every event when left out. */
 const eventFilter = (request: Request): string | undefined => {
@@ -101,14 +100,16 @@ export class EventPassAdminController extends BaseController {
     })
   );
 
-  /** GET /api/sv/admin/event-pass-bookings?event=golf-tournament&status=paid: bookings, newest first. */
+  /**
+   * GET /api/sv/admin/event-pass-bookings?event=golf-tournament&status=paid&q=raj&page=2: one page of
+   * the event's bookings, newest first, with the event's totals by payment status.
+   */
   listBookings = withAdminAuth((request) =>
     this.handle(async () => {
       const event = eventFilter(request);
-      const status = new URL(request.url).searchParams.get("status") || undefined;
-      if (status && !BOOKING_STATUSES.includes(status)) throw HttpError.badRequest("Unknown booking status.");
-      const bookings = await this.bookings.findAll({ event, status });
-      return this.ok({ data: bookings.map(toAdminBooking) });
+      const page = readPageRequest(request);
+      const [{ rows, total }, summary] = await Promise.all([this.bookings.findPage(event, page), this.bookings.summary(event)]);
+      return this.ok({ data: rows.map(toAdminBooking), page: page.page, pageSize: page.pageSize, total, summary });
     })
   );
 

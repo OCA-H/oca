@@ -1,5 +1,6 @@
 import "server-only";
-import { and, count, desc, eq, gt, gte, isNull, like, ne, or, sql, sum } from "drizzle-orm";
+import { and, count, desc, eq, gt, gte, ilike, isNull, like, ne, or, sql, sum, type SQL } from "drizzle-orm";
+import { containsPattern, toPaymentSummary, type PageRequest, type PaymentSummary } from "@/app/api/core/pagination";
 import { BaseRepository } from "@/app/api/core/baseRepository";
 import { eventPasses } from "../schema/eventPassSchema";
 import {
@@ -8,33 +9,63 @@ import {
   type NewEventPassBooking,
 } from "../schema/eventPassBookingSchema";
 
-/** The admin panel shows at most this many bookings at once, newest first. */
-const ADMIN_LIST_LIMIT = 2000;
-
 export interface PassSales {
   eventPassId: number;
   paid: number;
   revenue: number;
 }
 
+/** Bookings for one event (with its past years: "annual-dinner" matches "annual-dinner-2024"), or every event. */
+const forEvent = (event?: string): SQL | undefined =>
+  event ? or(eq(eventPassBookings.eventName, event), like(eventPassBookings.eventName, `${event}-%`)) : undefined;
+
+/** A booking whose name, member ID, email, mobile or order number contains the query. */
+const searching = (query?: string): SQL | undefined => {
+  if (!query) return undefined;
+  const pattern = containsPattern(query);
+  return or(
+    ilike(eventPassBookings.fullName, pattern),
+    ilike(eventPassBookings.memberId, pattern),
+    ilike(eventPassBookings.email, pattern),
+    ilike(eventPassBookings.mobile, pattern),
+    ilike(eventPassBookings.orderId, pattern)
+  );
+};
+
 export class EventPassBookingRepository extends BaseRepository {
-  /**
-   * Newest first, optionally only one event's or one status's. `event` also takes in the event's
-   * past years: "annual-dinner" matches "annual-dinner-2024".
-   */
-  async findAll(filter?: { eventName?: string; event?: string; status?: string }): Promise<EventPassBooking[]> {
-    const conditions = [];
-    if (filter?.eventName) conditions.push(eq(eventPassBookings.eventName, filter.eventName));
-    if (filter?.event) {
-      conditions.push(or(eq(eventPassBookings.eventName, filter.event), like(eventPassBookings.eventName, `${filter.event}-%`)));
-    }
-    if (filter?.status) conditions.push(eq(eventPassBookings.status, filter.status));
-    return this.db
-      .select()
+  /** One page of an event's bookings, newest first, filtered by status and search; with how many match. */
+  async findPage(event: string | undefined, request: PageRequest): Promise<{ rows: EventPassBooking[]; total: number }> {
+    const where = and(
+      forEvent(event),
+      request.status ? eq(eventPassBookings.status, request.status) : undefined,
+      searching(request.query)
+    );
+    const [rows, [{ total }]] = await Promise.all([
+      this.db
+        .select()
+        .from(eventPassBookings)
+        .where(where)
+        .orderBy(desc(eventPassBookings.createdAt), desc(eventPassBookings.id))
+        .limit(request.pageSize)
+        .offset(request.offset),
+      this.db.select({ total: count() }).from(eventPassBookings).where(where),
+    ]);
+    return { rows, total };
+  }
+
+  /** An event's bookings counted by payment status, with the money paid and how many were paid after sell-out. */
+  async summary(event: string | undefined): Promise<PaymentSummary & { oversold: number }> {
+    const rows = await this.db
+      .select({
+        status: eventPassBookings.status,
+        count: count(),
+        amount: sum(eventPassBookings.amount),
+        oversold: sql<number>`count(*) filter (where ${eventPassBookings.oversold})`.mapWith(Number),
+      })
       .from(eventPassBookings)
-      .where(conditions.length > 0 ? and(...conditions) : undefined)
-      .orderBy(desc(eventPassBookings.createdAt), desc(eventPassBookings.id))
-      .limit(ADMIN_LIST_LIMIT);
+      .where(forEvent(event))
+      .groupBy(eventPassBookings.status);
+    return { ...toPaymentSummary(rows), oversold: rows.find((row) => row.status === "paid")?.oversold ?? 0 };
   }
 
   /** Paid bookings and money taken, per pass. */

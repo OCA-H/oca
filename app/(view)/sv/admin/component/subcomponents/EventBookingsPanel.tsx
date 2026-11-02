@@ -1,12 +1,13 @@
 'use client';
 
-import React, { useCallback, useState } from 'react';
+import React, { useCallback } from 'react';
 import { adminContent, type AdminPanel, type PassEvent } from '../../content';
-import { useConfirmPayment, useRecordList } from '../../handler';
+import { useConfirmPayment, usePagedList } from '../../handler';
 import { adminHelper } from '../../helper';
-import { adminService, type AdminBooking } from '../../services';
+import { adminService, type ListQuery } from '../../services';
 import { ConfirmPaymentDialog, PaymentNotice } from './ConfirmPaymentDialog';
 import { AdminIcon } from './AdminIcon';
+import { AdminPager } from './AdminPager';
 import { RecordPanelFrame } from './RecordPanelFrame';
 
 const text = adminContent.bookings;
@@ -14,32 +15,22 @@ const pay = adminContent.payments;
 
 const STATUS_TONE: Record<string, string> = { paid: 'ok', pending: 'warn', failed: 'bad', cancelled: 'muted' };
 
-const matches = (booking: AdminBooking, query: string) =>
-  [booking.fullName, booking.memberId, booking.email, booking.orderId, booking.mobile ?? '']
-    .some((value) => value.toLowerCase().includes(query));
-
 interface EventBookingsPanelProps {
   passEvent: PassEvent;
   isActive: boolean;
   onBack: (panel: AdminPanel) => void;
 }
 
-/** Every pass booking for one event, newest first, filtered by payment status and a search. */
+/** One event's pass bookings, a page at a time, newest first, filtered by payment status and a search. */
 export const EventBookingsPanel: React.FC<EventBookingsPanelProps> = ({ passEvent, isActive, onBack }) => {
-  const load = useCallback(() => adminService.listBookings(passEvent.event), [passEvent.event]);
-  const { items: bookings, setItems, error, isLoading, reload } = useRecordList(load, isActive);
-  const replace = useCallback(
-    (updated: AdminBooking) => setItems((list) => list?.map((b) => (b.orderId === updated.orderId ? updated : b)) ?? null),
-    [setItems]
-  );
-  const confirmation = useConfirmPayment(adminService.confirmBooking, replace);
-  const [status, setStatus] = useState('');
-  const [query, setQuery] = useState('');
+  const load = useCallback((query: ListQuery) => adminService.listBookings(passEvent.event, query), [passEvent.event]);
+  const { list, error, isLoading, setPage, status, setStatus, search, setSearch, reload } = usePagedList(load, isActive);
+  // A confirmed booking moves between the status counts (and may leave a Pending list), so fetch the page again.
+  const confirmation = useConfirmPayment(adminService.confirmBooking, reload);
 
-  const all = bookings ?? [];
-  const paid = all.filter((b) => b.status === 'paid');
-  const q = query.trim().toLowerCase();
-  const shown = all.filter((b) => (!status || b.status === status) && (!q || matches(b, q)));
+  const shown = list?.data ?? [];
+  const summary = list?.summary;
+  const from = list ? (list.page - 1) * list.pageSize + 1 : 0;
 
   return (
     <RecordPanelFrame
@@ -47,7 +38,7 @@ export const EventBookingsPanel: React.FC<EventBookingsPanelProps> = ({ passEven
       isActive={isActive}
       onBack={onBack}
       isLoading={isLoading}
-      hasLoaded={bookings !== null}
+      hasLoaded={list !== null}
       error={error}
       onReload={reload}
     >
@@ -55,20 +46,20 @@ export const EventBookingsPanel: React.FC<EventBookingsPanelProps> = ({ passEven
         <dl className="ad-stats">
           <div className="ad-stat">
             <dt>{text.stats.paid}</dt>
-            <dd>{paid.length}</dd>
+            <dd>{summary?.counts.paid ?? 0}</dd>
           </div>
           <div className="ad-stat">
             <dt>{text.stats.revenue}</dt>
-            <dd>{adminHelper.formatRupees(paid.reduce((total, b) => total + b.amount, 0))}</dd>
+            <dd>{adminHelper.formatRupees(summary?.paidAmount ?? 0)}</dd>
           </div>
           <div className="ad-stat">
             <dt>{text.stats.oversold}</dt>
-            <dd>{paid.filter((b) => b.oversold).length}</dd>
+            <dd>{summary?.oversold ?? 0}</dd>
           </div>
         </dl>
 
         <PaymentNotice notice={confirmation.notice} />
-        <input className="ad-search" type="search" value={query} onChange={(e) => setQuery(e.target.value)} placeholder={text.search} aria-label={text.search} />
+        <input className="ad-search" type="search" value={search} onChange={(e) => setSearch(e.target.value)} placeholder={text.search} aria-label={text.search} />
         <div className="ad-toolbar">
           <div className="ad-pills" role="group" aria-label="Payment status">
             {pay.filters.map((filter) => (
@@ -80,19 +71,19 @@ export const EventBookingsPanel: React.FC<EventBookingsPanelProps> = ({ passEven
                 onClick={() => setStatus(filter.value)}
               >
                 {filter.label}
-                <span className="ad-pill-n">{filter.value ? all.filter((b) => b.status === filter.value).length : all.length}</span>
+                <span className="ad-pill-n">{filter.value ? (summary?.counts[filter.value as keyof typeof summary.counts] ?? 0) : (summary?.all ?? 0)}</span>
               </button>
             ))}
           </div>
           <p className="ad-tally" aria-live="polite">
-            {text.shown(shown.length, all.length)}
+            {list && list.total > 0 && text.shown(from, from + shown.length - 1, list.total)}
           </p>
         </div>
 
         {shown.length === 0 ? (
-          <p className="ad-empty">{all.length === 0 ? adminContent.records.empty : text.none}</p>
+          <p className="ad-empty">{summary?.all === 0 ? adminContent.records.empty : text.none}</p>
         ) : (
-          <ul className="ad-bookings">
+          <ul className={`ad-bookings${isLoading ? ' is-loading' : ''}`} aria-busy={isLoading}>
             {shown.map((b) => (
               <li key={b.id} className={`ad-booking${b.oversold ? ' is-flagged' : ''}`}>
                 <div className="ad-booking-who">
@@ -135,6 +126,7 @@ export const EventBookingsPanel: React.FC<EventBookingsPanelProps> = ({ passEven
             ))}
           </ul>
         )}
+        {list && <AdminPager page={list.page} pageSize={list.pageSize} total={list.total} isLoading={isLoading} onPage={setPage} />}
       </div>
       <ConfirmPaymentDialog confirmation={confirmation} name={confirmation.target?.fullName ?? ''} />
     </RecordPanelFrame>

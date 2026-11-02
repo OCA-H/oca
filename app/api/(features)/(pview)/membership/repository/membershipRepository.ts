@@ -1,5 +1,6 @@
 import "server-only";
-import { and, desc, eq, gte, isNull, ne, or } from "drizzle-orm";
+import { and, count, desc, eq, gte, ilike, isNull, ne, or, sql, sum, type SQL } from "drizzle-orm";
+import { containsPattern, toPaymentSummary, type PageRequest, type PaymentSummary } from "@/app/api/core/pagination";
 import { BaseRepository } from "@/app/api/core/baseRepository";
 import {
   membershipApplications,
@@ -7,18 +8,46 @@ import {
   type NewMembershipApplication,
 } from "../schema/membershipSchema";
 
-/** The admin panel shows at most this many applications at once, newest first. */
-const ADMIN_LIST_LIMIT = 2000;
+/** The applicant's whole name, as one string to search: "Mr. Mohit Malani". */
+const fullName = sql`concat_ws(' ', ${membershipApplications.title}, ${membershipApplications.firstName}, ${membershipApplications.middleName}, ${membershipApplications.lastName})`;
+
+/** An application whose name, batch, email, mobile or order number contains the query. */
+const searching = (query?: string): SQL | undefined => {
+  if (!query) return undefined;
+  const pattern = containsPattern(query);
+  return or(
+    ilike(fullName, pattern),
+    ilike(membershipApplications.batchYear, pattern),
+    ilike(membershipApplications.email, pattern),
+    ilike(membershipApplications.mobile, pattern),
+    ilike(membershipApplications.orderId, pattern)
+  );
+};
 
 export class MembershipRepository extends BaseRepository {
-  /** Newest first, optionally only one payment status's. */
-  async findAll(filter?: { status?: string }): Promise<MembershipApplication[]> {
-    return this.db
-      .select()
+  /** One page of applications, newest first, filtered by status and search; with how many match. */
+  async findPage(request: PageRequest): Promise<{ rows: MembershipApplication[]; total: number }> {
+    const where = and(request.status ? eq(membershipApplications.status, request.status) : undefined, searching(request.query));
+    const [rows, [{ total }]] = await Promise.all([
+      this.db
+        .select()
+        .from(membershipApplications)
+        .where(where)
+        .orderBy(desc(membershipApplications.createdAt), desc(membershipApplications.id))
+        .limit(request.pageSize)
+        .offset(request.offset),
+      this.db.select({ total: count() }).from(membershipApplications).where(where),
+    ]);
+    return { rows, total };
+  }
+
+  /** Applications counted by payment status, with the fees paid. */
+  async summary(): Promise<PaymentSummary> {
+    const rows = await this.db
+      .select({ status: membershipApplications.status, count: count(), amount: sum(membershipApplications.amount) })
       .from(membershipApplications)
-      .where(filter?.status ? eq(membershipApplications.status, filter.status) : undefined)
-      .orderBy(desc(membershipApplications.createdAt), desc(membershipApplications.id))
-      .limit(ADMIN_LIST_LIMIT);
+      .groupBy(membershipApplications.status);
+    return toPaymentSummary(rows);
   }
 
   async findByOrderId(orderId: string): Promise<MembershipApplication | null> {

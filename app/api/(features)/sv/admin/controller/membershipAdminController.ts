@@ -1,14 +1,12 @@
 import "server-only";
 import { BaseController } from "@/app/api/core/baseController";
-import { HttpError } from "@/app/api/core/httpError";
 import { readManualReference } from "@/app/api/core/paymentReconciliation";
+import { readPageRequest } from "@/app/api/core/pagination";
 import { membershipRepository, membershipService } from "@/app/api/(features)/(pview)/membership/controller/membershipController";
 import type { MembershipApplication } from "@/app/api/(features)/(pview)/membership/schema/membershipSchema";
 import { withAdminAuth } from "../middleware/adminAuth";
 
 type OrderContext = { params: Promise<{ orderId: string }> };
-
-const PAYMENT_STATUSES = ["pending", "paid", "failed", "cancelled"];
 
 /** A membership application as the admin panel lists it. Leaves out the password and raw gateway response. */
 const toAdminMembership = (application: MembershipApplication) => ({
@@ -36,13 +34,15 @@ const toAdminMembership = (application: MembershipApplication) => ({
 
 // Every action runs behind withAdminAuth: signed in, and an admin in the database.
 export class MembershipAdminController extends BaseController {
-  /** GET /api/sv/admin/memberships?status=pending: membership applications, newest first. */
+  /**
+   * GET /api/sv/admin/memberships?status=pending&q=raj&page=2: one page of membership applications,
+   * newest first, with the totals by payment status.
+   */
   listMemberships = withAdminAuth((request) =>
     this.handle(async () => {
-      const status = new URL(request.url).searchParams.get("status") || undefined;
-      if (status && !PAYMENT_STATUSES.includes(status)) throw HttpError.badRequest("Unknown payment status.");
-      const applications = await membershipRepository.findAll({ status });
-      return this.ok({ data: applications.map(toAdminMembership) });
+      const page = readPageRequest(request);
+      const [{ rows, total }, summary] = await Promise.all([membershipRepository.findPage(page), membershipRepository.summary()]);
+      return this.ok({ data: rows.map(toAdminMembership), page: page.page, pageSize: page.pageSize, total, summary });
     })
   );
 

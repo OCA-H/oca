@@ -10898,3 +10898,14 @@ section[id^="ec-"] {
 .ad-pay-btn svg{width:14px; height:14px;}
 .ad-confirm-ref{margin:18px 0 0;}
 .ad-confirm-ref input{width:100%;}
+
+/* records: pages */
+.ad-pager{display:flex; flex-wrap:wrap; align-items:center; justify-content:center; gap:6px; margin:20px 0 0;}
+.ad-pager-btn{display:inline-flex; align-items:center; justify-content:center; min-width:36px; height:36px; padding:0 10px; border:1px solid var(--border); border-radius:100px; background:#fff; font:inherit; font-size:13.5px; font-weight:600; color:var(--text); font-variant-numeric:tabular-nums; cursor:pointer;}
+.ad-pager-btn svg{width:16px; height:16px;}
+.ad-pager-btn:hover:not(:disabled){border-color:var(--border-strong);}
+.ad-pager-btn.is-active{background:var(--brand); border-color:var(--brand); color:#fff; cursor:default;}
+.ad-pager-btn:disabled:not(.is-active){opacity:.45; cursor:default;}
+.ad-pager-btn:focus-visible{outline:3px solid var(--gold-accent); outline-offset:1px;}
+.ad-pager-gap{padding:0 4px; color:var(--text-soft);}
+.ad-bookings.is-loading{opacity:.55; transition:opacity .15s ease;}

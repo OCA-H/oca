@@ -160,6 +160,32 @@ export interface AdminContribution {
   createdAt: string;
 }
 
+/** How many records are in each payment state, and what the paid ones came to. */
+export interface PaymentSummary {
+  all: number;
+  counts: Record<PaymentStatus, number>;
+  paidAmount: number;
+}
+
+/** One page of a records list, with how many match in all and the list's totals. */
+export interface PagedList<T, S extends PaymentSummary = PaymentSummary> {
+  data: T[];
+  page: number;
+  pageSize: number;
+  total: number;
+  summary: S;
+}
+
+/** Which page of a list to fetch, and what to narrow it to. */
+export interface ListQuery {
+  page: number;
+  status: string;
+  q: string;
+}
+
+const listParams = ({ page, status, q }: ListQuery, extra: Record<string, string> = {}) =>
+  new URLSearchParams({ ...extra, page: String(page), ...(status && { status }), ...(q.trim() && { q: q.trim() }) }).toString();
+
 /** What a manual confirmation returns: the record as it now stands, and what happened to its email. */
 export interface Confirmed<T> {
   data: T;
@@ -222,9 +248,9 @@ export const adminService = {
   updatePass: async (id: number, changes: EventPassChanges): Promise<AdminEventPass> =>
     (await adminRequest<{ data: AdminEventPass }>(`/api/sv/admin/event-passes/${id}`, { method: "PATCH", body: changes })).data,
 
-  /** One event's bookings, newest first. */
-  listBookings: async (event: string): Promise<AdminBooking[]> =>
-    (await adminRequest<{ data: AdminBooking[] }>(`/api/sv/admin/event-pass-bookings?event=${encodeURIComponent(event)}`)).data,
+  /** One page of an event's bookings, newest first. */
+  listBookings: (event: string, query: ListQuery): Promise<PagedList<AdminBooking, PaymentSummary & { oversold: number }>> =>
+    adminRequest(`/api/sv/admin/event-pass-bookings?${listParams(query, { event })}`),
 
   /**
    * Marks an unpaid booking paid after the admin found the payment in the CCAvenue dashboard;
@@ -233,17 +259,15 @@ export const adminService = {
   confirmBooking: (orderId: string, reference: string): Promise<Confirmed<AdminBooking>> =>
     adminRequest(`/api/sv/admin/event-pass-bookings/${encodeURIComponent(orderId)}/confirm`, { method: "POST", body: { reference } }),
 
-  /** Every membership application, newest first. */
-  listMemberships: async (): Promise<AdminMembership[]> =>
-    (await adminRequest<{ data: AdminMembership[] }>("/api/sv/admin/memberships")).data,
+  /** One page of membership applications, newest first. */
+  listMemberships: (query: ListQuery): Promise<PagedList<AdminMembership>> => adminRequest(`/api/sv/admin/memberships?${listParams(query)}`),
 
   /** Marks an unpaid application paid; the member's account is made and the welcome email sent. */
   confirmMembership: (orderId: string, reference: string): Promise<Confirmed<AdminMembership>> =>
     adminRequest(`/api/sv/admin/memberships/${encodeURIComponent(orderId)}/confirm`, { method: "POST", body: { reference } }),
 
-  /** Every contribution, newest first. */
-  listContributions: async (): Promise<AdminContribution[]> =>
-    (await adminRequest<{ data: AdminContribution[] }>("/api/sv/admin/contributions")).data,
+  /** One page of contributions, newest first. */
+  listContributions: (query: ListQuery): Promise<PagedList<AdminContribution>> => adminRequest(`/api/sv/admin/contributions?${listParams(query)}`),
 
   /** Marks an unpaid contribution paid; the thank-you email is sent. */
   confirmContribution: (orderId: string, reference: string): Promise<Confirmed<AdminContribution>> =>

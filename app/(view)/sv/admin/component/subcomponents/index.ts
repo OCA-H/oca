@@ -20,3 +20,4 @@ export * from './AdminConfirmDialog';
 export * from './ConfirmPaymentDialog';
 export * from './MembershipsPanel';
 export * from './ContributionsPanel';
+export * from './AdminPager';
