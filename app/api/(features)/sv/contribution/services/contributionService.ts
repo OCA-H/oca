@@ -6,6 +6,7 @@ import { CcAvenue, type CcAvenueCheckout, type GatewayResult } from "@/app/api/c
 import { manualPayment, settle } from "@/app/api/core/paymentReconciliation";
 import { FILE_KINDS, readUploadedFile, type UploadRules, type UploadedFile } from "@/app/api/core/fileUpload";
 import { Mailer } from "@/app/api/core/mailer";
+import { renderReceipt } from "@/app/api/core/receiptCard";
 import { getContactDetails, getRegistrationCcEmails } from "@/app/api/(features)/(pview)/site/services/siteContentService";
 import { createSignedToken, verifySignedToken, type SessionData } from "@/app/api/core/session";
 import { storage } from "@/app/api/core/storage";
@@ -18,7 +19,7 @@ import type {
   ContributionWithFund,
   NewContributionDocument,
 } from "../schema/contributionSchema";
-import { contributionThankYouEmail } from "./contributionThankYouEmail";
+import { contributionThankYouEmail, fundLine } from "./contributionThankYouEmail";
 import { FUND_PROGRESS_TAG } from "./fundProgress";
 
 const PAYMENT_METHODS = ["upi", "card", "netbanking"];
@@ -438,17 +439,30 @@ export class ContributionService {
   }
 
   /**
-   * Emails the member their thank-you and payment acknowledgement, copying the addresses set under
-   * Email settings in the admin panel. A failure is logged, not thrown:
+   * Emails the member their thank-you and payment acknowledgement, with the receipt for the payment
+   * made out on account of the fund they chose, copying the addresses set under Email settings in
+   * the admin panel. A failure is logged, not thrown:
    * the payment is already recorded, and the payment check retries it.
    */
   private async sendThankYou(contribution: ContributionWithFund, baseUrl: string): Promise<void> {
     if (contribution.thankYouEmailSentAt) return;
     if (!(await this.repository.claimThankYouEmail(contribution.id))) return;
     try {
-      const [ccEmails, contact] = await Promise.all([getRegistrationCcEmails(), getContactDetails()]);
+      const [ccEmails, contact, receipt] = await Promise.all([
+        getRegistrationCcEmails(),
+        getContactDetails(),
+        renderReceipt({
+          receiptNo: contribution.orderId,
+          paidAt: contribution.paidAt ?? contribution.updatedAt,
+          receivedFrom: contribution.donorName,
+          amount: contribution.amount,
+          paymentMode: gatewayValue(contribution.paymentMode),
+          paymentReference: gatewayValue(contribution.trackingId),
+          onAccountOf: fundLine(contribution),
+        }),
+      ]);
       const cc = ccEmails.filter((email) => email !== contribution.email);
-      await Mailer.send(contributionThankYouEmail(contribution, baseUrl, cc, contact));
+      await Mailer.send(contributionThankYouEmail(contribution, receipt, baseUrl, cc, contact));
     } catch (error) {
       console.error(`Contribution ${contribution.orderId}: thank-you email to ${contribution.email} failed:`, error);
       await this.repository.releaseThankYouEmail(contribution.id).catch(() => {});

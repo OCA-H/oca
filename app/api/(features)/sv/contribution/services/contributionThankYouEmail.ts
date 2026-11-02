@@ -1,6 +1,7 @@
 import "server-only";
 import type { MailMessage } from "@/app/api/core/mailer";
 import type { ContactDetailsContent } from "@/app/api/(features)/(pview)/site/schema/sectionSpecs";
+import { receiptFileName } from "@/app/api/core/receiptCard";
 import type { ContributionWithFund } from "../schema/contributionSchema";
 
 const escapeHtml = (value: string) =>
@@ -35,11 +36,13 @@ export const fundLine = (contribution: ContributionWithFund) => {
 
 /**
  * The thank-you email sent once a contribution is paid: table layout and inline styles, because
- * email clients ignore most CSS. Doubles as the member's payment acknowledgement. `cc` is the
- * addresses set under Email settings in the admin panel; `contact` the Contact details set there.
+ * email clients ignore most CSS. Doubles as the member's payment acknowledgement, with `receipt`
+ * (from renderReceipt()) attached. `cc` is the addresses set under Email settings in the admin
+ * panel; `contact` the Contact details set there.
  */
 export function contributionThankYouEmail(
   contribution: ContributionWithFund,
+  receipt: Buffer,
   baseUrl: string,
   cc: string[],
   contact: ContactDetailsContent
@@ -48,6 +51,7 @@ export function contributionThankYouEmail(
   const towards = fundLine(contribution);
   const paymentMode = gatewayValue(contribution.paymentMode);
   const trackingId = gatewayValue(contribution.trackingId);
+  const receiptFile = receiptFileName(contribution.orderId);
   const rows: [string, string][] = [
     ["Order reference", contribution.orderId],
     ["Contribution towards", towards],
@@ -68,6 +72,8 @@ Thank you for your contribution of ${amount} to the ${towards}.
 Gifts like yours are how the Old Columbans Association keeps its promise to St. Columba's School: to its teachers, its students, and the generations still to come. We are grateful that you chose to stand behind it.
 
 ${rows.map(([label, value]) => `${label}: ${value}`).join("\n")}
+
+The receipt for your payment is attached as ${receiptFile}.
 
 ${taxNote}
 
@@ -109,6 +115,7 @@ ${contact.address}`;
         <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:22px 0 0;padding:6px 18px;background:#F8FBF8;border:1px solid #D8E4DA;border-radius:10px;">
           ${rowsHtml}
         </table>
+        <p style="margin:22px 0 0;font-size:15px;line-height:1.65;color:#5A6B60;">The receipt for your payment is attached as <b style="color:#12251A;">${escapeHtml(receiptFile)}</b>.</p>
         <p style="margin:22px 0 0;padding:14px 16px;background:#FBF4E3;border-left:3px solid #C9A227;font-size:13.5px;line-height:1.6;color:#5A6B60;">${escapeHtml(taxNote)}</p>
         <p style="margin:22px 0 0;font-size:15px;line-height:1.65;">With gratitude,<br><b style="color:#0F5E2D;">${escapeHtml(contact.name)}</b></p>
       </td></tr>
@@ -128,5 +135,6 @@ ${contact.address}`;
     subject: `Thank you for your contribution of ${amount} – Old Columbans Association`,
     text,
     html,
+    attachments: [{ filename: receiptFile, content: receipt, contentType: "image/jpeg" }],
   };
 }

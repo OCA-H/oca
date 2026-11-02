@@ -19,6 +19,7 @@ import {
   iconBadge,
   type EmailDetailRow,
 } from "@/app/api/core/emailLayout";
+import { receiptFileName } from "@/app/api/core/receiptCard";
 import type { EventPassBooking } from "../schema/eventPassBookingSchema";
 import { PASS_CARD_MISSING } from "./eventPassCard";
 import { eventPassEvent } from "./eventPassEvents";
@@ -31,14 +32,15 @@ const firstName = (fullName: string) =>
   fullName.replace(/^(mr|mrs|ms|miss|dr|prof|col|capt|maj|gen|lt|brig|rev|hon)\.?\s+/i, "").split(" ")[0];
 
 /**
- * The email sent once a pass payment goes through, with the member's digital pass attached.
- * It doubles as the payment acknowledgement. `card` is the pass from renderPassCard(); a detail
+ * The email sent once a pass payment goes through, with the member's digital pass and the receipt
+ * for the payment (from renderReceipt()) attached. `card` is the pass from renderPassCard(); a detail
  * missing from it (a couple pass booked without the spouse's name, a member with no batch on
  * record) shows as "NA" on the card and here, and the email asks the member to send it in.
  */
 export function eventPassConfirmationEmail(params: {
   booking: EventPassBooking;
   card: Buffer;
+  receipt: Buffer;
   /** Whether the pass admits a spouse, so a missing spouse name is called out. */
   includesSpouse: boolean;
   batch: string | null | undefined;
@@ -46,13 +48,14 @@ export function eventPassConfirmationEmail(params: {
   baseUrl: string;
   contact: ContactDetailsContent;
 }): MailMessage {
-  const { booking, card, includesSpouse, batch, cc, baseUrl, contact } = params;
+  const { booking, card, receipt, includesSpouse, batch, cc, baseUrl, contact } = params;
   // What the printed pass says; keep it in step with the artwork in public/images/passes.
   const event = eventPassEvent(booking.eventName);
   const amount = formatRupees(booking.amount);
   const paymentMode = gatewayValue(booking.paymentMode);
   const trackingId = gatewayValue(booking.trackingId);
   const cardFile = `${event.cardFile}-${booking.orderId}.jpg`;
+  const receiptFile = receiptFileName(booking.orderId);
   const includes = event.includes ? ` ${event.includes}` : "";
 
   const eventRows: EmailDetailRow[] = [
@@ -99,7 +102,7 @@ export function eventPassConfirmationEmail(params: {
       ${emailBody(`
         ${emailParagraph(`Dear ${escapeHtml(booking.fullName)},`)}
         ${emailParagraph(
-          `Thank you for booking the ${escapeHtml(booking.passLabel)} for the ${event.name}. Your digital pass, with your name on it, is attached as <b>${escapeHtml(cardFile)}</b>. Please show it on your phone, or bring a printout, at the entrance.${escapeHtml(includes)}`,
+          `Thank you for booking the ${escapeHtml(booking.passLabel)} for the ${event.name}. Your digital pass, with your name on it, is attached as <b>${escapeHtml(cardFile)}</b>. Please show it on your phone, or bring a printout, at the entrance.${escapeHtml(includes)} The receipt for your payment is attached as <b>${escapeHtml(receiptFile)}</b>.`,
           { soft: true, margin: "0 0 4px" }
         )}
         ${emailSubhead("Your pass")}
@@ -113,7 +116,7 @@ export function eventPassConfirmationEmail(params: {
 
   const text = `Dear ${booking.fullName},
 
-Thank you for booking the ${booking.passLabel} for the ${event.name}. Your digital pass is attached as ${cardFile}. Please show it on your phone, or bring a printout, at the entrance.${includes}
+Thank you for booking the ${booking.passLabel} for the ${event.name}. Your digital pass is attached as ${cardFile}. Please show it on your phone, or bring a printout, at the entrance.${includes} The receipt for your payment is attached as ${receiptFile}.
 
 YOUR PASS
 ${eventRows.map(({ label, value }) => `${label}: ${value}`).join("\n")}
@@ -134,6 +137,9 @@ ${contactSignature(contact)}`;
     subject: `Your ${event.name} pass – ${booking.passLabel}`,
     text,
     html,
-    attachments: [{ filename: cardFile, content: card, contentType: "image/jpeg" }],
+    attachments: [
+      { filename: cardFile, content: card, contentType: "image/jpeg" },
+      { filename: receiptFile, content: receipt, contentType: "image/jpeg" },
+    ],
   };
 }

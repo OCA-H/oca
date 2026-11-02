@@ -4,6 +4,7 @@ import { HttpError, type FieldErrors } from "@/app/api/core/httpError";
 import { CcAvenue, type CcAvenueCheckout, type GatewayResult } from "@/app/api/core/ccavenue";
 import { isRecheckable, manualPayment, settle } from "@/app/api/core/paymentReconciliation";
 import { Mailer } from "@/app/api/core/mailer";
+import { PASS_RECEIPT_ACCOUNT, renderReceipt } from "@/app/api/core/receiptCard";
 import type { SessionData } from "@/app/api/core/session";
 import { UserRepository } from "@/app/api/(features)/(pview)/auth/repository/userRepository";
 import { getContactDetails, getRegistrationCcEmails } from "@/app/api/(features)/(pview)/site/services/siteContentService";
@@ -292,9 +293,9 @@ export class EventPassBookingService {
   }
 
   /**
-   * Emails the member their pass, with their name, member ID and batch written on it, copying the
-   * addresses set under Email settings in the admin panel. A failure is logged, not thrown: the
-   * payment is already recorded, and the payment check retries the email.
+   * Emails the member their pass, with their name, member ID and batch written on it, and the receipt
+   * for the payment, copying the addresses set under Email settings in the admin panel. A failure is
+   * logged, not thrown: the payment is already recorded, and the payment check retries the email.
    */
   private async sendPass(booking: EventPassBooking, baseUrl: string): Promise<void> {
     if (booking.passEmailSentAt) return;
@@ -306,15 +307,26 @@ export class EventPassBookingService {
       ]);
       const includesSpouse = pass?.includesSpouse ?? Boolean(booking.spouseName);
       const batch = user?.batchYear;
-      const card = await renderPassCard(passCardDesign({ eventName: booking.eventName, passId: booking.passId, includesSpouse }), {
-        memberName: booking.fullName,
-        spouseName: booking.spouseName,
-        memberId: booking.memberId,
-        batch,
-      });
+      const [card, receipt] = await Promise.all([
+        renderPassCard(passCardDesign({ eventName: booking.eventName, passId: booking.passId, includesSpouse }), {
+          memberName: booking.fullName,
+          spouseName: booking.spouseName,
+          memberId: booking.memberId,
+          batch,
+        }),
+        renderReceipt({
+          receiptNo: booking.orderId,
+          paidAt: booking.paidAt ?? booking.updatedAt,
+          receivedFrom: booking.fullName,
+          amount: booking.amount,
+          paymentMode: gatewayValue(booking.paymentMode),
+          paymentReference: gatewayValue(booking.trackingId),
+          onAccountOf: PASS_RECEIPT_ACCOUNT,
+        }),
+      ]);
       const [ccEmails, contact] = await Promise.all([getRegistrationCcEmails(), getContactDetails()]);
       const cc = ccEmails.filter((email) => email !== booking.email);
-      await Mailer.send(eventPassConfirmationEmail({ booking, card, includesSpouse, batch, cc, baseUrl, contact }));
+      await Mailer.send(eventPassConfirmationEmail({ booking, card, receipt, includesSpouse, batch, cc, baseUrl, contact }));
     } catch (error) {
       console.error(`Pass order ${booking.orderId}: pass email to ${booking.email} failed:`, error);
       await this.bookings.releasePassEmail(booking.id).catch(() => {});
