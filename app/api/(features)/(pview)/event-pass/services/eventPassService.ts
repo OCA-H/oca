@@ -138,7 +138,8 @@ export class EventPassService {
 
   /**
    * The admin panel's edit: every editable detail of a pass, checked together so the form can show
-   * each problem beside its field. Seats left can never exceed the seats in total.
+   * each problem beside its field. Seats left can never exceed the seats in total; both left empty
+   * make the pass unlimited.
    */
   async updateFromAdmin(id: number, payload: Record<string, unknown>): Promise<EventPass> {
     const existing = await this.repository.findById(id);
@@ -157,19 +158,26 @@ export class EventPassService {
       if (!Number.isInteger(number) || number < 0) fields[key] = `${label} must be a whole number, 0 or more.`;
       return number;
     };
+    // Seats left empty (null) mean the pass is not limited.
+    const seats = (key: string, label: string): number | null => (payload[key] === null ? null : whole(key, label));
 
     const label = text("label", "Name on the site", 200, true);
     const description = text("description", "Description", 500);
     const batchEligibility = text("batchEligibility", "Who can book", 100);
     const statusNote = text("statusNote", "Note on the card", 255);
     const price = whole("price", "Price");
-    const totalQuantity = whole("totalQuantity", "Seats in total");
-    const availableQuantity = whole("availableQuantity", "Seats left");
+    const totalQuantity = seats("totalQuantity", "Seats in total");
+    const availableQuantity = seats("availableQuantity", "Seats left");
     const displayOrder = whole("displayOrder", "Order on the page");
     const status = payload.status;
     if (status !== "active" && status !== "locked") fields.status = "Choose whether the pass is open or locked.";
-    if (!fields.totalQuantity && !fields.availableQuantity && availableQuantity > totalQuantity) {
-      fields.availableQuantity = "Seats left cannot be more than the seats in total.";
+    if (!fields.totalQuantity && !fields.availableQuantity) {
+      if ((totalQuantity === null) !== (availableQuantity === null)) {
+        const field = totalQuantity === null ? "totalQuantity" : "availableQuantity";
+        fields[field] = "Leave both seat boxes empty for unlimited seats, or fill in both.";
+      } else if (totalQuantity !== null && availableQuantity !== null && availableQuantity > totalQuantity) {
+        fields.availableQuantity = "Seats left cannot be more than the seats in total.";
+      }
     }
     if (Object.keys(fields).length > 0) throw HttpError.badRequest("Some details need fixing.", fields);
 

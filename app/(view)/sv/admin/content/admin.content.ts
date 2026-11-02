@@ -272,6 +272,7 @@ export const adminContent = {
     open: "Open",
     locked: "Locked",
     soldOut: "Sold out",
+    unlimited: "Unlimited",
     groups: {
       booking: { title: "Booking & seats", lead: "What members pay, and how many can still book." },
       card: { title: "Shown on the pass card", lead: "How this pass reads on its event page." },
@@ -300,6 +301,7 @@ export const adminContent = {
     },
     hints: {
       price: "Charged at checkout, and shown on the pass card and in the page's \"at a glance\" box.",
+      totalQuantity: "Leave this and Seats left empty for unlimited seats.",
       availableQuantity: "Goes down by one with every paid booking.",
       statusNote: "Shown on the pass card. A note such as \"42 left\" keeps counting down by itself.",
     },

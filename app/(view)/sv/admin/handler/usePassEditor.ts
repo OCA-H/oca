@@ -21,6 +21,8 @@ export const passToForm = (pass: AdminEventPass): PassForm => ({
 
 // An empty number box goes as NaN, which the API rejects beside that field.
 const toNumber = (value: string) => (value.trim() === '' ? Number.NaN : Number(value));
+// Empty seat boxes go as null: the pass is not limited.
+const toSeats = (value: string) => (value.trim() === '' ? null : Number(value));
 
 /**
  * The edit form for one pass. Saving asks first: the form opens a confirm dialog listing the
@@ -80,8 +82,8 @@ export function usePassEditor(pass: AdminEventPass, onSaved: (pass: AdminEventPa
       const result = await adminService.updatePass(pass.id, {
         ...form,
         price: toNumber(form.price),
-        totalQuantity: toNumber(form.totalQuantity),
-        availableQuantity: toNumber(form.availableQuantity),
+        totalQuantity: toSeats(form.totalQuantity),
+        availableQuantity: toSeats(form.availableQuantity),
         displayOrder: toNumber(form.displayOrder),
       });
       setIsConfirming(false);

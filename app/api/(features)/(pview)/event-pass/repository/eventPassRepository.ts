@@ -158,7 +158,7 @@ export const DEFAULT_ANNUAL_DINNER_PASSES: NewEventPass[] = [
 
 /**
  * The OCA Golf Tournament: Single or Couple. Every golf pass also covers the Annual Dinner the same
- * day, so it has no add-ons of its own.
+ * day, so it has no add-ons of its own. Golf passes are not limited: their quantities are null.
  */
 export const DEFAULT_GOLF_TOURNAMENT_PASSES: NewEventPass[] = [
   {
@@ -172,8 +172,8 @@ export const DEFAULT_GOLF_TOURNAMENT_PASSES: NewEventPass[] = [
     batchEligibility: "18 Dec · 11:30 am onwards",
     price: 10000,
     currency: "INR",
-    totalQuantity: 100,
-    availableQuantity: 100,
+    totalQuantity: null,
+    availableQuantity: null,
     includesSpouse: false,
     allowsChildren: false,
     allowsTeacherSponsorship: false,
@@ -193,8 +193,8 @@ export const DEFAULT_GOLF_TOURNAMENT_PASSES: NewEventPass[] = [
     batchEligibility: "18 Dec · 11:30 am onwards",
     price: 12500,
     currency: "INR",
-    totalQuantity: 50,
-    availableQuantity: 50,
+    totalQuantity: null,
+    availableQuantity: null,
     includesSpouse: true,
     allowsChildren: false,
     allowsTeacherSponsorship: false,

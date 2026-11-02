@@ -73,8 +73,9 @@ export interface EventPassChanges {
   description: string;
   batchEligibility: string;
   price: number;
-  totalQuantity: number;
-  availableQuantity: number;
+  /** Null with availableQuantity: the pass is not limited. */
+  totalQuantity: number | null;
+  availableQuantity: number | null;
   status: string;
   statusNote: string;
   displayOrder: number;

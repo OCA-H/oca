@@ -20,7 +20,7 @@ const FIELD_GROUPS: { title: string; lead: string; fields: FormField[] }[] = [
     fields: [
       { key: 'status', label: text.fields.status, type: 'select', options: text.statusOptions },
       { key: 'price', label: text.fields.price, type: 'number', min: 0, hint: text.hints.price },
-      { key: 'totalQuantity', label: text.fields.totalQuantity, type: 'number', min: 0 },
+      { key: 'totalQuantity', label: text.fields.totalQuantity, type: 'number', min: 0, hint: text.hints.totalQuantity },
       { key: 'availableQuantity', label: text.fields.availableQuantity, type: 'number', min: 0, hint: text.hints.availableQuantity },
     ],
   },
@@ -164,7 +164,10 @@ export const EventPassesPanel: React.FC<EventPassesPanelProps> = ({ passEvent, i
 
   const replace = (saved: AdminEventPass) => setItems((list) => list && list.map((pass) => (pass.id === saved.id ? saved : pass)));
 
-  const seatsLeft = passes?.reduce((total, pass) => total + (pass.availableQuantity ?? 0), 0) ?? 0;
+  // Any unlimited pass leaves the event's seats unlimited.
+  const seatsLeft = passes?.some((pass) => pass.availableQuantity === null)
+    ? text.unlimited
+    : (passes?.reduce((total, pass) => total + (pass.availableQuantity ?? 0), 0) ?? 0);
   const paid = passes?.reduce((total, pass) => total + pass.paid, 0) ?? 0;
   const revenue = passes?.reduce((total, pass) => total + pass.revenue, 0) ?? 0;
 
