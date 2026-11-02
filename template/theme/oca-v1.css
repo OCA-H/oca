@@ -5651,6 +5651,145 @@ section[id] {
   .gf-form .dn-tiers::after {
     display: none;
   }
+
+  .gf-form .dn-pass {
+    padding: 16px 18px;
+    gap: 12px;
+  }
+
+  .gf-form .dn-price {
+    font-size: 20px;
+  }
+
+  .gf-note {
+    gap: 12px;
+    padding: 14px 16px;
+  }
+
+  .gf-note p {
+    font-size: 14px;
+  }
+}
+
+/* Phones: the form sits inside the section's gutter and its own padding, so everything in it
+   steps down a size to keep the pass rows on one line and the prices clear of the card edge. */
+@media (max-width:480px) {
+  #page-golf-tournament .dn-passes .cf-form {
+    padding: 4px 14px 22px;
+    border-radius: 16px;
+  }
+
+  #page-golf-tournament .dn-passes-head h2 {
+    font-size: 26px;
+  }
+
+  #page-golf-tournament .dn-passes-head .dn-lead {
+    font-size: 14.5px;
+  }
+
+  .gf-form .dn-tiers {
+    gap: 14px;
+  }
+
+  .gf-form .dn-tier-head {
+    gap: 12px;
+    padding: 16px 14px 18px;
+  }
+
+  .gf-form .dn-tier-ico {
+    width: 38px;
+    height: 38px;
+    border-radius: 12px;
+  }
+
+  .gf-form .dn-tier-head h4 {
+    font-size: 17px;
+    margin-bottom: 6px;
+  }
+
+  .gf-form .dn-tier-pill {
+    font-size: 11px;
+    padding: 3px 9px;
+    white-space: nowrap;
+  }
+
+  .gf-form .dn-pass {
+    padding: 14px;
+    gap: 10px;
+  }
+
+  .gf-form .dn-radio {
+    width: 20px;
+    height: 20px;
+  }
+
+  .gf-form .dn-pass-t {
+    min-width: 0;
+  }
+
+  .gf-form .dn-pass-t b {
+    font-size: 15px;
+  }
+
+  .gf-form .dn-left {
+    font-size: 12px;
+  }
+
+  .gf-form .dn-price {
+    flex-shrink: 0;
+    font-size: 18px;
+  }
+
+  .gf-form .dn-locked {
+    padding: 18px 14px;
+  }
+
+  .dn-tier.is-included .dn-locked b {
+    font-size: 16px;
+  }
+
+  .dn-tier.is-included .dn-locked p {
+    font-size: 13.5px;
+  }
+
+  .gf-note,
+  .gf-form .dn-login {
+    gap: 10px;
+    padding: 12px 14px;
+  }
+
+  .gf-note-ico {
+    width: 30px;
+    height: 30px;
+    border-radius: 9px;
+  }
+
+  .gf-note-ico svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  .gf-note p,
+  .gf-form .dn-login p {
+    font-size: 13.5px;
+    line-height: 1.55;
+  }
+
+  .gf-form .dn-summary {
+    padding: 14px 16px;
+  }
+
+  .gf-form .dn-line {
+    font-size: 13.5px;
+  }
+
+  .gf-form .dn-total strong {
+    font-size: 22px;
+  }
+
+  .gf-form .dn-extras .field input {
+    font-size: 16px;
+  }
 }
 
 /* ---------- merged page: executive-committee ---------- */
