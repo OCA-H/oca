@@ -28,7 +28,7 @@ import {
  * birth is today, and `funds` the paid totals per fund; see app/(view)/(pv)/page.tsx.
  */
 export const HomeView: React.FC<{ content: HomeContent; birthdays: BirthdayMember[]; funds: FundProgress[] }> = ({ content, birthdays, funds }) => {
-  useHomeHandler();
+  const { user, isAuthLoading } = useHomeHandler();
 
   return (
     <>
@@ -49,7 +49,7 @@ export const HomeView: React.FC<{ content: HomeContent; birthdays: BirthdayMembe
           <MissionSection />
           <GallerySection content={content.gallery} />
           <CommitteeSection content={content.committee} />
-          <ContactSection />
+          <ContactSection member={user} isAuthLoading={isAuthLoading} />
         </div>
       </main>
 
