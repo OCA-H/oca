@@ -52,7 +52,7 @@ export const Footer: React.FC = () => {
           <h5>Quick Links</h5>
           <Link href={ROUTES.HOME}>Home</Link>
           {!isAuthenticated && <Link href={ROUTES.MEMBER_SIGNIN}>Sign In</Link>}
-          <Link href={ROUTES.MEMBERSHIP}>New Membership</Link>
+          {!isAuthenticated && <Link href={ROUTES.MEMBERSHIP}>New Membership</Link>}
           <Link href={ROUTES.DONATION}>Contribute</Link>
         </div>
       </div>

@@ -41,8 +41,18 @@ const getServerSnapshot = () => undefined;
 
 const AUTH_CHANGE_EVENT = 'oca_auth_change';
 
+/** The check in flight, so components that mount together share one request. */
+let pendingCheck: Promise<void> | null = null;
+
 /** Asks the API who is signed in and shares the answer. */
-async function checkAuth(): Promise<void> {
+function checkAuth(): Promise<void> {
+  pendingCheck ??= requestAuth().finally(() => {
+    pendingCheck = null;
+  });
+  return pendingCheck;
+}
+
+async function requestAuth(): Promise<void> {
   try {
     const res = await fetch('/api/auth/me', {
       method: 'GET',
@@ -105,6 +115,19 @@ export function useAuth() {
     checkAuth,
     signOut,
   };
+}
+
+/**
+ * Sends a signed-in member home from a page meant only for visitors (membership application,
+ * forgot password). The proxy does this for a fresh load; this covers pages Next.js restores in
+ * the browser, which were rendered before the member signed in.
+ */
+export function useSendMembersHome() {
+  const router = useRouter();
+  const { isAuthenticated } = useAuth();
+  useEffect(() => {
+    if (isAuthenticated) router.replace(ROUTES.HOME);
+  }, [isAuthenticated, router]);
 }
 
 export default useAuth;

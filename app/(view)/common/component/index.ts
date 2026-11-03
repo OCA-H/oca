@@ -6,3 +6,4 @@ export * from './CustomDropdown';
 export * from './DatePicker';
 export * from './ContactProvider';
 export * from './PhoneInput';
+export * from './MemberSwitch';

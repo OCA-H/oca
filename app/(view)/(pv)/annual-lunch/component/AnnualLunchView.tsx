@@ -4,6 +4,7 @@ import React from 'react';
 import Link from 'next/link';
 import { ROUTES } from '@/app/(view)/common/helper/routes';
 import { useContact } from '@/app/(view)/common/component/ContactProvider';
+import { MemberSwitch } from '@/app/(view)/common/component/MemberSwitch';
 import type { EventLunchContent } from '@/app/api/(features)/(pview)/site/schema/sectionSpecs';
 
 export const AnnualLunchView: React.FC<{ content: EventLunchContent }> = ({ content }) => {
@@ -169,9 +170,13 @@ export const AnnualLunchView: React.FC<{ content: EventLunchContent }> = ({ cont
             <a className="btn btn-gold" href={rsvpHref}>
               RSVP Now
             </a>
-            <Link className="btn btn-secondary" href={ROUTES.MEMBERSHIP}>
-              Become a Member
-            </Link>
+            <MemberSwitch
+              guest={
+                <Link className="btn btn-secondary" href={ROUTES.MEMBERSHIP}>
+                  Become a Member
+                </Link>
+              }
+            />
           </div>
         </div>
       </section>

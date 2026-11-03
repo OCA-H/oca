@@ -3,7 +3,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { ROUTES } from '@/app/(view)/common/helper/routes';
-import { useAuth } from '@/app/(view)/common/helper/useAuth';
+import { useSendMembersHome } from '@/app/(view)/common/helper/useAuth';
 import { useContact } from '@/app/(view)/common/component/ContactProvider';
 import { CustomDropdown, DatePicker, PhoneInput } from '@/app/(view)/common';
 import { DATE_OF_BIRTH_PICKER } from '@/app/(view)/common/helper/common.helper';
@@ -17,7 +17,7 @@ interface MembershipViewProps {
 }
 
 export const MembershipView: React.FC<MembershipViewProps> = ({ fee }) => {
-  const { isAuthenticated } = useAuth();
+  useSendMembersHome();
   const contact = useContact();
   const content = MEMBERSHIP_CONTENT;
   const feeLabel = formatRupees(fee);
@@ -594,11 +594,9 @@ export const MembershipView: React.FC<MembershipViewProps> = ({ fee }) => {
             <p>{content.cta.desc}</p>
           </div>
           <div className="cta-band-actions">
-            {!isAuthenticated && (
-              <Link className="btn btn-gold" href={ROUTES.MEMBER_SIGNIN}>
-                Sign In
-              </Link>
-            )}
+            <Link className="btn btn-gold" href={ROUTES.MEMBER_SIGNIN}>
+              Sign In
+            </Link>
             <Link className="btn btn-secondary" href={ROUTES.DONATION}>
               Support OCA
             </Link>

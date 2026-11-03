@@ -10,19 +10,19 @@ import { memberSignInService } from '../services';
 const HANDOFF_MS = 900;
 
 /**
- * Where to go after signing in: ?redirect= when it stays on this site, else the member's profile.
- * Resolving it against this origin catches every form a browser would send elsewhere
- * ("//evil.com", "/\evil.com", "https://...").
+ * Where to go after signing in: ?redirect= when it stays on this site, else `fallback` (the
+ * member's profile). Resolving it against this origin catches every form a browser would send
+ * elsewhere ("//evil.com", "/\evil.com", "https://...").
  */
-export function signInTarget(): string {
-  if (typeof window === 'undefined') return ROUTES.PROFILE;
+export function signInTarget(fallback: string = ROUTES.PROFILE): string {
+  if (typeof window === 'undefined') return fallback;
   const redirect = new URLSearchParams(window.location.search).get('redirect');
-  if (!redirect) return ROUTES.PROFILE;
+  if (!redirect) return fallback;
   try {
     const url = new URL(redirect, window.location.origin);
-    return url.origin === window.location.origin ? `${url.pathname}${url.search}${url.hash}` : ROUTES.PROFILE;
+    return url.origin === window.location.origin ? `${url.pathname}${url.search}${url.hash}` : fallback;
   } catch {
-    return ROUTES.PROFILE;
+    return fallback;
   }
 }
 

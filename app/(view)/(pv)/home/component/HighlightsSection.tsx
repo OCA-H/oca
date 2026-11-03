@@ -1,6 +1,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { ROUTES } from '@/app/(view)/common/helper/routes';
+import { MemberSwitch } from '@/app/(view)/common/component/MemberSwitch';
 
 export const HighlightsSection: React.FC = () => {
   return (
@@ -38,8 +39,20 @@ export const HighlightsSection: React.FC = () => {
           <div className="qa-card">
             <div className="qa-icon"><svg viewBox="0 0 24 24" fill="none"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2M9 3a4 4 0 1 1 0 8 4 4 0 0 1 0-8ZM22 21v-2a4 4 0 0 0-3-3.87M17 3.13a4 4 0 0 1 0 7.75" stroke="currentColor" strokeWidth="1.6"/></svg></div>
             <h3>Membership</h3>
-            <p>Lifetime membership &amp; benefits.</p>
-            <Link className="qa-link" href={ROUTES.MEMBERSHIP}>Become a member →</Link>
+            <MemberSwitch
+              guest={
+                <>
+                  <p>Lifetime membership &amp; benefits.</p>
+                  <Link className="qa-link" href={ROUTES.MEMBERSHIP}>Become a member →</Link>
+                </>
+              }
+              member={
+                <>
+                  <p>Your membership &amp; details.</p>
+                  <Link className="qa-link" href={ROUTES.PROFILE}>My profile →</Link>
+                </>
+              }
+            />
           </div>
         </div>
       </div>

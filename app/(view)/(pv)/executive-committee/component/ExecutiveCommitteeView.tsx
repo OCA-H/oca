@@ -17,7 +17,7 @@ import {
 export const ExecutiveCommitteeView: React.FC<{ committee: CommitteeContent }> = ({ committee }) => {
   const terms = useMemo(() => toCommitteeTerms(committee), [committee]);
   const { content, activeTermId, handleSelectTerm } = useExecutiveCommitteeHandler(terms);
-  const { breadcrumbs, hero, cta } = content;
+  const { breadcrumbs, hero, cta, memberCta } = content;
 
   return (
     <>
@@ -53,7 +53,7 @@ export const ExecutiveCommitteeView: React.FC<{ committee: CommitteeContent }> =
       })}
 
       {/* CTA Band */}
-      <ExecutiveCommitteeCTA cta={cta} />
+      <ExecutiveCommitteeCTA cta={cta} memberCta={memberCta} />
     </>
   );
 };

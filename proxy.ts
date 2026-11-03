@@ -50,10 +50,14 @@ function sameSiteRedirect(redirect: string | null, origin: string): string | nul
 }
 
 /**
- * Public auth pages that should redirect to home if user is already authenticated
+ * Pages for people who are not signed in yet: signing in, finding a lost password, and applying
+ * for membership. A signed-in member is sent home from them (or to a same-site ?redirect=).
+ * /membership/payment-status is not one: it shows the result of an application already made.
  */
 const AUTH_PAGES = [
   "/member-signin",
+  "/member-signin/forgot-password",
+  "/membership",
   "/partner-organization",
 ];
 
@@ -71,10 +75,10 @@ export async function proxy(request: NextRequest) {
   const sessionCookie = request.cookies.get(SESSION_COOKIE_NAME)?.value;
   const session = sessionCookie ? await verifySessionToken(sessionCookie) : null;
 
-  // 1. If already authenticated and navigating to login/signin page, go where sign-in would have
-  //    sent them: a same-site ?redirect=, else the member's profile
+  // 1. If already authenticated and opening a sign-in or join page, go to a same-site ?redirect=,
+  //    else home
   if (isAuthPage && session) {
-    const target = sameSiteRedirect(request.nextUrl.searchParams.get("redirect"), request.nextUrl.origin) ?? "/sv/profile";
+    const target = sameSiteRedirect(request.nextUrl.searchParams.get("redirect"), request.nextUrl.origin) ?? "/";
     return NextResponse.redirect(new URL(target, request.url));
   }
 

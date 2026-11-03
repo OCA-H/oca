@@ -1,6 +1,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { ROUTES } from '@/app/(view)/common/helper/routes';
+import { MemberSwitch } from '@/app/(view)/common/component/MemberSwitch';
 import type { HomeTickerContent, HomeTickerItem } from '@/app/api/(features)/(pview)/site/schema/sectionSpecs';
 
 /** Where today's birthday line goes among the admin's ticker lines. */
@@ -29,7 +30,10 @@ export const HeroSection: React.FC<{ ticker: HomeTickerContent; birthdayCount: n
           <h1><span className="nowrap-line">One school. One brotherhood.</span><br /><span style={{ color: "var(--gold)" }}>A lifetime of belonging.</span></h1>
           <p className="lead">OCA's mission is to praise, promote and protect St. Columba's School and its students, and to unite, inform and involve alumni and friends in fellowship and support of each other and the school.</p>
           <div className="hero-ctas">
-            <Link className="btn btn-primary" href={ROUTES.MEMBERSHIP}>Become a Member</Link>
+            <MemberSwitch
+              guest={<Link className="btn btn-primary" href={ROUTES.MEMBERSHIP}>Become a Member</Link>}
+              member={<Link className="btn btn-primary" href={ROUTES.PROFILE}>My Profile</Link>}
+            />
             <Link className="btn btn-secondary" href={ROUTES.HOME_EVENTS}>Explore Events &amp; Connect</Link>
           </div>
         </div>

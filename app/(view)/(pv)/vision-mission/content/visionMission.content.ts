@@ -12,6 +12,8 @@ export const visionMissionContent = {
     title: 'Vision & Mission',
     lead: 'Connecting generations of Columbans through fellowship, service, and commitment to our alma mater.',
     primaryBtn: { text: 'Become a Member', href: ROUTES.MEMBERSHIP },
+    /** In place of primaryBtn for a signed-in member. */
+    memberPrimaryBtn: { text: 'My Profile', href: ROUTES.PROFILE },
     secondaryBtn: { text: 'Support our initiatives', href: ROUTES.DONATION },
     image: '/images/annual-lunch.jpg',
     imageAlt: 'Columbans of every batch at the OCA Annual Lunch Get Together',
@@ -104,6 +106,14 @@ export const visionMissionContent = {
     title: 'Be part of the Columban legacy',
     lead: 'Lifetime membership keeps you on the roll, in the directory, and in touch with Columbans of every batch.',
     btnGold: { text: 'Become a Member', href: ROUTES.MEMBERSHIP },
+    btnSecondary: { text: 'Support OCA', href: ROUTES.DONATION },
+  },
+  /** The CTA band for a signed-in member, who has no membership left to buy. */
+  memberCta: {
+    eyebrow: 'You are part of it',
+    title: 'Thank you for carrying the Columban legacy',
+    lead: 'Your lifetime membership keeps you on the roll, in the directory, and in touch with Columbans of every batch.',
+    btnGold: { text: 'My Profile', href: ROUTES.PROFILE },
     btnSecondary: { text: 'Support OCA', href: ROUTES.DONATION },
   },
 };

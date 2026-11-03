@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import { memberSignInContent } from '../content';
 import { signInTarget, useMemberSignInHandler } from '../handler';
 import { useAuth } from '@/app/(view)/common/helper/useAuth';
+import { ROUTES } from '@/app/(view)/common/helper/routes';
 
 export const MemberSignInView: React.FC = () => {
   const router = useRouter();
@@ -23,12 +24,12 @@ export const MemberSignInView: React.FC = () => {
     handleSubmit,
   } = useMemberSignInHandler();
 
-  // Already signed in when this page opened (e.g. Back from the members area): go on to the
-  // members area. The proxy does this for a fresh load; this covers pages restored in the browser.
-  // A sign-in made here navigates itself once its welcome has shown.
+  // Already signed in when this page opened (e.g. Back from the members area): go home, or to a
+  // same-site ?redirect=. The proxy does this for a fresh load; this covers pages restored in the
+  // browser. A sign-in made here navigates itself (to the profile) once its welcome has shown.
   const isAlreadySignedIn = isAuthenticated && !welcomeName;
   useEffect(() => {
-    if (isAlreadySignedIn) router.replace(signInTarget());
+    if (isAlreadySignedIn) router.replace(signInTarget(ROUTES.HOME));
   }, [isAlreadySignedIn, router]);
 
   const isHandingOff = Boolean(welcomeName) || isAlreadySignedIn;

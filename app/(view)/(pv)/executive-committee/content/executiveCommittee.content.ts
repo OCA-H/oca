@@ -49,6 +49,11 @@ export interface ExecutiveCommitteeContent {
       text: string;
       href: string;
     };
+    /** In place of primaryBtn for a signed-in member. */
+    memberPrimaryBtn: {
+      text: string;
+      href: string;
+    };
     secondaryBtn: {
       text: string;
       href: string;
@@ -58,18 +63,22 @@ export interface ExecutiveCommitteeContent {
     caption: string;
   };
   jumpAriaLabel: string;
-  cta: {
-    eyebrow: string;
-    title: string;
-    lead: string;
-    primaryBtn: {
-      text: string;
-      href: string;
-    };
-    secondaryBtn: {
-      text: string;
-      href: string;
-    };
+  cta: ExecutiveCommitteeCtaContent;
+  /** The CTA band for a signed-in member, who has no membership left to buy. */
+  memberCta: ExecutiveCommitteeCtaContent;
+}
+
+export interface ExecutiveCommitteeCtaContent {
+  eyebrow: string;
+  title: string;
+  lead: string;
+  primaryBtn: {
+    text: string;
+    href: string;
+  };
+  secondaryBtn: {
+    text: string;
+    href: string;
   };
 }
 
@@ -87,6 +96,10 @@ export const executiveCommitteeContent: ExecutiveCommitteeContent = {
       text: 'Join the OCA community',
       href: ROUTES.MEMBERSHIP,
     },
+    memberPrimaryBtn: {
+      text: 'My Profile',
+      href: ROUTES.PROFILE,
+    },
     secondaryBtn: {
       text: 'Read our mission',
       href: ROUTES.VISION_MISSION,
@@ -103,6 +116,19 @@ export const executiveCommitteeContent: ExecutiveCommitteeContent = {
     primaryBtn: {
       text: 'Become a Member',
       href: ROUTES.MEMBERSHIP,
+    },
+    secondaryBtn: {
+      text: 'Support OCA',
+      href: ROUTES.DONATION,
+    },
+  },
+  memberCta: {
+    eyebrow: 'Get involved',
+    title: 'Have your say in the Association',
+    lead: 'As a member you elect the committee, can stand for it, and help shape what the Association does next.',
+    primaryBtn: {
+      text: 'My Profile',
+      href: ROUTES.PROFILE,
     },
     secondaryBtn: {
       text: 'Support OCA',

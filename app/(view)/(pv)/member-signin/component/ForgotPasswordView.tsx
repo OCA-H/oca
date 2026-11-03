@@ -3,11 +3,13 @@
 import React from 'react';
 import Link from 'next/link';
 import { useContact } from '@/app/(view)/common/component/ContactProvider';
+import { useSendMembersHome } from '@/app/(view)/common/helper/useAuth';
 import { memberSignInContent, forgotPasswordContent } from '../content';
 import { useForgotPasswordHandler } from '../handler';
 import { PasswordRecoverySide, PasswordRecoveryNotice } from './subcomponents';
 
 export const ForgotPasswordView: React.FC = () => {
+  useSendMembersHome();
   const content = forgotPasswordContent;
   const contact = useContact();
   const { identifier, setIdentifier, isLoading, error, sentTo, handleSubmit, tryAgain } = useForgotPasswordHandler();

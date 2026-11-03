@@ -38,6 +38,8 @@ export interface DonationContent {
     links: {
       text: string;
       href: string;
+      /** Hidden from signed-in members, e.g. "Become a member". */
+      guestsOnly?: boolean;
     }[];
   };
   lock: {
@@ -87,18 +89,22 @@ export interface DonationContent {
     title: string;
     cells: TrustCell[];
   };
-  cta: {
-    eyebrow: string;
-    title: string;
-    lead: string;
-    primaryBtn: {
-      text: string;
-      href: string;
-    };
-    secondaryBtn: {
-      text: string;
-      href: string;
-    };
+  cta: DonationCtaContent;
+  /** The CTA band for a signed-in member, who has no membership left to buy. */
+  memberCta: DonationCtaContent;
+}
+
+export interface DonationCtaContent {
+  eyebrow: string;
+  title: string;
+  lead: string;
+  primaryBtn: {
+    text: string;
+    href: string;
+  };
+  secondaryBtn: {
+    text: string;
+    href: string;
   };
 }
 
@@ -122,7 +128,7 @@ export const donationContent: DonationContent = {
     quoteWho: 'From the objects of the Association',
     links: [
       { text: 'Know more about OCA →', href: ROUTES.VISION_MISSION },
-      { text: 'Become a member →', href: ROUTES.MEMBERSHIP },
+      { text: 'Become a member →', href: ROUTES.MEMBERSHIP, guestsOnly: true },
       { text: 'Who administers the funds →', href: ROUTES.EXECUTIVE_COMMITTEE },
     ],
   },
@@ -288,6 +294,19 @@ export const donationContent: DonationContent = {
     primaryBtn: {
       text: 'Become a Member',
       href: ROUTES.MEMBERSHIP,
+    },
+    secondaryBtn: {
+      text: 'Know more about OCA',
+      href: ROUTES.VISION_MISSION,
+    },
+  },
+  memberCta: {
+    eyebrow: 'Thank you',
+    title: 'Your membership is the longest contribution of all',
+    lead: 'As a lifetime member you carry the Association year after year. Keep your details current so we can stay in touch.',
+    primaryBtn: {
+      text: 'My Profile',
+      href: ROUTES.PROFILE,
     },
     secondaryBtn: {
       text: 'Know more about OCA',

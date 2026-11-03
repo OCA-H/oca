@@ -4,8 +4,28 @@ import React from 'react';
 import Link from 'next/link';
 import { ROUTES } from '@/app/(view)/common/helper/routes';
 import { useContact } from '@/app/(view)/common/component/ContactProvider';
+import { MemberSwitch } from '@/app/(view)/common/component/MemberSwitch';
+import type { DonationCtaContent } from '../content/donation.content';
 import { useDonationHandler } from '../handler/useDonationHandler';
 import { ContributionForm, ContributionLockOverlay, ContributionDummyPreview } from './subcomponents';
+
+const CtaBody: React.FC<{ cta: DonationCtaContent }> = ({ cta }) => (
+  <>
+    <div>
+      <span className="eyebrow">{cta.eyebrow}</span>
+      <h2>{cta.title}</h2>
+      <p>{cta.lead}</p>
+    </div>
+    <div className="cta-band-actions">
+      <Link className="btn btn-gold" href={cta.primaryBtn.href}>
+        {cta.primaryBtn.text}
+      </Link>
+      <Link className="btn btn-secondary" href={cta.secondaryBtn.href}>
+        {cta.secondaryBtn.text}
+      </Link>
+    </div>
+  </>
+);
 
 export const DonationView: React.FC = () => {
   const handler = useDonationHandler();
@@ -49,11 +69,10 @@ export const DonationView: React.FC = () => {
               <div className="who">{aside.quoteWho}</div>
             </div>
             <div className="aside-links">
-              {aside.links.map((link, idx) => (
-                <a key={idx} href={link.href}>
-                  {link.text}
-                </a>
-              ))}
+              {aside.links.map((link, idx) => {
+                const anchor = <a href={link.href}>{link.text}</a>;
+                return <React.Fragment key={idx}>{link.guestsOnly ? <MemberSwitch guest={anchor} /> : anchor}</React.Fragment>;
+              })}
             </div>
           </aside>
 
@@ -240,19 +259,7 @@ export const DonationView: React.FC = () => {
       {/* CTA */}
       <section className="cta-band">
         <div className="wrap">
-          <div>
-            <span className="eyebrow">{cta.eyebrow}</span>
-            <h2>{cta.title}</h2>
-            <p>{cta.lead}</p>
-          </div>
-          <div className="cta-band-actions">
-            <Link className="btn btn-gold" href={cta.primaryBtn.href}>
-              {cta.primaryBtn.text}
-            </Link>
-            <Link className="btn btn-secondary" href={cta.secondaryBtn.href}>
-              {cta.secondaryBtn.text}
-            </Link>
-          </div>
+          <MemberSwitch guest={<CtaBody cta={cta} />} member={<CtaBody cta={content.memberCta} />} />
         </div>
       </section>
 

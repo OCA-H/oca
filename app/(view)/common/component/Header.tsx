@@ -315,9 +315,8 @@ export const Header: React.FC<HeaderProps> = ({ activeRoute }) => {
             <span className="sub sub-soon">Remembrance<span className="soon-tag">Soon</span></span>
           </MobileGroup>
 
-          {isAuthenticated ? (
-            <Link className="top" href={ROUTES.MEMBERSHIP} onClick={() => handleLinkClick(ROUTES.MEMBERSHIP)}>Membership</Link>
-          ) : (
+          {/* A signed-in member has no membership to apply for and no sign-in to do. */}
+          {!isAuthenticated && (
             <MobileGroup label="Membership" open={openGroup === 'membership'} onToggle={() => toggleGroup('membership')}>
               <Link className="sub" href={ROUTES.MEMBERSHIP} onClick={() => handleLinkClick(ROUTES.MEMBERSHIP)}>Become a Member</Link>
               <Link className="sub" href={ROUTES.MEMBER_SIGNIN} onClick={() => handleLinkClick(ROUTES.MEMBER_SIGNIN)}>As an OCA Member</Link>

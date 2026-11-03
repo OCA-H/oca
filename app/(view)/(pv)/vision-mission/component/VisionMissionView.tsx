@@ -2,9 +2,31 @@ import React from 'react';
 import Link from 'next/link';
 import { visionMissionContent } from '../content';
 import { ROUTES } from '@/app/(view)/common/helper/routes';
+import { MemberSwitch } from '@/app/(view)/common/component/MemberSwitch';
+
+type CtaContent = { eyebrow: string; title: string; lead: string; btnGold: CtaLink; btnSecondary: CtaLink };
+type CtaLink = { text: string; href: string };
+
+const CtaBody: React.FC<{ cta: CtaContent }> = ({ cta }) => (
+  <>
+    <div>
+      <span className="eyebrow">{cta.eyebrow}</span>
+      <h2>{cta.title}</h2>
+      <p>{cta.lead}</p>
+    </div>
+    <div className="cta-band-actions">
+      <Link className="btn btn-gold" href={cta.btnGold.href}>
+        {cta.btnGold.text}
+      </Link>
+      <Link className="btn btn-secondary" href={cta.btnSecondary.href}>
+        {cta.btnSecondary.text}
+      </Link>
+    </div>
+  </>
+);
 
 export const VisionMissionView: React.FC = () => {
-  const { hero, whoWeAre, vision, mission, objectives, socialConscience, cta } =
+  const { hero, whoWeAre, vision, mission, objectives, socialConscience, cta, memberCta } =
     visionMissionContent;
 
   return (
@@ -25,9 +47,10 @@ export const VisionMissionView: React.FC = () => {
             <h1>{hero.title}</h1>
             <p className="lead">{hero.lead}</p>
             <div className="page-hero-actions">
-              <Link className="btn btn-primary" href={hero.primaryBtn.href}>
-                {hero.primaryBtn.text}
-              </Link>
+              <MemberSwitch
+                guest={<Link className="btn btn-primary" href={hero.primaryBtn.href}>{hero.primaryBtn.text}</Link>}
+                member={<Link className="btn btn-primary" href={hero.memberPrimaryBtn.href}>{hero.memberPrimaryBtn.text}</Link>}
+              />
               <Link className="btn btn-secondary" href={hero.secondaryBtn.href}>
                 {hero.secondaryBtn.text}
               </Link>
@@ -211,19 +234,7 @@ export const VisionMissionView: React.FC = () => {
       {/* ---------- CTA ---------- */}
       <section className="cta-band">
         <div className="wrap">
-          <div>
-            <span className="eyebrow">{cta.eyebrow}</span>
-            <h2>{cta.title}</h2>
-            <p>{cta.lead}</p>
-          </div>
-          <div className="cta-band-actions">
-            <Link className="btn btn-gold" href={cta.btnGold.href}>
-              {cta.btnGold.text}
-            </Link>
-            <Link className="btn btn-secondary" href={cta.btnSecondary.href}>
-              {cta.btnSecondary.text}
-            </Link>
-          </div>
+          <MemberSwitch guest={<CtaBody cta={cta} />} member={<CtaBody cta={memberCta} />} />
         </div>
       </section>
     </>
