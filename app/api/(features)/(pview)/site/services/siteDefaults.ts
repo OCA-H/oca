@@ -198,16 +198,6 @@ export const HOME_DEFAULTS: HomeContent = {
           { caption: "The Association crest", image: "/images/oca-crest.png" },
         ],
       },
-      {
-        name: "Executive Committee",
-        time: "2023 – 25",
-        desc: "The office bearers of the 2023 – 25 Executive Committee.",
-        photos: [
-          { caption: "Santosh V. Kalyani, President", image: U + "2022/02/SVK-Profile-Pic-n.png" },
-          { caption: "Anurag Aggarwal, Secretary", image: U + "2022/05/Anurag-agarawal-n-1.png" },
-          { caption: "Kuwar Pranav Pratap Uppal, Treasurer", image: U + "2020/02/Pranav-Uppal.jpg" },
-        ],
-      },
     ],
   },
 

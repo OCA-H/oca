@@ -12,9 +12,10 @@ export const metadata = {
 // page's (Home page → Our Gallery), so a photo added there shows on both pages.
 export default async function EventPhotographsPage() {
   const [content, gallery] = await Promise.all([getPageContent(PAGE_SECTION_KEYS.galleryPhotographs), getGalleryContent()]);
+  const albums = (gallery.albums ?? []).filter((album) => !/executive\s*committee/i.test(album.name));
   return (
     <InteriorPage route="event-photographs">
-      <EventPhotographsView content={content} albums={gallery.albums} />
+      <EventPhotographsView content={content} albums={albums} />
     </InteriorPage>
   );
 }

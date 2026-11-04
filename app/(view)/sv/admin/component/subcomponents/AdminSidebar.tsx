@@ -69,64 +69,64 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({ admin, panel, onShow
     );
 
   return (
-    <aside className="mp-side" aria-label="Admin menu">
-      <div className="mp-profile ad-who">
-        <span className="ad-who-badge" aria-hidden="true">
-          {admin ? adminHelper.getInitials(admin.fullName) : <AdminIcon name="shield" />}
-        </span>
-        <div className="mp-profile-t">
-          {admin ? <b>{admin.fullName}</b> : <span className="mp-skel mp-skel-line mp-skel-name" aria-hidden="true" />}
-          <small className="ad-role">
-            <AdminIcon name="shield" />
-            {adminContent.hero.chip}
-          </small>
+      <aside className="mp-side ad-side" aria-label="Admin menu">
+        <div className="mp-profile ad-who">
+          <span className="ad-who-badge" aria-hidden="true">
+            {admin ? adminHelper.getInitials(admin.fullName) : <AdminIcon name="shield" />}
+          </span>
+          <div className="mp-profile-t">
+            {admin ? <b>{admin.fullName}</b> : <span className="mp-skel mp-skel-line mp-skel-name" aria-hidden="true" />}
+            <small className="ad-role">
+              <AdminIcon name="shield" />
+              {adminContent.hero.chip}
+            </small>
+          </div>
         </div>
-      </div>
 
-      <nav className="mp-nav" aria-label="Admin sections">
-        {adminContent.nav.map((navGroup) => {
-          const { group, items, collapsible } = navGroup;
-          if (!collapsible) {
+        <nav className="mp-nav" aria-label="Admin sections">
+          {adminContent.nav.map((navGroup) => {
+            const { group, items, collapsible } = navGroup;
+            if (!collapsible) {
+              return (
+                <React.Fragment key={group}>
+                  <p className="mp-group">{group}</p>
+                  {items.map(renderItem)}
+                </React.Fragment>
+              );
+            }
+            const open = isOpen(navGroup);
+            const listId = `ad-nav-${group.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`;
+            const holdsActive = groupOf(panel) === group;
             return (
-              <React.Fragment key={group}>
-                <p className="mp-group">{group}</p>
-                {items.map(renderItem)}
-              </React.Fragment>
-            );
-          }
-          const open = isOpen(navGroup);
-          const listId = `ad-nav-${group.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`;
-          const holdsActive = groupOf(panel) === group;
-          return (
-            <div key={group} className={`ad-nav-group${open ? ' is-open' : ''}${holdsActive ? ' has-active' : ''}`}>
-              <button className="ad-group-toggle" type="button" aria-expanded={open} aria-controls={listId} onClick={() => toggle(navGroup)}>
-                {navGroup.icon && (
-                  <span className="ad-group-ico" aria-hidden="true">
-                    <AdminIcon name={navGroup.icon} />
+              <div key={group} className={`ad-nav-group${open ? ' is-open' : ''}${holdsActive ? ' has-active' : ''}`}>
+                <button className="ad-group-toggle" type="button" aria-expanded={open} aria-controls={listId} onClick={() => toggle(navGroup)}>
+                  {navGroup.icon && (
+                    <span className="ad-group-ico" aria-hidden="true">
+                      <AdminIcon name={navGroup.icon} />
+                    </span>
+                  )}
+                  <span className="ad-group-name">{group}</span>
+                  <span className="ad-group-count">
+                    {items.length}
+                    <span className="mp-sr"> sections</span>
                   </span>
-                )}
-                <span className="ad-group-name">{group}</span>
-                <span className="ad-group-count">
-                  {items.length}
-                  <span className="mp-sr"> sections</span>
-                </span>
-                <AdminIcon name="down" className="ad-group-chev" />
-              </button>
-              <div className="ad-nav-items" id={listId}>
-                {items.map(renderItem)}
+                  <AdminIcon name="down" className="ad-group-chev" />
+                </button>
+                <div className="ad-nav-items" id={listId}>
+                  {items.map(renderItem)}
+                </div>
               </div>
-            </div>
-          );
-        })}
-        {onSignOut && (
-          <button className="mp-link mp-out" type="button" onClick={onSignOut} disabled={isSigningOut} aria-busy={isSigningOut}>
-            <AdminIcon name="logout" />
-            <span>{isSigningOut ? 'Signing out…' : 'Log out'}</span>
-          </button>
-        )}
-      </nav>
-    </aside>
-  );
+            );
+          })}
+          {onSignOut && (
+            <button className="mp-link mp-out" type="button" onClick={onSignOut} disabled={isSigningOut} aria-busy={isSigningOut}>
+              <AdminIcon name="logout" />
+              <span>{isSigningOut ? 'Signing out…' : 'Log out'}</span>
+            </button>
+          )}
+        </nav>
+      </aside>
+      );
 };
 
-export default AdminSidebar;
+      export default AdminSidebar;

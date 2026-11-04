@@ -6,3 +6,44 @@
   --serif: 'Raleway', var(--font-raleway), -apple-system, sans-serif;
   --sans: 'Inter', var(--font-inter), -apple-system, BlinkMacSystemFont, sans-serif;
 }
+
+/* Sticky sidebar for member portal and admin panel */
+@media (min-width: 901px) {
+  body:has(.mp-layout) {
+    overflow-x: visible;
+  }
+
+  .mp-layout {
+    align-items: start !important;
+  }
+
+  .mp-side,
+  .ad-side {
+    position: -webkit-sticky !important;
+    position: sticky !important;
+    top: 96px !important;
+    align-self: start !important;
+    max-height: calc(100vh - 116px);
+    overflow-y: auto;
+    overflow-x: hidden;
+    overscroll-behavior: contain;
+    scrollbar-width: thin;
+    z-index: 10;
+  }
+
+  .mp-side::-webkit-scrollbar,
+  .ad-side::-webkit-scrollbar {
+    width: 5px;
+  }
+
+  .mp-side::-webkit-scrollbar-thumb,
+  .ad-side::-webkit-scrollbar-thumb {
+    background: var(--border-strong, #c8d3cb);
+    border-radius: 4px;
+  }
+
+  .mp-side::-webkit-scrollbar-track,
+  .ad-side::-webkit-scrollbar-track {
+    background: transparent;
+  }
+}

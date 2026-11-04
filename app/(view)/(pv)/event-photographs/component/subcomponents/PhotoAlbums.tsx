@@ -8,15 +8,19 @@ import { eventPhotographsHelper } from '../../helper';
 
 /** The albums with their photos, the chips to show one album, and the photo viewer. */
 export const PhotoAlbums: React.FC<{ albums: HomeGalleryAlbum[] }> = ({ albums }) => {
-  const { ids, filter, chooseFilter, isShown, viewer, open, close, step } = useEventPhotographsHandler(albums);
+  const visibleAlbums = React.useMemo(
+    () => (albums ?? []).filter((album) => !/executive\s*committee/i.test(album.name)),
+    [albums]
+  );
+  const { ids, filter, chooseFilter, isShown, viewer, open, close, step } = useEventPhotographsHandler(visibleAlbums);
   return (
     <>
-      {albums.length > 1 && (
+      {visibleAlbums.length > 1 && (
         <div className="ph-chips" role="group" aria-label={text.filterAria}>
           <button type="button" className={`ph-chip${filter === ALL_ALBUMS ? ' active' : ''}`} aria-pressed={filter === ALL_ALBUMS} onClick={() => chooseFilter(ALL_ALBUMS)}>
             {text.allAlbums}
           </button>
-          {albums.map((album, i) => (
+          {visibleAlbums.map((album, i) => (
             <button type="button" key={ids[i]} className={`ph-chip${filter === ids[i] ? ' active' : ''}`} aria-pressed={filter === ids[i]} onClick={() => chooseFilter(ids[i])}>
               {album.name}
             </button>
@@ -24,7 +28,7 @@ export const PhotoAlbums: React.FC<{ albums: HomeGalleryAlbum[] }> = ({ albums }
         </div>
       )}
 
-      {albums.map((album, albumIndex) => (
+      {visibleAlbums.map((album, albumIndex) => (
         <div className="ph-album" data-album-id={ids[albumIndex]} key={ids[albumIndex]} hidden={!isShown(albumIndex)}>
           <div className="ph-album-head">
             <div>
