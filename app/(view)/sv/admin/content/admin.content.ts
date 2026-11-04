@@ -344,7 +344,7 @@ export const adminContent = {
     fields: {
       label: "Name on the site",
       price: "Price (₹)",
-      totalQuantity: "Seats in total",
+      totalQuantity: "Pass limit (Seats in total)",
       availableQuantity: "Seats left",
       status: "Booking",
       statusNote: "Note on the card",
@@ -354,8 +354,8 @@ export const adminContent = {
     },
     hints: {
       price: "Charged at checkout, and shown on the pass card and in the page's \"at a glance\" box.",
-      totalQuantity: "Leave this and Seats left empty for unlimited seats.",
-      availableQuantity: "Goes down by one with every paid booking.",
+      totalQuantity: "Total pass limit. Increasing this automatically increases the seats left.",
+      availableQuantity: "Seats left to book. Goes down by one with every paid booking.",
       statusNote: "Shown on the pass card. A note such as \"42 left\" keeps counting down by itself.",
     },
     save: "Save pass",

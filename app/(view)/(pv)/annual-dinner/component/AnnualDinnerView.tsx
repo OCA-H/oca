@@ -2,6 +2,7 @@
 
 import React from 'react';
 import type { EventDinnerContent } from '@/app/api/(features)/(pview)/site/schema/sectionSpecs';
+import type { ApiEventPass } from '../services/annualDinner.service';
 import { useAnnualDinnerHandler } from '../handler/useAnnualDinnerHandler';
 import type { DinnerGlanceGroup, DinnerGlanceTier } from '../helper/annualDinner.helper';
 import {
@@ -16,10 +17,11 @@ interface AnnualDinnerViewProps {
   content: EventDinnerContent;
   /** "Passes at a glance", from the passes as priced in the admin panel. */
   glance: Record<DinnerGlanceGroup, DinnerGlanceTier>;
+  initialPasses?: ApiEventPass[];
 }
 
-export const AnnualDinnerView: React.FC<AnnualDinnerViewProps> = ({ content, glance }) => {
-  const handler = useAnnualDinnerHandler();
+export const AnnualDinnerView: React.FC<AnnualDinnerViewProps> = ({ content, glance, initialPasses }) => {
+  const handler = useAnnualDinnerHandler(initialPasses);
 
   const scrollToAnchor = (id: string) => (e: React.MouseEvent<HTMLAnchorElement>) => {
     const target = document.getElementById(id);

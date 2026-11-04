@@ -21,7 +21,6 @@ const FIELD_GROUPS: { title: string; lead: string; fields: FormField[] }[] = [
       { key: 'status', label: text.fields.status, type: 'select', options: text.statusOptions },
       { key: 'price', label: text.fields.price, type: 'number', min: 0, hint: text.hints.price },
       { key: 'totalQuantity', label: text.fields.totalQuantity, type: 'number', min: 0, hint: text.hints.totalQuantity },
-      { key: 'availableQuantity', label: text.fields.availableQuantity, type: 'number', min: 0, hint: text.hints.availableQuantity },
     ],
   },
   {
@@ -96,16 +95,78 @@ const PassItem: React.FC<{ pass: AdminEventPass; page: string; onSaved: (pass: A
                 </legend>
                 <div className="ad-grid">
                   {group.fields.map((field) => (
-                    <FieldInput
-                      key={field.key}
-                      field={field}
-                      wide={field.wide}
-                      name={`pass-${pass.id}-${field.key}`}
-                      value={editor.form[field.key as keyof typeof editor.form]}
-                      onChange={(value) => editor.setField(field.key as keyof typeof editor.form, String(value))}
-                      onChoose={noUpload}
-                      error={editor.fieldErrors[field.key]}
-                    />
+                    <React.Fragment key={field.key}>
+                      <FieldInput
+                        field={field}
+                        wide={field.wide}
+                        name={`pass-${pass.id}-${field.key}`}
+                        value={editor.form[field.key as keyof typeof editor.form]}
+                        onChange={(value) => editor.setField(field.key as keyof typeof editor.form, String(value))}
+                        onChoose={noUpload}
+                        error={editor.fieldErrors[field.key]}
+                      />
+                      {field.key === 'totalQuantity' && (
+                        <div
+                          style={{
+                            gridColumn: '1 / -1',
+                            marginTop: '-4px',
+                            marginBottom: '10px',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            gap: '8px',
+                          }}
+                        >
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                            <span style={{ fontSize: '12px', fontWeight: 600, color: '#33503d' }}>
+                              Increase limit:
+                            </span>
+                            {[10, 25, 50, 100].map((delta) => (
+                              <button
+                                key={delta}
+                                type="button"
+                                className="btn btn-secondary btn-sm"
+                                style={{
+                                  padding: '3px 10px',
+                                  fontSize: '12px',
+                                  minHeight: 'unset',
+                                  height: '26px',
+                                  borderRadius: '4px',
+                                  cursor: 'pointer',
+                                }}
+                                onClick={() => editor.increaseLimit(delta)}
+                              >
+                                +{delta}
+                              </button>
+                            ))}
+                          </div>
+                          <div
+                            style={{
+                              padding: '8px 12px',
+                              background: '#f4f8f5',
+                              borderRadius: '6px',
+                              border: '1px solid #dbe6dd',
+                              fontSize: '12.5px',
+                              color: '#16572e',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'space-between',
+                              flexWrap: 'wrap',
+                              gap: '6px',
+                            }}
+                          >
+                            <span>
+                              <strong>Seats left:</strong>{' '}
+                              {pass.availableQuantity !== null
+                                ? `${pass.availableQuantity} left (${pass.paid} booked)`
+                                : 'Unlimited'}
+                            </span>
+                            <span style={{ fontSize: '11.5px', color: '#666' }}>
+                              Maintained automatically by database
+                            </span>
+                          </div>
+                        </div>
+                      )}
+                    </React.Fragment>
                   ))}
                 </div>
               </fieldset>

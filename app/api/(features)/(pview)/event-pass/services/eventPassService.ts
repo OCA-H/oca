@@ -1,11 +1,15 @@
 import "server-only";
 import { HttpError, type FieldErrors } from "@/app/api/core/httpError";
 import { DEFAULT_EVENT_PASSES, EventPassRepository, type EventPassFilter } from "../repository/eventPassRepository";
+import { EventPassBookingRepository } from "../repository/eventPassBookingRepository";
 import type { EventPass, NewEventPass } from "../schema/eventPassSchema";
 import { refreshPassPrices } from "./passPrices";
 
 export class EventPassService {
-  constructor(private readonly repository: EventPassRepository) {}
+  constructor(
+    private readonly repository: EventPassRepository,
+    private readonly bookings: EventPassBookingRepository = new EventPassBookingRepository()
+  ) {}
 
   async list(filter?: EventPassFilter): Promise<EventPass[]> {
     // An event with built-in passes (or every event, when none is named) gets them the first time
@@ -164,22 +168,28 @@ export class EventPassService {
     const label = text("label", "Name on the site", 200, true);
     const description = text("description", "Description", 500);
     const batchEligibility = text("batchEligibility", "Who can book", 100);
-    const statusNote = text("statusNote", "Note on the card", 255);
+    let statusNote = text("statusNote", "Note on the card", 255);
     const price = whole("price", "Price");
-    const totalQuantity = seats("totalQuantity", "Seats in total");
-    const availableQuantity = seats("availableQuantity", "Seats left");
+    const totalQuantity = seats("totalQuantity", "Pass limit");
     const displayOrder = whole("displayOrder", "Order on the page");
     const status = payload.status;
     if (status !== "active" && status !== "locked") fields.status = "Choose whether the pass is open or locked.";
-    if (!fields.totalQuantity && !fields.availableQuantity) {
-      if ((totalQuantity === null) !== (availableQuantity === null)) {
-        const field = totalQuantity === null ? "totalQuantity" : "availableQuantity";
-        fields[field] = "Leave both seat boxes empty for unlimited seats, or fill in both.";
-      } else if (totalQuantity !== null && availableQuantity !== null && availableQuantity > totalQuantity) {
-        fields.availableQuantity = "Seats left cannot be more than the seats in total.";
+    if (Object.keys(fields).length > 0) throw HttpError.badRequest("Some details need fixing.", fields);
+
+    // Maintain availableQuantity automatically in the DB from totalQuantity minus paid bookings
+    let availableQuantity: number | null = null;
+    if (totalQuantity !== null) {
+      const paidCount = await this.bookings.countPaidByPassId(id);
+      availableQuantity = Math.max(0, totalQuantity - paidCount);
+    }
+
+    // Keep statusNote in sync with availableQuantity
+    if (availableQuantity !== null) {
+      const isAutoNote = !statusNote || statusNote.endsWith(" left") || statusNote === "Sold out" || statusNote === existing.statusNote;
+      if (isAutoNote) {
+        statusNote = availableQuantity === 0 ? "Sold out" : `${availableQuantity} left`;
       }
     }
-    if (Object.keys(fields).length > 0) throw HttpError.badRequest("Some details need fixing.", fields);
 
     const updated = await this.repository.update(id, {
       label: label!,

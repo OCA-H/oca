@@ -79,6 +79,15 @@ export class EventPassBookingRepository extends BaseRepository {
     return rows.map((row) => ({ eventPassId: row.eventPassId, paid: row.paid, revenue: Number(row.revenue ?? 0) }));
   }
 
+  /** Count of paid bookings for a single pass. */
+  async countPaidByPassId(eventPassId: number): Promise<number> {
+    const results = await this.db
+      .select({ paid: count() })
+      .from(eventPassBookings)
+      .where(and(eq(eventPassBookings.eventPassId, eventPassId), eq(eventPassBookings.status, "paid")));
+    return results[0]?.paid ?? 0;
+  }
+
   async findByOrderId(orderId: string): Promise<EventPassBooking | null> {
     const results = await this.db
       .select()
@@ -150,7 +159,9 @@ export class EventPassBookingRepository extends BaseRepository {
         .update(eventPasses)
         .set({
           availableQuantity: sql`${eventPasses.availableQuantity} - 1`,
-          statusNote: sql`CASE WHEN ${eventPasses.statusNote} ~ '^[0-9]+ left$'
+          statusNote: sql`CASE
+            WHEN (${eventPasses.availableQuantity} - 1) <= 0 THEN 'Sold out'
+            WHEN ${eventPasses.statusNote} ~ '^[0-9]+ left$' OR ${eventPasses.statusNote} IS NULL
             THEN (${eventPasses.availableQuantity} - 1) || ' left'
             ELSE ${eventPasses.statusNote} END`,
           updatedAt: new Date(),

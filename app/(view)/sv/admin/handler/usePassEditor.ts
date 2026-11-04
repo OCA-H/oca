@@ -56,6 +56,13 @@ export function usePassEditor(pass: AdminEventPass, onSaved: (pass: AdminEventPa
     setIsSaved(false);
   };
 
+  const increaseLimit = (delta: number) => {
+    const current = form.totalQuantity.trim() === '' ? 0 : Number(form.totalQuantity);
+    if (!isNaN(current)) {
+      setField('totalQuantity', String(Math.max(0, current + delta)));
+    }
+  };
+
   const reset = () => {
     setForm(saved);
     setFieldErrors({});
@@ -102,7 +109,7 @@ export function usePassEditor(pass: AdminEventPass, onSaved: (pass: AdminEventPa
     }
   };
 
-  return { form, saved, setField, fieldErrors, error, isSaving, isSaved, isDirty, reset, handleSubmit, isConfirming, cancelConfirm, confirmSave };
+  return { form, saved, setField, increaseLimit, fieldErrors, error, isSaving, isSaved, isDirty, reset, handleSubmit, isConfirming, cancelConfirm, confirmSave };
 }
 
 export default usePassEditor;

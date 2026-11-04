@@ -13,6 +13,7 @@ export const metadata = {
 // the prices in "Passes at a glance" follow the passes (Passes → Dinner passes & seats).
 export default async function AnnualDinnerPage() {
   const [content, passes] = await Promise.all([getDinnerContent(), getPassPrices('annual-dinner')]);
+
   return (
     <>
       <Header activeRoute="annual-dinner" />

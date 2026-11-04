@@ -78,7 +78,8 @@ export interface EventPassChanges {
   price: number;
   /** Null with availableQuantity: the pass is not limited. */
   totalQuantity: number | null;
-  availableQuantity: number | null;
+  /** Maintained automatically by the database based on totalQuantity and paid bookings. */
+  availableQuantity?: number | null;
   status: string;
   statusNote: string;
   displayOrder: number;

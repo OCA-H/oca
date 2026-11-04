@@ -135,29 +135,36 @@ export const PassTierCard: React.FC<PassTierCardProps> = ({ group, selectedPass,
         <>
           {group.passes.map((pass) => {
             const isChecked = selectedPass === pass.passId;
-            const isSoldOut = pass.availableQuantity === 0;
+            const isSoldOut = pass.availableQuantity !== null && pass.availableQuantity <= 0;
+            const leftNote =
+              isSoldOut
+                ? 'Sold out'
+                : pass.availableQuantity !== null
+                  ? `${pass.availableQuantity} left`
+                  : pass.statusNote && pass.statusNote !== pass.title
+                    ? pass.statusNote
+                    : null;
             return (
               <label
                 key={pass.passId}
                 className={`dn-pass ${isChecked ? 'is-checked' : ''} ${isSoldOut ? 'is-sold-out' : ''}`}
+                style={isSoldOut ? { pointerEvents: 'none', cursor: 'not-allowed', opacity: 0.55 } : undefined}
               >
                 <input
                   type="radio"
                   name="pass"
                   value={pass.passId}
                   checked={isChecked}
-                  onChange={() => onSelectPass(pass.passId)}
+                  onChange={() => {
+                    if (!isSoldOut) onSelectPass(pass.passId);
+                  }}
                   disabled={isSoldOut}
                   required={!selectedPass}
                 />
                 <span className="dn-radio" aria-hidden="true"></span>
                 <span className="dn-pass-t">
                   <b>{pass.title}</b>
-                  {isSoldOut ? (
-                    <em className="dn-left">Sold out</em>
-                  ) : pass.statusNote && pass.statusNote !== pass.title && (
-                    <em className="dn-left">{pass.statusNote}</em>
-                  )}
+                  {leftNote && <em className="dn-left">{leftNote}</em>}
                 </span>
                 <span className="dn-price">&#8377;{pass.price.toLocaleString('en-IN')}</span>
               </label>

@@ -12,7 +12,7 @@ export interface SummaryLine {
   included?: boolean;
 }
 
-export function useAnnualDinnerHandler() {
+export function useAnnualDinnerHandler(initialPasses: ApiEventPass[] = []) {
   const { user, isAuthenticated, isLoading: isAuthLoading } = useAuth();
   const [selectedPass, setSelectedPass] = useState<string | null>(null);
   const [teachers, setTeachers] = useState<number>(0);
@@ -21,30 +21,26 @@ export function useAnnualDinnerHandler() {
   const [above12, setAbove12] = useState<number>(0);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [checkoutError, setCheckoutError] = useState<string | null>(null);
-  const [apiPasses, setApiPasses] = useState<ApiEventPass[]>([]);
+  const [apiPasses, setApiPasses] = useState<ApiEventPass[]>(initialPasses);
   const [isLoadingPasses, setIsLoadingPasses] = useState<boolean>(false);
 
-  // Fetch passes directly from database API when the user is authenticated
+  // Keep passes in sync with backend: fetch live passes on mount and whenever auth state changes
   useEffect(() => {
     let isMounted = true;
-    if (isAuthenticated) {
-      setIsLoadingPasses(true);
-      annualDinnerService
-        .getPasses('annual-dinner')
-        .then((passes) => {
-          if (isMounted) {
-            if (passes && passes.length > 0) {
-              setApiPasses(passes);
-            }
-            setIsLoadingPasses(false);
+    setIsLoadingPasses(true);
+    annualDinnerService
+      .getPasses('annual-dinner')
+      .then((passes) => {
+        if (isMounted) {
+          if (passes && passes.length > 0) {
+            setApiPasses(passes);
           }
-        })
-        .catch(() => {
-          if (isMounted) setIsLoadingPasses(false);
-        });
-    } else {
-      setIsLoadingPasses(false);
-    }
+          setIsLoadingPasses(false);
+        }
+      })
+      .catch(() => {
+        if (isMounted) setIsLoadingPasses(false);
+      });
     return () => {
       isMounted = false;
     };
@@ -132,6 +128,16 @@ export function useAnnualDinnerHandler() {
     }
   }
 
+  // If currently selected pass becomes sold out, unselect it immediately
+  useEffect(() => {
+    if (selectedPass && passesById[selectedPass]) {
+      const p = passesById[selectedPass];
+      if (p.availableQuantity !== null && p.availableQuantity <= 0) {
+        setSelectedPass(null);
+      }
+    }
+  }, [apiPasses, selectedPass, passesById]);
+
   const handleReset = () => {
     setSelectedPass(null);
     setTeachers(0);
@@ -144,6 +150,13 @@ export function useAnnualDinnerHandler() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!isAuthenticated || !selectedPass || !currentTier) return;
+
+    // Do not allow booking if seats are 0 / sold out
+    const selectedPassData = passesById[selectedPass];
+    if (selectedPassData && selectedPassData.availableQuantity !== null && selectedPassData.availableQuantity <= 0) {
+      setCheckoutError('Sorry, this pass is sold out. Bookings are no longer allowed for this tier.');
+      return;
+    }
 
     setIsSubmitting(true);
     setCheckoutError(null);
