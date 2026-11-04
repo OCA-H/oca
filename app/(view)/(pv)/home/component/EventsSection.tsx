@@ -1,5 +1,6 @@
 import React from 'react';
 import type { HomeEventsContent } from '@/app/api/(features)/(pview)/site/schema/sectionSpecs';
+import { PhotoTile, type TileTone } from '@/app/(view)/common/component/PageParts';
 import { SiteLink, toneAt } from './SiteLink';
 
 export const EventsSection: React.FC<{ content: HomeEventsContent }> = ({ content }) => {
@@ -17,14 +18,13 @@ export const EventsSection: React.FC<{ content: HomeEventsContent }> = ({ conten
             const featured = i === 0;
             return (
               <div className={`event-card${featured ? ' event-featured' : ''}`} key={`${i}-${event.title}`}>
-                <div className={`event-media photo-tile ${toneAt(i, 2)}`}>
-                  <img className="tile-img" src={event.image} alt={event.imageAlt} loading="lazy" decoding="async" data-ph="photo" />
-                  {event.caption && (
-                    <div className="tile-caption">
-                      <div className="t">{event.caption}</div>
-                    </div>
-                  )}
-                </div>
+                <PhotoTile
+                  className="event-media"
+                  src={event.image}
+                  alt={event.imageAlt}
+                  caption={event.caption}
+                  tone={toneAt(i, 2) as TileTone}
+                />
                 <div className="event-body">
                   {event.date && <div className="date">{event.date}</div>}
                   <h4>{event.title}</h4>

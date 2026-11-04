@@ -40,7 +40,7 @@ export const GolfTournamentHero: React.FC<GolfTournamentHeroProps> = ({ content,
           </div>
           <div className="page-hero-media">
             <figure className="dn-poster">
-              <img src={content.image} alt={content.imageAlt} />
+              <img src={content.image} alt={content.imageAlt} data-ph="photo" />
             </figure>
           </div>
         </div>

@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { visionMissionContent } from '../content';
 import { ROUTES } from '@/app/(view)/common/helper/routes';
 import { MemberSwitch } from '@/app/(view)/common/component/MemberSwitch';
+import { PhotoTile } from '@/app/(view)/common/component/PageParts';
 
 type CtaContent = { eyebrow: string; title: string; lead: string; btnGold: CtaLink; btnSecondary: CtaLink };
 type CtaLink = { text: string; href: string };
@@ -57,16 +58,12 @@ export const VisionMissionView: React.FC = () => {
             </div>
           </div>
           <div className="page-hero-media">
-            <div className="photo-tile duo-navy">
-              <img
-                className="tile-img"
-                src={hero.image}
-                alt={hero.imageAlt}
-                loading="lazy"
-                decoding="async"
-                data-ph="photo"
-              />
-            </div>
+            <PhotoTile
+              src={hero.image}
+              alt={hero.imageAlt}
+              tone="duo-navy"
+              eager
+            />
           </div>
         </div>
       </section>
@@ -155,16 +152,11 @@ export const VisionMissionView: React.FC = () => {
             </Link>
           </div>
           <div className="split-media">
-            <div className="photo-tile duo-teal">
-              <img
-                className="tile-img"
-                src={mission.image}
-                alt={mission.imageAlt}
-                loading="lazy"
-                decoding="async"
-                data-ph="photo"
-              />
-            </div>
+            <PhotoTile
+              src={mission.image}
+              alt={mission.imageAlt}
+              tone="duo-teal"
+            />
             <p className="split-caption">{mission.caption}</p>
           </div>
         </div>
@@ -200,16 +192,11 @@ export const VisionMissionView: React.FC = () => {
       <section className="content-section tint-teal">
         <div className="wrap split-2 media-left">
           <div className="split-media">
-            <div className="photo-tile duo-gold">
-              <img
-                className="tile-img"
-                src={socialConscience.image}
-                alt={socialConscience.imageAlt}
-                loading="lazy"
-                decoding="async"
-                data-ph="photo"
-              />
-            </div>
+            <PhotoTile
+              src={socialConscience.image}
+              alt={socialConscience.imageAlt}
+              tone="duo-gold"
+            />
             <p className="split-caption">{socialConscience.caption}</p>
           </div>
           <div>

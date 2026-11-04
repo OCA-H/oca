@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { ROUTES } from '@/app/(view)/common/helper/routes';
 import { useContact } from '@/app/(view)/common/component/ContactProvider';
 import { MemberSwitch } from '@/app/(view)/common/component/MemberSwitch';
+import { PhotoTile } from '@/app/(view)/common/component/PageParts';
 import type { DonationCtaContent } from '../content/donation.content';
 import { useDonationHandler } from '../handler/useDonationHandler';
 import { ContributionForm, ContributionLockOverlay, ContributionDummyPreview } from './subcomponents';
@@ -109,16 +110,11 @@ export const DonationView: React.FC = () => {
       <section className="content-section tint-gold">
         <div className="wrap split-2 media-left">
           <div className="split-media">
-            <div className="photo-tile duo-teal">
-              <img
-                className="tile-img"
-                src={featuredCause.image}
-                alt={featuredCause.caption}
-                loading="lazy"
-                decoding="async"
-                data-ph="photo"
-              />
-            </div>
+            <PhotoTile
+              src={featuredCause.image}
+              alt={featuredCause.caption}
+              tone="duo-teal"
+            />
             <p className="split-caption">{featuredCause.caption}</p>
           </div>
           <div>

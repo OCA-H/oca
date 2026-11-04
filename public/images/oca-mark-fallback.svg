@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 300" preserveAspectRatio="xMidYMid slice">
+  <rect width="300" height="300" fill="#F5F8F5"/>
+  <path d="M150 62 L214 88 V148 C214 190 186 218 150 232 C114 218 86 190 86 148 V88 Z" fill="none" stroke="#C9A227" stroke-width="2"/>
+  <text x="150" y="162" text-anchor="middle" font-family="Georgia,serif" font-size="34" fill="#0F5E2D">OCA</text>
+</svg>
+

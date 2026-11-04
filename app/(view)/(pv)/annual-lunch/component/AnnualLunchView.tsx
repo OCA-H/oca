@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { ROUTES } from '@/app/(view)/common/helper/routes';
 import { useContact } from '@/app/(view)/common/component/ContactProvider';
 import { MemberSwitch } from '@/app/(view)/common/component/MemberSwitch';
+import { PhotoTile } from '@/app/(view)/common/component/PageParts';
 import type { EventLunchContent } from '@/app/api/(features)/(pview)/site/schema/sectionSpecs';
 
 export const AnnualLunchView: React.FC<{ content: EventLunchContent }> = ({ content }) => {
@@ -38,16 +39,12 @@ export const AnnualLunchView: React.FC<{ content: EventLunchContent }> = ({ cont
           </div>
 
           <div className="page-hero-media">
-            <div className="photo-tile duo-gold">
-              <img
-                className="tile-img"
-                src={content.image}
-                alt={content.imageAlt}
-                loading="lazy"
-                decoding="async"
-                data-ph="photo"
-              />
-            </div>
+            <PhotoTile
+              src={content.image}
+              alt={content.imageAlt}
+              tone="duo-gold"
+              eager
+            />
           </div>
         </div>
       </section>
@@ -93,16 +90,11 @@ export const AnnualLunchView: React.FC<{ content: EventLunchContent }> = ({ cont
           </div>
 
           <div className="split-media">
-            <div className="photo-tile duo-teal">
-              <img
-                className="tile-img"
-                src="https://www.oldcolumban.net/wp-content/uploads/2017/10/b38eafcb-e18b-484c-b1c6-1d1782b1b92a.jpg"
-                alt="Columbans of every batch at a previous Annual Lunch"
-                loading="lazy"
-                decoding="async"
-                data-ph="photo"
-              />
-            </div>
+            <PhotoTile
+              src="https://www.oldcolumban.net/wp-content/uploads/2017/10/b38eafcb-e18b-484c-b1c6-1d1782b1b92a.jpg"
+              alt="Columbans of every batch at a previous Annual Lunch"
+              tone="duo-teal"
+            />
             <p className="split-caption">Columbans of every batch, back together again.</p>
           </div>
         </div>

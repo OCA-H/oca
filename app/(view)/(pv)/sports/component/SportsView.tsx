@@ -41,7 +41,7 @@ export const SportsView: React.FC<{ content: EventSportsContent }> = ({ content 
           <div className="page-hero-media">
             <div className="sports-poster">
               <div className="poster-frame">
-                <img src={content.image} alt={content.imageAlt} decoding="async" />
+                <img src={content.image} alt={content.imageAlt} decoding="async" data-ph="photo" />
                 {content.posterChip && <span className="poster-chip">{content.posterChip}</span>}
               </div>
             </div>

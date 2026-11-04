@@ -1,7 +1,15 @@
+'use client';
+
 import React from 'react';
 import Link from 'next/link';
 import { ROUTES } from '@/app/(view)/common/helper/routes';
 import type { PageCtaContent, PageHeroContent } from '@/app/api/(features)/(pview)/site/schema/pageSections';
+import {
+  FALLBACK_HERO_IMAGE,
+  getPlaceholderImage,
+  handleImageFallback,
+  type PlaceholderKind,
+} from '@/app/(view)/common/helper/placeholders';
 
 // The pieces most interior pages are built from, in the template's markup: the breadcrumb, the
 // banner, the closing green band, and text an admin typed with paragraphs and **bold**.
@@ -29,22 +37,43 @@ export const PageCrumb: React.FC<{ trail: CrumbStep[] }> = ({ trail }) => (
 export type TileTone = 'duo-navy' | 'duo-teal' | 'duo-gold';
 
 /** A photo with the template's colour wash and, optionally, a line over its bottom edge. */
-export const PhotoTile: React.FC<{ src: string; alt: string; caption?: string; tone?: TileTone; eager?: boolean }> = ({
+export const PhotoTile: React.FC<{
+  src?: string | null;
+  alt?: string;
+  caption?: string;
+  tone?: TileTone;
+  eager?: boolean;
+  className?: string;
+  fallbackKind?: PlaceholderKind;
+}> = ({
   src,
-  alt,
+  alt = '',
   caption,
   tone = 'duo-teal',
   eager,
-}) => (
-  <div className={`photo-tile ${tone}`}>
-    <img className="tile-img" src={src} alt={alt} loading={eager ? undefined : 'lazy'} decoding="async" />
-    {caption && (
-      <div className="tile-caption">
-        <div className="t">{caption}</div>
-      </div>
-    )}
-  </div>
-);
+  className = '',
+  fallbackKind = 'photo',
+}) => {
+  const fallback = getPlaceholderImage(fallbackKind);
+  return (
+    <div className={`photo-tile ${tone}${className ? ` ${className}` : ''}`}>
+      <img
+        className="tile-img"
+        src={src || fallback}
+        alt={alt}
+        loading={eager ? undefined : 'lazy'}
+        decoding="async"
+        data-ph={fallbackKind}
+        onError={(e) => handleImageFallback(e, fallbackKind)}
+      />
+      {caption && (
+        <div className="tile-caption">
+          <div className="t">{caption}</div>
+        </div>
+      )}
+    </div>
+  );
+};
 
 interface PageHeroProps {
   content: Pick<PageHeroContent, 'eyebrow' | 'title' | 'lead'> & Partial<Pick<PageHeroContent, 'image' | 'imageAlt' | 'imageCaption'>>;
@@ -55,10 +84,19 @@ interface PageHeroProps {
   tone?: TileTone;
   /** An extra class on the section, e.g. "by-hero". */
   className?: string;
+  /** Fallback placeholder type if content.image is missing or fails. */
+  fallbackKind?: PlaceholderKind;
 }
 
 /** The banner: eyebrow, heading, intro and buttons, with the banner photo (or `media`) beside them. */
-export const PageHero: React.FC<PageHeroProps> = ({ content, actions, media, tone, className }) => (
+export const PageHero: React.FC<PageHeroProps> = ({
+  content,
+  actions,
+  media,
+  tone = 'duo-teal',
+  className,
+  fallbackKind = 'photo',
+}) => (
   <section className={`page-hero${className ? ` ${className}` : ''}`}>
     <div className="wrap">
       <div>
@@ -67,9 +105,18 @@ export const PageHero: React.FC<PageHeroProps> = ({ content, actions, media, ton
         {content.lead && <p className="lead">{content.lead}</p>}
         {actions && <div className="page-hero-actions">{actions}</div>}
       </div>
-      {(media || content.image) && (
+      {(media || content.image !== undefined) && (
         <div className="page-hero-media">
-          {media ?? <PhotoTile src={content.image!} alt={content.imageAlt ?? ''} caption={content.imageCaption} tone={tone} eager />}
+          {media ?? (
+            <PhotoTile
+              src={content.image || getPlaceholderImage(fallbackKind)}
+              alt={content.imageAlt ?? content.title ?? ''}
+              caption={content.imageCaption}
+              tone={tone}
+              eager
+              fallbackKind={fallbackKind}
+            />
+          )}
         </div>
       )}
     </div>

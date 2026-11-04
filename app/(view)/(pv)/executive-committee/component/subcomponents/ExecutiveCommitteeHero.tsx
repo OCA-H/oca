@@ -1,6 +1,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { MemberSwitch } from '@/app/(view)/common/component/MemberSwitch';
+import { PhotoTile } from '@/app/(view)/common/component/PageParts';
 import { ExecutiveCommitteeContent } from '../../content/executiveCommittee.content';
 
 export interface ExecutiveCommitteeHeroProps {
@@ -26,19 +27,13 @@ export const ExecutiveCommitteeHero: React.FC<ExecutiveCommitteeHeroProps> = ({ 
           </div>
         </div>
         <div className="page-hero-media">
-          <div className="photo-tile duo-teal">
-            <img
-              className="tile-img"
-              src={hero.image}
-              alt={hero.imageAlt}
-              loading="lazy"
-              decoding="async"
-              data-ph="photo"
-            />
-            <div className="tile-caption">
-              <div className="t">{hero.caption}</div>
-            </div>
-          </div>
+          <PhotoTile
+            src={hero.image}
+            alt={hero.imageAlt}
+            caption={hero.caption}
+            tone="duo-teal"
+            eager
+          />
         </div>
       </div>
     </section>
