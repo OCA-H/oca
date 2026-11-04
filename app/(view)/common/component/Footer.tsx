@@ -26,7 +26,7 @@ export const Footer: React.FC = () => {
           <Link href={ROUTES.HOME} className="brand" style={{ alignItems: "center" }}>
             <img
               className="footer-logo-img"
-              src="/images/oca-crest.png"
+              src="/images/logo.webp"
               alt="Old Columbans Association crest"
               loading="lazy"
               decoding="async"

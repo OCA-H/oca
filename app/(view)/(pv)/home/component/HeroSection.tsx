@@ -45,7 +45,7 @@ export const HeroSection: React.FC<{ ticker: HomeTickerContent; birthdayCount: n
             </svg>
             <img 
               className="hero-crest-img" 
-              src="/images/oca-crest.png" 
+              src="/images/logo.webp" 
               alt="Old Columbans Association crest" 
             />
           </div>
