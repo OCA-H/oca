@@ -2,8 +2,14 @@
 // these specs, and the admin panel builds its forms from them. To make another section editable,
 // add its spec here, its defaults in services/siteDefaults.ts, and read it where the page renders.
 // No server-only imports: the admin panel (a client component) imports this file too.
+// The About, Gallery, Directory and OCA Connect pages' sections are in pageSections.ts, merged in below.
 
-export type FieldType = "text" | "textarea" | "image" | "video" | "link" | "select" | "number" | "email" | "emails";
+import { PAGE_SECTION_KEYS, PAGE_SECTION_SPECS } from "./pageSections";
+
+export type FieldType = "text" | "textarea" | "image" | "video" | "file" | "link" | "select" | "number" | "email" | "emails";
+
+/** What a "file" field takes: a PDF, or an MP3 recording. */
+export type FileKindName = "document" | "audio";
 
 /** Shows a field or list only while another field of the same entry has this value, e.g. a post's kind is "video". */
 export interface ShowWhen {
@@ -34,6 +40,8 @@ export interface FieldSpec {
   heading?: string;
   /** Only shown, checked (required included) and saved while this holds; otherwise saved empty. */
   showWhen?: ShowWhen;
+  /** "file" fields only: what may be uploaded. Default: a PDF. */
+  fileKind?: FileKindName;
 }
 
 /** A repeating group inside a section: event cards, notices, posts. */
@@ -52,7 +60,7 @@ export interface ListSpec {
   lists?: ListSpec[];
   /** For a list inside an entry: only shown, checked and saved while this holds; otherwise saved empty. */
   showWhen?: ShowWhen;
-  /** For a list inside an entry: drawn inside the block of fields with this heading, instead of after them all. */
+  /** Drawn inside the block of fields with this heading (the section's, or its entry's), instead of after them all. */
   inBlock?: string;
   /** "grid": photo tiles, several uploaded at once, for lists of an image and short text fields. Default: folding entries. */
   layout?: "grid";
@@ -61,7 +69,7 @@ export interface ListSpec {
 export interface SectionSpec {
   key: SiteSectionKey;
   /** Which group of the admin menu the section is under. */
-  page: "home" | "about" | "events" | "membership" | "settings";
+  page: "home" | "about" | "gallery" | "events" | "directory" | "connect" | "membership" | "settings";
   label: string;
   description: string;
   /** Where the section sits on its page, for "View on site". Settings that are not on a page have none. */
@@ -86,6 +94,7 @@ export const SITE_SECTION_KEYS = {
   membershipFee: "membership.fee",
   settingsEmails: "settings.emails",
   settingsContact: "settings.contact",
+  ...PAGE_SECTION_KEYS,
 } as const;
 
 export type SiteSectionKey = (typeof SITE_SECTION_KEYS)[keyof typeof SITE_SECTION_KEYS];
@@ -134,6 +143,8 @@ export interface HomeNoticeItem {
   date: string;
   title: string;
   href: string;
+  /** "NOTICE", "MINUTES", "LETTER": the tag on its card on the Newsletters page. */
+  tag: string;
 }
 
 export interface HomeNoticesContent {
@@ -219,6 +230,8 @@ export interface HomeGalleryAlbum {
   name: string;
   /** When the album is from, e.g. "Nov 2025". */
   time: string;
+  /** A line about the album, shown on the Photographs page. */
+  desc: string;
   photos: HomeGalleryPhoto[];
 }
 
@@ -491,6 +504,7 @@ export const SECTION_SPECS: SectionSpec[] = [
           { key: "date", label: "Date", type: "text", max: 60, placeholder: "November 19, 2025" },
           { key: "title", label: "Title", type: "text", max: 150, required: true },
           { key: "href", label: "“Read more” link", type: "link", hint: `${LINK_HINT} Leave empty to hide the link.` },
+          { key: "tag", label: "Kind of notice", type: "text", max: 20, placeholder: "NOTICE", hint: "The tag on its card on the Newsletters page, e.g. NOTICE, MINUTES or LETTER. Left empty: NOTICE." },
         ],
       },
     ],
@@ -593,7 +607,7 @@ export const SECTION_SPECS: SectionSpec[] = [
     key: SITE_SECTION_KEYS.homeSocial,
     page: "home",
     label: "OCA Social Conscience",
-    description: "The causes Columbans can support, with the featured fund’s progress.",
+    description: "The causes Columbans can support, with the featured fund’s progress: on the home page, and on the OCA Social Conscience and Teachers Benevolent Fund pages.",
     href: "/#give",
     fields: sectionHead(),
     lists: [
@@ -618,7 +632,7 @@ export const SECTION_SPECS: SectionSpec[] = [
           { key: "badge", label: "Badge", type: "text", max: 40, placeholder: "Featured Cause" },
           ...image(),
           { key: "title", label: "Title", type: "text", max: 120, required: true },
-          { key: "desc", label: "Note", type: "textarea", max: 300, hint: "Shown on muted causes." },
+          { key: "desc", label: "Note", type: "textarea", max: 400, hint: "Shown on muted causes. On the OCA Social Conscience page it is also shown under featured causes." },
           {
             key: "fund",
             label: "Fund code",
@@ -648,7 +662,7 @@ export const SECTION_SPECS: SectionSpec[] = [
     key: SITE_SECTION_KEYS.homeGallery,
     page: "home",
     label: "Our Gallery",
-    description: "Photo albums in a slideshow that moves through each album’s photos in turn.",
+    description: "Photo albums: the home page’s slideshow, and the albums on the Photographs page (Gallery → Photographs).",
     href: "/#gallery",
     fields: sectionHead(),
     lists: [
@@ -663,6 +677,7 @@ export const SECTION_SPECS: SectionSpec[] = [
         fields: [
           { key: "name", label: "Album name", type: "text", max: 60, required: true, placeholder: "Annual Lunch 2025" },
           { key: "time", label: "When", type: "text", max: 30, placeholder: "Nov 2025" },
+          { key: "desc", label: "Description", type: "textarea", max: 300, hint: "A line about the album, shown on the Photographs page." },
         ],
         lists: [
           {
@@ -874,6 +889,8 @@ export const SECTION_SPECS: SectionSpec[] = [
     ],
     lists: [],
   },
+  // About, Gallery, Directory and OCA Connect pages: see pageSections.ts.
+  ...PAGE_SECTION_SPECS,
 ];
 
 export const sectionSpec = (key: string): SectionSpec | undefined => SECTION_SPECS.find((spec) => spec.key === key);

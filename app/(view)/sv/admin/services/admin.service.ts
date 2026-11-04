@@ -3,10 +3,13 @@ import { ROUTES } from "@/app/(view)/common/helper/routes";
 import { signOutMember } from "@/app/(view)/common/helper/useAuth";
 import type { SectionData, SiteSectionKey } from "@/app/api/(features)/(pview)/site/schema/sectionSpecs";
 
-export type { SectionData, SectionItem, SectionSpec, FieldSpec, ListSpec, ShowWhen, SiteSectionKey } from "@/app/api/(features)/(pview)/site/schema/sectionSpecs";
+export type { SectionData, SectionItem, SectionSpec, FieldSpec, FileKindName, ListSpec, ShowWhen, SiteSectionKey } from "@/app/api/(features)/(pview)/site/schema/sectionSpecs";
 
-/** What a section upload is; the server holds each to its own limits (images 10 MB, videos 20 MB). */
-export type MediaKind = "image" | "video";
+/** What a section upload is; the server holds each to its own limits (images 10 MB, videos 20 MB, PDFs 25 MB, MP3s 20 MB). */
+export type MediaKind = "image" | "video" | "document" | "audio";
+
+/** How each kind of upload is named in messages. */
+const MEDIA_LABELS: Record<MediaKind, string> = { image: "image", video: "video", document: "PDF", audio: "recording" };
 
 /**
  * Calls an admin API. A 401 means the session is over: sign out and come back here after signing
@@ -287,7 +290,7 @@ export const adminService = {
   },
 
   /**
-   * Uploads an image or video for a section; the address to use for it comes back. The file goes
+   * Uploads an image, video, PDF or recording for a section; the address to use for it comes back. The file goes
    * straight to storage, at an address our API hands out (Vercel turns away request bodies over
    * 4.5 MB), and the API then checks it.
    */
@@ -302,7 +305,7 @@ export const adminService = {
       body: file,
     }).catch(() => null);
     if (!sent?.ok) {
-      const message = `The ${kind} did not upload. Please check your connection and try again.`;
+      const message = `The ${MEDIA_LABELS[kind]} did not upload. Please check your connection and try again.`;
       throw new ApiError(message, sent?.status ?? 0, { [kind]: message });
     }
     const body = { section: key, kind, name: upload.name };

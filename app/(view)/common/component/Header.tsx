@@ -22,6 +22,24 @@ const NAV_MAP: Record<string, string> = {
   'sports': 'events',
   'member-signin': 'membership',
   'partner-organization': 'membership',
+  'batch-coordinators': 'about',
+  'social-conscience': 'about',
+  'teachers-benevolent-fund': 'about',
+  'bylaws': 'about',
+  'school-anthem': 'events',
+  'school-history': 'events',
+  'our-principal': 'events',
+  'school-magazine': 'events',
+  'event-photographs': 'events',
+  'find-your-batchmates': 'directory',
+  'worldwide-chapters': 'directory',
+  'news-makers': 'connect',
+  'alumni-services': 'connect',
+  'careers': 'connect',
+  'networking': 'connect',
+  'internships': 'connect',
+  'newsletters': 'connect',
+  'remembrance': 'connect',
 };
 
 const Chevron = () => (
@@ -117,10 +135,10 @@ export const Header: React.FC<HeaderProps> = ({ activeRoute }) => {
               <div className="dropdown">
                 <Link href={ROUTES.VISION_MISSION} onClick={() => handleLinkClick(ROUTES.VISION_MISSION)}>Our Mission &amp; Objectives</Link>
                 <Link href={ROUTES.EXECUTIVE_COMMITTEE} onClick={() => handleLinkClick(ROUTES.EXECUTIVE_COMMITTEE)}>Executive Committee</Link>
-                <div className="dropdown-soon"><span>Batch Coordinators</span><span className="soon-tag">Coming soon</span></div>
-                <div className="dropdown-soon"><span>OCA Social Conscience</span><span className="soon-tag">Coming soon</span></div>
-                <div className="dropdown-soon"><span>Teachers Benevolent Fund</span><span className="soon-tag">Coming soon</span></div>
-                <div className="dropdown-soon"><span>ByLaws of OCA</span><span className="soon-tag">Coming soon</span></div>
+                <Link href={ROUTES.BATCH_COORDINATORS} onClick={() => handleLinkClick(ROUTES.BATCH_COORDINATORS)}>Batch Coordinators</Link>
+                <Link href={ROUTES.SOCIAL_CONSCIENCE} onClick={() => handleLinkClick(ROUTES.SOCIAL_CONSCIENCE)}>OCA Social Conscience</Link>
+                <Link href={ROUTES.TEACHERS_BENEVOLENT_FUND} onClick={() => handleLinkClick(ROUTES.TEACHERS_BENEVOLENT_FUND)}>Teachers Benevolent Fund</Link>
+                <Link href={ROUTES.BYLAWS} onClick={() => handleLinkClick(ROUTES.BYLAWS)}>ByLaws of OCA</Link>
               </div>
             </div>
             <div className="nav-item">
@@ -136,32 +154,32 @@ export const Header: React.FC<HeaderProps> = ({ activeRoute }) => {
                     <svg viewBox="0 0 8 12" fill="none" aria-hidden="true"><path d="M1.5 1l5 5-5 5" stroke="currentColor" strokeWidth="1.6" /></svg>
                   </span>
                   <div className="flyout">
-                    <div className="dropdown-soon"><span>School Anthem</span><span className="soon-tag">Coming soon</span></div>
-                    <div className="dropdown-soon"><span>History of the School</span><span className="soon-tag">Coming soon</span></div>
-                    <div className="dropdown-soon"><span>School Principals</span><span className="soon-tag">Coming soon</span></div>
-                    <div className="dropdown-soon"><span>School Magazine</span><span className="soon-tag">Coming soon</span></div>
-                    <div className="dropdown-soon"><span>Photographs</span><span className="soon-tag">Coming soon</span></div>
+                    <Link href={ROUTES.SCHOOL_ANTHEM} onClick={() => handleLinkClick(ROUTES.SCHOOL_ANTHEM)}>School Anthem</Link>
+                    <Link href={ROUTES.SCHOOL_HISTORY} onClick={() => handleLinkClick(ROUTES.SCHOOL_HISTORY)}>History of the School</Link>
+                    <Link href={ROUTES.OUR_PRINCIPAL} onClick={() => handleLinkClick(ROUTES.OUR_PRINCIPAL)}>School Principals</Link>
+                    <Link href={ROUTES.SCHOOL_MAGAZINE} onClick={() => handleLinkClick(ROUTES.SCHOOL_MAGAZINE)}>School Magazine</Link>
+                    <Link href={ROUTES.EVENT_PHOTOGRAPHS} onClick={() => handleLinkClick(ROUTES.EVENT_PHOTOGRAPHS)}>Photographs</Link>
                   </div>
                 </div>
               </div>
             </div>
             <div className="nav-item">
-              <span className="nav-link" data-nav="directory">Directory <svg viewBox="0 0 12 8" fill="none"><path d="M1 1l5 5 5-5" stroke="currentColor" strokeWidth="1.6" /></svg></span>
+              <span className={`nav-link ${activeNav === 'directory' ? 'active' : ''}`} data-nav="directory">Directory <svg viewBox="0 0 12 8" fill="none"><path d="M1 1l5 5 5-5" stroke="currentColor" strokeWidth="1.6" /></svg></span>
               <div className="dropdown">
-                <div className="dropdown-soon"><span>Find Your Batchmates</span><span className="soon-tag">Coming soon</span></div>
-                <div className="dropdown-soon"><span>Worldwide Chapters</span><span className="soon-tag">Coming soon</span></div>
+                <Link href={ROUTES.FIND_YOUR_BATCHMATES} onClick={() => handleLinkClick(ROUTES.FIND_YOUR_BATCHMATES)}>Find Your Batchmates</Link>
+                <Link href={ROUTES.WORLDWIDE_CHAPTERS} onClick={() => handleLinkClick(ROUTES.WORLDWIDE_CHAPTERS)}>Worldwide Chapters</Link>
               </div>
             </div>
             <div className="nav-item">
-              <span className="nav-link" data-nav="connect">OCA Connect <svg viewBox="0 0 12 8" fill="none"><path d="M1 1l5 5 5-5" stroke="currentColor" strokeWidth="1.6" /></svg></span>
+              <span className={`nav-link ${activeNav === 'connect' ? 'active' : ''}`} data-nav="connect">OCA Connect <svg viewBox="0 0 12 8" fill="none"><path d="M1 1l5 5 5-5" stroke="currentColor" strokeWidth="1.6" /></svg></span>
               <div className="dropdown">
-                <div className="dropdown-soon"><span>News Makers</span><span className="soon-tag">Coming soon</span></div>
-                <div className="dropdown-soon"><span>Alumni Services</span><span className="soon-tag">Coming soon</span></div>
-                <div className="dropdown-soon"><span>Careers</span><span className="soon-tag">Coming soon</span></div>
-                <div className="dropdown-soon"><span>Networking</span><span className="soon-tag">Coming soon</span></div>
-                <div className="dropdown-soon"><span>OCA Internships Program</span><span className="soon-tag">Coming soon</span></div>
-                <div className="dropdown-soon"><span>Newsletters</span><span className="soon-tag">Coming soon</span></div>
-                <div className="dropdown-soon"><span>Remembrance</span><span className="soon-tag">Coming soon</span></div>
+                <Link href={ROUTES.NEWS_MAKERS} onClick={() => handleLinkClick(ROUTES.NEWS_MAKERS)}>News Makers</Link>
+                <Link href={ROUTES.ALUMNI_SERVICES} onClick={() => handleLinkClick(ROUTES.ALUMNI_SERVICES)}>Alumni Services</Link>
+                <Link href={ROUTES.CAREERS} onClick={() => handleLinkClick(ROUTES.CAREERS)}>Careers</Link>
+                <Link href={ROUTES.NETWORKING} onClick={() => handleLinkClick(ROUTES.NETWORKING)}>Networking</Link>
+                <Link href={ROUTES.INTERNSHIPS} onClick={() => handleLinkClick(ROUTES.INTERNSHIPS)}>OCA Internships Program</Link>
+                <Link href={ROUTES.NEWSLETTERS} onClick={() => handleLinkClick(ROUTES.NEWSLETTERS)}>Newsletters</Link>
+                <Link href={ROUTES.REMEMBRANCE} onClick={() => handleLinkClick(ROUTES.REMEMBRANCE)}>Remembrance</Link>
               </div>
             </div>
             {/* <div className="nav-item">
@@ -281,10 +299,10 @@ export const Header: React.FC<HeaderProps> = ({ activeRoute }) => {
           <MobileGroup label="About OCA" open={openGroup === 'about'} onToggle={() => toggleGroup('about')}>
             <Link className="sub" href={ROUTES.VISION_MISSION} onClick={() => handleLinkClick(ROUTES.VISION_MISSION)}>Our Mission &amp; Objectives</Link>
             <Link className="sub" href={ROUTES.EXECUTIVE_COMMITTEE} onClick={() => handleLinkClick(ROUTES.EXECUTIVE_COMMITTEE)}>Executive Committee</Link>
-            <span className="sub sub-soon">Batch Coordinators<span className="soon-tag">Soon</span></span>
-            <span className="sub sub-soon">OCA Social Conscience<span className="soon-tag">Soon</span></span>
-            <span className="sub sub-soon">Teachers Benevolent Fund<span className="soon-tag">Soon</span></span>
-            <span className="sub sub-soon">ByLaws of OCA<span className="soon-tag">Soon</span></span>
+            <Link className="sub" href={ROUTES.BATCH_COORDINATORS} onClick={() => handleLinkClick(ROUTES.BATCH_COORDINATORS)}>Batch Coordinators</Link>
+            <Link className="sub" href={ROUTES.SOCIAL_CONSCIENCE} onClick={() => handleLinkClick(ROUTES.SOCIAL_CONSCIENCE)}>OCA Social Conscience</Link>
+            <Link className="sub" href={ROUTES.TEACHERS_BENEVOLENT_FUND} onClick={() => handleLinkClick(ROUTES.TEACHERS_BENEVOLENT_FUND)}>Teachers Benevolent Fund</Link>
+            <Link className="sub" href={ROUTES.BYLAWS} onClick={() => handleLinkClick(ROUTES.BYLAWS)}>ByLaws of OCA</Link>
           </MobileGroup>
 
           <MobileGroup label="Events" open={openGroup === 'events'} onToggle={() => toggleGroup('events')}>
@@ -293,26 +311,26 @@ export const Header: React.FC<HeaderProps> = ({ activeRoute }) => {
             <Link className="sub" href={ROUTES.ANNUAL_LUNCH} onClick={() => handleLinkClick(ROUTES.ANNUAL_LUNCH)}>Annual Lunch Get Together</Link>
             <Link className="sub" href={ROUTES.SPORTS} onClick={() => handleLinkClick(ROUTES.SPORTS)}>OCA Sports</Link>
             <span className="sub-head">Gallery</span>
-            <span className="sub sub2 sub-soon">School Anthem<span className="soon-tag">Soon</span></span>
-            <span className="sub sub2 sub-soon">History of the School<span className="soon-tag">Soon</span></span>
-            <span className="sub sub2 sub-soon">School Principals<span className="soon-tag">Soon</span></span>
-            <span className="sub sub2 sub-soon">School Magazine<span className="soon-tag">Soon</span></span>
-            <span className="sub sub2 sub-soon">Photographs<span className="soon-tag">Soon</span></span>
+            <Link className="sub sub2" href={ROUTES.SCHOOL_ANTHEM} onClick={() => handleLinkClick(ROUTES.SCHOOL_ANTHEM)}>School Anthem</Link>
+            <Link className="sub sub2" href={ROUTES.SCHOOL_HISTORY} onClick={() => handleLinkClick(ROUTES.SCHOOL_HISTORY)}>History of the School</Link>
+            <Link className="sub sub2" href={ROUTES.OUR_PRINCIPAL} onClick={() => handleLinkClick(ROUTES.OUR_PRINCIPAL)}>School Principals</Link>
+            <Link className="sub sub2" href={ROUTES.SCHOOL_MAGAZINE} onClick={() => handleLinkClick(ROUTES.SCHOOL_MAGAZINE)}>School Magazine</Link>
+            <Link className="sub sub2" href={ROUTES.EVENT_PHOTOGRAPHS} onClick={() => handleLinkClick(ROUTES.EVENT_PHOTOGRAPHS)}>Photographs</Link>
           </MobileGroup>
 
           <MobileGroup label="Directory" open={openGroup === 'directory'} onToggle={() => toggleGroup('directory')}>
-            <span className="sub sub-soon">Find Your Batchmates<span className="soon-tag">Soon</span></span>
-            <span className="sub sub-soon">Worldwide Chapters<span className="soon-tag">Soon</span></span>
+            <Link className="sub" href={ROUTES.FIND_YOUR_BATCHMATES} onClick={() => handleLinkClick(ROUTES.FIND_YOUR_BATCHMATES)}>Find Your Batchmates</Link>
+            <Link className="sub" href={ROUTES.WORLDWIDE_CHAPTERS} onClick={() => handleLinkClick(ROUTES.WORLDWIDE_CHAPTERS)}>Worldwide Chapters</Link>
           </MobileGroup>
 
           <MobileGroup label="OCA Connect" open={openGroup === 'connect'} onToggle={() => toggleGroup('connect')}>
-            <span className="sub sub-soon">News Makers<span className="soon-tag">Soon</span></span>
-            <span className="sub sub-soon">Alumni Services<span className="soon-tag">Soon</span></span>
-            <span className="sub sub-soon">Careers<span className="soon-tag">Soon</span></span>
-            <span className="sub sub-soon">Networking<span className="soon-tag">Soon</span></span>
-            <span className="sub sub-soon">OCA Internships Program<span className="soon-tag">Soon</span></span>
-            <span className="sub sub-soon">Newsletters<span className="soon-tag">Soon</span></span>
-            <span className="sub sub-soon">Remembrance<span className="soon-tag">Soon</span></span>
+            <Link className="sub" href={ROUTES.NEWS_MAKERS} onClick={() => handleLinkClick(ROUTES.NEWS_MAKERS)}>News Makers</Link>
+            <Link className="sub" href={ROUTES.ALUMNI_SERVICES} onClick={() => handleLinkClick(ROUTES.ALUMNI_SERVICES)}>Alumni Services</Link>
+            <Link className="sub" href={ROUTES.CAREERS} onClick={() => handleLinkClick(ROUTES.CAREERS)}>Careers</Link>
+            <Link className="sub" href={ROUTES.NETWORKING} onClick={() => handleLinkClick(ROUTES.NETWORKING)}>Networking</Link>
+            <Link className="sub" href={ROUTES.INTERNSHIPS} onClick={() => handleLinkClick(ROUTES.INTERNSHIPS)}>OCA Internships Program</Link>
+            <Link className="sub" href={ROUTES.NEWSLETTERS} onClick={() => handleLinkClick(ROUTES.NEWSLETTERS)}>Newsletters</Link>
+            <Link className="sub" href={ROUTES.REMEMBRANCE} onClick={() => handleLinkClick(ROUTES.REMEMBRANCE)}>Remembrance</Link>
           </MobileGroup>
 
           {/* A signed-in member has no membership to apply for and no sign-in to do. */}

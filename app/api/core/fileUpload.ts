@@ -25,10 +25,14 @@ export const FILE_KINDS = {
   mp4: { contentType: "video/mp4", extension: "mp4", matches: (h) => startsWith(h, ascii("ftyp"), 4) && !startsWith(h, ascii("qt  "), 8) },
   mov: { contentType: "video/quicktime", extension: "mov", matches: (h) => startsWith(h, ascii("ftyp"), 4) && startsWith(h, ascii("qt  "), 8) },
   webm: { contentType: "video/webm", extension: "webm", matches: (h) => startsWith(h, [0x1a, 0x45, 0xdf, 0xa3]) },
+  // An MP3 opens with an ID3 tag, or straight away with an MPEG audio frame (11 sync bits set).
+  mp3: { contentType: "audio/mpeg", extension: "mp3", matches: (h) => startsWith(h, ascii("ID3")) || (h[0] === 0xff && (h[1] & 0xe0) === 0xe0) },
 } satisfies Record<string, FileKind>;
 
 export const IMAGE_KINDS: FileKind[] = [FILE_KINDS.jpeg, FILE_KINDS.png, FILE_KINDS.webp];
 export const VIDEO_KINDS: FileKind[] = [FILE_KINDS.mp4, FILE_KINDS.mov, FILE_KINDS.webm];
+export const DOCUMENT_KINDS: FileKind[] = [FILE_KINDS.pdf];
+export const AUDIO_KINDS: FileKind[] = [FILE_KINDS.mp3];
 
 export interface UploadRules {
   /** Largest file accepted, in bytes. */

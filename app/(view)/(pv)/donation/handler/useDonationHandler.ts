@@ -129,11 +129,17 @@ export function useDonationHandler() {
         if (!active) return;
         setFunds(list);
         setFundsError(null);
-        // Keep the chosen fund if it can be paid into, else fall back to the first that can.
+        const payable = (code: string | null) => list.some((f) => f.code === code && !f.suspended);
+        // A "Contribute" button on another page (the Teachers Benevolent Fund, a cause) links here
+        // with ?fund=<code>: start with that fund chosen. Otherwise keep the chosen fund if it can
+        // be paid into, else fall back to the first that can.
+        const requested = new URLSearchParams(window.location.search).get('fund');
         setFormData((prev) =>
-          list.some((f) => f.code === prev.fund && !f.suspended)
-            ? prev
-            : { ...prev, fund: list.find((f) => !f.suspended)?.code ?? '' }
+          payable(requested)
+            ? { ...prev, fund: requested! }
+            : payable(prev.fund)
+              ? prev
+              : { ...prev, fund: list.find((f) => !f.suspended)?.code ?? '' }
         );
       })
       .catch((error) => {

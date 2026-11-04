@@ -5,6 +5,7 @@ import { CustomDropdown } from '@/app/(view)/common/component/CustomDropdown';
 import type { AdminIconName } from '../../content';
 import type { FieldSpec, MediaKind } from '../../services';
 import { AdminIcon } from './AdminIcon';
+import { FileField } from './FileField';
 import { ImageField } from './ImageField';
 import { VideoField } from './VideoField';
 
@@ -14,7 +15,7 @@ interface FieldInputProps {
   name: string;
   value: string | number | undefined;
   onChange: (value: string | number) => void;
-  /** Image and video fields: holds a chosen file until the section is saved; the address to show it by comes back. */
+  /** Image, video and file fields: holds a chosen file until the section is saved; the address to show it by comes back. */
   onChoose: (file: File, kind?: MediaKind) => string;
   /** Video fields: told how long a newly chosen video runs, e.g. "2:14". */
   onVideoLength?: (length: string) => void;
@@ -30,7 +31,7 @@ export const FieldInput: React.FC<FieldInputProps> = ({ field, name, value, onCh
   const text = value === undefined ? '' : String(value);
   const counts = field.max && (field.type === 'text' || field.type === 'textarea');
   const isEmail = field.type === 'email' || field.type === 'emails';
-  const wide = forceWide || field.type === 'textarea' || field.type === 'image' || field.type === 'video' || field.type === 'emails';
+  const wide = forceWide || field.type === 'textarea' || field.type === 'image' || field.type === 'video' || field.type === 'file' || field.type === 'emails';
   const described = error || field.hint ? hintId : undefined;
   const common = { id, name, 'aria-describedby': described, 'aria-invalid': Boolean(error) || undefined };
 
@@ -72,6 +73,11 @@ export const FieldInput: React.FC<FieldInputProps> = ({ field, name, value, onCh
       break;
     case 'image':
       input = <ImageField id={id} value={text} onChange={onChange} onChoose={onChoose} describedBy={described} invalid={Boolean(error)} />;
+      break;
+    case 'file':
+      input = (
+        <FileField id={id} value={text} kind={field.fileKind ?? 'document'} onChange={onChange} onChoose={onChoose} describedBy={described} invalid={Boolean(error)} />
+      );
       break;
     case 'video':
       input = (

@@ -85,13 +85,16 @@ function checkField(spec: FieldSpec, raw: unknown, errors: FieldErrors, name: st
     return value;
   }
 
-  if (spec.type === "link" || spec.type === "image") {
+  if (spec.type === "link" || spec.type === "image" || spec.type === "file") {
+    // A file is uploaded here or linked from elsewhere (a PDF already online), like an image.
     if (value.length > MAX_URL_LENGTH) errors[name] = `Please keep this address under ${MAX_URL_LENGTH} characters.`;
-    else if (!isAllowedUrl(value, spec.type)) {
+    else if (!isAllowedUrl(value, spec.type === "link" ? "link" : "image")) {
       errors[name] =
         spec.type === "image"
           ? "Upload an image, or use an address starting with https:// or /."
-          : "Use a page on this site (starting with /) or a full address starting with https://.";
+          : spec.type === "file"
+            ? "Upload the file, or use an address starting with https:// or /."
+            : "Use a page on this site (starting with /) or a full address starting with https://.";
     }
     return value;
   }

@@ -20,6 +20,32 @@ export const ROUTES = {
   RESET_PASSWORD: '/member-signin/reset-password',
   PARTNER_ORGANIZATION: '/partner-organization',
 
+  // About OCA
+  BATCH_COORDINATORS: '/batch-coordinators',
+  SOCIAL_CONSCIENCE: '/social-conscience',
+  TEACHERS_BENEVOLENT_FUND: '/teachers-benevolent-fund',
+  BYLAWS: '/bylaws',
+
+  // Gallery
+  SCHOOL_ANTHEM: '/school-anthem',
+  SCHOOL_HISTORY: '/school-history',
+  OUR_PRINCIPAL: '/our-principal',
+  SCHOOL_MAGAZINE: '/school-magazine',
+  EVENT_PHOTOGRAPHS: '/event-photographs',
+
+  // Directory
+  FIND_YOUR_BATCHMATES: '/find-your-batchmates',
+  WORLDWIDE_CHAPTERS: '/worldwide-chapters',
+
+  // OCA Connect
+  NEWS_MAKERS: '/news-makers',
+  ALUMNI_SERVICES: '/alumni-services',
+  CAREERS: '/careers',
+  NETWORKING: '/networking',
+  INTERNSHIPS: '/internships',
+  NEWSLETTERS: '/newsletters',
+  REMEMBRANCE: '/remembrance',
+
   // Section Anchors & Deep Links
   HOME_EVENTS: '/#events',
   HOME_CONNECT: '/#connect',
@@ -46,10 +72,10 @@ export const ROUTES = {
   // Subpages & Utility Links
   LOST_PASSWORD: '/member-signin#lost-password',
   CONTACT: '/#contact',
-  BYLAWS: '/#bylaws',
-  NEWS_MAKERS: '/#news-makers',
-  TEACHERS_BENEVOLENT_FUND: '/#teachers-benevolent-fund',
-  EVENT_PHOTOGRAPHS: '/#event-photographs',
+  SOCIAL_CONSCIENCE_CAUSES: '/social-conscience#causes',
+  TEACHERS_FUND_COMMITTEE: '/teachers-benevolent-fund#tbf-committee',
+  SCHOOL_ANTHEM_LYRICS: '/school-anthem#lyrics',
+  SCHOOL_ANTHEM_DOWNLOAD: '/school-anthem#download',
   TOP: '#top',
 
   // Direct Page Routes
@@ -66,6 +92,9 @@ export const ROUTES = {
   // External Portal Links
   PORTAL_LOGIN: 'https://www.oldcolumban.net/members-2/',
 } as const;
+
+/** The contribution form with a fund already chosen, e.g. "/donation?fund=tbf#give-form". */
+export const donationFundHref = (fund: string) => `${ROUTES.DONATION}?fund=${encodeURIComponent(fund)}#give-form`;
 
 export type RouteKey = keyof typeof ROUTES;
 export type RoutePath = (typeof ROUTES)[RouteKey];

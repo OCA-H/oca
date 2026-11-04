@@ -6,6 +6,7 @@ export * from './AdminDashboardPanel';
 export * from './FieldInput';
 export * from './ImageField';
 export * from './VideoField';
+export * from './FileField';
 export * from './ListEditor';
 export * from './PhotoGridEditor';
 export * from './SectionEditorPanel';

@@ -60,6 +60,24 @@ export const SECTION_ICONS: Record<SiteSectionKey, AdminIconName> = {
   "membership.fee": "rupee",
   "settings.emails": "mail",
   "settings.contact": "phone",
+  "about.batch-coordinators": "people",
+  "about.social-conscience": "heart",
+  "about.teachers-benevolent-fund": "rupee",
+  "about.bylaws": "shield",
+  "gallery.school-anthem": "megaphone",
+  "gallery.school-history": "layers",
+  "gallery.our-principal": "user",
+  "gallery.school-magazine": "page",
+  "gallery.event-photographs": "camera",
+  "directory.find-your-batchmates": "people",
+  "directory.worldwide-chapters": "globe",
+  "connect.news-makers": "star",
+  "connect.alumni-services": "info",
+  "connect.careers": "flag",
+  "connect.networking": "people",
+  "connect.internships": "trophy",
+  "connect.newsletters": "mail",
+  "connect.remembrance": "heart",
 };
 
 /** The record panels, in menu order, under their menu group. Each has its own address, e.g. /sv/admin/passes. */
@@ -144,7 +162,10 @@ export interface AdminNavGroup {
 const PAGE_GROUPS: Record<SectionSpec["page"], { group: string; icon: AdminIconName }> = {
   home: { group: "Home page", icon: "home" },
   about: { group: "About", icon: "info" },
+  gallery: { group: "Gallery", icon: "image" },
   events: { group: "Events", icon: "calendar" },
+  directory: { group: "Directory", icon: "globe" },
+  connect: { group: "OCA Connect", icon: "star" },
   membership: { group: "Membership", icon: "people" },
   settings: { group: "Settings", icon: "mail" },
 };
@@ -254,6 +275,38 @@ export const adminContent = {
     badType: "Please choose an MP4, MOV or WebM video.",
     tooBig: "That video is over 20 MB. Please choose a shorter or smaller one.",
     none: "No video yet",
+  },
+
+  /** Documents and recordings: the ByLaws, magazines, newsletters, the School Anthem. */
+  file: {
+    document: {
+      label: "PDF",
+      upload: "Upload PDF",
+      replace: "Replace PDF",
+      pending: "New PDF: uploads when you save",
+      types: /^application\/pdf$/i,
+      extensions: /\.pdf$/i,
+      accept: "application/pdf,.pdf",
+      // Matches the server's limit (SITE_DOCUMENT_RULES); checked when chosen, not first at save.
+      maxBytes: 25 * 1024 * 1024,
+      badType: "Please choose a PDF file.",
+      tooBig: "That PDF is over 25 MB. Please choose a smaller one, or compress it first.",
+      none: "No PDF yet",
+    },
+    audio: {
+      label: "recording",
+      upload: "Upload MP3",
+      replace: "Replace recording",
+      pending: "New recording: uploads when you save",
+      types: /^audio\/(mpeg|mp3)$/i,
+      extensions: /\.mp3$/i,
+      accept: "audio/mpeg,.mp3",
+      // Matches the server's limit (SITE_AUDIO_RULES); checked when chosen, not first at save.
+      maxBytes: 20 * 1024 * 1024,
+      badType: "Please choose an MP3 recording.",
+      tooBig: "That recording is over 20 MB. Please choose a smaller one.",
+      none: "No recording yet",
+    },
   },
 
   records: {

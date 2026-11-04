@@ -5,7 +5,8 @@ import { HttpError } from "@/app/api/core/httpError";
 import { storage, type StoredFile } from "@/app/api/core/storage";
 import { assertUploadSize, detectUploadKind, wrongUploadKind, type FileKind, type UploadRules } from "@/app/api/core/fileUpload";
 import { SiteContentRepository } from "../repository/siteContentRepository";
-import { SECTION_SPECS, SITE_SECTION_KEYS, sectionSpec, type CommitteeContent, type ContactDetailsContent, type EmailSettingsContent, type EventDinnerContent, type EventGolfContent, type MembershipFeeContent, type EventLunchContent, type EventSportsContent, type HomeContent, type SectionSpec, type SiteSectionKey } from "../schema/sectionSpecs";
+import type { PageContentMap, PageSectionKey } from "../schema/pageSections";
+import { SECTION_SPECS, SITE_SECTION_KEYS, sectionSpec, type CommitteeContent, type HomeGalleryContent, type HomeNoticesContent, type HomeSocialContent, type ContactDetailsContent, type EmailSettingsContent, type EventDinnerContent, type EventGolfContent, type MembershipFeeContent, type EventLunchContent, type EventSportsContent, type HomeContent, type SectionSpec, type SiteSectionKey } from "../schema/sectionSpecs";
 import { MEMBERSHIP_FEE_DEFAULTS, SECTION_DEFAULTS } from "./siteDefaults";
 import { splitEmails, validateSection } from "./sectionValidator";
 
@@ -155,6 +156,20 @@ export const getLunchContent = async () => (await getSectionContent(SITE_SECTION
 export const getSportsContent = async () => (await getSectionContent(SITE_SECTION_KEYS.eventsSports)) as unknown as EventSportsContent;
 /** Every committee term, the current one first, as set in the admin panel (About → Executive Committee). */
 export const getCommitteeContent = async () => (await getSectionContent(SITE_SECTION_KEYS.aboutCommittee)) as unknown as CommitteeContent;
+
+/**
+ * One About, Gallery, Directory or OCA Connect page's content, as set in the admin panel; cached and
+ * refreshed on save like the rest.
+ */
+export const getPageContent = async <K extends PageSectionKey>(key: K) => (await getSectionContent(key)) as unknown as PageContentMap[K];
+
+// Home page sections that other pages show too, so each is edited in one place.
+/** The causes (OCA Social Conscience and Teachers Benevolent Fund pages). */
+export const getSocialContent = async () => (await getSectionContent(SITE_SECTION_KEYS.homeSocial)) as unknown as HomeSocialContent;
+/** The photo albums (Photographs page). */
+export const getGalleryContent = async () => (await getSectionContent(SITE_SECTION_KEYS.homeGallery)) as unknown as HomeGalleryContent;
+/** The latest notices (Newsletters page). */
+export const getNoticesContent = async () => (await getSectionContent(SITE_SECTION_KEYS.homeNotices)) as unknown as HomeNoticesContent;
 
 /** The Life Membership fee in rupees, as set in the admin panel (Membership → Membership fee). */
 export async function getMembershipFee(): Promise<number> {

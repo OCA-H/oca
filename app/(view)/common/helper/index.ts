@@ -4,3 +4,4 @@ export { default as ROUTES } from './routes';
 export * from './useAuth';
 export * from './ccavenue';
 export * from './phone';
+export * from './fundFigures';

@@ -1,6 +1,6 @@
 import "server-only";
 import { BaseController } from "@/app/api/core/baseController";
-import { IMAGE_KINDS, VIDEO_KINDS, assertUploadSize, claimedUploadKind } from "@/app/api/core/fileUpload";
+import { AUDIO_KINDS, DOCUMENT_KINDS, IMAGE_KINDS, VIDEO_KINDS, assertUploadSize, claimedUploadKind, type UploadRules } from "@/app/api/core/fileUpload";
 import { HttpError } from "@/app/api/core/httpError";
 import { siteContentService, type SiteContentService } from "@/app/api/(features)/(pview)/site";
 import { withAdminAuth } from "../middleware/adminAuth";
@@ -9,6 +9,18 @@ import { withAdminAuth } from "../middleware/adminAuth";
 export const SITE_IMAGE_RULES = { maxBytes: 10 * 1024 * 1024, kinds: IMAGE_KINDS, label: "image" };
 /** Section videos (OCA Hangout posts): MP4, MOV or WebM, up to 20 MB. */
 export const SITE_VIDEO_RULES = { maxBytes: 20 * 1024 * 1024, kinds: VIDEO_KINDS, label: "video" };
+/** Section documents (the ByLaws, magazines, newsletters): PDF, up to 25 MB. */
+export const SITE_DOCUMENT_RULES = { maxBytes: 25 * 1024 * 1024, kinds: DOCUMENT_KINDS, label: "PDF" };
+/** Section audio (the School Anthem recordings): MP3, up to 20 MB. */
+export const SITE_AUDIO_RULES = { maxBytes: 20 * 1024 * 1024, kinds: AUDIO_KINDS, label: "audio file" };
+
+/** The rules for each kind of section upload, by the kind the admin panel names. */
+const MEDIA_RULES: Record<string, UploadRules> = {
+  image: SITE_IMAGE_RULES,
+  video: SITE_VIDEO_RULES,
+  document: SITE_DOCUMENT_RULES,
+  audio: SITE_AUDIO_RULES,
+};
 
 type SectionContext = { params: Promise<{ key: string }> };
 
@@ -47,7 +59,7 @@ export class AdminController extends BaseController {
   );
 
   /**
-   * POST /api/sv/admin/media (JSON: section, kind "image" or "video", fileName, contentType, size):
+   * POST /api/sv/admin/media (JSON: section, kind "image", "video", "document" or "audio", fileName, contentType, size):
    * starts an upload. The browser then PUTs the file to the uploadUrl that comes back (straight to
    * storage: Vercel turns away request bodies over 4.5 MB) and calls /media/confirm with the name.
    */
@@ -91,8 +103,10 @@ export class AdminController extends BaseController {
   private mediaRequest(body: Record<string, unknown>) {
     const { section, kind } = body;
     if (typeof section !== "string" || !section) throw HttpError.badRequest("Say which section the file is for.");
-    if (kind !== "image" && kind !== "video") throw HttpError.badRequest('The kind of file must be "image" or "video".');
-    return { section, kind, rules: kind === "video" ? SITE_VIDEO_RULES : SITE_IMAGE_RULES };
+    if (typeof kind !== "string" || !Object.hasOwn(MEDIA_RULES, kind)) {
+      throw HttpError.badRequest('The kind of file must be "image", "video", "document" or "audio".');
+    }
+    return { section, kind, rules: MEDIA_RULES[kind] };
   }
 }
 

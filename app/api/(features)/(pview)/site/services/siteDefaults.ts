@@ -10,6 +10,7 @@ import {
   type HomeContent,
   type SiteSectionKey,
 } from "../schema/sectionSpecs";
+import { PAGE_SECTION_DEFAULTS } from "./pageDefaults";
 
 // What each section shows until an admin saves it: the content the home page was built with.
 
@@ -73,13 +74,13 @@ export const HOME_DEFAULTS: HomeContent = {
     intro: "The latest word from the OCA Secretariat — AGM notices, elections and community updates.",
     updatedLabel: "Updated Nov 19, 2025",
     items: [
-      { date: "November 19, 2025", title: "OCA – AGM 2025 Reminder & Balance Sheet" },
-      { date: "October 31, 2025", title: "OCA – AGM and Election Notice 2025" },
-      { date: "October 14, 2024", title: "OCA – AGM MOM 23rd April 2023" },
-      { date: "September 25, 2024", title: "OCA AGM Notice to be held on 17th October, 2024" },
-      { date: "March 10, 2023", title: "OCA – AGM and Election Notice 2023" },
-      { date: "October 14, 2022", title: "Become members of the Old Columban Association – Principal Letter" },
-    ].map((notice) => ({ ...notice, image: NOTICE_IMAGE, imageAlt: "OCA newsletter and notice", href: "" })),
+      { date: "November 19, 2025", title: "OCA – AGM 2025 Reminder & Balance Sheet", tag: "NOTICE", href: "https://www.oldcolumban.net/oca-agm-2025-reminder-balance-sheet/" },
+      { date: "October 31, 2025", title: "OCA – AGM and Election Notice 2025", tag: "NOTICE", href: "https://www.oldcolumban.net/oca-agm-and-election-notice-2025/" },
+      { date: "October 14, 2024", title: "OCA – AGM MOM 23rd April 2023", tag: "MINUTES", href: "https://www.oldcolumban.net/oca-agm-mom-23rd-april-2023/" },
+      { date: "September 25, 2024", title: "OCA AGM Notice to be held on 17th October, 2024", tag: "NOTICE", href: "https://www.oldcolumban.net/oca-agm-notice-to-be-held-on-17th-october-2024/" },
+      { date: "March 10, 2023", title: "OCA – AGM and Election Notice 2023", tag: "NOTICE", href: "https://www.oldcolumban.net/agm-and-election-notice-2023/" },
+      { date: "October 14, 2022", title: "Become members of the Old Columban Association – Principal Letter", tag: "LETTER", href: "https://www.oldcolumban.net/become-members-of-the-old-columban-association-principal-letter/" },
+    ].map((notice) => ({ ...notice, image: NOTICE_IMAGE, imageAlt: "OCA newsletter and notice" })),
   },
 
   spotlight: {
@@ -92,7 +93,7 @@ export const HOME_DEFAULTS: HomeContent = {
     headline: "Congratulating Columban Justice D. Y. Chandrachud",
     body: "OCA proudly celebrates fellow Columban Justice Dhananjaya Y. Chandrachud on his tenure as Chief Justice of India — one of many Columbans making the school proud across public life, business and the arts.",
     linkLabel: "See more News Makers →",
-    linkHref: "/#news-makers",
+    linkHref: "/news-makers",
   },
 
   hangout: {
@@ -121,13 +122,13 @@ export const HOME_DEFAULTS: HomeContent = {
         imageAlt: "Teachers Benevolent Fund",
         badge: "Featured Cause",
         title: "Teachers Benevolent Fund",
-        desc: "",
+        desc: "As we all are aware, this fund was initiated in earnest by the Old Columbans Association, after the unfortunate incident involving an ex-teacher of SCS,…",
         fund: "tbf",
         offlineRaised: 0,
         progress: 7,
         raised: "₹15,68,928",
         goal: "₹2,00,00,000",
-        href: "/#teachers-benevolent-fund",
+        href: "/teachers-benevolent-fund",
         ctaHref: "/donation#give-form",
       },
       {
@@ -171,6 +172,7 @@ export const HOME_DEFAULTS: HomeContent = {
       {
         name: "Annual Lunch 2025",
         time: "Nov 2025",
+        desc: "The OCA Annual Lunch Get Together — Columbans of every batch under one roof.",
         photos: [
           { caption: "Columbans of every batch", image: U + "2025/12/annual-lunch.jpg" },
           { caption: "Old boys, reunited", image: U + "2017/10/b38eafcb-e18b-484c-b1c6-1d1782b1b92a.jpg" },
@@ -181,6 +183,7 @@ export const HOME_DEFAULTS: HomeContent = {
       {
         name: "OCA Sports",
         time: "2022",
+        desc: "The Brother Foley Memorial cricket tournament, keeping Columban sport alive.",
         photos: [
           { caption: "Brother Foley Memorial, first day", image: U + "2022/10/Bro-Foley-Cricket-2022.jpg" },
           { caption: "The sponsorship appeal", image: U + "2022/11/sponsor-new.jpg" },
@@ -189,6 +192,7 @@ export const HOME_DEFAULTS: HomeContent = {
       {
         name: "Honours & News Makers",
         time: "Ongoing",
+        desc: "Columbans making the School proud.",
         photos: [
           { caption: "Justice D. Y. Chandrachud, Batch of 1975", image: U + "2022/10/Chadrachud-Congrats-web.jpg" },
           { caption: "The Association crest", image: "/images/oca-crest.png" },
@@ -197,6 +201,7 @@ export const HOME_DEFAULTS: HomeContent = {
       {
         name: "Executive Committee",
         time: "2023 – 25",
+        desc: "The office bearers of the 2023 – 25 Executive Committee.",
         photos: [
           { caption: "Santosh V. Kalyani, President", image: U + "2022/02/SVK-Profile-Pic-n.png" },
           { caption: "Anurag Aggarwal, Secretary", image: U + "2022/05/Anurag-agarawal-n-1.png" },
@@ -417,4 +422,5 @@ export const SECTION_DEFAULTS: Record<SiteSectionKey, object> = {
   [SITE_SECTION_KEYS.membershipFee]: MEMBERSHIP_FEE_DEFAULTS,
   [SITE_SECTION_KEYS.settingsEmails]: EMAIL_SETTINGS_DEFAULTS,
   [SITE_SECTION_KEYS.settingsContact]: CONTACT_DEFAULTS,
+  ...PAGE_SECTION_DEFAULTS,
 };
