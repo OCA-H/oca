@@ -1,5 +1,6 @@
 import React from 'react';
 import { PageCrumb, PageHero } from '@/app/(view)/common/component/PageParts';
+import { downloadHref } from '@/app/(view)/common/helper/routes';
 import type { BylawsContent } from '@/app/api/(features)/(pview)/site/schema/pageSections';
 import { bylawsContent as text } from '../content';
 
@@ -43,7 +44,7 @@ export const BylawsView: React.FC<{ content: BylawsContent }> = ({ content }) =>
       </section>
 
       {pdf && (
-        <a className="by-float" href={pdf} download aria-label={text.downloadAria}>
+        <a className="by-float" href={downloadHref(pdf)} download aria-label={text.downloadAria}>
           <span className="by-float-circle">
             <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
               <path d="M12 3v12m0 0-4-4m4 4 4-4M4 21h16" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />

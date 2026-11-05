@@ -1,5 +1,6 @@
 import "server-only";
 import { cacheLife, cacheTag, revalidateTag } from "next/cache";
+import { DB_FALLBACK_LIFE } from "@/app/api/core/cacheLifetimes";
 import { EventPassRepository } from "../repository/eventPassRepository";
 
 /** Refreshed whenever an admin changes a pass (see refreshPassPrices). */
@@ -23,7 +24,8 @@ export interface PassPrice {
 export async function getPassPrices(eventName: string): Promise<PassPrice[]> {
   "use cache";
   cacheTag(PASS_PRICES_TAG);
-  cacheLife("hours");
+  // Refreshed whenever an admin changes a pass, so a long life only spares needless rebuilds.
+  cacheLife("days");
 
   try {
     const passes = await new EventPassRepository().findAll({ eventName });
@@ -38,7 +40,7 @@ export async function getPassPrices(eventName: string): Promise<PassPrice[]> {
     }));
   } catch (error) {
     console.error(`Could not load "${eventName}" pass prices; the page is showing the typed-in prices.`, error);
-    cacheLife("minutes");
+    cacheLife(DB_FALLBACK_LIFE);
     return [];
   }
 }

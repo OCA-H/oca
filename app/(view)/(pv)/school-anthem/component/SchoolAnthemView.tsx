@@ -1,6 +1,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { CtaBand, MottoFigure, PageCrumb, PageHero, SectionHead } from '@/app/(view)/common/component/PageParts';
+import { downloadHref } from '@/app/(view)/common/helper/routes';
 import type { AnthemContent, SchoolHistoryContent } from '@/app/api/(features)/(pview)/site/schema/pageSections';
 import { schoolAnthemContent as text } from '../content';
 import { schoolAnthemHelper } from '../helper';
@@ -70,7 +71,7 @@ export const SchoolAnthemView: React.FC<{ content: AnthemContent; motto: Motto }
             <SectionHead centered wide eyebrow={content.downloadsEyebrow} title={content.downloadsTitle} />
             <div className="dl-grid" style={{ marginTop: 28 }}>
               {content.downloads.map((item, i) => (
-                <a className="dl-card" href={item.file} download key={`${i}-${item.file}`}>
+                <a className="dl-card" href={downloadHref(item.file)} download key={`${i}-${item.file}`}>
                   <span className="dl-icon">
                     <MusicIcon />
                   </span>

@@ -6,32 +6,35 @@ import { SiteContentService } from "../services/siteContentService";
 
 type MediaContext = { params: Promise<{ path: string[] }> };
 
+/** How long a signed storage address for a section file stays valid: a week. */
+const MEDIA_LINK_LIFE = 7 * 24 * 60 * 60;
+/** How long browsers and the CDN keep the redirect to it: a day, so a kept redirect never points at an expired address. */
+const MEDIA_REDIRECT_CACHE = 24 * 60 * 60;
+
 export class SiteContentController extends BaseController {
   constructor(private readonly service: SiteContentService) {
     super();
   }
 
   /**
-   * GET /api/site/media/{section path}/{file}
-   * Public: these are the images and videos the public pages show. Each upload gets a new name, so
-   * the file at an address never changes and browsers may keep it. Range requests are passed on,
-   * so videos can start playing before they have fully downloaded, and be skipped through.
+   * GET /api/site/media/{section path}/{file}[?download=1]
+   * Public: the images, videos and documents the public pages show. The file itself is not sent
+   * from here: this redirects to a signed address on storage, so the browser downloads it (video
+   * seeking included) straight from Supabase and none of it passes through our functions, which
+   * on Vercel count against Fast Origin Transfer. The redirect is kept by browsers and Vercel's
+   * CDN for a day, well inside the signed address's week, so most views never reach this function.
+   * Each upload gets a new name, so an address always means the same file.
    */
   getMedia = (request: Request, context: MediaContext) =>
     this.handle(async () => {
       const { path } = await context.params;
-      const file = await this.service.getMedia(path, request.headers.get("range"));
-      if (!file) throw HttpError.notFound("No such file.");
-      return new Response(file.body, {
-        status: file.contentRange ? 206 : 200,
-        headers: {
-          "Content-Type": file.contentType,
-          "Accept-Ranges": "bytes",
-          ...(file.contentRange && { "Content-Range": file.contentRange }),
-          ...(file.size !== null && { "Content-Length": String(file.size) }),
-          "Cache-Control": "public, max-age=31536000, immutable",
-          "X-Content-Type-Options": "nosniff",
-        },
+      const download = new URL(request.url).searchParams.has("download");
+      const url = await this.service.getMediaUrl(path, MEDIA_LINK_LIFE, download);
+      if (!url) throw HttpError.notFound("No such file.");
+      const cache = `public, max-age=${MEDIA_REDIRECT_CACHE}`;
+      return new Response(null, {
+        status: 307,
+        headers: { Location: url, "Cache-Control": cache, "CDN-Cache-Control": cache },
       });
     });
 }

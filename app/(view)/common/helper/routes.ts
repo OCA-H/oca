@@ -107,3 +107,10 @@ export async function GET() {
 
 export default ROUTES;
 
+
+/**
+ * A "Download" link for a file: uploaded files (/api/site/media/…) are fetched from storage on
+ * another domain, where the download attribute is ignored, so they ask for an attachment instead.
+ * Files elsewhere are linked as they are.
+ */
+export const downloadHref = (url: string) => (url.startsWith('/api/site/media/') ? `${url}?download=1` : url);

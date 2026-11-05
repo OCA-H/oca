@@ -4,6 +4,7 @@ import { todayInIndia } from "@/app/api/core/dateOfBirth";
 import { UserRepository } from "@/app/api/(features)/(pview)/auth/repository/userRepository";
 import type { User } from "@/app/api/(features)/(pview)/auth/schema/userSchema";
 import type { BirthdayMember } from "../schema/birthdaySchema";
+import { DB_FALLBACK_LIFE } from "@/app/api/core/cacheLifetimes";
 
 /** India is UTC+5:30 all year, so its midnight is a fixed offset from UTC's. */
 const INDIA_OFFSET_SECONDS = 5.5 * 60 * 60;
@@ -55,7 +56,7 @@ export async function getTodaysBirthdays(): Promise<BirthdayMember[]> {
     return (await new UserRepository().findActiveBornOn(birthdaysOn(todayInIndia()))).map(toMember);
   } catch (error) {
     console.error("Could not load today's birthdays; the home page is showing none.", error);
-    cacheLife("minutes");
+    cacheLife(DB_FALLBACK_LIFE);
     return [];
   }
 }

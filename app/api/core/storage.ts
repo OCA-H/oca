@@ -141,6 +141,27 @@ export class FileStorage {
   }
 
   /**
+   * An address anyone can read the file at `path` from, straight from Supabase, for `expiresIn`
+   * seconds; null if there is no such file. With `download`, Supabase sends it as an attachment
+   * under that name (true: its own name). Range requests work on it, so videos stream from it.
+   */
+  async createSignedUrl(path: string, expiresIn: number, download?: string | true): Promise<string | null> {
+    const key = this.key(path);
+    const res = await this.request(`/object/sign/${encodeURIComponent(this.bucket)}/${encodePath(key)}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ expiresIn }),
+    });
+    if (res.status === 400 || res.status === 404) return null;
+    if (!res.ok) return this.fail(`sign download "${key}"`, res);
+    // Comes back relative to /storage/v1, e.g. /object/sign/bucket/path?token=...
+    const { signedURL } = (await res.json()) as { signedURL: string };
+    const url = new URL(`${this.config.url}/storage/v1${signedURL}`);
+    if (download) url.searchParams.set("download", download === true ? "" : download);
+    return url.toString();
+  }
+
+  /**
    * The file at `path`, streamed, or null if there is none. With `range` (a Range header, e.g.
    * "bytes=0-"), only that part, as browsers ask for when playing a video.
    */

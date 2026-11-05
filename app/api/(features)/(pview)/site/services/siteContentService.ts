@@ -1,8 +1,9 @@
 import "server-only";
 import crypto from "node:crypto";
 import { cacheLife, cacheTag, revalidateTag } from "next/cache";
+import { DB_FALLBACK_LIFE } from "@/app/api/core/cacheLifetimes";
 import { HttpError } from "@/app/api/core/httpError";
-import { storage, type StoredFile } from "@/app/api/core/storage";
+import { storage } from "@/app/api/core/storage";
 import { assertUploadSize, detectUploadKind, wrongUploadKind, type FileKind, type UploadRules } from "@/app/api/core/fileUpload";
 import { SiteContentRepository } from "../repository/siteContentRepository";
 import type { PageContentMap, PageSectionKey } from "../schema/pageSections";
@@ -111,6 +112,8 @@ const withDefaults = (key: SiteSectionKey, saved: Record<string, unknown> | unde
 export async function getHomeContent(): Promise<HomeContent> {
   "use cache";
   cacheTag(SITE_CONTENT_TAG);
+  // Kept until a save in the admin panel revalidates the tag; no timer (see core/cacheLifetimes).
+  cacheLife("max");
 
   const keys = {
     ticker: SITE_SECTION_KEYS.homeTicker,
@@ -128,8 +131,8 @@ export async function getHomeContent(): Promise<HomeContent> {
     for (const row of await new SiteContentRepository().findByKeys(Object.values(keys))) saved.set(row.key, row.data);
   } catch (error) {
     console.error("Could not load site content; the home page is showing its defaults.", error);
-    // Keep the fallback briefly, so the saved content returns within a minute or so of the database.
-    cacheLife("minutes");
+    // Keep the fallback briefly, so the saved content returns soon after the database does.
+    cacheLife(DB_FALLBACK_LIFE);
   }
 
   return Object.fromEntries(
@@ -141,11 +144,13 @@ export async function getHomeContent(): Promise<HomeContent> {
 async function getSectionContent(key: SiteSectionKey): Promise<Record<string, unknown>> {
   "use cache";
   cacheTag(SITE_CONTENT_TAG);
+  // Kept until a save in the admin panel revalidates the tag; no timer (see core/cacheLifetimes).
+  cacheLife("max");
   try {
     return withDefaults(key, (await new SiteContentRepository().findByKey(key))?.data);
   } catch (error) {
     console.error(`Could not load site content "${key}"; the page is showing its defaults.`, error);
-    cacheLife("minutes");
+    cacheLife(DB_FALLBACK_LIFE);
     return withDefaults(key, undefined);
   }
 }
@@ -311,12 +316,16 @@ export class SiteContentService {
     return this.findSpec(key).key.replace(/\./g, "/");
   }
 
-  /** An uploaded section file, by the path after /api/site/media/, or null if there is none; `range` asks for part of it. */
-  async getMedia(segments: string[], range?: string | null): Promise<StoredFile | null> {
+  /**
+   * Where the browser can fetch an uploaded section file straight from storage (by the path after
+   * /api/site/media/), valid for `expiresIn` seconds, or null if there is no such file. With
+   * `download`, the file comes as an attachment, for "Download" links.
+   */
+  async getMediaUrl(segments: string[], expiresIn: number, download = false): Promise<string | null> {
     if (segments.length < 2 || segments.length > 4 || !segments.every((s) => SAFE_SEGMENT.test(s) && !s.includes(".."))) {
       return null;
     }
-    return storage.download(`${MEDIA_FOLDER}/${segments.join("/")}`, range);
+    return storage.createSignedUrl(`${MEDIA_FOLDER}/${segments.join("/")}`, expiresIn, download || undefined);
   }
 
   private findSpec(key: string): SectionSpec {
