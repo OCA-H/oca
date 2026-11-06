@@ -52,7 +52,7 @@ export const SchoolAnthemView: React.FC<{ content: AnthemContent; motto: Motto }
                   src={embed}
                   title={text.videoTitle}
                   loading="lazy"
-                  allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allow="autoplay; accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                   referrerPolicy="strict-origin-when-cross-origin"
                   allowFullScreen
                 ></iframe>
