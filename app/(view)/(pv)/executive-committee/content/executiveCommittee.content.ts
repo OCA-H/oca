@@ -104,7 +104,7 @@ export const executiveCommitteeContent: ExecutiveCommitteeContent = {
       text: 'Read our mission',
       href: ROUTES.VISION_MISSION,
     },
-    image: 'https://www.oldcolumban.net/wp-content/uploads/2017/10/b38eafcb-e18b-484c-b1c6-1d1782b1b92a.jpg',
+    image: 'https://legacy.oldcolumban.net/wp-content/uploads/2017/10/b38eafcb-e18b-484c-b1c6-1d1782b1b92a.jpg',
     imageAlt: 'Columbans gathered at an Association event',
     caption: 'The Association at work',
   },

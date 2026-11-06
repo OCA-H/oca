@@ -20,7 +20,7 @@ import type {
 // What each About, Gallery, Directory and OCA Connect page shows until an admin saves it: the
 // content of the website template (templates/oca-website_V1.html).
 
-const U = "https://www.oldcolumban.net/wp-content/uploads/";
+const U = "https://legacy.oldcolumban.net/wp-content/uploads/";
 const GATHERING = U + "2017/10/b38eafcb-e18b-484c-b1c6-1d1782b1b92a.jpg";
 // Kept on this site: the old site no longer serves these two.
 const SECRETARIAT = "/images/IMG_1792.jpg";

@@ -91,7 +91,7 @@ export const AnnualLunchView: React.FC<{ content: EventLunchContent }> = ({ cont
 
           <div className="split-media">
             <PhotoTile
-              src="https://www.oldcolumban.net/wp-content/uploads/2017/10/b38eafcb-e18b-484c-b1c6-1d1782b1b92a.jpg"
+              src="https://legacy.oldcolumban.net/wp-content/uploads/2017/10/b38eafcb-e18b-484c-b1c6-1d1782b1b92a.jpg"
               alt="Columbans of every batch at a previous Annual Lunch"
               tone="duo-teal"
             />

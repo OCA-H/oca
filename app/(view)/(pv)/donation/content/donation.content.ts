@@ -241,7 +241,7 @@ export const donationContent: DonationContent = {
     percent: 7,
     collected: '₹15,68,928',
     target: '₹2,00,00,000',
-    image: 'https://www.oldcolumban.net/wp-content/uploads/2023/02/IMG_1792.jpg',
+    image: 'https://legacy.oldcolumban.net/wp-content/uploads/2023/02/IMG_1792.jpg',
     caption:
       'The Teachers Benevolent Fund stands behind the staff who spent their careers at the School.',
     primaryBtn: {

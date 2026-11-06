@@ -14,7 +14,7 @@ import { PAGE_SECTION_DEFAULTS } from "./pageDefaults";
 
 // What each section shows until an admin saves it: the content the home page was built with.
 
-const U = "https://www.oldcolumban.net/wp-content/uploads/";
+const U = "https://legacy.oldcolumban.net/wp-content/uploads/";
 const NOTICE_IMAGE = U + "2016/03/OCA_Newsletter-Volume11.jpg";
 
 export const HOME_DEFAULTS: HomeContent = {
@@ -235,9 +235,9 @@ export const HOME_DEFAULTS: HomeContent = {
         eyebrow: "",
         pill: "",
         officeBearers: [
-          { image: "https://www.oldcolumban.net/wp-content/uploads/2022/02/SVK-Profile-Pic-n.png", imageAlt: "Santosh V. Kalyani, President", initials: "", name: "Santosh V. Kalyani", role: "PRESIDENT", roleSub: "", batch: "Batch of 1990", profession: "", email: "sirsantosh123@gmail.com" },
-          { image: "https://www.oldcolumban.net/wp-content/uploads/2022/05/Anurag-agarawal-n-1.png", imageAlt: "Anurag Aggarwal, Secretary", initials: "", name: "Anurag Aggarwal", role: "SECRETARY", roleSub: "", batch: "Batch of 2002", profession: "", email: "aggarwalanurag@yahoo.com" },
-          { image: "https://www.oldcolumban.net/wp-content/uploads/2020/02/Pranav-Uppal.jpg", imageAlt: "Kunwar Pranav Pratap Uppal, Treasurer", initials: "", name: "Kunwar Pranav Pratap Uppal", role: "TREASURER", roleSub: "", batch: "Batch of 1989", profession: "", email: "pranav.uppal@ndeh.com" },
+          { image: "https://legacy.oldcolumban.net/wp-content/uploads/2022/02/SVK-Profile-Pic-n.png", imageAlt: "Santosh V. Kalyani, President", initials: "", name: "Santosh V. Kalyani", role: "PRESIDENT", roleSub: "", batch: "Batch of 1990", profession: "", email: "sirsantosh123@gmail.com" },
+          { image: "https://legacy.oldcolumban.net/wp-content/uploads/2022/05/Anurag-agarawal-n-1.png", imageAlt: "Anurag Aggarwal, Secretary", initials: "", name: "Anurag Aggarwal", role: "SECRETARY", roleSub: "", batch: "Batch of 2002", profession: "", email: "aggarwalanurag@yahoo.com" },
+          { image: "https://legacy.oldcolumban.net/wp-content/uploads/2020/02/Pranav-Uppal.jpg", imageAlt: "Kunwar Pranav Pratap Uppal, Treasurer", initials: "", name: "Kunwar Pranav Pratap Uppal", role: "TREASURER", roleSub: "", batch: "Batch of 1989", profession: "", email: "pranav.uppal@ndeh.com" },
         ],
         members: [
           { name: "Varun Aggarwal", role: "EC MEMBER", roleSub: "", batch: "Batch of 1972", profession: "", email: "varunagga@hotmail.com" },

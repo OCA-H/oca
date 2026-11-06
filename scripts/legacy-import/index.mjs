@@ -42,7 +42,7 @@ const { values: args } = parseArgs({
 
 const MEMBERS_DB = "oldcovm6_digioca";
 const WORDPRESS_DB = "oldcovm6_website2022";
-const OLD_SITE = "https://www.oldcolumban.net";
+const OLD_SITE = "https://legacy.oldcolumban.net"; // old site's static files (member photos, documents)
 /** Passwords the old admin panel handed out, like "OCA@1985_1234". Anyone who knows the pattern can guess them. */
 const DEFAULT_PASSWORD = /^[A-Z]{3}@\d{4}_\d{3,4}$/;
 const THIS_YEAR = new Date().getFullYear();
