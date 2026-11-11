@@ -67,7 +67,7 @@ function PostPhotos({ images, clone }: { images: HomeHangoutPhoto[]; clone: bool
       >
         {images.map((photo, i) => (
           <div className="post-slide" key={`${i}-${photo.image}`} aria-hidden={i !== current || undefined}>
-            <img className="tile-img" src={photo.image} alt={photo.imageAlt} loading="lazy" decoding="async" />
+            <img suppressHydrationWarning className="tile-img" src={photo.image} alt={photo.imageAlt} loading="lazy" decoding="async" />
           </div>
         ))}
       </div>
@@ -146,7 +146,7 @@ function PostVideo({ src, still, duration, clone }: { src: string; still?: HomeH
           }}
         />
       ) : (
-        still && <img className="tile-img" src={still.image} alt={still.imageAlt} loading="lazy" decoding="async" />
+        still && <img suppressHydrationWarning className="tile-img" src={still.image} alt={still.imageAlt} loading="lazy" decoding="async" />
       )}
       <button
         type="button"

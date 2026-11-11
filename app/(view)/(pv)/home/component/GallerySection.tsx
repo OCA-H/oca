@@ -40,6 +40,7 @@ export const GallerySection: React.FC<{ content: HomeGalleryContent }> = ({ cont
             <div className={`photo-tile ${galleryTone(selectedAlbumIdx)}`} id="stageTile">
               {currentPhoto.image && (
                 <img
+                  suppressHydrationWarning
                   className="tile-img"
                   id="stageImg"
                   src={currentPhoto.image}

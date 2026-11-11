@@ -2,9 +2,9 @@ import React from 'react';
 import Link from 'next/link';
 import { CtaBand, PageCrumb, PageHero, RichText, SectionHead, type TileTone } from '@/app/(view)/common/component/PageParts';
 import { MailtoLink } from '@/app/(view)/common/component/ContactLinks';
-import { SiteLink } from '@/app/(view)/common/component/SiteLink';
 import type { NewslettersContent } from '@/app/api/(features)/(pview)/site/schema/pageSections';
 import type { HomeNoticeItem } from '@/app/api/(features)/(pview)/site/schema/sectionSpecs';
+import { newsHref, noticeSlugs } from '@/app/(view)/(pv)/news/helper';
 import { newslettersContent as text } from '../content';
 import { EmailUpdateForm } from './subcomponents';
 
@@ -22,38 +22,27 @@ const DownloadIcon = () => (
   </svg>
 );
 
-/** One notice: a card that opens it, or just reads it when it has no link. */
-const NoticeCard: React.FC<{ notice: HomeNoticeItem; index: number }> = ({ notice, index }) => {
-  const body = (
-    <>
-      <div className={`photo-tile ${TONES[index % TONES.length]} nlc-tile`}>
-        <div className="event-date-chip">{(notice.tag || text.defaultTag).toUpperCase()}</div>
-        <div className="tile-icon">
-          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
-            <path d="M6 3h8l4 4v14H6V3Z" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round" />
-            <path d="M14 3v4h4M9 12h6M9 16h6" stroke="currentColor" strokeWidth="1.6" />
-          </svg>
-        </div>
+/** One notice: a card that opens its own page, /news/<slug>. */
+const NoticeCard: React.FC<{ notice: HomeNoticeItem; slug: string; index: number }> = ({ notice, slug, index }) => (
+  <Link className="nlc-card" href={newsHref(slug)}>
+    <div className={`photo-tile ${TONES[index % TONES.length]} nlc-tile`}>
+      <div className="event-date-chip">{(notice.tag || text.defaultTag).toUpperCase()}</div>
+      <div className="tile-icon">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <path d="M6 3h8l4 4v14H6V3Z" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round" />
+          <path d="M14 3v4h4M9 12h6M9 16h6" stroke="currentColor" strokeWidth="1.6" />
+        </svg>
       </div>
-      <div className="nlc-body">
-        {notice.date && <span className="nlc-date">{notice.date}</span>}
-        <h4>{notice.title}</h4>
-        {notice.href && (
-          <span className="nlc-act">
-            {text.readNotice} <Arrow />
-          </span>
-        )}
-      </div>
-    </>
-  );
-  return notice.href ? (
-    <SiteLink className="nlc-card" href={notice.href} target="_blank" rel="noopener noreferrer">
-      {body}
-    </SiteLink>
-  ) : (
-    <div className="nlc-card">{body}</div>
-  );
-};
+    </div>
+    <div className="nlc-body">
+      {notice.date && <span className="nlc-date">{notice.date}</span>}
+      <h4>{notice.title}</h4>
+      <span className="nlc-act">
+        {text.readNotice} <Arrow />
+      </span>
+    </div>
+  </Link>
+);
 
 /** `notices` are the home page's (Home page → News & Notices), newest first. */
 export const NewslettersView: React.FC<{ content: NewslettersContent; notices: HomeNoticeItem[] }> = ({ content, notices }) => (
@@ -80,8 +69,8 @@ export const NewslettersView: React.FC<{ content: NewslettersContent; notices: H
         <div className="wrap">
           <SectionHead eyebrow={content.noticesEyebrow} title={content.noticesTitle} intro={content.noticesIntro} />
           <div className="nlc-grid">
-            {notices.map((notice, i) => (
-              <NoticeCard key={`${i}-${notice.title}`} notice={notice} index={i} />
+            {noticeSlugs(notices).map((slug, i) => (
+              <NoticeCard key={slug} notice={notices[i]} slug={slug} index={i} />
             ))}
           </div>
         </div>

@@ -21,6 +21,7 @@ export const OfficeBearerCard: React.FC<OfficeBearerCardProps> = ({ bearer }) =>
       {bearer.photo ? (
         <div className="profile-photo">
           <img
+            suppressHydrationWarning
             src={bearer.photo}
             alt={bearer.photoAlt || `${bearer.name}, ${bearer.role}`}
             loading="lazy"

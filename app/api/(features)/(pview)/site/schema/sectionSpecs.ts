@@ -137,14 +137,45 @@ export interface HomeEventsContent {
   items: HomeEventItem[];
 }
 
+/** The icon beside a key detail on a notice's own page. */
+export type NoticeFactIcon = "cal" | "pin" | "vote" | "doc" | "people";
+
+/** A key detail on a notice's own page: "When", "Sunday, 30 November 2025 · 10:30 am". */
+export interface HomeNoticeFact {
+  icon: NoticeFactIcon;
+  label: string;
+  text: string;
+}
+
 export interface HomeNoticeItem {
   image: string;
   imageAlt: string;
   date: string;
   title: string;
-  href: string;
   /** "NOTICE", "MINUTES", "LETTER": the tag on its card on the Newsletters page. */
   tag: string;
+  // The notice's own page, /news/<slug>. Notices saved before it existed have none of these,
+  // so the page reads every one of them as possibly missing (see the news helper).
+  /** The end of its address; empty: made from the title. */
+  slug?: string;
+  /** "Election, Accounts": more tags beside `tag` on its page. */
+  extraTags?: string;
+  /** A line about it, for search engines and link previews. */
+  summary?: string;
+  /** Paragraphs, separated by blank lines; **bold** and *italics* allowed. */
+  body?: string;
+  facts?: HomeNoticeFact[];
+  /** The agenda, one item per line. */
+  agenda?: string;
+  /** "Santosh Kalyani (Batch of 1990), President, OCA 2023–25". */
+  sign?: string;
+  /** The button at the end of its page, to `href`. */
+  actionLabel?: string;
+  href: string;
+  /** The notice as a PDF, shown on its page with a Download button. */
+  pdf?: string;
+  pdfTitle?: string;
+  pdfLabel?: string;
 }
 
 export interface HomeNoticesContent {
@@ -503,8 +534,56 @@ export const SECTION_SPECS: SectionSpec[] = [
           ...image(),
           { key: "date", label: "Date", type: "text", max: 60, placeholder: "November 19, 2025" },
           { key: "title", label: "Title", type: "text", max: 150, required: true },
-          { key: "href", label: "“Read more” link", type: "link", hint: `${LINK_HINT} Leave empty to hide the link.` },
           { key: "tag", label: "Kind of notice", type: "text", max: 20, placeholder: "NOTICE", hint: "The tag on its card on the Newsletters page, e.g. NOTICE, MINUTES or LETTER. Left empty: NOTICE." },
+          // Its own page, which "Read more" on its card opens.
+          {
+            key: "slug",
+            label: "Page address",
+            type: "text",
+            max: 80,
+            heading: "Its page",
+            placeholder: "agm-mom-2023",
+            hint: "The end of the notice's address: /news/agm-mom-2023. Lowercase letters, numbers and dashes. Left empty: made from the title. Changing it breaks links already shared.",
+          },
+          { key: "extraTags", label: "More tags", type: "text", max: 80, placeholder: "Election, Accounts", hint: "Shown beside the kind of notice at the top of its page. Separate them with commas." },
+          { key: "summary", label: "Summary", type: "textarea", max: 300, hint: "A line about the notice, for search engines and link previews." },
+          { key: "body", label: "Text", type: "textarea", max: 5000, hint: "Leave a blank line between paragraphs. Wrap words in **double stars** for bold, or *single stars* for italics." },
+          { key: "agenda", label: "Agenda", type: "textarea", max: 2000, hint: "One item per line, numbered on the page. Leave empty to hide it." },
+          { key: "sign", label: "Signed by", type: "text", max: 150, placeholder: "Santosh Kalyani (Batch of 1990), President, OCA 2023–25", hint: "Leave empty to hide it." },
+          { key: "actionLabel", label: "Button text", type: "text", max: 40, placeholder: "Become a member", hint: "A button at the end of the page, to the link below. Left empty: “Read more”." },
+          { key: "href", label: "Button link", type: "link", hint: `${LINK_HINT} Leave empty to hide the button.` },
+          { key: "pdf", label: "The notice (PDF)", type: "file", fileKind: "document", heading: "Attached document", hint: "Upload a PDF (up to 25 MB), or paste the address of one already online. Shown on its page with a Download button." },
+          { key: "pdfTitle", label: "Document title", type: "text", max: 100, placeholder: "Minutes of the AGM, 23 April 2023" },
+          { key: "pdfLabel", label: "Download button text", type: "text", max: 40, placeholder: "Download the minutes", hint: "Left empty: “Download the notice”." },
+        ],
+        lists: [
+          {
+            key: "facts",
+            label: "Key details",
+            itemLabel: "Detail",
+            titleField: "label",
+            hint: "Shown under the text: when, where, the election, the quorum.",
+            min: 0,
+            max: 6,
+            inBlock: "Its page",
+            fields: [
+              {
+                key: "icon",
+                label: "Icon",
+                type: "select",
+                required: true,
+                options: [
+                  { value: "cal", label: "Calendar" },
+                  { value: "pin", label: "Place" },
+                  { value: "vote", label: "Election" },
+                  { value: "doc", label: "Document" },
+                  { value: "people", label: "People" },
+                ],
+              },
+              { key: "label", label: "Label", type: "text", max: 40, required: true, placeholder: "When" },
+              { key: "text", label: "Detail", type: "text", max: 300, required: true, placeholder: "Sunday, 30 November 2025 · 10:30 am" },
+            ],
+          },
         ],
       },
     ],

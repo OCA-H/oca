@@ -17306,3 +17306,206 @@ a.mag-card.feat:hover .mag-open {
 .nl-form-msg.is-bad {
   color: #b42318;
 }
+/* ---------- News & Notices: one notice on its own page (/news/<slug>) ---------- */
+.nw-hero .wrap {
+  grid-template-columns: 1fr;
+  gap: 0;
+  padding-top: 56px;
+  padding-bottom: 52px;
+}
+
+.nw-hero h1 {
+  font-size: clamp(28px, 3.2vw, 40px);
+  max-width: 26ch;
+}
+
+.nw-meta {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px 12px;
+  margin-top: 20px;
+}
+
+.nw-posted {
+  font-size: 14px;
+  font-weight: 600;
+  color: #CDE0D2;
+}
+
+.nw-tag {
+  display: inline-flex;
+  padding: 3px 11px;
+  border-radius: 100px;
+  font-size: 12px;
+  font-weight: 700;
+  background: rgba(27, 158, 75, .1);
+  color: var(--teal-dark);
+}
+
+.nw-tag.gold {
+  background: rgba(201, 162, 39, .16);
+  color: var(--gold-dark);
+}
+
+.nw-hero .nw-tag {
+  background: rgba(255, 255, 255, .14);
+  color: #E2EEE5;
+}
+
+.nw-hero .nw-tag.gold {
+  background: rgba(201, 162, 39, .24);
+  color: #F4D976;
+}
+
+.nw-article {
+  max-width: 780px;
+  margin: 0;
+}
+
+.nw-article > p {
+  font-size: 17px;
+  line-height: 1.78;
+  color: var(--text);
+  margin: 0 0 16px;
+  max-width: 68ch;
+}
+
+.nw-facts {
+  display: grid;
+  gap: 16px;
+  margin: 26px 0 4px;
+  padding: 24px 0 6px;
+  border-top: 1px solid var(--border);
+}
+
+.nw-fact {
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+}
+
+.nw-ico {
+  flex: 0 0 38px;
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  background: var(--tint-teal);
+  color: var(--brand-mid);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.nw-ico svg {
+  width: 20px;
+  height: 20px;
+}
+
+.nw-fact b {
+  display: block;
+  font-size: 12px;
+  letter-spacing: .07em;
+  text-transform: uppercase;
+  color: var(--text-soft);
+  margin-bottom: 2px;
+  font-weight: 700;
+}
+
+.nw-fact span {
+  font-size: 16px;
+  line-height: 1.55;
+  color: var(--text);
+}
+
+.nw-agenda {
+  margin-top: 22px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-m);
+  padding: 20px 24px;
+}
+
+.nw-agenda h2 {
+  font-size: 12px;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--text-soft);
+  margin: 0 0 10px;
+  font-family: var(--sans);
+}
+
+.nw-agenda ol {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  counter-reset: ag;
+}
+
+.nw-agenda li {
+  counter-increment: ag;
+  position: relative;
+  padding: 6px 0 6px 38px;
+  font-size: 16px;
+  line-height: 1.55;
+  color: var(--text);
+}
+
+.nw-agenda li::before {
+  content: counter(ag);
+  position: absolute;
+  left: 0;
+  top: 6px;
+  width: 25px;
+  height: 25px;
+  border-radius: 50%;
+  background: #fff;
+  border: 1.5px solid var(--border-strong);
+  color: var(--brand-mid);
+  font-size: 12.5px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.nw-article > p.nw-sign {
+  margin-top: 18px;
+  font-size: 15px;
+  font-style: italic;
+  color: var(--text-soft);
+}
+
+.nw-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 14px 22px;
+  margin-top: 28px;
+}
+
+.nw-doc {
+  padding-top: 44px;
+  padding-bottom: 56px;
+}
+
+.nw-doc-head {
+  max-width: 860px;
+  margin: 0 auto 18px;
+}
+
+.nw-doc-head h2 {
+  font-size: 22px;
+  margin-top: 6px;
+}
+
+@media (max-width: 760px) {
+  .nw-hero .wrap {
+    padding-top: 36px;
+    padding-bottom: 34px;
+  }
+
+  .nw-article > p {
+    font-size: 16px;
+  }
+}

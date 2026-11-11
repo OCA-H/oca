@@ -16,7 +16,7 @@ function CauseCard({ cause, index, funds }: { cause: HomeCause; index: number; f
   return (
     <div className={`cause-card${featured ? '' : ' muted'}`}>
       <div className={`photo-tile ${tone}`}>
-        <img className="tile-img" src={cause.image} alt={cause.imageAlt} loading="lazy" decoding="async" />
+        <img suppressHydrationWarning className="tile-img" src={cause.image} alt={cause.imageAlt} loading="lazy" decoding="async" />
         {cause.badge && (
           <div className="tile-caption">
             {featured ? (

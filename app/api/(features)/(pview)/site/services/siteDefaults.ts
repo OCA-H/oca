@@ -8,6 +8,7 @@ import {
   type EventLunchContent,
   type EventSportsContent,
   type HomeContent,
+  type HomeNoticeItem,
   type SiteSectionKey,
 } from "../schema/sectionSpecs";
 import { PAGE_SECTION_DEFAULTS } from "./pageDefaults";
@@ -16,6 +17,7 @@ import { PAGE_SECTION_DEFAULTS } from "./pageDefaults";
 
 const U = "https://legacy.oldcolumban.net/wp-content/uploads/";
 const NOTICE_IMAGE = U + "2016/03/OCA_Newsletter-Volume11.jpg";
+const AGM_VENUE = "Middle School Auditorium, St. Columba’s School (SCS), Ashok Place, New Delhi 110 001";
 
 export const HOME_DEFAULTS: HomeContent = {
   ticker: {
@@ -73,14 +75,120 @@ export const HOME_DEFAULTS: HomeContent = {
     title: "News & Notice(s)",
     intro: "The latest word from the OCA Secretariat — AGM notices, elections and community updates.",
     updatedLabel: "Updated Nov 19, 2025",
-    items: [
-      { date: "November 19, 2025", title: "OCA – AGM 2025 Reminder & Balance Sheet", tag: "NOTICE", href: "https://www.oldcolumban.net/oca-agm-2025-reminder-balance-sheet/" },
-      { date: "October 31, 2025", title: "OCA – AGM and Election Notice 2025", tag: "NOTICE", href: "https://www.oldcolumban.net/oca-agm-and-election-notice-2025/" },
-      { date: "October 14, 2024", title: "OCA – AGM MOM 23rd April 2023", tag: "MINUTES", href: "https://www.oldcolumban.net/oca-agm-mom-23rd-april-2023/" },
-      { date: "September 25, 2024", title: "OCA AGM Notice to be held on 17th October, 2024", tag: "NOTICE", href: "https://www.oldcolumban.net/oca-agm-notice-to-be-held-on-17th-october-2024/" },
-      { date: "March 10, 2023", title: "OCA – AGM and Election Notice 2023", tag: "NOTICE", href: "https://www.oldcolumban.net/agm-and-election-notice-2023/" },
-      { date: "October 14, 2022", title: "Become members of the Old Columban Association – Principal Letter", tag: "LETTER", href: "https://www.oldcolumban.net/become-members-of-the-old-columban-association-principal-letter/" },
-    ].map((notice) => ({ ...notice, image: NOTICE_IMAGE, imageAlt: "OCA newsletter and notice" })),
+    items: ([
+      {
+        date: "November 19, 2025",
+        title: "OCA – AGM 2025 Reminder & Balance Sheet",
+        tag: "NOTICE",
+        slug: "agm-2025-reminder",
+        extraTags: "Reminder, Accounts",
+        summary: "A reminder of the AGM on 30 November 2025, with the audited balance sheet for 2024–25.",
+        body:
+          "A reminder about the Annual General Meeting, sent together with the audited balance sheet for the 2024–25 financial year so members can read the accounts before they attend.\n\n" +
+          "The Honorary Treasurer will be at the meeting to answer questions about the accounts. The notice also links to the minutes of the previous AGM.",
+        facts: [
+          { icon: "cal", label: "When", text: "Sunday, 30 November 2025 · 10:30 am" },
+          { icon: "pin", label: "Where", text: AGM_VENUE },
+        ],
+        pdfTitle: "AGM 2025 reminder letter",
+        pdfLabel: "Download the letter",
+      },
+      {
+        date: "October 31, 2025",
+        title: "OCA – AGM and Election Notice 2025",
+        tag: "NOTICE",
+        slug: "agm-2025-notice",
+        extraTags: "Election",
+        summary: "Notice of the AGM on 30 November 2025, with the nomination form for the 2025–27 Executive Committee election.",
+        body:
+          "The formal notice calling the Annual General Meeting of the Old Columbans Association.\n\n" +
+          "It comes with a nomination form for the elections to the Executive Committee of the Association for 2025–27.",
+        facts: [
+          { icon: "cal", label: "When", text: "Sunday, 30 November 2025 · 10:30 am" },
+          { icon: "pin", label: "Where", text: AGM_VENUE },
+          { icon: "vote", label: "Election", text: "Executive Committee of the OCA, 2025–27" },
+        ],
+        pdfTitle: "Notice for the AGM and elections 2025",
+        pdfLabel: "Download the notice",
+      },
+      {
+        date: "October 14, 2024",
+        title: "OCA – AGM MOM 23rd April 2023",
+        tag: "MINUTES",
+        slug: "agm-mom-2023",
+        summary: "The minutes of the Annual General Meeting held on 23 April 2023.",
+        body:
+          "The minutes of the Annual General Meeting held on 23 April 2023, published for members to read.\n\n" +
+          "They were the first item on the agenda of the next AGM, called for 17 October 2024.",
+        facts: [
+          { icon: "cal", label: "Meeting held", text: "23 April 2023" },
+          { icon: "doc", label: "On the agenda of", text: "The AGM called for 17 October 2024" },
+        ],
+        pdfTitle: "Minutes of the AGM, 23 April 2023",
+        pdfLabel: "Download the minutes",
+      },
+      {
+        date: "September 25, 2024",
+        title: "OCA AGM Notice to be held on 17th October, 2024",
+        tag: "NOTICE",
+        slug: "agm-2024-notice",
+        summary: "Notice of the AGM on 17 October 2024 at 10:30 am, with the agenda.",
+        body: "The notice, dated 24 September 2024, for the Annual General Meeting of the Association. Refreshments follow the meeting in the Middle School Canteen.",
+        facts: [
+          { icon: "cal", label: "When", text: "Thursday, 17 October 2024 · 10:30 am" },
+          { icon: "pin", label: "Where", text: AGM_VENUE },
+          {
+            icon: "people",
+            label: "Quorum",
+            text: "50 members present in person. If there are fewer, the meeting is adjourned to 11:30 am, and those present then form the quorum",
+          },
+        ],
+        agenda: [
+          "Read and pass the minutes of the last AGM, held on 23 April 2023.",
+          "Presentation of the accounts for the financial year 2023–24.",
+          "Appointment of the auditor(s) and fixing of their remuneration for 2024–25.",
+          "Any other matter, with the permission of the chair.",
+        ].join("\n"),
+        sign: "Santosh Kalyani (Batch of 1990), President, OCA 2023–25",
+        pdfTitle: "AGM notice, 17 October 2024",
+        pdfLabel: "Download the notice",
+      },
+      {
+        date: "March 10, 2023",
+        title: "OCA – AGM and Election Notice 2023",
+        tag: "NOTICE",
+        slug: "agm-2023-notice",
+        extraTags: "Election",
+        summary: "The notice for the 2023 Annual General Meeting and its election.",
+        body: "The notice for the 2023 Annual General Meeting and its election.",
+        pdfTitle: "AGM and election notice 2023",
+        pdfLabel: "Download the notice",
+      },
+      {
+        date: "October 14, 2022",
+        title: "Become members of the Old Columban Association – Principal Letter",
+        tag: "LETTER",
+        slug: "principal-letter-2022",
+        extraTags: "Membership",
+        summary: "A letter from the Principal inviting Old Columbans to become members.",
+        body: "A letter from the Principal of St. Columba’s School inviting Old Columbans to join the Association as members.",
+        actionLabel: "Become a member",
+        href: "/membership",
+        pdfTitle: "The Principal’s letter",
+        pdfLabel: "Download the letter",
+      },
+    ] satisfies Array<Omit<HomeNoticeItem, "image" | "imageAlt" | "href"> & { href?: string }>).map((notice): HomeNoticeItem => ({
+      href: "",
+      extraTags: "",
+      facts: [],
+      agenda: "",
+      sign: "",
+      actionLabel: "",
+      pdf: "",
+      ...notice,
+      image: NOTICE_IMAGE,
+      imageAlt: "OCA newsletter and notice",
+    })),
   },
 
   spotlight: {

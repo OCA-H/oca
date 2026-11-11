@@ -502,7 +502,7 @@ export const NEWSLETTERS_DEFAULTS: NewslettersContent = {
   imageCaption: "Written to every Columban",
   noticesEyebrow: "The archive",
   noticesTitle: "Latest notices",
-  noticesIntro: "Newest first. These open on the Association’s document archive.",
+  noticesIntro: "Newest first. Each one opens on its own page.",
   archiveEyebrow: "Newsletter archive",
   archiveTitle: "Every issue on file",
   archiveIntro: "Scanned and kept exactly as printed.",

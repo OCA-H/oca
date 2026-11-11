@@ -58,6 +58,8 @@ export const PhotoTile: React.FC<{
   return (
     <div className={`photo-tile ${tone}${className ? ` ${className}` : ''}`}>
       <img
+        // The head script swaps a broken image for the placeholder before React loads (see placeholders).
+        suppressHydrationWarning
         className="tile-img"
         src={src || fallback}
         alt={alt}

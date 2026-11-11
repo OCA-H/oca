@@ -1,9 +1,12 @@
 import React from 'react';
 import type { HomeNoticesContent } from '@/app/api/(features)/(pview)/site/schema/sectionSpecs';
 import { SiteLink, toneAt } from './SiteLink';
+import { newsHref, noticeSlugs } from '@/app/(view)/(pv)/news/helper';
 
 /** The OCA Notice Board: News & Notices. */
 export const OfferingsSection: React.FC<{ content: HomeNoticesContent }> = ({ content }) => {
+  // Each notice's "Read more" opens its own page, /news/<slug>.
+  const slugs = noticeSlugs(content.items);
   return (
     <section className="section tint-teal" id="notices" style={{ paddingTop: "80px" }}>
       <div className="wrap">
@@ -31,12 +34,19 @@ export const OfferingsSection: React.FC<{ content: HomeNoticesContent }> = ({ co
                 {...(i >= content.items.length && { 'data-clone': '', 'aria-hidden': true })}
               >
                 <div className={`notice-card-media photo-tile ${toneAt(i % content.items.length)}`}>
-                  <img className="tile-img" src={notice.image} alt={notice.imageAlt} loading="lazy" decoding="async" />
+                  <img suppressHydrationWarning className="tile-img" src={notice.image} alt={notice.imageAlt} loading="lazy" decoding="async" />
                 </div>
                 <div className="notice-card-body">
                   {notice.date && <div className="notice-card-date">{notice.date}</div>}
                   <h4 className="notice-card-title">{notice.title}</h4>
-                  {notice.href && <SiteLink className="qa-link" href={notice.href} tabIndex={i >= content.items.length ? -1 : undefined}>Read more →</SiteLink>}
+                  <SiteLink
+                    className="qa-link"
+                    href={newsHref(slugs[i % content.items.length])}
+                    aria-label={`Read more: ${notice.title}`}
+                    tabIndex={i >= content.items.length ? -1 : undefined}
+                  >
+                    Read more →
+                  </SiteLink>
                 </div>
               </article>
             ))}

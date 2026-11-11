@@ -7,7 +7,7 @@ import { storage } from "@/app/api/core/storage";
 import { assertUploadSize, detectUploadKind, wrongUploadKind, type FileKind, type UploadRules } from "@/app/api/core/fileUpload";
 import { SiteContentRepository } from "../repository/siteContentRepository";
 import type { PageContentMap, PageSectionKey } from "../schema/pageSections";
-import { SECTION_SPECS, SITE_SECTION_KEYS, sectionSpec, type CommitteeContent, type HomeGalleryContent, type HomeNoticesContent, type HomeSocialContent, type ContactDetailsContent, type EmailSettingsContent, type EventDinnerContent, type EventGolfContent, type MembershipFeeContent, type EventLunchContent, type EventSportsContent, type HomeContent, type SectionSpec, type SiteSectionKey } from "../schema/sectionSpecs";
+import { SECTION_SPECS, SITE_SECTION_KEYS, sectionSpec, type CommitteeContent, type HomeGalleryContent, type HomeNoticeItem, type HomeNoticesContent, type HomeSocialContent, type ContactDetailsContent, type EmailSettingsContent, type EventDinnerContent, type EventGolfContent, type MembershipFeeContent, type EventLunchContent, type EventSportsContent, type HomeContent, type SectionSpec, type SiteSectionKey } from "../schema/sectionSpecs";
 import { MEMBERSHIP_FEE_DEFAULTS, SECTION_DEFAULTS } from "./siteDefaults";
 import { splitEmails, validateSection } from "./sectionValidator";
 
@@ -97,9 +97,36 @@ function upgradeCommittee(data: Record<string, unknown>, saved: Record<string, u
   return { ...rest, terms: [{ ...current, officeBearers }, ...previous] };
 }
 
+/**
+ * Notices saved before each had its own page (/news/<slug>) have none of its fields (they have no
+ * `slug` key at all). One with the title of a default notice gets that notice's page: its slug,
+ * text, key details and so on, with what was saved kept on top. The rest stay as they are, and
+ * the page makes their slug from the title. The next save stores the fields, so this stops.
+ */
+const NOTICE_PAGE_FIELDS = [
+  "slug", "extraTags", "summary", "body", "facts", "agenda", "sign", "actionLabel", "href", "pdf", "pdfTitle", "pdfLabel",
+] as const satisfies readonly (keyof HomeNoticeItem)[];
+
+function upgradeNotices(data: Record<string, unknown>): Record<string, unknown> {
+  if (!Array.isArray(data.items)) return data;
+  const title = (value: unknown) => (typeof value === "string" ? value.trim().toLowerCase() : "");
+  const defaults = (SECTION_DEFAULTS[SITE_SECTION_KEYS.homeNotices] as HomeNoticesContent).items;
+  const items = data.items.map((item: Record<string, unknown>) => {
+    if (!item || typeof item !== "object" || "slug" in item) return item;
+    const known = defaults.find((notice) => title(notice.title) === title(item.title));
+    if (!known) return item;
+    // Only the page's fields come from the default; the card keeps what was saved.
+    const page = Object.fromEntries(NOTICE_PAGE_FIELDS.map((field) => [field, known[field]]));
+    const saved = Object.fromEntries(Object.entries(item).filter(([, value]) => value !== "" && value != null));
+    return { ...page, ...saved };
+  });
+  return { ...data, items };
+}
+
 /** Saved content over the defaults, so a field added to a spec later still has a value. */
 const withDefaults = (key: SiteSectionKey, saved: Record<string, unknown> | undefined) => {
   const data = { ...SECTION_DEFAULTS[key], ...saved };
+  if (key === SITE_SECTION_KEYS.homeNotices && saved) return upgradeNotices(data);
   if (key === SITE_SECTION_KEYS.homeHangout) return upgradeHangout(data);
   if (key === SITE_SECTION_KEYS.aboutCommittee) return upgradeCommittee(data, saved);
   return data;
