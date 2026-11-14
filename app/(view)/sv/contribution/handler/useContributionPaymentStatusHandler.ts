@@ -4,7 +4,7 @@ import { useCallback } from 'react';
 import { formatPaymentDate, formatPaymentMode, formatRupees } from '@/app/(view)/(pv)/membership/helper/membership.helper';
 import type { ContributionResult } from '../services/contribution.service';
 
-export type ContributionPaymentState = 'paid' | 'failed' | 'cancelled' | 'unknown';
+export type ContributionPaymentState = 'paid' | 'failed' | 'cancelled' | 'rejected' | 'unknown';
 
 export interface ContributionReceiptRow {
   label: string;
@@ -24,7 +24,7 @@ export function useContributionPaymentStatusHandler(result: ContributionResult |
     { label: 'CCAvenue reference', value: result?.trackingId ?? '' },
     { label: 'Payment method', value: formatPaymentMode(result?.paymentMode ?? null) ?? '' },
     { label: isPaid ? 'Paid on' : 'Attempted on', value: formatPaymentDate(result?.at ?? null) ?? '' },
-    { label: 'Reason', value: !isPaid && state !== 'cancelled' ? result?.message ?? '' : '' },
+    { label: 'Reason', value: !isPaid && state !== 'cancelled' && state !== 'rejected' ? result?.message ?? '' : '' },
   ].filter((row) => row.value);
 
   const lineLabel = result

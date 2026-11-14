@@ -2,7 +2,7 @@ import "server-only";
 import crypto from "node:crypto";
 import { HttpError, type FieldErrors } from "@/app/api/core/httpError";
 import { CcAvenue, type CcAvenueCheckout, type GatewayResult } from "@/app/api/core/ccavenue";
-import { isRecheckable, manualPayment, settle } from "@/app/api/core/paymentReconciliation";
+import { acceptsResult, emailFailed, isRecheckable, manualPayment, REJECTED, rejectionNote, settle } from "@/app/api/core/paymentReconciliation";
 import { Mailer } from "@/app/api/core/mailer";
 import { PASS_RECEIPT_ACCOUNT, renderReceipt } from "@/app/api/core/receiptCard";
 import type { SessionData } from "@/app/api/core/session";
@@ -251,6 +251,45 @@ export class EventPassBookingService {
   }
 
   /**
+   * Emails a paid booking's pass again, on an admin's request: when the member lost it, or the first
+   * one never arrived. Unlike the automatic send, a failure is thrown, so the admin sees why.
+   */
+  async resendPass(orderId: string, baseUrl: string): Promise<EventPassBooking> {
+    const booking = await this.bookings.findByOrderId(orderId.trim());
+    if (!booking) throw HttpError.notFound("We could not find this pass order.");
+    if (booking.status !== "paid") throw HttpError.conflict("Only a paid booking has a pass to email.");
+    // Not sent yet: claim it, so the payment check does not send it at the same moment.
+    const claimed = !booking.passEmailSentAt;
+    if (claimed && !(await this.bookings.claimPassEmail(booking.id))) {
+      throw HttpError.conflict("The pass is being emailed right now. Refresh the list in a minute.");
+    }
+    try {
+      await this.deliverPass(booking, baseUrl);
+    } catch (error) {
+      console.error(`Pass order ${booking.orderId}: resending the pass to ${booking.email} failed:`, error);
+      if (claimed) await this.bookings.releasePassEmail(booking.id).catch(() => {});
+      throw emailFailed(booking.email, error);
+    }
+    return (await this.bookings.findByOrderId(booking.orderId)) ?? booking;
+  }
+
+  /**
+   * Closes an unpaid booking on an admin's word (a duplicate, a test, a booking the Secretariat will
+   * not honour). The payment check then leaves it alone; a payment CCAvenue later reports still
+   * marks it paid, since the money was taken.
+   */
+  async reject(orderId: string, reason: string, rejectedBy: { id: number; name: string }): Promise<EventPassBooking> {
+    const booking = await this.bookings.findByOrderId(orderId.trim());
+    if (!booking) throw HttpError.notFound("We could not find this pass order.");
+    if (booking.status === "paid") throw HttpError.conflict("This booking is paid, so it cannot be rejected.");
+    if (booking.status === REJECTED) throw HttpError.conflict("This booking is already rejected.");
+    const updated = await this.bookings.markUnpaid(booking.id, { status: REJECTED, gatewayMessage: rejectionNote(reason, rejectedBy) });
+    if (!updated) throw HttpError.conflict("This booking was paid a moment ago, so it was not rejected.");
+    console.info(`Pass order ${booking.orderId} rejected by admin ${rejectedBy.id}.`);
+    return updated;
+  }
+
+  /**
    * Applies a payment result, from the redirect or the Order Status API. Safe to call more than once
    * for the same order, from both at the same moment: a paid booking is never changed again, and
    * stock is only taken, and the pass emailed, once.
@@ -262,6 +301,8 @@ export class EventPassBookingService {
       await this.sendPass(booking, baseUrl);
       return booking;
     }
+    if (!acceptsResult(booking, result)) return booking;
+    if (booking.status === REJECTED) console.error(`Pass order ${booking.orderId} was rejected, but CCAvenue reports a payment for it.`);
 
     let status = result.outcome;
     let message = result.message;
@@ -301,36 +342,41 @@ export class EventPassBookingService {
     if (booking.passEmailSentAt) return;
     if (!(await this.bookings.claimPassEmail(booking.id))) return;
     try {
-      const [pass, user] = await Promise.all([
-        this.passes.findById(booking.eventPassId),
-        this.users.findById(booking.userId),
-      ]);
-      const includesSpouse = pass?.includesSpouse ?? Boolean(booking.spouseName);
-      const batch = user?.batchYear;
-      const [card, receipt] = await Promise.all([
-        renderPassCard(passCardDesign({ eventName: booking.eventName, passId: booking.passId, includesSpouse }), {
-          memberName: booking.fullName,
-          spouseName: booking.spouseName,
-          memberId: booking.memberId,
-          batch,
-        }),
-        renderReceipt({
-          receiptNo: booking.orderId,
-          paidAt: booking.paidAt ?? booking.updatedAt,
-          receivedFrom: booking.fullName,
-          amount: booking.amount,
-          paymentMode: gatewayValue(booking.paymentMode),
-          paymentReference: gatewayValue(booking.trackingId),
-          onAccountOf: PASS_RECEIPT_ACCOUNT,
-        }),
-      ]);
-      const [ccEmails, contact] = await Promise.all([getRegistrationCcEmails(), getContactDetails()]);
-      const cc = ccEmails.filter((email) => email !== booking.email);
-      await Mailer.send(eventPassConfirmationEmail({ booking, card, receipt, includesSpouse, batch, cc, baseUrl, contact }));
+      await this.deliverPass(booking, baseUrl);
     } catch (error) {
       console.error(`Pass order ${booking.orderId}: pass email to ${booking.email} failed:`, error);
       await this.bookings.releasePassEmail(booking.id).catch(() => {});
     }
+  }
+
+  /** Renders the member's pass and receipt and emails them; throws if the email does not go. */
+  private async deliverPass(booking: EventPassBooking, baseUrl: string): Promise<void> {
+    const [pass, user] = await Promise.all([
+      this.passes.findById(booking.eventPassId),
+      this.users.findById(booking.userId),
+    ]);
+    const includesSpouse = pass?.includesSpouse ?? Boolean(booking.spouseName);
+    const batch = user?.batchYear;
+    const [card, receipt] = await Promise.all([
+      renderPassCard(passCardDesign({ eventName: booking.eventName, passId: booking.passId, includesSpouse }), {
+        memberName: booking.fullName,
+        spouseName: booking.spouseName,
+        memberId: booking.memberId,
+        batch,
+      }),
+      renderReceipt({
+        receiptNo: booking.orderId,
+        paidAt: booking.paidAt ?? booking.updatedAt,
+        receivedFrom: booking.fullName,
+        amount: booking.amount,
+        paymentMode: gatewayValue(booking.paymentMode),
+        paymentReference: gatewayValue(booking.trackingId),
+        onAccountOf: PASS_RECEIPT_ACCOUNT,
+      }),
+    ]);
+    const [ccEmails, contact] = await Promise.all([getRegistrationCcEmails(), getContactDetails()]);
+    const cc = ccEmails.filter((email) => email !== booking.email);
+    await Mailer.send(eventPassConfirmationEmail({ booking, card, receipt, includesSpouse, batch, cc, baseUrl, contact }));
   }
 
   /** The event an order is for, or null when there is no such order. */

@@ -32,4 +32,9 @@ export class HttpError extends Error {
   static conflict(message: string) {
     return new HttpError(409, message);
   }
+
+  /** A service we depend on (the mail server, say) refused or could not be reached. */
+  static badGateway(message: string) {
+    return new HttpError(502, message);
+  }
 }

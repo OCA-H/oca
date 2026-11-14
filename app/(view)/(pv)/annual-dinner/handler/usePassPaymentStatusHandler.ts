@@ -57,7 +57,7 @@ export function usePassPaymentStatusHandler() {
     { label: 'Member', value: order ? `${order.fullName} (${order.memberId})` : '' },
     { label: 'Email', value: order?.email ?? '' },
     { label: 'Spouse', value: order?.spouseName ?? '' },
-    { label: 'Reason', value: !isPaid && state !== 'cancelled' ? order?.message ?? '' : '' },
+    { label: 'Reason', value: !isPaid && state !== 'cancelled' && state !== 'rejected' ? order?.message ?? '' : '' },
   ].filter((row) => row.value);
 
   const printReceipt = useCallback(() => window.print(), []);

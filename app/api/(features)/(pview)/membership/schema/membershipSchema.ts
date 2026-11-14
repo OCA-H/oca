@@ -54,4 +54,4 @@ export const membershipApplications = pgTable(
 export type MembershipApplication = typeof membershipApplications.$inferSelect;
 export type NewMembershipApplication = typeof membershipApplications.$inferInsert;
 
-export type MembershipPaymentStatus = "pending" | "paid" | "failed" | "cancelled";
+export type MembershipPaymentStatus = "pending" | "paid" | "failed" | "cancelled" | "rejected";

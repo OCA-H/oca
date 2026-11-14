@@ -3,7 +3,7 @@ import crypto from "node:crypto";
 import { revalidateTag } from "next/cache";
 import { HttpError, type FieldErrors } from "@/app/api/core/httpError";
 import { CcAvenue, type CcAvenueCheckout, type GatewayResult } from "@/app/api/core/ccavenue";
-import { manualPayment, settle } from "@/app/api/core/paymentReconciliation";
+import { acceptsResult, emailFailed, manualPayment, REJECTED, rejectionNote, settle } from "@/app/api/core/paymentReconciliation";
 import { FILE_KINDS, readUploadedFile, type UploadRules, type UploadedFile } from "@/app/api/core/fileUpload";
 import { Mailer } from "@/app/api/core/mailer";
 import { renderReceipt } from "@/app/api/core/receiptCard";
@@ -372,6 +372,44 @@ export class ContributionService {
   }
 
   /**
+   * Emails a paid contribution's thank-you and receipt again, on an admin's request. Unlike the
+   * automatic send, a failure is thrown, so the admin sees why.
+   */
+  async resendThankYou(orderId: string, baseUrl: string): Promise<ContributionWithFund> {
+    const contribution = await this.repository.findByOrderId(orderId.trim());
+    if (!contribution) throw HttpError.notFound("We could not find this contribution.");
+    if (contribution.status !== "paid") throw HttpError.conflict("Only a paid contribution has a thank-you to send.");
+    // Not sent yet: claim it, so the payment check does not send it at the same moment.
+    const claimed = !contribution.thankYouEmailSentAt;
+    if (claimed && !(await this.repository.claimThankYouEmail(contribution.id))) {
+      throw HttpError.conflict("The thank-you is being sent right now. Refresh the list in a minute.");
+    }
+    try {
+      await this.deliverThankYou(contribution, baseUrl);
+    } catch (error) {
+      console.error(`Contribution ${contribution.orderId}: resending the thank-you to ${contribution.email} failed:`, error);
+      if (claimed) await this.repository.releaseThankYouEmail(contribution.id).catch(() => {});
+      throw emailFailed(contribution.email, error);
+    }
+    return (await this.repository.findByOrderId(contribution.orderId)) ?? contribution;
+  }
+
+  /**
+   * Closes an unpaid contribution on an admin's word (a duplicate or a test). The payment check
+   * then leaves it alone; a payment CCAvenue later reports still marks it paid, since the money was taken.
+   */
+  async reject(orderId: string, reason: string, rejectedBy: { id: number; name: string }): Promise<ContributionWithFund> {
+    const contribution = await this.repository.findByOrderId(orderId.trim());
+    if (!contribution) throw HttpError.notFound("We could not find this contribution.");
+    if (contribution.status === "paid") throw HttpError.conflict("This contribution is paid, so it cannot be rejected.");
+    if (contribution.status === REJECTED) throw HttpError.conflict("This contribution is already rejected.");
+    const changed = await this.repository.updateUnlessPaid(contribution.id, { status: REJECTED, gatewayMessage: rejectionNote(reason, rejectedBy) });
+    if (!changed) throw HttpError.conflict("This contribution was paid a moment ago, so it was not rejected.");
+    console.info(`Contribution ${contribution.orderId} rejected by admin ${rejectedBy.id}.`);
+    return (await this.repository.findByOrderId(contribution.orderId)) ?? contribution;
+  }
+
+  /**
    * Applies a payment result, from the redirect or the Order Status API. Safe to call more than once
    * for the same order, from both at the same moment: a paid contribution is never changed again,
    * and the thank-you email goes out once.
@@ -383,6 +421,8 @@ export class ContributionService {
       await this.sendThankYou(contribution, baseUrl);
       return contribution;
     }
+    if (!acceptsResult(contribution, result)) return contribution;
+    if (contribution.status === REJECTED) console.error(`Contribution ${contribution.orderId} was rejected, but CCAvenue reports a payment for it.`);
 
     let status = result.outcome;
     let message = result.message;
@@ -448,24 +488,29 @@ export class ContributionService {
     if (contribution.thankYouEmailSentAt) return;
     if (!(await this.repository.claimThankYouEmail(contribution.id))) return;
     try {
-      const [ccEmails, contact, receipt] = await Promise.all([
-        getRegistrationCcEmails(),
-        getContactDetails(),
-        renderReceipt({
-          receiptNo: contribution.orderId,
-          paidAt: contribution.paidAt ?? contribution.updatedAt,
-          receivedFrom: contribution.donorName,
-          amount: contribution.amount,
-          paymentMode: gatewayValue(contribution.paymentMode),
-          paymentReference: gatewayValue(contribution.trackingId),
-          onAccountOf: fundLine(contribution),
-        }),
-      ]);
-      const cc = ccEmails.filter((email) => email !== contribution.email);
-      await Mailer.send(contributionThankYouEmail(contribution, receipt, baseUrl, cc, contact));
+      await this.deliverThankYou(contribution, baseUrl);
     } catch (error) {
       console.error(`Contribution ${contribution.orderId}: thank-you email to ${contribution.email} failed:`, error);
       await this.repository.releaseThankYouEmail(contribution.id).catch(() => {});
     }
+  }
+
+  /** Renders the receipt and emails the thank-you; throws if the email does not go. */
+  private async deliverThankYou(contribution: ContributionWithFund, baseUrl: string): Promise<void> {
+    const [ccEmails, contact, receipt] = await Promise.all([
+      getRegistrationCcEmails(),
+      getContactDetails(),
+      renderReceipt({
+        receiptNo: contribution.orderId,
+        paidAt: contribution.paidAt ?? contribution.updatedAt,
+        receivedFrom: contribution.donorName,
+        amount: contribution.amount,
+        paymentMode: gatewayValue(contribution.paymentMode),
+        paymentReference: gatewayValue(contribution.trackingId),
+        onAccountOf: fundLine(contribution),
+      }),
+    ]);
+    const cc = ccEmails.filter((email) => email !== contribution.email);
+    await Mailer.send(contributionThankYouEmail(contribution, receipt, baseUrl, cc, contact));
   }
 }

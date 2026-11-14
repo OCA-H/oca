@@ -58,6 +58,20 @@ export const CONTRIBUTION_PAYMENT_STATUS_CONTENT = {
       primary: { label: 'Contribute again', href: ROUTES.DONATION_GIVE_FORM },
       secondary: { label: 'Back to home', href: ROUTES.HOME },
     },
+    rejected: {
+      tone: 'neutral',
+      badge: 'Order closed',
+      title: 'This order was closed by the Secretariat',
+      lead: 'The OCA Secretariat has closed this order, so no contribution has been recorded. If money has left your account for it, write to us with the order reference below and we will sort it out.',
+      receiptStatus: 'Closed',
+      nextTitle: 'What you can do',
+      nextSteps: [
+        { title: 'Write to the Secretariat', desc: 'Quote the order reference below and we will explain why it was closed, or set it right.' },
+        { title: 'Money debited?', desc: 'If you paid for this order, tell us: a payment that reached the Association is never lost.' },
+      ],
+      primary: { label: 'Back to contributions', href: ROUTES.DONATION },
+      secondary: { label: 'Back to home', href: ROUTES.HOME },
+    },
     unknown: {
       tone: 'danger',
       badge: 'Status unavailable',

@@ -57,7 +57,7 @@ export function useMembershipPaymentStatusHandler() {
     { label: 'Member', value: order?.fullName ?? '' },
     { label: 'Email', value: order?.email ?? '' },
     { label: 'Membership', value: order ? `${order.membershipType} · one-time` : '' },
-    { label: 'Reason', value: !isPaid && state !== 'cancelled' ? order?.message ?? '' : '' },
+    { label: 'Reason', value: !isPaid && state !== 'cancelled' && state !== 'rejected' ? order?.message ?? '' : '' },
   ].filter((row) => row.value);
 
   const printReceipt = useCallback(() => window.print(), []);

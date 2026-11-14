@@ -8,6 +8,7 @@ export type RecordPanel = "passes" | "bookings" | "golf-passes" | "golf-bookings
 export type AdminPanel = "dashboard" | SiteSectionKey | RecordPanel;
 
 export type AdminIconName =
+  | "ban"
   | "dashboard"
   | "calendar"
   | "megaphone"
@@ -392,8 +393,11 @@ export const adminContent = {
       { value: "pending", label: "Pending" },
       { value: "failed", label: "Failed" },
       { value: "cancelled", label: "Cancelled" },
+      { value: "rejected", label: "Rejected" },
     ],
     confirm: "Confirm payment",
+    resend: "Resend email",
+    reject: "Reject",
     emailSent: "Email sent",
     emailPending: "Email not sent yet: retried automatically",
     reference: (ref: string) => `Ref ${ref}`,
@@ -405,6 +409,23 @@ export const adminContent = {
       referenceHint: "The \"CCAvenue Ref. #\" shown beside this order in the dashboard, e.g. 114955902641.",
       confirm: "Confirm and send email",
       busy: "Confirming…",
+    },
+    /** `what` is what the email carries: "their pass", "the welcome email", "the thank-you and receipt". */
+    resendDialog: {
+      title: "Send the email again?",
+      body: (name: string, what: string, email: string) =>
+        `${name} will be sent ${what} again at ${email}, with the addresses under Email settings copied as before.`,
+      confirm: "Send email",
+      busy: "Sending…",
+    },
+    rejectDialog: {
+      title: "Reject this order?",
+      body: (name: string, amount: string, orderId: string) =>
+        `Order ${orderId} for ${amount} from ${name} will be marked rejected, and the payment check will stop following it up. Nothing is emailed to them. If CCAvenue later reports that it was paid, it is marked paid again.`,
+      reasonLabel: "Reason (optional)",
+      reasonHint: "For the record, shown in this list: a duplicate, a test order, not an Old Columban…",
+      confirm: "Reject order",
+      busy: "Rejecting…",
     },
   },
 

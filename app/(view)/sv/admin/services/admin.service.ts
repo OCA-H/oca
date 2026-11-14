@@ -85,7 +85,7 @@ export interface EventPassChanges {
   displayOrder: number;
 }
 
-export type BookingStatus = "pending" | "paid" | "failed" | "cancelled";
+export type BookingStatus = "pending" | "paid" | "failed" | "cancelled" | "rejected";
 
 export interface AdminBooking {
   id: number;
@@ -263,6 +263,12 @@ export const adminService = {
    */
   confirmBooking: (orderId: string, reference: string): Promise<Confirmed<AdminBooking>> =>
     adminRequest(`/api/sv/admin/event-pass-bookings/${encodeURIComponent(orderId)}/confirm`, { method: "POST", body: { reference } }),
+  /** Emails a paid order's confirmation again; the error says why if the mail server refused it. */
+  resendBookingEmail: (orderId: string): Promise<Confirmed<AdminBooking>> =>
+    adminRequest(`/api/sv/admin/event-pass-bookings/${encodeURIComponent(orderId)}/resend-email`, { method: "POST", body: {} }),
+  /** Closes an unpaid order, with an optional reason. */
+  rejectBooking: (orderId: string, reason: string): Promise<Confirmed<AdminBooking>> =>
+    adminRequest(`/api/sv/admin/event-pass-bookings/${encodeURIComponent(orderId)}/reject`, { method: "POST", body: { reason } }),
 
   /** One page of membership applications, newest first. */
   listMemberships: (query: ListQuery): Promise<PagedList<AdminMembership>> => adminRequest(`/api/sv/admin/memberships?${listParams(query)}`),
@@ -270,6 +276,12 @@ export const adminService = {
   /** Marks an unpaid application paid; the member's account is made and the welcome email sent. */
   confirmMembership: (orderId: string, reference: string): Promise<Confirmed<AdminMembership>> =>
     adminRequest(`/api/sv/admin/memberships/${encodeURIComponent(orderId)}/confirm`, { method: "POST", body: { reference } }),
+  /** Emails a paid order's confirmation again; the error says why if the mail server refused it. */
+  resendMembershipEmail: (orderId: string): Promise<Confirmed<AdminMembership>> =>
+    adminRequest(`/api/sv/admin/memberships/${encodeURIComponent(orderId)}/resend-email`, { method: "POST", body: {} }),
+  /** Closes an unpaid order, with an optional reason. */
+  rejectMembership: (orderId: string, reason: string): Promise<Confirmed<AdminMembership>> =>
+    adminRequest(`/api/sv/admin/memberships/${encodeURIComponent(orderId)}/reject`, { method: "POST", body: { reason } }),
 
   /** One page of contributions, newest first. */
   listContributions: (query: ListQuery): Promise<PagedList<AdminContribution>> => adminRequest(`/api/sv/admin/contributions?${listParams(query)}`),
@@ -277,6 +289,12 @@ export const adminService = {
   /** Marks an unpaid contribution paid; the thank-you email is sent. */
   confirmContribution: (orderId: string, reference: string): Promise<Confirmed<AdminContribution>> =>
     adminRequest(`/api/sv/admin/contributions/${encodeURIComponent(orderId)}/confirm`, { method: "POST", body: { reference } }),
+  /** Emails a paid order's confirmation again; the error says why if the mail server refused it. */
+  resendContributionEmail: (orderId: string): Promise<Confirmed<AdminContribution>> =>
+    adminRequest(`/api/sv/admin/contributions/${encodeURIComponent(orderId)}/resend-email`, { method: "POST", body: {} }),
+  /** Closes an unpaid order, with an optional reason. */
+  rejectContribution: (orderId: string, reason: string): Promise<Confirmed<AdminContribution>> =>
+    adminRequest(`/api/sv/admin/contributions/${encodeURIComponent(orderId)}/reject`, { method: "POST", body: { reason } }),
 
   listFunds: async (): Promise<AdminFund[]> => (await adminRequest<{ data: AdminFund[] }>("/api/sv/admin/contribution-funds")).data,
 

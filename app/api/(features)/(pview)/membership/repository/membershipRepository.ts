@@ -117,7 +117,7 @@ export class MembershipRepository extends BaseRepository {
       .where(
         or(
           eq(membershipApplications.status, "pending"),
-          and(ne(membershipApplications.status, "paid"), gte(membershipApplications.createdAt, since.unpaid)),
+          and(ne(membershipApplications.status, "paid"), ne(membershipApplications.status, "rejected"), gte(membershipApplications.createdAt, since.unpaid)),
           and(
             eq(membershipApplications.status, "paid"),
             gte(membershipApplications.paidAt, since.paid),

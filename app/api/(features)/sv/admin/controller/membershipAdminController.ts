@@ -1,6 +1,6 @@
 import "server-only";
 import { BaseController } from "@/app/api/core/baseController";
-import { readManualReference } from "@/app/api/core/paymentReconciliation";
+import { readManualReference, readRejectReason } from "@/app/api/core/paymentReconciliation";
 import { readPageRequest } from "@/app/api/core/pagination";
 import { membershipRepository, membershipService } from "@/app/api/(features)/(pview)/membership/controller/membershipController";
 import type { MembershipApplication } from "@/app/api/(features)/(pview)/membership/schema/membershipSchema";
@@ -64,6 +64,25 @@ export class MembershipAdminController extends BaseController {
           ? `Payment confirmed. The account is ready and the welcome email has been sent to ${confirmed.email}.`
           : `Payment confirmed and the account is ready, but the welcome email to ${confirmed.email} did not go. It is retried automatically.`;
       return this.ok({ message, data: toAdminMembership(confirmed) });
+    })
+  );
+
+  /** POST /api/sv/admin/memberships/{orderId}/resend-email: emails a paid member's welcome again. */
+  resendMembershipEmail = withAdminAuth<OrderContext>((request, _admin, _session, context) =>
+    this.handle(async () => {
+      const { orderId } = await context.params;
+      const application = await membershipService.resendWelcome(orderId, this.baseUrl(request));
+      return this.ok({ message: `The welcome email has been sent again to ${application.email}.`, data: toAdminMembership(application) });
+    })
+  );
+
+  /** POST /api/sv/admin/memberships/{orderId}/reject { reason? }: closes an unpaid application. */
+  rejectMembership = withAdminAuth<OrderContext>((request, admin, _session, context) =>
+    this.handle(async () => {
+      const { orderId } = await context.params;
+      const reason = readRejectReason(await this.readJson(request));
+      const application = await membershipService.reject(orderId, reason, { id: admin.id, name: admin.fullName });
+      return this.ok({ message: `The application ${application.orderId} has been rejected.`, data: toAdminMembership(application) });
     })
   );
 }

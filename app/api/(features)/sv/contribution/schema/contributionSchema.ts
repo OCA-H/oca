@@ -114,7 +114,7 @@ export type Contribution = typeof contributions.$inferSelect;
 export type NewContribution = typeof contributions.$inferInsert;
 export type NewContributionDocument = typeof contributionDocuments.$inferInsert;
 
-export type ContributionPaymentStatus = "pending" | "paid" | "failed" | "cancelled";
+export type ContributionPaymentStatus = "pending" | "paid" | "failed" | "cancelled" | "rejected";
 export type ContributionDocumentKind = "pan_card" | "address_proof";
 
 /** A contribution with the fund it went to, as the service and the email need it. */

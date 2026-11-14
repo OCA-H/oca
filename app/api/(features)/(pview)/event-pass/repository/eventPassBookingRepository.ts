@@ -109,7 +109,7 @@ export class EventPassBookingRepository extends BaseRepository {
       .where(
         or(
           eq(eventPassBookings.status, "pending"),
-          and(ne(eventPassBookings.status, "paid"), gte(eventPassBookings.createdAt, since.unpaid)),
+          and(ne(eventPassBookings.status, "paid"), ne(eventPassBookings.status, "rejected"), gte(eventPassBookings.createdAt, since.unpaid)),
           and(eq(eventPassBookings.status, "paid"), gte(eventPassBookings.paidAt, since.paid), isNull(eventPassBookings.passEmailSentAt))
         )
       )

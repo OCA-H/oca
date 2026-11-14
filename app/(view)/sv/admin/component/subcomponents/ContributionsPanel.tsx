@@ -2,18 +2,18 @@
 
 import React from 'react';
 import { adminContent, type AdminPanel } from '../../content';
-import { useConfirmPayment, usePagedList } from '../../handler';
+import { useConfirmPayment, useOrderActions, usePagedList } from '../../handler';
 import { adminHelper } from '../../helper';
 import { adminService } from '../../services';
-import { AdminIcon } from './AdminIcon';
 import { AdminPager } from './AdminPager';
 import { ConfirmPaymentDialog, PaymentNotice } from './ConfirmPaymentDialog';
+import { OrderActionButtons, OrderActionDialog } from './OrderActions';
 import { RecordPanelFrame } from './RecordPanelFrame';
 
 const text = adminContent.contributions;
 const pay = adminContent.payments;
 
-const STATUS_TONE: Record<string, string> = { paid: 'ok', pending: 'warn', failed: 'bad', cancelled: 'muted' };
+const STATUS_TONE: Record<string, string> = { paid: 'ok', pending: 'warn', failed: 'bad', cancelled: 'muted', rejected: 'bad' };
 
 interface ContributionsPanelProps {
   isActive: boolean;
@@ -25,6 +25,8 @@ export const ContributionsPanel: React.FC<ContributionsPanelProps> = ({ isActive
   const { list, error, isLoading, setPage, status, setStatus, search, setSearch, reload } = usePagedList(adminService.listContributions, isActive);
   // A confirmed payment moves between the status counts (and may leave a Pending list), so fetch the page again.
   const confirmation = useConfirmPayment(adminService.confirmContribution, reload);
+  // Resending a paid order's email, or rejecting an unpaid one; a rejection moves it between the counts.
+  const orderActions = useOrderActions(adminService.resendContributionEmail, adminService.rejectContribution, reload);
 
   const shown = list?.data ?? [];
   const summary = list?.summary;
@@ -57,6 +59,7 @@ export const ContributionsPanel: React.FC<ContributionsPanelProps> = ({ isActive
         </dl>
 
         <PaymentNotice notice={confirmation.notice} />
+        <PaymentNotice notice={orderActions.notice} />
         <input className="ad-search" type="search" value={search} onChange={(e) => setSearch(e.target.value)} placeholder={text.search} aria-label={text.search} />
         <div className="ad-toolbar">
           <div className="ad-pills" role="group" aria-label="Payment status">
@@ -97,12 +100,7 @@ export const ContributionsPanel: React.FC<ContributionsPanelProps> = ({ isActive
                 <div className="ad-booking-pay">
                   <b>{adminHelper.formatRupees(c.amount)}</b>
                   <span className={`ad-badge ad-badge--${STATUS_TONE[c.status] ?? 'muted'}`}>{c.status}</span>
-                  {c.status !== 'paid' && (
-                    <button className="mp-photo-btn ad-pay-btn" type="button" onClick={() => confirmation.open(c)}>
-                      <AdminIcon name="check" />
-                      {pay.confirm}
-                    </button>
-                  )}
+                  <OrderActionButtons record={c} actions={orderActions} onConfirm={confirmation.open} />
                 </div>
                 <p className="ad-booking-foot">
                   <span className="ad-mono">{c.orderId}</span>
@@ -125,6 +123,7 @@ export const ContributionsPanel: React.FC<ContributionsPanelProps> = ({ isActive
         )}
         {list && <AdminPager page={list.page} pageSize={list.pageSize} total={list.total} isLoading={isLoading} onPage={setPage} />}
       </div>
+      <OrderActionDialog actions={orderActions} nameOf={(c) => c.donorName} emailCarries="the thank-you and receipt" />
       <ConfirmPaymentDialog confirmation={confirmation} name={confirmation.target?.donorName ?? ''} />
     </RecordPanelFrame>
   );

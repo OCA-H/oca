@@ -5,6 +5,12 @@ const PATHS: Record<MembershipPaymentState, React.ReactNode> = {
   paid: <path d="M20 6L9 17l-5-5" />,
   failed: <path d="M18 6L6 18M6 6l12 12" />,
   cancelled: <path d="M5 12h14" />,
+  rejected: (
+    <>
+      <circle cx="12" cy="12" r="8.5" />
+      <path d="M6 18 18 6" />
+    </>
+  ),
   pending: (
     <>
       <circle cx="12" cy="12" r="8.5" />

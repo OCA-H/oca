@@ -2,7 +2,7 @@ import "server-only";
 import { BaseController } from "@/app/api/core/baseController";
 import { HttpError } from "@/app/api/core/httpError";
 import { eventPassBookingService, eventPassRepository, eventPassService } from "@/app/api/(features)/(pview)/event-pass/controller";
-import { readManualReference } from "@/app/api/core/paymentReconciliation";
+import { readManualReference, readRejectReason } from "@/app/api/core/paymentReconciliation";
 import { readPageRequest } from "@/app/api/core/pagination";
 import { EventPassBookingRepository } from "@/app/api/(features)/(pview)/event-pass/repository/eventPassBookingRepository";
 import type { EventPass } from "@/app/api/(features)/(pview)/event-pass/schema/eventPassSchema";
@@ -127,6 +127,25 @@ export class EventPassAdminController extends BaseController {
         ? `Payment confirmed. ${booking.fullName}'s pass has been emailed to ${booking.email}.`
         : `Payment confirmed, but the pass email to ${booking.email} did not go. It is retried automatically.`;
       return this.ok({ message, data: toAdminBooking(booking) });
+    })
+  );
+
+  /** POST /api/sv/admin/event-pass-bookings/{orderId}/resend-email: emails a paid booking's pass to the member again. */
+  resendBookingEmail = withAdminAuth<OrderContext>((request, _admin, _session, context) =>
+    this.handle(async () => {
+      const { orderId } = await context.params;
+      const booking = await eventPassBookingService.resendPass(orderId, this.baseUrl(request));
+      return this.ok({ message: `${booking.fullName}'s pass has been emailed again to ${booking.email}.`, data: toAdminBooking(booking) });
+    })
+  );
+
+  /** POST /api/sv/admin/event-pass-bookings/{orderId}/reject { reason? }: closes an unpaid booking. */
+  rejectBooking = withAdminAuth<OrderContext>((request, admin, _session, context) =>
+    this.handle(async () => {
+      const { orderId } = await context.params;
+      const reason = readRejectReason(await this.readJson(request));
+      const booking = await eventPassBookingService.reject(orderId, reason, { id: admin.id, name: admin.fullName });
+      return this.ok({ message: `${booking.fullName}'s booking ${booking.orderId} has been rejected.`, data: toAdminBooking(booking) });
     })
   );
 }

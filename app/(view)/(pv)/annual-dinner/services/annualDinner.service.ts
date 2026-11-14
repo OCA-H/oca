@@ -37,7 +37,7 @@ export interface PassCheckoutRequest {
 
 export interface PassOrder {
   orderId: string;
-  status: 'pending' | 'paid' | 'failed' | 'cancelled';
+  status: 'pending' | 'paid' | 'failed' | 'cancelled' | 'rejected';
   eventName: string;
   passLabel: string;
   lineItems: { label: string; amount: number }[];

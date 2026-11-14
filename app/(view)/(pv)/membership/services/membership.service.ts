@@ -4,7 +4,7 @@ export type MembershipCheckoutData = CcAvenueCheckoutData;
 
 export interface MembershipOrder {
   orderId: string;
-  status: 'pending' | 'paid' | 'failed' | 'cancelled';
+  status: 'pending' | 'paid' | 'failed' | 'cancelled' | 'rejected';
   amount: number;
   currency: string;
   membershipType: string;

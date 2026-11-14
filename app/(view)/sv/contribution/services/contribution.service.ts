@@ -4,7 +4,7 @@
  */
 export interface ContributionResult {
   orderId: string;
-  status: 'pending' | 'paid' | 'failed' | 'cancelled';
+  status: 'pending' | 'paid' | 'failed' | 'cancelled' | 'rejected';
   amount: number;
   fundLabel: string;
   units: number | null;

@@ -4,7 +4,7 @@ import { HttpError, type FieldErrors } from "@/app/api/core/httpError";
 import { hashPassword } from "@/app/api/core/auth";
 import { isUniqueViolation } from "@/app/api/core/baseRepository";
 import { CcAvenue, type CcAvenueCheckout, type GatewayResult } from "@/app/api/core/ccavenue";
-import { isRecheckable, manualPayment, settle } from "@/app/api/core/paymentReconciliation";
+import { acceptsResult, emailFailed, isRecheckable, manualPayment, REJECTED, rejectionNote, settle } from "@/app/api/core/paymentReconciliation";
 import { dateOfBirthError } from "@/app/api/core/dateOfBirth";
 import { Mailer } from "@/app/api/core/mailer";
 import { UserRepository } from "@/app/api/(features)/(pview)/auth/repository/userRepository";
@@ -195,6 +195,52 @@ export class MembershipService {
   }
 
   /**
+   * Emails a paid member their welcome again, on an admin's request, setting up their account
+   * first if that never happened. Unlike the automatic send, a failure is thrown, so the admin sees why.
+   */
+  async resendWelcome(orderId: string, baseUrl: string): Promise<MembershipApplication> {
+    let application = await this.repository.findByOrderId(orderId.trim());
+    if (!application) throw HttpError.notFound("We could not find this membership order.");
+    if (application.status !== "paid") throw HttpError.conflict("Only a paid membership has a welcome email to send.");
+
+    let member = application.userId ? await this.users.findById(application.userId) : null;
+    if (!member) {
+      member = await this.createMember(application);
+      application = (await this.repository.update(application.id, { userId: member.id })) ?? application;
+    }
+
+    // Not sent yet: claim it, so the payment check does not send it at the same moment.
+    const claimed = !application.welcomeEmailSentAt;
+    if (claimed && !(await this.repository.claimWelcomeEmail(application.id))) {
+      throw HttpError.conflict("The welcome email is being sent right now. Refresh the list in a minute.");
+    }
+    try {
+      await this.deliverWelcome(application, member, baseUrl);
+    } catch (error) {
+      console.error(`Membership ${application.orderId}: resending the welcome to ${application.email} failed:`, error);
+      if (claimed) await this.repository.releaseWelcomeEmail(application.id).catch(() => {});
+      throw emailFailed(application.email, error);
+    }
+    return (await this.repository.findByOrderId(application.orderId)) ?? application;
+  }
+
+  /**
+   * Closes an unpaid application on an admin's word (a duplicate, a test, someone who is not an Old
+   * Columban). The payment check then leaves it alone; a payment CCAvenue later reports still
+   * marks it paid, since the money was taken.
+   */
+  async reject(orderId: string, reason: string, rejectedBy: { id: number; name: string }): Promise<MembershipApplication> {
+    const application = await this.repository.findByOrderId(orderId.trim());
+    if (!application) throw HttpError.notFound("We could not find this membership order.");
+    if (application.status === "paid") throw HttpError.conflict("This membership is paid, so it cannot be rejected.");
+    if (application.status === REJECTED) throw HttpError.conflict("This application is already rejected.");
+    const updated = await this.repository.updateUnlessPaid(application.id, { status: REJECTED, gatewayMessage: rejectionNote(reason, rejectedBy) });
+    if (!updated) throw HttpError.conflict("This membership was paid a moment ago, so it was not rejected.");
+    console.info(`Membership order ${application.orderId} rejected by admin ${rejectedBy.id}.`);
+    return updated;
+  }
+
+  /**
    * Applies a payment result, from the redirect or the Order Status API. Safe to call more than once
    * for the same order, from both at the same moment: a paid application is never changed again,
    * and its account and welcome email are made once.
@@ -203,6 +249,8 @@ export class MembershipService {
     const application = result.orderId ? await this.repository.findByOrderId(result.orderId) : null;
     if (!application) throw HttpError.notFound("We could not find this membership order.");
     if (application.status === "paid") return this.completePaid(application, baseUrl);
+    if (!acceptsResult(application, result)) return application;
+    if (application.status === REJECTED) console.error(`Membership order ${application.orderId} was rejected, but CCAvenue reports a payment for it.`);
 
     let status = result.outcome;
     let message = result.message;
@@ -293,13 +341,18 @@ export class MembershipService {
     if (application.welcomeEmailSentAt) return;
     if (!(await this.repository.claimWelcomeEmail(application.id))) return;
     try {
-      const [ccEmails, contact] = await Promise.all([getRegistrationCcEmails(), getContactDetails()]);
-      const cc = ccEmails.filter((email) => email !== application.email);
-      await Mailer.send(membershipWelcomeEmail({ application, memberId: member.memberId, cc, baseUrl, contact }));
+      await this.deliverWelcome(application, member, baseUrl);
     } catch (error) {
       console.error(`Membership ${application.orderId}: welcome email to ${application.email} failed:`, error);
       await this.repository.releaseWelcomeEmail(application.id).catch(() => {});
     }
+  }
+
+  /** Emails the welcome and payment acknowledgement; throws if the email does not go. */
+  private async deliverWelcome(application: MembershipApplication, member: User, baseUrl: string): Promise<void> {
+    const [ccEmails, contact] = await Promise.all([getRegistrationCcEmails(), getContactDetails()]);
+    const cc = ccEmails.filter((email) => email !== application.email);
+    await Mailer.send(membershipWelcomeEmail({ application, memberId: member.memberId, cc, baseUrl, contact }));
   }
 
   /** Creates the member's account from a paid application, or reuses one already made for the email. */

@@ -8,8 +8,8 @@ export const DEFAULT_PAGE_SIZE = 15;
 const MAX_PAGE_SIZE = 50;
 const MAX_QUERY = 100;
 
-/** The payment states every payable record can be in. */
-export const PAYMENT_STATUSES = ["pending", "paid", "failed", "cancelled"] as const;
+/** The payment states every payable record can be in. "rejected": closed by an admin (see paymentReconciliation). */
+export const PAYMENT_STATUSES = ["pending", "paid", "failed", "cancelled", "rejected"] as const;
 export type PaymentStatus = (typeof PAYMENT_STATUSES)[number];
 
 export interface PageRequest {
@@ -59,7 +59,7 @@ export const containsPattern = (text: string) => `%${text.replace(/[\\%_]/g, (c)
 
 /** Rows of (status, count, amount) from a GROUP BY status, as a PaymentSummary. */
 export function toPaymentSummary(rows: { status: string; count: number; amount: unknown }[]): PaymentSummary {
-  const counts: Record<PaymentStatus, number> = { pending: 0, paid: 0, failed: 0, cancelled: 0 };
+  const counts: Record<PaymentStatus, number> = { pending: 0, paid: 0, failed: 0, cancelled: 0, rejected: 0 };
   let all = 0;
   let paidAmount = 0;
   for (const row of rows) {

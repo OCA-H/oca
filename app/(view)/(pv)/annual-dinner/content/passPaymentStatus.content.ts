@@ -22,7 +22,7 @@ export interface PassPaymentStatusContent {
   totalLabel: { paid: string; other: string };
   printLabel: string;
   help: { title: string; desc: string };
-  states: Record<'paid' | 'failed' | 'cancelled' | 'pending' | 'unknown', PassPaymentStateCopy>;
+  states: Record<'paid' | 'failed' | 'cancelled' | 'rejected' | 'pending' | 'unknown', PassPaymentStateCopy>;
 }
 
 export const PASS_PAYMENT_STATUS_CONTENT = {
@@ -78,6 +78,20 @@ export const PASS_PAYMENT_STATUS_CONTENT = {
         { title: 'Have a question first?', desc: 'Write to the Secretariat about passes, add-ons or payment options before you pay.' },
       ],
       primary: { label: 'Choose a pass', href: ROUTES.ANNUAL_DINNER_PASSES },
+      secondary: { label: 'Back to home', href: ROUTES.HOME },
+    },
+    rejected: {
+      tone: 'neutral',
+      badge: 'Order closed',
+      title: 'This order was closed by the Secretariat',
+      lead: 'The OCA Secretariat has closed this order, so your pass is not booked. If money has left your account for it, write to us with the order reference below and we will sort it out.',
+      receiptStatus: 'Closed',
+      nextTitle: 'What you can do',
+      nextSteps: [
+        { title: 'Write to the Secretariat', desc: 'Quote the order reference below and we will explain why it was closed, or set it right.' },
+        { title: 'Money debited?', desc: 'If you paid for this order, tell us: a payment that reached the Association is never lost.' },
+      ],
+      primary: { label: 'Back to the Annual Dinner', href: ROUTES.ANNUAL_DINNER },
       secondary: { label: 'Back to home', href: ROUTES.HOME },
     },
     pending: {

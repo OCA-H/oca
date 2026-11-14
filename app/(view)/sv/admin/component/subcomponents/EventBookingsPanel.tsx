@@ -2,18 +2,18 @@
 
 import React, { useCallback } from 'react';
 import { adminContent, type AdminPanel, type PassEvent } from '../../content';
-import { useConfirmPayment, usePagedList } from '../../handler';
+import { useConfirmPayment, useOrderActions, usePagedList } from '../../handler';
 import { adminHelper } from '../../helper';
 import { adminService, type ListQuery } from '../../services';
 import { ConfirmPaymentDialog, PaymentNotice } from './ConfirmPaymentDialog';
-import { AdminIcon } from './AdminIcon';
 import { AdminPager } from './AdminPager';
+import { OrderActionButtons, OrderActionDialog } from './OrderActions';
 import { RecordPanelFrame } from './RecordPanelFrame';
 
 const text = adminContent.bookings;
 const pay = adminContent.payments;
 
-const STATUS_TONE: Record<string, string> = { paid: 'ok', pending: 'warn', failed: 'bad', cancelled: 'muted' };
+const STATUS_TONE: Record<string, string> = { paid: 'ok', pending: 'warn', failed: 'bad', cancelled: 'muted', rejected: 'bad' };
 
 interface EventBookingsPanelProps {
   passEvent: PassEvent;
@@ -27,6 +27,8 @@ export const EventBookingsPanel: React.FC<EventBookingsPanelProps> = ({ passEven
   const { list, error, isLoading, setPage, status, setStatus, search, setSearch, reload } = usePagedList(load, isActive);
   // A confirmed booking moves between the status counts (and may leave a Pending list), so fetch the page again.
   const confirmation = useConfirmPayment(adminService.confirmBooking, reload);
+  // Resending a paid order's email, or rejecting an unpaid one; a rejection moves it between the counts.
+  const orderActions = useOrderActions(adminService.resendBookingEmail, adminService.rejectBooking, reload);
 
   const shown = list?.data ?? [];
   const summary = list?.summary;
@@ -59,6 +61,7 @@ export const EventBookingsPanel: React.FC<EventBookingsPanelProps> = ({ passEven
         </dl>
 
         <PaymentNotice notice={confirmation.notice} />
+        <PaymentNotice notice={orderActions.notice} />
         <input className="ad-search" type="search" value={search} onChange={(e) => setSearch(e.target.value)} placeholder={text.search} aria-label={text.search} />
         <div className="ad-toolbar">
           <div className="ad-pills" role="group" aria-label="Payment status">
@@ -99,12 +102,7 @@ export const EventBookingsPanel: React.FC<EventBookingsPanelProps> = ({ passEven
                 <div className="ad-booking-pay">
                   <b>{adminHelper.formatRupees(b.amount)}</b>
                   <span className={`ad-badge ad-badge--${STATUS_TONE[b.status] ?? 'muted'}`}>{b.status}</span>
-                  {b.status !== 'paid' && (
-                    <button className="mp-photo-btn ad-pay-btn" type="button" onClick={() => confirmation.open(b)}>
-                      <AdminIcon name="check" />
-                      {pay.confirm}
-                    </button>
-                  )}
+                  <OrderActionButtons record={b} actions={orderActions} onConfirm={confirmation.open} />
                 </div>
                 <p className="ad-booking-foot">
                   <span className="ad-mono">{b.orderId}</span>
@@ -128,6 +126,7 @@ export const EventBookingsPanel: React.FC<EventBookingsPanelProps> = ({ passEven
         )}
         {list && <AdminPager page={list.page} pageSize={list.pageSize} total={list.total} isLoading={isLoading} onPage={setPage} />}
       </div>
+      <OrderActionDialog actions={orderActions} nameOf={(b) => b.fullName} emailCarries="their pass" />
       <ConfirmPaymentDialog confirmation={confirmation} name={confirmation.target?.fullName ?? ''} />
     </RecordPanelFrame>
   );

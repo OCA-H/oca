@@ -17509,3 +17509,29 @@ a.mag-card.feat:hover .mag-open {
     font-size: 16px;
   }
 }
+
+/* Admin records lists: an order's actions under its amount (confirm, resend email, reject). */
+.ad-order-acts {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.ad-order-acts .ad-pay-btn {
+  margin-top: 0;
+}
+
+.ad-pay-btn--danger {
+  color: #B0452C;
+}
+
+.ad-pay-btn--danger:hover {
+  background: #FBEDE9;
+  border-color: rgba(176, 69, 44, .3);
+}
+
+#ad-reject-reason {
+  resize: vertical;
+}

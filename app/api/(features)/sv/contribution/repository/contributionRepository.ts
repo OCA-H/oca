@@ -199,7 +199,7 @@ export class ContributionRepository extends BaseRepository {
       .where(
         or(
           eq(contributions.status, "pending"),
-          and(ne(contributions.status, "paid"), gte(contributions.createdAt, since.unpaid)),
+          and(ne(contributions.status, "paid"), ne(contributions.status, "rejected"), gte(contributions.createdAt, since.unpaid)),
           and(eq(contributions.status, "paid"), gte(contributions.paidAt, since.paid), isNull(contributions.thankYouEmailSentAt))
         )
       )

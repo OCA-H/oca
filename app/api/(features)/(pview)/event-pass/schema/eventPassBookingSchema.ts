@@ -57,4 +57,4 @@ export const eventPassBookings = pgTable(
 export type EventPassBooking = typeof eventPassBookings.$inferSelect;
 export type NewEventPassBooking = typeof eventPassBookings.$inferInsert;
 
-export type EventPassPaymentStatus = "pending" | "paid" | "failed" | "cancelled";
+export type EventPassPaymentStatus = "pending" | "paid" | "failed" | "cancelled" | "rejected";

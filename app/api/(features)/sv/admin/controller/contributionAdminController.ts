@@ -4,7 +4,7 @@ import { HttpError } from "@/app/api/core/httpError";
 import { contributionRepository, contributionService } from "@/app/api/(features)/sv/contribution/controller/contributionController";
 import type { FundTotals } from "@/app/api/(features)/sv/contribution/repository/contributionRepository";
 import type { ContributionFund, ContributionWithFund } from "@/app/api/(features)/sv/contribution/schema/contributionSchema";
-import { readManualReference } from "@/app/api/core/paymentReconciliation";
+import { readManualReference, readRejectReason } from "@/app/api/core/paymentReconciliation";
 import { readPageRequest } from "@/app/api/core/pagination";
 import { withAdminAuth } from "../middleware/adminAuth";
 
@@ -96,6 +96,25 @@ export class ContributionAdminController extends BaseController {
         ? `Payment confirmed. The thank-you email has been sent to ${confirmed.email}.`
         : `Payment confirmed, but the thank-you email to ${confirmed.email} did not go. It is retried automatically.`;
       return this.ok({ message, data: toAdminContribution(confirmed) });
+    })
+  );
+
+  /** POST /api/sv/admin/contributions/{orderId}/resend-email: emails a paid contribution's thank-you again. */
+  resendContributionEmail = withAdminAuth<OrderContext>((request, _admin, _session, context) =>
+    this.handle(async () => {
+      const { orderId } = await context.params;
+      const contribution = await contributionService.resendThankYou(orderId, this.baseUrl(request));
+      return this.ok({ message: `The thank-you email has been sent again to ${contribution.email}.`, data: toAdminContribution(contribution) });
+    })
+  );
+
+  /** POST /api/sv/admin/contributions/{orderId}/reject { reason? }: closes an unpaid contribution. */
+  rejectContribution = withAdminAuth<OrderContext>((request, admin, _session, context) =>
+    this.handle(async () => {
+      const { orderId } = await context.params;
+      const reason = readRejectReason(await this.readJson(request));
+      const contribution = await contributionService.reject(orderId, reason, { id: admin.id, name: admin.fullName });
+      return this.ok({ message: `The contribution ${contribution.orderId} has been rejected.`, data: toAdminContribution(contribution) });
     })
   );
 

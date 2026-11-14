@@ -24,9 +24,19 @@ export interface PayableOrder {
   createdAt: Date;
 }
 
+/**
+ * An unpaid order an admin closed by hand. The payment check leaves it alone, so it stays rejected;
+ * only a payment CCAvenue reports for it (the member did pay) changes it again, to paid.
+ */
+export const REJECTED = "rejected";
+
 /** True for an unpaid order still worth asking CCAvenue about. */
 export const isRecheckable = (order: PayableOrder, now = Date.now()) =>
-  order.status === "pending" || (order.status !== "paid" && now - order.createdAt.getTime() < RECHECK_WINDOW_MS);
+  order.status === "pending" ||
+  (order.status !== "paid" && order.status !== REJECTED && now - order.createdAt.getTime() < RECHECK_WINDOW_MS);
+
+/** Whether a payment result may change an order: a rejected order is reopened only by a payment. */
+export const acceptsResult = (order: PayableOrder, result: GatewayResult) => order.status !== REJECTED || result.outcome === "paid";
 
 /**
  * What the Order Status API's answer means for an order, or null to leave it as it is. A payment the
@@ -100,4 +110,28 @@ export function manualPayment(order: { orderId: string; amount: number }, refere
       confirmed_at: new Date().toISOString(),
     },
   };
+}
+
+const MAX_REJECT_REASON = 200;
+
+/** The optional reason an admin gives for rejecting an order, trimmed; at most 200 characters. */
+export function readRejectReason(body: Record<string, unknown>): string {
+  const reason = typeof body.reason === "string" ? body.reason.trim().replace(/\s+/g, " ") : "";
+  if (reason.length > MAX_REJECT_REASON) {
+    throw HttpError.badRequest("Please shorten the reason.", { reason: `Keep the reason under ${MAX_REJECT_REASON} characters.` });
+  }
+  return reason;
+}
+
+/** What a rejected order's list entry says: who rejected it, and why. Stored as its gateway message. */
+export const rejectionNote = (reason: string, by: { name: string }) =>
+  (`Rejected by ${by.name}` + (reason ? `: ${reason}` : ".")).slice(0, 255);
+
+/**
+ * The error an admin sees when an email they asked to resend did not go: the mail server's own
+ * words (e.g. Gmail refusing the password), so the cause can be fixed.
+ */
+export function emailFailed(to: string, error: unknown): HttpError {
+  const detail = error instanceof Error ? error.message.split("\n")[0].slice(0, 200) : "";
+  return HttpError.badGateway(`The email to ${to} could not be sent.${detail ? ` The mail server said: ${detail}` : ""}`);
 }

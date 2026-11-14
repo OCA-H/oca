@@ -6,4 +6,5 @@ export * from "./useFundEditor";
 export * from "./useNewFund";
 export { useAdminHandler as default } from "./useAdminHandler";
 export * from "./useConfirmPayment";
+export * from "./useOrderActions";
 export * from "./usePagedList";

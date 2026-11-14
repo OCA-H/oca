@@ -52,6 +52,12 @@ const PATHS: Record<AdminIconName, React.ReactNode> = {
   go: <path d="M5 12h14m-5-5 5 5-5 5" />,
   ext: <path d="M7 17 17 7M8 7h9v9" />,
   check: <path d="m5.5 12.5 4.2 4.2L18.5 8" strokeWidth="2.2" />,
+  ban: (
+    <>
+      <circle cx="12" cy="12" r="8" />
+      <path d="m6.4 6.4 11.2 11.2" />
+    </>
+  ),
   plus: <path d="M12 5v14M5 12h14" />,
   trash: <path d="M4 7h16M9.5 7V4.5h5V7M6.5 7l1 13h9l1-13M10 11v5.5M14 11v5.5" />,
   up: <path d="m6 15 6-6 6 6" />,
