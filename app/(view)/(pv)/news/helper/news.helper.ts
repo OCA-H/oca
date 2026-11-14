@@ -1,4 +1,4 @@
-import type { HomeNoticeItem } from '@/app/api/(features)/(pview)/site/schema/sectionSpecs';
+import type { HomeNoticeDocument, HomeNoticeItem } from '@/app/api/(features)/(pview)/site/schema/sectionSpecs';
 
 // Every notice on the home page's notice board has its own page at /news/<slug>. The slug is the
 // one set in the admin panel, or one made from the title; notices saved before they had pages have
@@ -58,3 +58,7 @@ export const agendaItems = (agenda: string | undefined): string[] =>
     .split('\n')
     .map((line) => line.replace(/^\s*(\d+[.)]|[-•*])\s*/, '').trim())
     .filter(Boolean);
+
+/** A notice's attached PDFs: the entries that have a file, in the order set in the admin panel. */
+export const noticeDocuments = (notice: HomeNoticeItem): HomeNoticeDocument[] =>
+  (notice.documents ?? []).filter((doc) => doc && typeof doc.file === 'string' && doc.file.trim() !== '');

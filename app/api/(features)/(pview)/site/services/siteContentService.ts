@@ -102,23 +102,39 @@ function upgradeCommittee(data: Record<string, unknown>, saved: Record<string, u
  * `slug` key at all). One with the title of a default notice gets that notice's page: its slug,
  * text, key details and so on, with what was saved kept on top. The rest stay as they are, and
  * the page makes their slug from the title. The next save stores the fields, so this stops.
+ *
+ * Notices saved while each could hold one PDF have it as `pdf`, `pdfTitle` and `pdfLabel`; it
+ * becomes the notice's first document. The next save stores `documents` and drops the three.
  */
 const NOTICE_PAGE_FIELDS = [
-  "slug", "extraTags", "summary", "body", "facts", "agenda", "sign", "actionLabel", "href", "pdf", "pdfTitle", "pdfLabel",
+  "slug", "extraTags", "summary", "body", "facts", "agenda", "sign", "actionLabel", "href", "documents",
 ] as const satisfies readonly (keyof HomeNoticeItem)[];
+
+/** A notice's single PDF of old (`pdf`, `pdfTitle`, `pdfLabel`) as the first of its `documents`. */
+function upgradeNoticeDocuments(item: Record<string, unknown>): Record<string, unknown> {
+  const { pdf, pdfTitle, pdfLabel, ...rest } = item;
+  const text = (value: unknown) => (typeof value === "string" ? value : "");
+  const documents = Array.isArray(rest.documents) ? rest.documents : [];
+  if (documents.length > 0 || !text(pdf)) return { ...rest, documents };
+  return { ...rest, documents: [{ file: text(pdf), title: text(pdfTitle), label: text(pdfLabel) }] };
+}
 
 function upgradeNotices(data: Record<string, unknown>): Record<string, unknown> {
   if (!Array.isArray(data.items)) return data;
   const title = (value: unknown) => (typeof value === "string" ? value.trim().toLowerCase() : "");
   const defaults = (SECTION_DEFAULTS[SITE_SECTION_KEYS.homeNotices] as HomeNoticesContent).items;
-  const items = data.items.map((item: Record<string, unknown>) => {
-    if (!item || typeof item !== "object" || "slug" in item) return item;
+  const withDefaultPage = (item: Record<string, unknown>) => {
+    if ("slug" in item) return item;
     const known = defaults.find((notice) => title(notice.title) === title(item.title));
     if (!known) return item;
     // Only the page's fields come from the default; the card keeps what was saved.
     const page = Object.fromEntries(NOTICE_PAGE_FIELDS.map((field) => [field, known[field]]));
     const saved = Object.fromEntries(Object.entries(item).filter(([, value]) => value !== "" && value != null));
     return { ...page, ...saved };
+  };
+  const items = data.items.map((item: Record<string, unknown>) => {
+    if (!item || typeof item !== "object") return item;
+    return upgradeNoticeDocuments(withDefaultPage(item));
   });
   return { ...data, items };
 }

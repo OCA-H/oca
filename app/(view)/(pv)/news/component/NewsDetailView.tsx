@@ -4,7 +4,7 @@ import { SiteLink } from '@/app/(view)/common/component/SiteLink';
 import { downloadHref } from '@/app/(view)/common/helper/routes';
 import type { HomeNoticeItem, NoticeFactIcon } from '@/app/api/(features)/(pview)/site/schema/sectionSpecs';
 import { newsContent as text } from '../content';
-import { agendaItems, noticeTags } from '../helper';
+import { agendaItems, noticeDocuments, noticeTags } from '../helper';
 
 const svg = { viewBox: '0 0 24 24', fill: 'none', 'aria-hidden': true } as const;
 const line = { stroke: 'currentColor', strokeWidth: 1.6 } as const;
@@ -43,6 +43,12 @@ const FACT_ICONS: Record<NoticeFactIcon, React.ReactNode> = {
   ),
 };
 
+const DownloadIcon: React.FC = () => (
+  <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+    <path d="M12 3v12m0 0-4-4m4 4 4-4M4 21h16" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+  </svg>
+);
+
 /** The page while its notice loads: the breadcrumb and an empty banner, so nothing jumps when it arrives. */
 export const NewsDetailSkeleton: React.FC = () => (
   <>
@@ -61,12 +67,19 @@ export const NewsDetailSkeleton: React.FC = () => (
   </>
 );
 
-/** One notice on its own page (/news/<slug>): banner, text, key details, agenda, and its PDF. */
+/** One notice on its own page (/news/<slug>): banner, text, key details, agenda, and its PDFs. */
 export const NewsDetailView: React.FC<{ notice: HomeNoticeItem }> = ({ notice }) => {
   const tags = noticeTags(notice, text.defaultTag);
   const facts = (notice.facts ?? []).filter((fact) => fact.label && fact.text);
   const agenda = agendaItems(notice.agenda);
-  const docTitle = notice.pdfTitle || text.defaultDocTitle;
+  const isOnlyDoc = noticeDocuments(notice).length === 1;
+  /** The attached PDFs, each with the title and button text it shows by, and its place on the page. */
+  const docs = noticeDocuments(notice).map((doc, i) => ({
+    file: doc.file,
+    anchor: `document-${i + 1}`,
+    title: doc.title || (isOnlyDoc ? text.defaultDocTitle : text.numberedDocTitle(i + 1)),
+    label: doc.label || (isOnlyDoc ? text.defaultDownload : text.download),
+  }));
 
   return (
     <>
@@ -128,48 +141,100 @@ export const NewsDetailView: React.FC<{ notice: HomeNoticeItem }> = ({ notice })
                 </SiteLink>
               </div>
             )}
+
+            {docs.length > 0 && (
+              <div className="nw-files" id="documents">
+                <h2>{text.filesHeading(docs.length)}</h2>
+                <ul>
+                  {docs.map((doc) => (
+                    <li className="nw-file" key={doc.anchor}>
+                      <span className="nw-ico">{FACT_ICONS.doc}</span>
+                      <div className="nw-file-t">
+                        <b>{doc.title}</b>
+                        <small>{text.fileKind}</small>
+                      </div>
+                      <div className="nw-file-acts">
+                        <a className="btn btn-ghost btn-sm" href={`#${doc.anchor}`} aria-label={text.viewAria(doc.title)}>
+                          {text.view}
+                        </a>
+                        <a className="btn btn-primary btn-sm" href={downloadHref(doc.file)} download aria-label={text.downloadTitleAria(doc.title)}>
+                          <DownloadIcon />
+                          {doc.label}
+                        </a>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
           </article>
         </div>
       </section>
 
-      {notice.pdf && (
+      {docs.length > 0 && (
         <>
-          <section className="content-section tint-teal by-reader nw-doc" id="document">
+          <section className="content-section tint-teal by-reader nw-doc">
             <div className="wrap">
-              <div className="nw-doc-head">
-                <span className="eyebrow">{text.docEyebrow}</span>
-                <h2>{docTitle}</h2>
-              </div>
-              <div className="by-viewer">
-                <div className="by-scroll" tabIndex={0} aria-label={text.scrollLabel(docTitle)}>
-                  <div className="by-pages">
-                    <figure className="by-page by-page--pdf">
-                      <object data={notice.pdf} type="application/pdf" aria-label={docTitle}>
-                        <div className="by-pdf-fallback">
-                          <p>{text.pdfFallback}</p>
-                          <a className="btn btn-primary" href={notice.pdf} target="_blank" rel="noopener noreferrer">
-                            {text.openPdf}
-                          </a>
-                        </div>
-                      </object>
-                    </figure>
+              {docs.map((doc, i) => (
+                <div className="nw-doc-block" id={doc.anchor} key={doc.anchor}>
+                  <div className="nw-doc-head">
+                    <div>
+                      <span className="eyebrow">{isOnlyDoc ? text.docEyebrow : text.docEyebrowOf(i + 1, docs.length)}</span>
+                      <h2>{doc.title}</h2>
+                    </div>
+                    <div className="nw-doc-acts">
+                      <a className="btn btn-ghost btn-sm" href={doc.file} target="_blank" rel="noopener noreferrer" aria-label={text.openTitleAria(doc.title)}>
+                        {text.openPdf}
+                      </a>
+                      <a className="btn btn-primary btn-sm" href={downloadHref(doc.file)} download aria-label={text.downloadTitleAria(doc.title)}>
+                        <DownloadIcon />
+                        {doc.label}
+                      </a>
+                    </div>
+                  </div>
+                  <div className="by-viewer">
+                    <div className="by-scroll" tabIndex={0} aria-label={text.scrollLabel(doc.title)}>
+                      <div className="by-pages">
+                        <figure className="by-page by-page--pdf">
+                          <object data={doc.file} type="application/pdf" aria-label={doc.title}>
+                            <div className="by-pdf-fallback">
+                              <p>{text.pdfFallback}</p>
+                              <a className="btn btn-primary" href={doc.file} target="_blank" rel="noopener noreferrer">
+                                {text.openPdf}
+                              </a>
+                            </div>
+                          </object>
+                        </figure>
+                      </div>
+                    </div>
                   </div>
                 </div>
-              </div>
+              ))}
             </div>
           </section>
 
-          <a className="by-float" href={downloadHref(notice.pdf)} download aria-label={text.downloadAria}>
-            <span className="by-float-circle">
-              <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                <path d="M12 3v12m0 0-4-4m4 4 4-4M4 21h16" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-              </svg>
-            </span>
-            <span className="by-float-text">
-              <strong>{notice.pdfLabel || text.defaultDownload}</strong>
-              <small>{text.downloadNote}</small>
-            </span>
-          </a>
+          {/* One PDF: the floating button downloads it. Several: it goes to the list of them. */}
+          {isOnlyDoc ? (
+            <a className="by-float" href={downloadHref(docs[0].file)} download aria-label={text.downloadAria}>
+              <span className="by-float-circle">
+                <DownloadIcon />
+              </span>
+              <span className="by-float-text">
+                <strong>{docs[0].label}</strong>
+                <small>{text.downloadNote}</small>
+              </span>
+            </a>
+          ) : (
+            <a className="by-float" href="#documents" aria-label={text.allDownloadsAria}>
+              <span className="by-float-circle">
+                <DownloadIcon />
+              </span>
+              <span className="by-float-text">
+                <strong>{text.allDownloads}</strong>
+                <small>{text.allDownloadsNote(docs.length)}</small>
+              </span>
+            </a>
+          )}
         </>
       )}
     </>

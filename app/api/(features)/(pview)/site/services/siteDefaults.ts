@@ -90,8 +90,6 @@ export const HOME_DEFAULTS: HomeContent = {
           { icon: "cal", label: "When", text: "Sunday, 30 November 2025 · 10:30 am" },
           { icon: "pin", label: "Where", text: AGM_VENUE },
         ],
-        pdfTitle: "AGM 2025 reminder letter",
-        pdfLabel: "Download the letter",
       },
       {
         date: "October 31, 2025",
@@ -108,8 +106,6 @@ export const HOME_DEFAULTS: HomeContent = {
           { icon: "pin", label: "Where", text: AGM_VENUE },
           { icon: "vote", label: "Election", text: "Executive Committee of the OCA, 2025–27" },
         ],
-        pdfTitle: "Notice for the AGM and elections 2025",
-        pdfLabel: "Download the notice",
       },
       {
         date: "October 14, 2024",
@@ -124,8 +120,6 @@ export const HOME_DEFAULTS: HomeContent = {
           { icon: "cal", label: "Meeting held", text: "23 April 2023" },
           { icon: "doc", label: "On the agenda of", text: "The AGM called for 17 October 2024" },
         ],
-        pdfTitle: "Minutes of the AGM, 23 April 2023",
-        pdfLabel: "Download the minutes",
       },
       {
         date: "September 25, 2024",
@@ -150,8 +144,6 @@ export const HOME_DEFAULTS: HomeContent = {
           "Any other matter, with the permission of the chair.",
         ].join("\n"),
         sign: "Santosh Kalyani (Batch of 1990), President, OCA 2023–25",
-        pdfTitle: "AGM notice, 17 October 2024",
-        pdfLabel: "Download the notice",
       },
       {
         date: "March 10, 2023",
@@ -161,8 +153,6 @@ export const HOME_DEFAULTS: HomeContent = {
         extraTags: "Election",
         summary: "The notice for the 2023 Annual General Meeting and its election.",
         body: "The notice for the 2023 Annual General Meeting and its election.",
-        pdfTitle: "AGM and election notice 2023",
-        pdfLabel: "Download the notice",
       },
       {
         date: "October 14, 2022",
@@ -174,8 +164,6 @@ export const HOME_DEFAULTS: HomeContent = {
         body: "A letter from the Principal of St. Columba’s School inviting Old Columbans to join the Association as members.",
         actionLabel: "Become a member",
         href: "/membership",
-        pdfTitle: "The Principal’s letter",
-        pdfLabel: "Download the letter",
       },
     ] satisfies Array<Omit<HomeNoticeItem, "image" | "imageAlt" | "href"> & { href?: string }>).map((notice): HomeNoticeItem => ({
       href: "",
@@ -184,7 +172,7 @@ export const HOME_DEFAULTS: HomeContent = {
       agenda: "",
       sign: "",
       actionLabel: "",
-      pdf: "",
+      documents: [],
       ...notice,
       image: NOTICE_IMAGE,
       imageAlt: "OCA newsletter and notice",

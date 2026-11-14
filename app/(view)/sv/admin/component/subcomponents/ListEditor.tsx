@@ -31,6 +31,8 @@ export const ListEditor: React.FC<ListEditorProps> = ({ list, path, items, edito
   const blocks = adminHelper.fieldBlocks(list.fields, '');
   /** A choice shown as buttons (a post's type) is named in the collapsed entry, e.g. "Post 2 · Video". */
   const kindField = list.fields.find((field) => field.segmented);
+  /** Entries that hold a file (a notice's PDFs) show a page in the collapsed entry, not a picture. */
+  const holdsFile = list.fields.some((field) => field.type === 'file');
 
   return (
     <fieldset className={`ad-fieldset ad-list${isNested ? ' ad-list--nested' : ''}`}>
@@ -65,7 +67,7 @@ export const ListEditor: React.FC<ListEditorProps> = ({ list, path, items, edito
                 <button className="ad-item-toggle" type="button" aria-expanded={isOpen} aria-controls={bodyId} onClick={() => editor.toggleItem(item._id)}>
                   <span className="ad-item-thumb" aria-hidden="true">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
-                    {thumb && kind?.value !== 'video' ? <img src={thumb} alt="" /> : <AdminIcon name={kind?.value === 'video' ? 'video' : 'image'} />}
+                    {thumb && kind?.value !== 'video' ? <img src={thumb} alt="" /> : <AdminIcon name={kind?.value === 'video' ? 'video' : holdsFile ? 'page' : 'image'} />}
                   </span>
                   <span className="ad-item-t">
                     <small>

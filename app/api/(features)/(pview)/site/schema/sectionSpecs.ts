@@ -147,6 +147,16 @@ export interface HomeNoticeFact {
   text: string;
 }
 
+/** A PDF attached to a notice. */
+export interface HomeNoticeDocument {
+  /** The PDF's address. */
+  file: string;
+  /** "Balance sheet, 31 March 2026"; empty: "The notice (PDF)", or "Document 2" among several. */
+  title: string;
+  /** Its Download button's text; empty: "Download the notice", or "Download" among several. */
+  label: string;
+}
+
 export interface HomeNoticeItem {
   image: string;
   imageAlt: string;
@@ -172,10 +182,8 @@ export interface HomeNoticeItem {
   /** The button at the end of its page, to `href`. */
   actionLabel?: string;
   href: string;
-  /** The notice as a PDF, shown on its page with a Download button. */
-  pdf?: string;
-  pdfTitle?: string;
-  pdfLabel?: string;
+  /** The PDFs attached to it, each shown on its page with its own Download button. */
+  documents?: HomeNoticeDocument[];
 }
 
 export interface HomeNoticesContent {
@@ -552,9 +560,6 @@ export const SECTION_SPECS: SectionSpec[] = [
           { key: "sign", label: "Signed by", type: "text", max: 150, placeholder: "Santosh Kalyani (Batch of 1990), President, OCA 2023–25", hint: "Leave empty to hide it." },
           { key: "actionLabel", label: "Button text", type: "text", max: 40, placeholder: "Become a member", hint: "A button at the end of the page, to the link below. Left empty: “Read more”." },
           { key: "href", label: "Button link", type: "link", hint: `${LINK_HINT} Leave empty to hide the button.` },
-          { key: "pdf", label: "The notice (PDF)", type: "file", fileKind: "document", heading: "Attached document", hint: "Upload a PDF (up to 25 MB), or paste the address of one already online. Shown on its page with a Download button." },
-          { key: "pdfTitle", label: "Document title", type: "text", max: 100, placeholder: "Minutes of the AGM, 23 April 2023" },
-          { key: "pdfLabel", label: "Download button text", type: "text", max: 40, placeholder: "Download the minutes", hint: "Left empty: “Download the notice”." },
         ],
         lists: [
           {
@@ -582,6 +587,20 @@ export const SECTION_SPECS: SectionSpec[] = [
               },
               { key: "label", label: "Label", type: "text", max: 40, required: true, placeholder: "When" },
               { key: "text", label: "Detail", type: "text", max: 300, required: true, placeholder: "Sunday, 30 November 2025 · 10:30 am" },
+            ],
+          },
+          {
+            key: "documents",
+            label: "Attached documents",
+            itemLabel: "Document",
+            titleField: "title",
+            hint: "The PDFs that go with the notice: the notice itself, a balance sheet, a nomination form. Each is shown on its page with its own Download button, in this order.",
+            min: 0,
+            max: 6,
+            fields: [
+              { key: "file", label: "The document (PDF)", type: "file", fileKind: "document", required: true, hint: "Upload a PDF (up to 25 MB), or paste the address of one already online." },
+              { key: "title", label: "Document title", type: "text", max: 100, placeholder: "Minutes of the AGM, 23 April 2023" },
+              { key: "label", label: "Download button text", type: "text", max: 40, placeholder: "Download the minutes", hint: "Left empty: “Download the notice”, or “Download” when there are several." },
             ],
           },
         ],

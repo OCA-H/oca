@@ -17489,9 +17489,103 @@ a.mag-card.feat:hover .mag-open {
   padding-bottom: 56px;
 }
 
+/* A notice's attached PDFs: one row each, with View and Download. */
+.nw-files {
+  margin-top: 28px;
+  scroll-margin-top: 100px;
+}
+
+.nw-files h2 {
+  font-size: 12px;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--text-soft);
+  margin: 0 0 10px;
+  font-family: var(--sans);
+}
+
+.nw-files ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 10px;
+}
+
+.nw-file {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 16px;
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-m);
+}
+
+.nw-file-t {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.nw-file-t b {
+  display: block;
+  font-size: 16px;
+  line-height: 1.4;
+  color: var(--text);
+  overflow-wrap: anywhere;
+}
+
+.nw-file-t small {
+  font-size: 12.5px;
+  color: var(--text-soft);
+}
+
+.nw-file-acts {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.nw-file-acts .btn svg,
+.nw-doc-head .btn svg {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+}
+
+.nw-doc-block {
+  scroll-margin-top: 100px;
+}
+
+.nw-doc-block + .nw-doc-block {
+  margin-top: 48px;
+}
+
 .nw-doc-head {
   max-width: 860px;
   margin: 0 auto 18px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 12px 20px;
+}
+
+.nw-doc-head > div:first-child {
+  flex: 1 1 260px;
+  min-width: 0;
+}
+
+.nw-doc-head h2 {
+  overflow-wrap: anywhere;
+}
+
+.nw-doc-acts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
 }
 
 .nw-doc-head h2 {
@@ -17507,6 +17601,57 @@ a.mag-card.feat:hover .mag-open {
 
   .nw-article > p {
     font-size: 16px;
+  }
+
+  .nw-file {
+    flex-wrap: wrap;
+  }
+
+  .nw-file-t {
+    flex-basis: calc(100% - 52px);
+  }
+
+  .nw-file-acts {
+    flex: 1 1 100%;
+    justify-content: flex-start;
+  }
+
+  .nw-file-acts .btn,
+  .nw-doc-acts .btn {
+    flex: 1 1 0;
+    min-width: 120px;
+    white-space: normal;
+    text-align: center;
+  }
+
+  .nw-doc-head h2 {
+    font-size: 19px;
+  }
+
+  .nw-doc-acts {
+    flex: 1 1 100%;
+  }
+
+  .nw-doc-block + .nw-doc-block {
+    margin-top: 36px;
+  }
+
+  /* On a phone the preview is as tall as its page, so the notice scrolls as one page, not a pane inside it. */
+  .nw-doc .by-viewer,
+  .nw-doc .by-viewer .by-scroll {
+    border-radius: 14px;
+  }
+
+  .nw-doc .by-scroll {
+    height: auto;
+    padding: 10px;
+    overflow: visible;
+  }
+
+  /* Room for the floating Download button under the last document. */
+  .nw-doc {
+    padding-top: 32px;
+    padding-bottom: 104px;
   }
 }
 
