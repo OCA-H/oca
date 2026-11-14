@@ -141,39 +141,13 @@ export const NewsDetailView: React.FC<{ notice: HomeNoticeItem }> = ({ notice })
                 </SiteLink>
               </div>
             )}
-
-            {docs.length > 0 && (
-              <div className="nw-files" id="documents">
-                <h2>{text.filesHeading(docs.length)}</h2>
-                <ul>
-                  {docs.map((doc) => (
-                    <li className="nw-file" key={doc.anchor}>
-                      <span className="nw-ico">{FACT_ICONS.doc}</span>
-                      <div className="nw-file-t">
-                        <b>{doc.title}</b>
-                        <small>{text.fileKind}</small>
-                      </div>
-                      <div className="nw-file-acts">
-                        <a className="btn btn-ghost btn-sm" href={`#${doc.anchor}`} aria-label={text.viewAria(doc.title)}>
-                          {text.view}
-                        </a>
-                        <a className="btn btn-primary btn-sm" href={downloadHref(doc.file)} download aria-label={text.downloadTitleAria(doc.title)}>
-                          <DownloadIcon />
-                          {doc.label}
-                        </a>
-                      </div>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
           </article>
         </div>
       </section>
 
       {docs.length > 0 && (
         <>
-          <section className="content-section tint-teal by-reader nw-doc">
+          <section className="content-section tint-teal by-reader nw-doc" id="documents">
             <div className="wrap">
               {docs.map((doc, i) => (
                 <div className="nw-doc-block" id={doc.anchor} key={doc.anchor}>
@@ -213,7 +187,7 @@ export const NewsDetailView: React.FC<{ notice: HomeNoticeItem }> = ({ notice })
             </div>
           </section>
 
-          {/* One PDF: the floating button downloads it. Several: it goes to the list of them. */}
+          {/* One PDF: the floating button downloads it. Several: it goes to the first of them. */}
           {isOnlyDoc ? (
             <a className="by-float" href={downloadHref(docs[0].file)} download aria-label={text.downloadAria}>
               <span className="by-float-circle">

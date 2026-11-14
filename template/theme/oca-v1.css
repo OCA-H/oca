@@ -17489,66 +17489,10 @@ a.mag-card.feat:hover .mag-open {
   padding-bottom: 56px;
 }
 
-/* A notice's attached PDFs: one row each, with View and Download. */
-.nw-files {
-  margin-top: 28px;
-  scroll-margin-top: 100px;
+.nw-doc {
+  scroll-margin-top: 80px;
 }
 
-.nw-files h2 {
-  font-size: 12px;
-  letter-spacing: .08em;
-  text-transform: uppercase;
-  color: var(--text-soft);
-  margin: 0 0 10px;
-  font-family: var(--sans);
-}
-
-.nw-files ul {
-  margin: 0;
-  padding: 0;
-  list-style: none;
-  display: grid;
-  gap: 10px;
-}
-
-.nw-file {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  padding: 14px 16px;
-  background: #fff;
-  border: 1px solid var(--border);
-  border-radius: var(--radius-m);
-}
-
-.nw-file-t {
-  flex: 1 1 auto;
-  min-width: 0;
-}
-
-.nw-file-t b {
-  display: block;
-  font-size: 16px;
-  line-height: 1.4;
-  color: var(--text);
-  overflow-wrap: anywhere;
-}
-
-.nw-file-t small {
-  font-size: 12.5px;
-  color: var(--text-soft);
-}
-
-.nw-file-acts {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: flex-end;
-  gap: 8px;
-  flex-shrink: 0;
-}
-
-.nw-file-acts .btn svg,
 .nw-doc-head .btn svg {
   width: 16px;
   height: 16px;
@@ -17603,20 +17547,6 @@ a.mag-card.feat:hover .mag-open {
     font-size: 16px;
   }
 
-  .nw-file {
-    flex-wrap: wrap;
-  }
-
-  .nw-file-t {
-    flex-basis: calc(100% - 52px);
-  }
-
-  .nw-file-acts {
-    flex: 1 1 100%;
-    justify-content: flex-start;
-  }
-
-  .nw-file-acts .btn,
   .nw-doc-acts .btn {
     flex: 1 1 0;
     min-width: 120px;
