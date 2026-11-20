@@ -109,7 +109,7 @@ export async function proxy(request: NextRequest) {
   }
 
   // 5. The admin panel is for admins: anyone else goes to their own profile
-  if (session && (pathname === ADMIN_ROUTE || pathname.startsWith(`${ADMIN_ROUTE}/`)) && session.user.role !== USER_ROLES.admin) {
+  if (session && (pathname === ADMIN_ROUTE || pathname.startsWith(`${ADMIN_ROUTE}/`)) && session.user.role !== USER_ROLES.superAdmin) {
     return NextResponse.redirect(new URL("/sv/profile", request.url));
   }
 

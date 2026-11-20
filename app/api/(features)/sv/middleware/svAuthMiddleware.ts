@@ -10,7 +10,7 @@ import {
 
 export interface SvAuthOptions {
   /**
-   * Allowed roles for authorization (e.g., ['member', 'admin', 'columban']).
+   * Allowed roles for authorization (e.g., ['member', 'super_admin', 'columban']).
    * If omitted, any authenticated user is allowed.
    */
   roles?: string[];

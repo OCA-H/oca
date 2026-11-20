@@ -73,7 +73,7 @@ export const Header: React.FC<HeaderProps> = ({ activeRoute }) => {
   const activeNav = activeRoute ? NAV_MAP[activeRoute] : undefined;
   const [openGroup, setOpenGroup] = useState<string | null>(activeNav ?? null);
   // Only shows the link; /sv/admin and its APIs check the role themselves.
-  const isAdmin = user?.role === 'admin';
+  const isAdmin = user?.role === 'super_admin';
   // The buttons fade in only when they arrive after the placeholder (a page load). On a later page,
   // where the answer is already known, they are simply there.
   const [revealAuth] = useState(isAuthLoading);

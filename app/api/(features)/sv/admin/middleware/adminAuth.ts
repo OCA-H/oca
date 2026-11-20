@@ -18,9 +18,9 @@ export function withAdminAuth<TContext = unknown>(
   return withSvAuth<TContext>(
     async (request, session, context) => {
       const admin = await userRepository.findById(session.user.id);
-      if (!admin || admin.status !== "active" || admin.role !== USER_ROLES.admin) throw HttpError.forbidden(FORBIDDEN);
+      if (!admin || admin.status !== "active" || admin.role !== USER_ROLES.superAdmin) throw HttpError.forbidden(FORBIDDEN);
       return handler(request, admin, session, context);
     },
-    { roles: [USER_ROLES.admin], forbiddenMessage: FORBIDDEN }
+    { roles: [USER_ROLES.superAdmin], forbiddenMessage: FORBIDDEN }
   );
 }

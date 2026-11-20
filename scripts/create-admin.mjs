@@ -1,4 +1,4 @@
-// Creates an OCA admin account, or makes an existing member an admin. Admins see the admin panel
+// Creates an OCA super admin account, or makes an existing member a super admin. Super admins see the admin panel
 // (/sv/admin) from their profile and can edit the website's content.
 //
 //   npm run admin:create -- --email secretariat@oldcolumban.net --name "OCA Secretariat"
@@ -76,7 +76,7 @@ async function readPassword({ required }) {
   const given = args.password ?? process.env.ADMIN_PASSWORD;
   if (given !== undefined) return given;
   if (!required || !process.stdin.isTTY) return null;
-  const password = await askHidden("Password for the admin account: ");
+  const password = await askHidden("Password for the super admin account: ");
   if ((await askHidden("Type it again: ")) !== password) fail("The two passwords do not match.");
   return password;
 }
@@ -103,18 +103,18 @@ try {
   if (args.demote) {
     if (!existing) fail(`No account uses ${email}.`);
     await client.query("UPDATE users SET role = 'member', updated_at = now() WHERE id = $1", [existing.id]);
-    console.log(`\n✓ ${existing.full_name} (${existing.email}) is now a member, without admin access.\n`);
+    console.log(`\n✓ ${existing.full_name} (${existing.email}) is now a member, without super admin access.\n`);
   } else if (existing) {
     const password = await readPassword({ required: false });
     if (password !== null) checkPassword(password);
     const { hash, salt } = password !== null ? hashPassword(password) : {};
     await client.query(
-      `UPDATE users SET role = 'admin', updated_at = now()
+      `UPDATE users SET role = 'super_admin', updated_at = now()
          ${password !== null ? ", password_hash = $2, password_salt = $3" : ""}
        WHERE id = $1`,
       password !== null ? [existing.id, hash, salt] : [existing.id]
     );
-    console.log(`\n✓ ${existing.full_name} (${existing.email}) is now an admin${password !== null ? ", with the new password" : ""}.`);
+    console.log(`\n✓ ${existing.full_name} (${existing.email}) is now a super admin${password !== null ? ", with the new password" : ""}.`);
     if (existing.status !== "active") console.log(`  Note: the account's status is "${existing.status}", so it cannot sign in until it is active.`);
     console.log("  If they are signed in, they need to sign out and in again to see the admin panel.\n");
   } else {
@@ -126,10 +126,10 @@ try {
     const { hash, salt } = hashPassword(password);
     await client.query(
       `INSERT INTO users (member_id, email, mobile, full_name, password_hash, password_salt, role, membership_type, status)
-       VALUES ($1, $2, $3, $4, $5, $6, 'admin', 'Administrator', 'active')`,
+       VALUES ($1, $2, $3, $4, $5, $6, 'super_admin', 'Administrator', 'active')`,
       [memberId, email, args.mobile?.trim() || null, name.slice(0, 150), hash, salt]
     );
-    console.log(`\n✓ Created admin ${name}. Sign in at /member-signin with ${email} (or "${memberId}").\n`);
+    console.log(`\n✓ Created super admin ${name}. Sign in at /member-signin with ${email} (or "${memberId}").\n`);
   }
 } catch (error) {
   if (error?.code === "23505") fail("Another account already uses that member ID or mobile number.");

@@ -1,4 +1,5 @@
 import "server-only";
+import { USER_ROLES } from "@/app/api/(features)/(pview)/auth/schema/userSchema";
 import { BaseController } from "@/app/api/core/baseController";
 import { HttpError } from "@/app/api/core/httpError";
 import { verifySvAuth } from "@/app/api/(features)/sv/middleware/svAuthMiddleware";
@@ -9,9 +10,9 @@ import { EventPassRepository } from "../repository/eventPassRepository";
 import { EventPassBookingRepository } from "../repository/eventPassBookingRepository";
 import { paymentStatusPath } from "../services/eventPassEvents";
 
-/** Prices are charged from event_passes, so only admins may change them. */
+/** Prices are charged from event_passes, so only super admins may change them. */
 const requireAdmin = (request: Request) =>
-  verifySvAuth(request, { roles: ["admin"], forbiddenMessage: "Only administrators can manage passes." });
+  verifySvAuth(request, { roles: [USER_ROLES.superAdmin], forbiddenMessage: "Only super admins can manage passes." });
 
 export class EventPassController extends BaseController {
   constructor(private readonly service: EventPassService) {

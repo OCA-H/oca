@@ -45,7 +45,7 @@ export const DEFAULT_DEMO_USERS: Array<Omit<NewUser, "passwordHash" | "passwordS
     batchYear: "1988",
     house: "Mulligan",
     membershipType: "Honorary Member",
-    role: "admin",
+    role: "super_admin",
     status: "active",
     metadata: {
       designation: "Executive Committee",

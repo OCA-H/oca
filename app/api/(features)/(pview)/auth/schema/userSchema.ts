@@ -1,7 +1,7 @@
 import { pgTable, serial, varchar, text, date, timestamp, jsonb, uniqueIndex, index } from "drizzle-orm/pg-core";
 
-/** What users.role holds. Admins also get the admin panel (/sv/admin) for editing site content. */
-export const USER_ROLES = { member: "member", admin: "admin" } as const;
+/** What users.role holds. Only super admins get the admin panel (/sv/admin) for editing site content. */
+export const USER_ROLES = { member: "member", superAdmin: "super_admin" } as const;
 export type UserRole = (typeof USER_ROLES)[keyof typeof USER_ROLES];
 
 export const users = pgTable(

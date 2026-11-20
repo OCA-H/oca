@@ -21,7 +21,7 @@ export const profileHelper = {
     return profileHelper.panelFromSlug(rest || undefined) ?? "dashboard";
   },
 
-  isAdmin: (profile: MemberProfile): boolean => profile.role === "admin",
+  isAdmin: (profile: MemberProfile): boolean => profile.role === "super_admin",
 
   /** The menu: admins get the Administration group, right after the Overview. */
   navFor: (profile: MemberProfile) =>
