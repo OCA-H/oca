@@ -237,7 +237,7 @@ export const Header: React.FC<HeaderProps> = ({ activeRoute }) => {
                             </div>
                           </div>
                           <Link href={ROUTES.PROFILE} onClick={() => handleLinkClick(ROUTES.PROFILE)}>My Profile</Link>
-                          {isAdmin && <Link href={ROUTES.ADMIN} onClick={() => handleLinkClick(ROUTES.ADMIN)}>Admin Panel</Link>}
+                          {isAdmin && <Link href={ROUTES.ADMIN} onClick={() => handleLinkClick(ROUTES.ADMIN)}>Super Admin Profile</Link>}
                           <button type="button" className="member-signout" onClick={() => { signOut(); }}>
                             Sign Out
                           </button>
@@ -360,7 +360,7 @@ export const Header: React.FC<HeaderProps> = ({ activeRoute }) => {
             <>
               <Link className="btn btn-primary" href={ROUTES.PROFILE} onClick={() => handleLinkClick(ROUTES.PROFILE)}>My Profile</Link>
               {isAdmin && (
-                <Link className="btn btn-ghost" href={ROUTES.ADMIN} onClick={() => handleLinkClick(ROUTES.ADMIN)}>Admin Panel</Link>
+                <Link className="btn btn-ghost" href={ROUTES.ADMIN} onClick={() => handleLinkClick(ROUTES.ADMIN)}>Super Admin Profile</Link>
               )}
               <button
                 className="btn btn-ghost mobile-signout"

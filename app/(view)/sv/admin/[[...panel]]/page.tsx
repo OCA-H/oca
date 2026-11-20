@@ -22,7 +22,7 @@ export async function generateMetadata({ params }: AdminPageProps) {
   const panel = await panelFor(params);
   const section = adminHelper.panelLabel(panel);
   return {
-    title: `${section ? `${section} – ` : ''}Admin Panel – Old Columbans Association`,
+    title: `${section ? `${section} – ` : ''}Super Admin Profile – Old Columbans Association`,
     robots: { index: false },
   };
 }

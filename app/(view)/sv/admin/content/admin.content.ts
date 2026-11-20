@@ -180,7 +180,7 @@ const sectionItems = (page: SectionSpec["page"]): AdminNavItem[] =>
 
 export const adminContent = {
   breadcrumb: { homeText: "Home", homeHref: ROUTES.HOME, membersText: "Members", membersHref: ROUTES.PROFILE, pageText: "Admin panel" },
-  hero: { eyebrow: "Admin panel", title: "Manage the website", chip: "Administrator" },
+  hero: { eyebrow: "Super admin profile", title: "Manage the website", chip: "Super Admin" },
 
   nav: [
     { group: "Overview", items: [{ label: "Dashboard", icon: "dashboard", panel: "dashboard" }] },

@@ -104,12 +104,12 @@ export const profileContent = {
 
   /** Shown to admins only, in the menu and on the dashboard. */
   admin: {
-    nav: { group: "Administration", items: [{ label: "Admin Panel", icon: "shield", href: ROUTES.ADMIN }] } as {
+    nav: { group: "Administration", items: [{ label: "Super Admin Profile", icon: "shield", href: ROUTES.ADMIN }] } as {
       group: string;
       items: ProfileNavItem[];
     },
     tile: {
-      label: "Admin Panel",
+      label: "Super Admin Profile",
       icon: "shield",
       href: ROUTES.ADMIN,
       tone: "gold",
