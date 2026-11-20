@@ -17,6 +17,7 @@ const nextConfig: NextConfig = {
   allowedDevOrigins: appHost && appHost !== "localhost" ? [appHost] : [],
   cacheComponents: true,
   experimental: {
+    agentUpgrade: "security",
     // Requests to /api/sv pass through proxy.ts, which buffers bodies up to this size (default 10mb).
     // Uploads are capped by their own rules (images 10 MB, Hangout videos 20 MB); this leaves room
     // for the multipart wrapping.
