@@ -275,7 +275,7 @@ function useReload(ctx: OaContext) {
   };
 }
 
-const nameCol = (cell: (m: MemberRow) => React.ReactNode): PagedColumn<MemberRow> => ({ label: 'Name', sortKey: 'name', cell });
+const nameCol = (cell: (m: MemberRow) => React.ReactNode): PagedColumn<MemberRow> => ({ label: 'Name', sortKey: 'name', primary: true, cell });
 const batchCol: PagedColumn<MemberRow> = { label: 'Batch', sortKey: 'batch', cell: (m) => m.batch };
 const idCol: PagedColumn<MemberRow> = { label: 'OCA ID', sortKey: 'memberId', cell: (m) => <Dash v={m.memberId} /> };
 const emailCol: PagedColumn<MemberRow> = { label: 'Email', sortKey: 'email', cell: (m) => <Dash v={m.email} /> };
@@ -721,7 +721,7 @@ export const DuplicateAccountPage: React.FC<{ ctx: OaContext }> = ({ ctx }) => {
                 ) : null
               }
               cols={[
-                { label: 'Name', cell: (r) => <>{r.m.name}<RoleBadge role={r.m.role} /></> },
+                { label: 'Name', primary: true, cell: (r) => <>{r.m.name}<RoleBadge role={r.m.role} /></> },
                 { label: 'Batch', cell: (r) => r.m.batch },
                 { label: 'OCA ID', cell: (r) => <Dash v={r.m.memberId} /> },
                 { label: 'Email', cell: (r) => <Dash v={r.m.email} /> },

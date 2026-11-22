@@ -19,7 +19,8 @@
 .oa a:hover{text-decoration:underline;}
 .oa :focus-visible{outline:2px solid var(--teal); outline-offset:2px;}
 .oa button{font-family:inherit;}
-.oa .sr-only{position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap;}
+.oa{position:relative;}
+.oa .sr-only{position:absolute; width:1px; height:1px; margin:-1px; padding:0; border:0; overflow:hidden; clip:rect(0,0,0,0); clip-path:inset(50%); white-space:nowrap;}
 .oa .app-header{position:sticky; top:0; z-index:60; height:var(--hh); background:#fff; border-bottom:3px solid var(--brand); box-shadow:0 1px 3px rgba(11,60,30,.05); display:flex; align-items:center; justify-content:space-between; padding:0 28px;}
 .oa .hdr-l{display:flex; align-items:center; gap:16px; min-width:0;}
 .oa .logo{height:48px; width:auto; display:block;}
@@ -52,7 +53,9 @@
 .oa .back{display:inline-flex; align-items:center; gap:6px; margin:0 0 14px; font-weight:600; font-size:14px; color:var(--teal-dark);}
 .oa .card{background:var(--card); border:1px solid var(--border); border-radius:var(--radius-m); box-shadow:var(--shadow-card);}
 .oa .tcard{overflow:hidden;}
-.oa .scrollit{max-height:560px; overflow:auto;}
+/* position:relative keeps the hidden (sr-only) labels of off-screen rows inside the scroll box;
+   without it they sit below the page and stretch it, leaving blank space under the sidebar. */
+.oa .scrollit{position:relative; max-height:560px; overflow:auto;}
 .oa table.target{width:100%; border-collapse:collapse; font-size:14px;}
 .oa .target thead th{position:sticky; top:0; z-index:1; background:var(--tint-teal); color:var(--brand-deep); text-align:left; font-size:12px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; padding:12px 16px; border-bottom:1px solid var(--border-strong); white-space:nowrap;}
 .oa .target td{padding:12px 16px; border-bottom:1px solid var(--border); vertical-align:middle; white-space:nowrap;}
@@ -243,16 +246,60 @@
   .oa .tcard.stack .scrollit{max-height:none; overflow:visible;}
   .oa .tcard.stack table.target{min-width:0 !important;}
   .oa .tcard.stack thead{position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0,0,0,0);}
-  .oa .tcard.stack tbody tr{display:block; padding:10px 14px; border-bottom:1px solid var(--border);}
+  .oa .tcard.stack table.target, .oa .tcard.stack tbody{display:block; width:100%;}
+  .oa .tcard.stack tbody tr{display:flex; flex-direction:column; padding:12px 16px; border-bottom:1px solid var(--border);}
   .oa .tcard.stack tbody tr:last-child{border-bottom:0;}
-  .oa .tcard.stack td{display:flex; gap:12px; justify-content:space-between; padding:6px 0; border:0; white-space:normal; text-align:right; overflow-wrap:anywhere;}
-  .oa .tcard.stack td::before{content:attr(data-l); flex:0 0 38%; text-align:left; font-size:12px; font-weight:700; letter-spacing:.04em; text-transform:uppercase; color:var(--text-soft);}
+  .oa .tcard.stack tbody tr:hover td{background:none;}
+  /* each cell: label on the left, the value (one box) on the right */
+  .oa .tcard.stack td{display:flex; align-items:baseline; gap:12px; padding:5px 0; border:0; white-space:normal; font-size:14px;}
+  .oa .tcard.stack td::before{content:attr(data-l); flex:0 0 96px; font-size:11.5px; font-weight:700; letter-spacing:.05em; text-transform:uppercase; color:var(--text-soft);}
   .oa .tcard.stack td[data-l=""]::before{content:none;}
+  .oa .tcard.stack .tdv{flex:1; min-width:0; display:flex; flex-wrap:wrap; align-items:center; justify-content:flex-end; gap:4px 8px; text-align:right; overflow-wrap:anywhere;}
+  .oa .tcard.stack td[data-l=""] .tdv{justify-content:flex-start;}
   .oa .tcard.stack td.tdwrap{min-width:0;}
-  .oa .tcard.stack tr.grp{background:var(--tint-gold);}
-  .oa .tcard.stack tr.grp td{justify-content:flex-start; text-align:left;}
-  .oa .ph h1{font-size:23px;}
+  .oa .tcard.stack td.tdwrap .tdv{justify-content:flex-start; text-align:left;}
+  /* the primary cell (usually the name) is the card's title: first, full width, no label */
+  .oa .tcard.stack td.tdp{order:-1; padding:0 0 8px; margin-bottom:4px; border-bottom:1px dashed var(--border); font-size:15.5px; font-weight:600;}
+  .oa .tcard.stack td.tdp::before{content:none;}
+  .oa .tcard.stack td.tdp .tdv{justify-content:flex-start; text-align:left;}
+  .oa .tcard.stack .tdv .label-success, .oa .tcard.stack .tdv .label-gold{margin-left:0; white-space:nowrap;}
+  .oa .tcard.stack .tdv .stat{margin-left:auto;}
+  .oa .tcard.stack .tdv > .btn{width:100%;}
+  .oa .tcard.stack tr.grp{background:var(--tint-gold); padding-top:9px; padding-bottom:9px;}
+  .oa .tcard.stack tr.grp td{background:none !important; padding:0;}
+  .oa .tcard.stack tr.grp .tdv{justify-content:flex-start; text-align:left; display:block;}
+  .oa .skr{grid-template-columns:repeat(2,1fr) !important;}
+  .oa .skr span:nth-child(n+3){display:none;}
+  /* header, page head, forms, details, buttons */
+  .oa{--hh:64px;}
+  .oa .app-header{padding:0 12px; gap:8px;}
+  .oa .hdr-l{gap:10px;}
+  .oa .logo{height:36px;}
+  .oa .hdr-r{gap:8px;}
   .oa .hdr-r .btn{padding:7px 12px;}
+  .oa .main{padding:18px 14px 40px;}
+  .oa .ph{gap:12px; margin-bottom:16px; padding-bottom:14px;}
+  .oa .ph h1{font-size:22px;}
+  .oa .tiles{gap:12px;}
+  .oa .tile{gap:14px; padding:16px;}
+  .oa .tile-ic{flex-basis:46px; width:46px; height:46px;}
+  .oa .tile-ic svg{width:24px; height:24px;}
+  .oa .tile-t{font-size:16px;}
+  .oa .kv, .oa .kv tbody{display:block;}
+  .oa .kv tr{display:block; padding:10px 14px; border-bottom:1px solid var(--border);}
+  .oa .kv tr:last-child{border-bottom:0;}
+  .oa .kv th, .oa .kv td{display:block; width:auto; padding:0; border:0; background:none; overflow-wrap:anywhere;}
+  .oa .kv th{font-size:12px; font-weight:700; letter-spacing:.04em; text-transform:uppercase; margin-bottom:2px;}
+  .oa .factions .btn, .oa .top-actions .btn{flex:1 1 100%;}
+  .oa .modal{padding:12px; align-items:flex-end;}
+  .oa .modal-content{padding:22px 18px 18px;}
+  .oa .modal-footer{flex-direction:column-reverse;}
+  .oa .attn{padding:12px 14px; font-size:14px;}
+  .oa .alert{padding:12px 14px; font-size:14px;}
+}
+@media (max-width:380px){
+  .oa .tcard.stack td::before{flex-basis:78px;}
+  .oa .phone{grid-template-columns:110px 1fr;}
 }
 
 /* ===== custom dropdown (OaSelect), flags and radio: no browser-drawn controls ===== */

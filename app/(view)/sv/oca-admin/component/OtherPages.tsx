@@ -130,7 +130,7 @@ export const DonorPassPage: React.FC<{ ctx: OaContext }> = ({ ctx }) => {
       }
       cols={[
         { label: 'SN', sortKey: 'id', cell: (r) => r.id },
-        { label: 'Name', sortKey: 'name', cell: (r) => r.name },
+        { label: 'Name', sortKey: 'name', primary: true, cell: (r) => r.name },
         { label: 'Batch', sortKey: 'batch', cell: (r) => r.batch },
         { label: 'Email', sortKey: 'email', cell: (r) => <Dash v={r.email} /> },
         { label: 'Mobile', sortKey: 'mobile', cell: (r) => <Dash v={r.mobile} /> },
@@ -206,7 +206,7 @@ export const ExportDataPage: React.FC<{ ctx: OaContext }> = ({ ctx }) => {
         rows={[...EXPORT_KINDS]}
         rowKey={(k) => k}
         cols={[
-          { label: 'File', cell: (k) => <b>{EXPORT_INFO[k].title}</b> },
+          { label: 'File', primary: true, cell: (k) => <b>{EXPORT_INFO[k].title}</b> },
           { label: 'What it has', wrap: true, cell: (k) => EXPORT_INFO[k].desc },
           { label: 'Size', cell: (k) => (counts ? plural(counts[k], 'record', 'records') : <span className="skeleton" style={{ display: 'inline-block', width: 80 }} />) },
           {
@@ -298,7 +298,7 @@ export const BirthdaysPage: React.FC = () => {
                 },
               },
               { label: 'Occasion', cell: (x) => x.kind },
-              { label: 'Name', cell: (x) => <a href={`#members-detail/${x.member.id}`}>{x.member.name}</a> },
+              { label: 'Name', primary: true, cell: (x) => <a href={`#members-detail/${x.member.id}`}>{x.member.name}</a> },
               { label: 'Batch', cell: (x) => x.member.batch },
               { label: 'Email', cell: (x) => (x.member.email ? <a href={`mailto:${x.member.email}`}>{x.member.email}</a> : '') },
               { label: 'Mobile', cell: (x) => <Dash v={x.member.mobile} /> },

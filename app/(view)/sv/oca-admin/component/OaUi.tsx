@@ -59,6 +59,8 @@ export interface Column<T> {
   /** Cell content. */
   cell: (row: T) => React.ReactNode;
   wrap?: boolean;
+  /** On phones, this cell becomes the card's title: first, full width, no label. */
+  primary?: boolean;
 }
 
 export interface SortState {
@@ -109,8 +111,9 @@ export function DataTable<T>({
                 {before?.(r, index)}
                 <tr>
                   {cols.map((c, i) => (
-                    <td key={c.label || i} data-l={c.label} className={c.wrap ? 'tdwrap' : undefined}>
-                      {c.cell(r)}
+                    <td key={c.label || i} data-l={c.label} className={[c.wrap && 'tdwrap', c.primary && 'tdp'].filter(Boolean).join(' ') || undefined}>
+                      {/* One box for the value, so a name, its badge and icons stay together in the phone card. */}
+                      <span className="tdv">{c.cell(r)}</span>
                     </td>
                   ))}
                 </tr>
@@ -398,7 +401,7 @@ export const TableSkeleton: React.FC<{ cols: number; rows?: number }> = ({ cols,
   <div className="card tcard" aria-hidden="true">
     <div style={{ padding: '16px' }}>
       {Array.from({ length: rows }, (_, r) => (
-        <div key={r} style={{ display: 'grid', gridTemplateColumns: `repeat(${cols}, 1fr)`, gap: 18, padding: '11px 0' }}>
+        <div key={r} className="skr" style={{ display: 'grid', gridTemplateColumns: `repeat(${cols}, 1fr)`, gap: 18, padding: '11px 0' }}>
           {Array.from({ length: cols }, (_, c) => (
             <span key={c} className="skeleton" style={{ width: `${55 + ((r + c) % 4) * 10}%` }} />
           ))}
