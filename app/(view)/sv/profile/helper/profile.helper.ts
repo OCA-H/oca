@@ -23,11 +23,22 @@ export const profileHelper = {
 
   isAdmin: (profile: MemberProfile): boolean => profile.role === "super_admin",
 
-  /** The menu: admins get the Administration group, right after the Overview. */
+  /** Super admins and admins (sub admins): both get the OCA admin portal. */
+  isStaff: (profile: MemberProfile): boolean => profile.role === "super_admin" || profile.role === "admin",
+
+  /** The Administration menu entries this member gets: the OCA admin portal, plus the website editor for super admins. */
+  adminItems: (profile: MemberProfile) =>
+    profileContent.admin.nav.items.filter((item) => item.href !== ROUTES.ADMIN || profileHelper.isAdmin(profile)),
+
+  /** The menu: staff get the Administration group, right after the Overview. */
   navFor: (profile: MemberProfile) =>
-    profileHelper.isAdmin(profile)
-      ? [profileContent.nav[0], profileContent.admin.nav, ...profileContent.nav.slice(1)]
+    profileHelper.isStaff(profile)
+      ? [profileContent.nav[0], { ...profileContent.admin.nav, items: profileHelper.adminItems(profile) }, ...profileContent.nav.slice(1)]
       : profileContent.nav,
+
+  /** The dashboard's admin tiles. */
+  adminTiles: (profile: MemberProfile) =>
+    profileContent.admin.tiles.filter((tile) => tile.href !== ROUTES.ADMIN || profileHelper.isAdmin(profile)),
 
   getInitials: (name: string): string =>
     name

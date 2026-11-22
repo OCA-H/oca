@@ -102,20 +102,39 @@ export const profileContent = {
     ] as ProfileTile[],
   },
 
-  /** Shown to admins only, in the menu and on the dashboard. */
+  /**
+   * Shown to super admins and admins, in the menu and on the dashboard. Entries for ROUTES.ADMIN
+   * (the website editor) are for super admins only; see profileHelper.adminItems / adminTiles.
+   */
   admin: {
-    nav: { group: "Administration", items: [{ label: "Super Admin Profile", icon: "shield", href: ROUTES.ADMIN }] } as {
+    nav: {
+      group: "Administration",
+      items: [
+        { label: "OCA Admin", icon: "people", href: ROUTES.OCA_ADMIN },
+        { label: "Super Admin Profile", icon: "shield", href: ROUTES.ADMIN },
+      ],
+    } as {
       group: string;
       items: ProfileNavItem[];
     },
-    tile: {
-      label: "Super Admin Profile",
-      icon: "shield",
-      href: ROUTES.ADMIN,
-      tone: "gold",
-      desc: "Update the website’s images and text.",
-      action: "Manage the website",
-    } as ProfileTile,
+    tiles: [
+      {
+        label: "OCA Admin",
+        icon: "people",
+        href: ROUTES.OCA_ADMIN,
+        tone: "gold",
+        desc: "Create, update and export member accounts.",
+        action: "Manage members",
+      },
+      {
+        label: "Super Admin Profile",
+        icon: "shield",
+        href: ROUTES.ADMIN,
+        tone: "gold",
+        desc: "Update the website’s images and text.",
+        action: "Manage the website",
+      },
+    ] as ProfileTile[],
   },
 
   /** Shown in place of a panel that is not built yet, if its address is opened directly. */

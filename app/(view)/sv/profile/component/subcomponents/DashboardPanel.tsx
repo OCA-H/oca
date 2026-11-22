@@ -14,8 +14,8 @@ interface DashboardPanelProps {
 }
 
 export const DashboardPanel: React.FC<DashboardPanelProps> = ({ profile, hidden, onShowPanel }) => {
-  const { dashboard, comingSoon, admin } = profileContent;
-  const tiles = profileHelper.isAdmin(profile) ? [admin.tile, ...dashboard.tiles] : dashboard.tiles;
+  const { dashboard, comingSoon } = profileContent;
+  const tiles = profileHelper.isStaff(profile) ? [...profileHelper.adminTiles(profile), ...dashboard.tiles] : dashboard.tiles;
 
   // Tiles that show the member's own details instead of a fixed line.
   const details = (tile: ProfileTile): React.ReactNode => {

@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { verifySessionToken, SESSION_COOKIE_NAME } from "./app/api/core/session";
-import { USER_ROLES } from "./app/api/(features)/(pview)/auth/schema/userSchema";
+import { USER_ROLES, isStaffRole } from "./app/api/(features)/(pview)/auth/schema/userSchema";
 
 /**
  * Check if the requested route is a secure view (/sv/...) or protected route
@@ -17,6 +17,9 @@ function isSecureViewRoute(pathname: string): boolean {
 
 /** The admin panel. Its APIs (/api/sv/admin) check the role again, against the database. */
 const ADMIN_ROUTE = "/sv/admin";
+
+/** The OCA admin console, for super admins and admins. Its APIs (/api/sv/oca-admin) check the role again. */
+const OCA_ADMIN_ROUTE = "/sv/oca-admin";
 
 /**
  * List of API routes that require authenticated session
@@ -110,6 +113,11 @@ export async function proxy(request: NextRequest) {
 
   // 5. The admin panel is for admins: anyone else goes to their own profile
   if (session && (pathname === ADMIN_ROUTE || pathname.startsWith(`${ADMIN_ROUTE}/`)) && session.user.role !== USER_ROLES.superAdmin) {
+    return NextResponse.redirect(new URL("/sv/profile", request.url));
+  }
+
+  // 5b. The OCA admin console is for super admins and admins: anyone else goes to their own profile
+  if (session && (pathname === OCA_ADMIN_ROUTE || pathname.startsWith(`${OCA_ADMIN_ROUTE}/`)) && !isStaffRole(session.user.role)) {
     return NextResponse.redirect(new URL("/sv/profile", request.url));
   }
 

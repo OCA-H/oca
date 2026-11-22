@@ -1,8 +1,17 @@
 import { pgTable, serial, varchar, text, date, timestamp, jsonb, uniqueIndex, index } from "drizzle-orm/pg-core";
 
-/** What users.role holds. Only super admins get the admin panel (/sv/admin) for editing site content. */
-export const USER_ROLES = { member: "member", superAdmin: "super_admin" } as const;
+/**
+ * What users.role holds.
+ * - super_admin: everything, including the website editor (/sv/admin).
+ * - admin: a sub admin, below the super admin. Gets the OCA admin console (/sv/oca-admin) for
+ *   managing member accounts, but not the website editor.
+ */
+export const USER_ROLES = { member: "member", admin: "admin", superAdmin: "super_admin" } as const;
 export type UserRole = (typeof USER_ROLES)[keyof typeof USER_ROLES];
+
+/** Roles that may open the OCA admin console (/sv/oca-admin) and call its APIs. */
+export const STAFF_ROLES: readonly string[] = [USER_ROLES.superAdmin, USER_ROLES.admin];
+export const isStaffRole = (role: string | null | undefined): boolean => !!role && STAFF_ROLES.includes(role);
 
 export const users = pgTable(
   "users",

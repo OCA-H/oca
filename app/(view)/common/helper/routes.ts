@@ -86,6 +86,7 @@ export const ROUTES = {
   MEMBER_PORTAL: '/sv/member-portal',
   PROFILE: '/sv/profile',
   ADMIN: '/sv/admin',
+  OCA_ADMIN: '/sv/oca-admin',
   CONTRIBUTION_PAYMENT_STATUS: '/sv/contribution/payment-status',
   SV: '/sv',
 

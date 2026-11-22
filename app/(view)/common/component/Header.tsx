@@ -74,6 +74,8 @@ export const Header: React.FC<HeaderProps> = ({ activeRoute }) => {
   const [openGroup, setOpenGroup] = useState<string | null>(activeNav ?? null);
   // Only shows the link; /sv/admin and its APIs check the role themselves.
   const isAdmin = user?.role === 'super_admin';
+  // Super admins and admins (sub admins) both get the OCA admin portal.
+  const isStaff = isAdmin || user?.role === 'admin';
   // The buttons fade in only when they arrive after the placeholder (a page load). On a later page,
   // where the answer is already known, they are simply there.
   const [revealAuth] = useState(isAuthLoading);
@@ -237,6 +239,7 @@ export const Header: React.FC<HeaderProps> = ({ activeRoute }) => {
                             </div>
                           </div>
                           <Link href={ROUTES.PROFILE} onClick={() => handleLinkClick(ROUTES.PROFILE)}>My Profile</Link>
+                          {isStaff && <Link href={ROUTES.OCA_ADMIN} onClick={() => handleLinkClick(ROUTES.OCA_ADMIN)}>OCA Admin</Link>}
                           {isAdmin && <Link href={ROUTES.ADMIN} onClick={() => handleLinkClick(ROUTES.ADMIN)}>Super Admin Profile</Link>}
                           <button type="button" className="member-signout" onClick={() => { signOut(); }}>
                             Sign Out
@@ -359,6 +362,9 @@ export const Header: React.FC<HeaderProps> = ({ activeRoute }) => {
           {isAuthenticated ? (
             <>
               <Link className="btn btn-primary" href={ROUTES.PROFILE} onClick={() => handleLinkClick(ROUTES.PROFILE)}>My Profile</Link>
+              {isStaff && (
+                <Link className="btn btn-ghost" href={ROUTES.OCA_ADMIN} onClick={() => handleLinkClick(ROUTES.OCA_ADMIN)}>OCA Admin</Link>
+              )}
               {isAdmin && (
                 <Link className="btn btn-ghost" href={ROUTES.ADMIN} onClick={() => handleLinkClick(ROUTES.ADMIN)}>Super Admin Profile</Link>
               )}

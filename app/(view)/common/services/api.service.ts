@@ -19,7 +19,7 @@ export class ApiError extends Error {
  */
 export async function apiRequest<T = Record<string, unknown>>(
   url: string,
-  options: { method?: 'GET' | 'POST' | 'PATCH' | 'PUT' | 'DELETE'; body?: unknown } = {}
+  options: { method?: 'GET' | 'POST' | 'PATCH' | 'PUT' | 'DELETE'; body?: unknown; signal?: AbortSignal } = {}
 ): Promise<T> {
   // FormData (file uploads) goes as multipart, with the browser setting its own boundary.
   const isForm = typeof FormData !== 'undefined' && options.body instanceof FormData;
@@ -29,6 +29,7 @@ export async function apiRequest<T = Record<string, unknown>>(
       method: options.method ?? 'GET',
       headers: isForm ? undefined : { 'Content-Type': 'application/json' },
       credentials: 'include',
+      signal: options.signal,
       ...(options.body !== undefined && { body: isForm ? (options.body as FormData) : JSON.stringify(options.body) }),
     });
   } catch {
