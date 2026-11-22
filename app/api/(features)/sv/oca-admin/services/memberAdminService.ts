@@ -268,6 +268,7 @@ export function readMemberQuery(request: Request): MemberQuery & { page: number;
   return {
     ...readPaging(params),
     missing: pick(params.get("missing"), ["email", "mobile", "id"] as const),
+    staffOnly: params.get("role") === "staff",
     sort: pick(params.get("sort"), ["name", "batch", "memberId", "email", "mobile"] as const),
   };
 }

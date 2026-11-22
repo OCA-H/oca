@@ -6,6 +6,9 @@ import type { SectionData, SiteSectionKey } from "@/app/api/(features)/(pview)/s
 export type { SectionData, SectionItem, SectionSpec, FieldSpec, FileKindName, ListSpec, ShowWhen, SiteSectionKey } from "@/app/api/(features)/(pview)/site/schema/sectionSpecs";
 
 /** What a section upload is; the server holds each to its own limits (images 10 MB, videos 20 MB, PDFs 25 MB, MP3s 20 MB). */
+export type { MemberRow } from "@/app/api/(features)/sv/oca-admin/schema";
+import type { MemberRow } from "@/app/api/(features)/sv/oca-admin/schema";
+
 export type MediaKind = "image" | "video" | "document" | "audio";
 
 /** How each kind of upload is named in messages. */
@@ -284,6 +287,21 @@ export const adminService = {
     adminRequest(`/api/sv/admin/memberships/${encodeURIComponent(orderId)}/reject`, { method: "POST", body: { reason } }),
 
   /** One page of contributions, newest first. */
+  /** One page of member accounts for the Admins panel; `staffOnly` narrows it to super admins and sub admins. */
+  listMembers: (query: { page: number; q: string; staffOnly: boolean }): Promise<{ data: MemberRow[]; page: number; pageSize: number; total: number }> =>
+    adminRequest(
+      `/api/sv/oca-admin/members?${new URLSearchParams({
+        page: String(query.page),
+        pageSize: "15",
+        ...(query.q.trim() && { q: query.q.trim() }),
+        ...(query.staffOnly && { role: "staff" }),
+      })}`
+    ),
+
+  /** Makes a member a sub admin ("admin") or takes it away ("member"). */
+  setRole: (id: number, role: "admin" | "member"): Promise<{ data: MemberRow; message: string }> =>
+    adminRequest(`/api/sv/oca-admin/members/${id}/role`, { method: "PUT", body: { role } }),
+
   listContributions: (query: ListQuery): Promise<PagedList<AdminContribution>> => adminRequest(`/api/sv/admin/contributions?${listParams(query)}`),
 
   /** Marks an unpaid contribution paid; the thank-you email is sent. */

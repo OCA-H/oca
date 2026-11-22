@@ -22,6 +22,8 @@ export interface MemberQuery {
   q?: string;
   /** Only accounts missing this. */
   missing?: "email" | "mobile" | "id";
+  /** Only super admins and sub admins. */
+  staffOnly?: boolean;
   sort?: "name" | "batch" | "memberId" | "email" | "mobile";
   dir: "asc" | "desc";
 }
@@ -58,7 +60,8 @@ export class MemberAdminRepository extends BaseRepository {
         : undefined,
       query.missing === "email" ? blank(users.email) : undefined,
       query.missing === "mobile" ? blank(users.mobile) : undefined,
-      query.missing === "id" ? blank(users.memberId) : undefined
+      query.missing === "id" ? blank(users.memberId) : undefined,
+      query.staffOnly ? inArray(users.role, [...STAFF_ROLES]) : undefined
     );
   }
 

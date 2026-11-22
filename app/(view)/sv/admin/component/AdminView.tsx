@@ -9,6 +9,7 @@ import {
   AdminDenied,
   AdminHero,
   AdminSidebar,
+  AdminsPanel,
   AdminSkeleton,
   ContributionHeadsPanel,
   ContributionsPanel,
@@ -47,6 +48,7 @@ export const AdminView: React.FC = () => {
               </React.Fragment>
             ))}
             <MembershipsPanel isActive={panel === 'memberships'} onBack={back} />
+            <AdminsPanel selfId={admin.id} isActive={panel === 'admins'} onBack={back} />
             <ContributionHeadsPanel isActive={panel === 'funds'} onBack={back} />
             <ContributionsPanel isActive={panel === 'contributions'} onBack={back} />
           </main>

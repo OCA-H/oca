@@ -9,6 +9,7 @@ import type { EventPass } from "@/app/api/(features)/(pview)/event-pass/schema/e
 import type { EventPassBooking } from "@/app/api/(features)/(pview)/event-pass/schema/eventPassBookingSchema";
 import { eventPassEvent, isEventPassEventName } from "@/app/api/(features)/(pview)/event-pass/services/eventPassEvents";
 import { withAdminAuth } from "../middleware/adminAuth";
+import { withStaffAuth } from "../../oca-admin/middleware/staffAuth";
 
 /** ?event=golf-tournament: one event's passes or bookings (with its past years); every event when left out. */
 const eventFilter = (request: Request): string | undefined => {
@@ -70,7 +71,9 @@ const toAdminBooking = (booking: EventPassBooking) => ({
   createdAt: booking.createdAt.toISOString(),
 });
 
-// Every action runs behind withAdminAuth: signed in, and an admin in the database.
+// Signed in and checked against the database on every call. Orders (list, confirm, resend, reject) are
+// open to super admins and sub admins, who work them from the OCA admin console too (withStaffAuth);
+// everything else is for super admins only (withAdminAuth).
 export class EventPassAdminController extends BaseController {
   constructor(private readonly bookings: EventPassBookingRepository) {
     super();
@@ -104,7 +107,7 @@ export class EventPassAdminController extends BaseController {
    * GET /api/sv/admin/event-pass-bookings?event=golf-tournament&status=paid&q=raj&page=2: one page of
    * the event's bookings, newest first, with the event's totals by payment status.
    */
-  listBookings = withAdminAuth((request) =>
+  listBookings = withStaffAuth((request) =>
     this.handle(async () => {
       const event = eventFilter(request);
       const page = readPageRequest(request);
@@ -117,7 +120,7 @@ export class EventPassAdminController extends BaseController {
    * POST /api/sv/admin/event-pass-bookings/{orderId}/confirm { reference }: marks an unpaid booking
    * paid after the admin found the payment in the CCAvenue dashboard, and emails the member their pass.
    */
-  confirmBooking = withAdminAuth<OrderContext>((request, admin, _session, context) =>
+  confirmBooking = withStaffAuth<OrderContext>((request, admin, _session, context) =>
     this.handle(async () => {
       const { orderId } = await context.params;
       const reference = readManualReference(await this.readJson(request));
@@ -131,7 +134,7 @@ export class EventPassAdminController extends BaseController {
   );
 
   /** POST /api/sv/admin/event-pass-bookings/{orderId}/resend-email: emails a paid booking's pass to the member again. */
-  resendBookingEmail = withAdminAuth<OrderContext>((request, _admin, _session, context) =>
+  resendBookingEmail = withStaffAuth<OrderContext>((request, _admin, _session, context) =>
     this.handle(async () => {
       const { orderId } = await context.params;
       const booking = await eventPassBookingService.resendPass(orderId, this.baseUrl(request));
@@ -140,7 +143,7 @@ export class EventPassAdminController extends BaseController {
   );
 
   /** POST /api/sv/admin/event-pass-bookings/{orderId}/reject { reason? }: closes an unpaid booking. */
-  rejectBooking = withAdminAuth<OrderContext>((request, admin, _session, context) =>
+  rejectBooking = withStaffAuth<OrderContext>((request, admin, _session, context) =>
     this.handle(async () => {
       const { orderId } = await context.params;
       const reason = readRejectReason(await this.readJson(request));

@@ -7,6 +7,7 @@ import type { ContributionFund, ContributionWithFund } from "@/app/api/(features
 import { readManualReference, readRejectReason } from "@/app/api/core/paymentReconciliation";
 import { readPageRequest } from "@/app/api/core/pagination";
 import { withAdminAuth } from "../middleware/adminAuth";
+import { withStaffAuth } from "../../oca-admin/middleware/staffAuth";
 
 type FundContext = { params: Promise<{ id: string }> };
 type OrderContext = { params: Promise<{ orderId: string }> };
@@ -59,7 +60,9 @@ const fundId = async (context: FundContext) => {
   return id;
 };
 
-// Every action runs behind withAdminAuth: signed in, and an admin in the database.
+// Signed in and checked against the database on every call. Orders (list, confirm, resend, reject) are
+// open to super admins and sub admins, who work them from the OCA admin console too (withStaffAuth);
+// everything else is for super admins only (withAdminAuth).
 export class ContributionAdminController extends BaseController {
   /** GET /api/sv/admin/contribution-funds: every contribution head, with its totals. */
   listFunds = withAdminAuth(() =>
@@ -73,7 +76,7 @@ export class ContributionAdminController extends BaseController {
    * GET /api/sv/admin/contributions?status=pending&q=raj&page=2: one page of contributions, newest
    * first, with the totals by payment status.
    */
-  listContributions = withAdminAuth((request) =>
+  listContributions = withStaffAuth((request) =>
     this.handle(async () => {
       const page = readPageRequest(request);
       const [{ rows, total }, summary] = await Promise.all([contributionRepository.findPage(page), contributionRepository.summary()]);
@@ -85,7 +88,7 @@ export class ContributionAdminController extends BaseController {
    * POST /api/sv/admin/contributions/{orderId}/confirm { reference }: marks an unpaid contribution
    * paid after the admin found the payment in the CCAvenue dashboard, and sends the thank-you email.
    */
-  confirmContribution = withAdminAuth<OrderContext>((request, admin, _session, context) =>
+  confirmContribution = withStaffAuth<OrderContext>((request, admin, _session, context) =>
     this.handle(async () => {
       const { orderId } = await context.params;
       const reference = readManualReference(await this.readJson(request));
@@ -100,7 +103,7 @@ export class ContributionAdminController extends BaseController {
   );
 
   /** POST /api/sv/admin/contributions/{orderId}/resend-email: emails a paid contribution's thank-you again. */
-  resendContributionEmail = withAdminAuth<OrderContext>((request, _admin, _session, context) =>
+  resendContributionEmail = withStaffAuth<OrderContext>((request, _admin, _session, context) =>
     this.handle(async () => {
       const { orderId } = await context.params;
       const contribution = await contributionService.resendThankYou(orderId, this.baseUrl(request));
@@ -109,7 +112,7 @@ export class ContributionAdminController extends BaseController {
   );
 
   /** POST /api/sv/admin/contributions/{orderId}/reject { reason? }: closes an unpaid contribution. */
-  rejectContribution = withAdminAuth<OrderContext>((request, admin, _session, context) =>
+  rejectContribution = withStaffAuth<OrderContext>((request, admin, _session, context) =>
     this.handle(async () => {
       const { orderId } = await context.params;
       const reason = readRejectReason(await this.readJson(request));

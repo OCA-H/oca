@@ -4,7 +4,7 @@ import { readManualReference, readRejectReason } from "@/app/api/core/paymentRec
 import { readPageRequest } from "@/app/api/core/pagination";
 import { membershipRepository, membershipService } from "@/app/api/(features)/(pview)/membership/controller/membershipController";
 import type { MembershipApplication } from "@/app/api/(features)/(pview)/membership/schema/membershipSchema";
-import { withAdminAuth } from "../middleware/adminAuth";
+import { withStaffAuth } from "../../oca-admin/middleware/staffAuth";
 
 type OrderContext = { params: Promise<{ orderId: string }> };
 
@@ -32,13 +32,14 @@ const toAdminMembership = (application: MembershipApplication) => ({
   createdAt: application.createdAt.toISOString(),
 });
 
-// Every action runs behind withAdminAuth: signed in, and an admin in the database.
+// Signed in and checked against the database on every call. Open to super admins and sub admins
+// (withStaffAuth), who work these orders from the Super Admin panel and the OCA admin console.
 export class MembershipAdminController extends BaseController {
   /**
    * GET /api/sv/admin/memberships?status=pending&q=raj&page=2: one page of membership applications,
    * newest first, with the totals by payment status.
    */
-  listMemberships = withAdminAuth((request) =>
+  listMemberships = withStaffAuth((request) =>
     this.handle(async () => {
       const page = readPageRequest(request);
       const [{ rows, total }, summary] = await Promise.all([membershipRepository.findPage(page), membershipRepository.summary()]);
@@ -51,7 +52,7 @@ export class MembershipAdminController extends BaseController {
    * after the admin found the payment in the CCAvenue dashboard, creates the member's account and
    * sends the welcome email.
    */
-  confirmMembership = withAdminAuth<OrderContext>((request, admin, _session, context) =>
+  confirmMembership = withStaffAuth<OrderContext>((request, admin, _session, context) =>
     this.handle(async () => {
       const { orderId } = await context.params;
       const reference = readManualReference(await this.readJson(request));
@@ -68,7 +69,7 @@ export class MembershipAdminController extends BaseController {
   );
 
   /** POST /api/sv/admin/memberships/{orderId}/resend-email: emails a paid member's welcome again. */
-  resendMembershipEmail = withAdminAuth<OrderContext>((request, _admin, _session, context) =>
+  resendMembershipEmail = withStaffAuth<OrderContext>((request, _admin, _session, context) =>
     this.handle(async () => {
       const { orderId } = await context.params;
       const application = await membershipService.resendWelcome(orderId, this.baseUrl(request));
@@ -77,7 +78,7 @@ export class MembershipAdminController extends BaseController {
   );
 
   /** POST /api/sv/admin/memberships/{orderId}/reject { reason? }: closes an unpaid application. */
-  rejectMembership = withAdminAuth<OrderContext>((request, admin, _session, context) =>
+  rejectMembership = withStaffAuth<OrderContext>((request, admin, _session, context) =>
     this.handle(async () => {
       const { orderId } = await context.params;
       const reason = readRejectReason(await this.readJson(request));

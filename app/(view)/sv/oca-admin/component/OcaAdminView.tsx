@@ -16,6 +16,7 @@ import {
   UpdateAccountPage,
 } from './MemberPages';
 import { BirthdaysPage, DashboardPage, DonorPassPage, ExportDataPage } from './OtherPages';
+import { ContributionsPage, DinnerBookingsPage, GolfBookingsPage, MembershipsPage } from './OrderPages';
 import '../ocaAdmin.css';
 
 /** The menu: the old portal's items, in its order, with group captions. */
@@ -27,6 +28,10 @@ const NAV: { route: string; label: string; icon: OaIconName; group?: string }[] 
   { route: 'update-account', label: 'Update Account', icon: 'edit' },
   { route: 'members-detail', label: 'Members Detail', icon: 'idcard' },
   { route: 'donor-pass', label: 'Donor Pass', icon: 'ticket' },
+  { route: 'memberships', label: 'Membership Payments', icon: 'idcard', group: 'Payments' },
+  { route: 'dinner-bookings', label: 'Dinner Bookings', icon: 'ticket' },
+  { route: 'golf-bookings', label: 'Golf Bookings', icon: 'ticket' },
+  { route: 'contributions', label: 'Contributions', icon: 'rupee' },
   { route: 'delete-account', label: 'Delete Account', icon: 'trash', group: 'Tools' },
   { route: 'duplicate-account', label: 'Duplicate Account', icon: 'copy' },
   { route: 'export-data', label: 'Export Data', icon: 'download' },
@@ -334,6 +339,14 @@ export const OcaAdminView: React.FC = () => {
         return <DeleteAccountPage ctx={ctx} />;
       case 'duplicate-account':
         return <DuplicateAccountPage ctx={ctx} />;
+      case 'memberships':
+        return <MembershipsPage ctx={ctx} />;
+      case 'dinner-bookings':
+        return <DinnerBookingsPage ctx={ctx} />;
+      case 'golf-bookings':
+        return <GolfBookingsPage ctx={ctx} />;
+      case 'contributions':
+        return <ContributionsPage ctx={ctx} />;
       case 'export-data':
         return <ExportDataPage ctx={ctx} />;
       case 'birthdays':

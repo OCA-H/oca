@@ -2,7 +2,7 @@ import { ROUTES } from "@/app/(view)/common/helper/routes";
 import { SECTION_SPECS, type SectionSpec, type SiteSectionKey } from "@/app/api/(features)/(pview)/site/schema/sectionSpecs";
 
 /** Panels that show records from the database rather than editing a section of the site. */
-export type RecordPanel = "passes" | "bookings" | "golf-passes" | "golf-bookings" | "memberships" | "funds" | "contributions";
+export type RecordPanel = "passes" | "bookings" | "golf-passes" | "golf-bookings" | "memberships" | "funds" | "contributions" | "admins";
 
 /** The open panel: the dashboard, the editor for one section (its key, e.g. "home.events"), or a record panel. */
 export type AdminPanel = "dashboard" | SiteSectionKey | RecordPanel;
@@ -125,12 +125,18 @@ export const RECORD_PANELS: Record<RecordPanel, { group: string; label: string; 
     description: "Every contribution and its payment. Confirm a payment here when CCAvenue took it but it still shows pending.",
     icon: "rupee",
   },
+  admins: {
+    group: "Members",
+    label: "Admins",
+    description: "Make a member a sub admin of the OCA admin console, or remove one. Sub admins manage member accounts, exports and payments there.",
+    icon: "shield",
+  },
 };
 
 /** The record panels' menu groups, in order, with their panels. */
 export const RECORD_GROUPS: { group: string; icon: AdminIconName; panels: RecordPanel[] }[] = [
   { group: "Passes", icon: "ticket", panels: ["passes", "bookings", "golf-passes", "golf-bookings"] },
-  { group: "Members", icon: "people", panels: ["memberships"] },
+  { group: "Members", icon: "people", panels: ["memberships", "admins"] },
   { group: "Contributions", icon: "heart", panels: ["funds", "contributions"] },
 ];
 
@@ -455,6 +461,36 @@ export const adminContent = {
       return total <= to - from + 1 ? `${total} ${noun}` : `${from}–${to} of ${total} ${noun}`;
     },
     none: "No contributions match.",
+  },
+
+  admins: {
+    search: "Search name, email, mobile, membership ID or batch",
+    filters: [
+      { value: "", label: "All members" },
+      { value: "staff", label: "Admins only" },
+    ],
+    roles: { super_admin: "Super admin", admin: "Sub admin" } as Record<string, string>,
+    inactive: "Inactive account",
+    you: "You",
+    makeAdmin: "Make sub admin",
+    removeAdmin: "Remove sub admin",
+    shown: (from: number, to: number, total: number) => {
+      const noun = total === 1 ? "member" : "members";
+      return total <= to - from + 1 ? `${total} ${noun}` : `${from}–${to} of ${total} ${noun}`;
+    },
+    none: "No members match.",
+    makeDialog: {
+      title: (name: string) => `Make ${name} a sub admin?`,
+      body: "They get the OCA admin console: creating, updating and deleting member accounts, the exports, and payments (confirming, resending emails, rejecting orders). They see it after they next sign in. They do not get this Super Admin panel.",
+      confirm: "Make sub admin",
+      busy: "Saving…",
+    },
+    removeDialog: {
+      title: (name: string) => `Remove ${name} as a sub admin?`,
+      body: "They stay a member, but lose the OCA admin console straight away.",
+      confirm: "Remove sub admin",
+      busy: "Saving…",
+    },
   },
 
   funds: {

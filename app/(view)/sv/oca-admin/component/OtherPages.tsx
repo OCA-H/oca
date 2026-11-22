@@ -13,13 +13,15 @@ const errorText = (error: unknown) => (error instanceof Error ? error.message : 
 /* ------------------------------- Dashboard ------------------------------- */
 
 export const DashboardPage: React.FC<{ ctx: OaContext }> = ({ ctx }) => {
-  const subs = ctx.summary?.subAdmins;
   const total = ctx.summary?.members;
   const tiles: [string, string, OaIconName, string][] = [
     ['create-account', 'Create Account', 'plus', ''],
-    ['create-admins', 'Create Sub Admins', 'shield', subs === undefined ? '' : plural(subs, 'sub admin', 'sub admins')],
     ['update-account', 'Update Account', 'edit', total === undefined ? '' : plural(total, 'member', 'members')],
     ['members-detail', 'Members Detail', 'idcard', ''],
+    ['memberships', 'Membership Payments', 'idcard', ''],
+    ['dinner-bookings', 'Dinner Bookings', 'ticket', ''],
+    ['golf-bookings', 'Golf Bookings', 'ticket', ''],
+    ['contributions', 'Contributions', 'rupee', ''],
     ['export-data', 'Export Data', 'download', plural(EXPORT_KINDS.length, 'file', 'files')],
     ['delete-account', 'Delete Account', 'trash', ''],
   ];

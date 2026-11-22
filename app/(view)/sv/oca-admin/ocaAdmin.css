@@ -203,6 +203,7 @@
 .oa .btn-sm{min-height:40px;}
 .oa .mi{padding-top:13px; padding-bottom:13px;}
 .oa .target td a{display:inline-block; padding:8px 3px;}
+.oa .target td .ord-who a{padding:3px 0;}
 .oa .sortbtn{min-height:34px;}
 .oa .sclear{width:34px; height:34px;}
 }
@@ -348,3 +349,46 @@
 .oa .is-loading{opacity:.55; pointer-events:none; transition:opacity .15s;}
 .oa .ff .oa-select{min-width:176px;}
 @media (max-width:700px){ .oa .foot{flex-direction:column; align-items:stretch;} .oa .pg{justify-content:center;} .oa .psize{justify-content:center;} }
+
+/* Order lists (Membership Payments, Dinner / Golf Bookings, Contributions) */
+.oa .label-bad{display:inline-flex; padding:2px 10px; border-radius:100px; font-size:11.5px; font-weight:700; background:#FEF3F2; color:var(--danger-dark); border:1px solid rgba(180,35,24,.25); text-transform:capitalize;}
+.oa .label-muted{display:inline-flex; padding:2px 10px; border-radius:100px; font-size:11.5px; font-weight:700; background:#F2F4F3; color:var(--text-soft); border:1px solid var(--border); text-transform:capitalize;}
+.oa .label-success, .oa .label-gold{text-transform:capitalize;}
+.oa .ord-stats{display:flex; flex-wrap:wrap; gap:8px 26px; margin:0 2px 16px; font-size:14px; color:var(--text-soft);}
+.oa .ord-stats b{color:var(--text); font-size:16px;}
+.oa .ord-who, .oa .ord-meta{display:flex; flex-direction:column; gap:2px; font-size:13px; color:var(--text-soft);}
+.oa .ord-who b, .oa .ord-meta b{font-size:14px; color:var(--text);}
+.oa .ord-who a{color:var(--teal-dark); overflow-wrap:anywhere;}
+.oa .ord-mono{font-family:ui-monospace,SFMono-Regular,Menlo,monospace; font-size:12.5px; color:var(--text);}
+.oa .ord-acts{display:flex; flex-wrap:wrap; gap:8px;}
+.oa .ord-acts .btn{white-space:nowrap;}
+.oa .ord-search{display:flex; gap:8px; align-items:center; min-width:320px;}
+.oa .ord-search .sbox{flex:1; min-width:0;}
+.oa .ord-filter{position:relative; flex:0 0 auto;}
+.oa .ord-filter-btn{position:relative; display:flex; align-items:center; justify-content:center; width:42px; height:42px; border:1px solid var(--border-strong); border-radius:var(--radius-s); background:#fff; color:var(--brand-mid); cursor:pointer;}
+.oa .ord-filter-btn svg{width:19px; height:19px;}
+.oa .ord-filter-btn:hover{background:var(--tint-teal);}
+.oa .ord-filter-btn[aria-expanded="true"]{border-color:var(--teal); outline:2px solid var(--teal); outline-offset:1px;}
+.oa .ord-filter-btn.is-on{background:var(--tint-teal); border-color:var(--teal);}
+.oa .ord-filter-dot{position:absolute; top:7px; right:7px; width:8px; height:8px; border-radius:50%; background:var(--gold-accent); border:1.5px solid #fff;}
+.oa .ord-filter-pop{left:auto; right:0; min-width:220px;}
+.oa .ord-filter-h{margin:0; padding:10px 14px 6px; font-size:12px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; color:var(--text-soft);}
+.oa .ord-filter-opt{all:unset; box-sizing:border-box; width:100%; display:flex; align-items:center; gap:10px; padding:8px 11px; border-radius:var(--radius-s); font-size:14px; cursor:pointer; color:var(--text);}
+.oa .ord-filter-opt:hover, .oa .ord-filter-opt:focus-visible{background:var(--tint-teal);}
+.oa .ord-filter-opt.is-on{font-weight:600; color:var(--brand-deep); background:var(--tint-teal);}
+.oa .ord-filter-n{margin-left:auto; font-size:12.5px; color:var(--text-soft); font-weight:600;}
+.oa .ord-field{margin-top:14px; display:flex; flex-direction:column; gap:6px;}
+.oa .ord-field label{font-size:13px; font-weight:600; color:var(--text);}
+.oa .ord-field p{margin:0;}
+@media (max-width:700px){
+  .oa .tcard.stack .tdv .label-bad, .oa .tcard.stack .tdv .label-muted{margin-left:0; white-space:nowrap;}
+  .oa .tcard.stack .tdv .ord-who, .oa .tcard.stack .tdv .ord-meta{align-items:flex-start;}
+  .oa .tcard.stack .tdv .ord-who{gap:2px;}
+  .oa .tcard.stack .tdv .ord-who b{margin-bottom:2px;}
+  /* actions: full width under a divider, no label, two equal buttons */
+  .oa .tcard.stack td[data-l="Actions"]{margin-top:8px; padding-top:12px; border-top:1px dashed var(--border);}
+  .oa .tcard.stack td[data-l="Actions"]::before{content:none;}
+  .oa .tcard.stack .tdv .ord-acts{width:100%; flex-wrap:nowrap;}
+  .oa .tcard.stack .tdv .ord-acts .btn{flex:1 1 0; min-width:0; white-space:normal; justify-content:center; text-align:center;}
+  .oa .ord-search{min-width:0;}
+}
